@@ -19,8 +19,8 @@ public:
 
 		pWallField = this->AddSceneObject("WallField");
 		pWallField->AddComponent<CWallField>();
-		pWallField->transform.position = Vector3(0.0f,0.0f,0.0f);
-		pWallField->transform.scale = Vector3(10.0f,10.0f,10.0f);
+		pWallField->transform = 
+			Transform( Vector3::zero(), Vector3::one() * 10.0f, Vector3::zero());
 
 		pModel = this->AddSceneObject("Miku");
 		pModel->AddComponent<CModel>();

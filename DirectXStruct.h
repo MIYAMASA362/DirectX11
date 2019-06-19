@@ -14,11 +14,11 @@ namespace DirectX
 	};
 
 	//tagVector3
-	typedef struct tagVector3 :public XMFLOAT3
-
+	typedef struct tagVector3
 	{
-		tagVector3() :XMFLOAT3(0.0f, 0.0f, 0.0f) {}
-		tagVector3(float _x, float _y, float _z) :XMFLOAT3(_x, _y, _z) {}
+		float x, y, z;
+		tagVector3() :x(0.0f), y(0.0f), z(0.0f) {};
+		tagVector3(float _x, float _y, float _z) :x(_x),y(_y),z(_z) {};
 
 		static tagVector3 zero() { return tagVector3(0.0f, 0.0f, 0.0f); };
 		static tagVector3 one() { return tagVector3(1.0f, 1.0f, 1.0f); };
@@ -31,7 +31,7 @@ namespace DirectX
 
 		operator const float*() { return &x; }
 		operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
-
+		tagVector3 operator* (const float& vec) { x *= vec; y *= vec; z *= vec; return *this; };
 	}Vector3;
 
 

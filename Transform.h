@@ -10,11 +10,12 @@ namespace DirectX
 		Vector3 scale;
 		Vector3 rotation;
 	public:
-		Transform() :
-			position(0.0f, 0.0f, 0.0f),
-			scale(1.0f, 1.0f, 1.0f), 
-			rotation(0.0f, 0.0f, 0.0f) 
+		Transform(Vector3 position, Vector3 scale, Vector3 rotation) :
+			position(position),
+			scale(scale),
+			rotation(rotation)
 		{};
+		Transform():Transform(Vector3::zero(),Vector3::one(),Vector3::zero()){};
 	public:
 		Vector3 forward()	{ return Vector3::forward();};
 		Vector3 back()		{ return Vector3::back();	};

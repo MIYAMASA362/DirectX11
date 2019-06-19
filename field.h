@@ -29,8 +29,6 @@ private:
 	ID3D11Buffer* m_WallVertexBuffer = NULL;
 	CTexture* m_WallTexture = NULL;
 public:
-	int n = 0;
-public:
 	void Initialize()override;
 	void Update()override;
 	void Render()override;
