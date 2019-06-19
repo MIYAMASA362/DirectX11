@@ -17,19 +17,17 @@ namespace DirectX
 		Transform transform;
 	public:
 		GameObject(std::string name,Scene* scene):name(name),scene(scene) {};
-		virtual ~GameObject()
-		{
-			Components.clear();
-		};
+		virtual ~GameObject() { Components.clear(); };
 
 	//--- Component --------------------------------
 	public:
-		template<typename Type> void AddComponent()
+		template<typename Type> Type* AddComponent()
 		{
 			std::shared_ptr<Component> component = std::shared_ptr<Component>(new Type());
 			component->transform = &this->transform;
 			component->gameObject = this;
 			Components.push_back(component);
+			return static_cast<Type*>(component._Get());
 		};
 
 		template<typename Type> Type* GetComponent()

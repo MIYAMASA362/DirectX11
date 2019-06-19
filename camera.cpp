@@ -8,9 +8,6 @@
 
 void CCamera::Initialize()
 {
-	gameObject->transform.position = Vector3( 0.0f, 1.0f, -5.0f );
-	gameObject->transform.rotation = Vector3( 0.0f, 0.0f, 0.0f);
-
 	m_Viewport.left = 0;
 	m_Viewport.top = 0;
 	m_Viewport.right = D3DApp::GetScreenWidth();
