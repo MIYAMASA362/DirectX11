@@ -12,15 +12,13 @@ namespace DirectX
 		const std::string name;
 		const Scene* scene;		//èäëÆÇµÇƒÇ¢ÇÈScene
 
-		std::list<Component*> Components;
+		std::list<std::shared_ptr<Component>> Components;
 	public:
 		Transform transform;
 	public:
 		GameObject(std::string name,Scene* scene):name(name),scene(scene) {};
 		virtual ~GameObject()
 		{
-			for (Component* component : Components)
-				delete component;
 			Components.clear();
 		};
 
@@ -28,20 +26,22 @@ namespace DirectX
 	public:
 		template<typename Type> void AddComponent()
 		{
-			Type* type = new Type();
-			Components.push_back(type);
+			std::shared_ptr<Component> component = std::shared_ptr<Component>(new Type());
+			component->transform = &this->transform;
+			component->gameObject = this;
+			Components.push_back(component);
 		};
 
 		template<typename Type> Type* GetComponent()
 		{
-			for (Component* component : Components)
-				if (typeid(*component) ==  typeid(Type)) return static_cast<Type*>(component);
+			for (std::shared_ptr<Component> component : Components)
+				if (typeid(*component) ==  typeid(Type)) return static_cast<Type*>(component._Get());
 			return NULL;
 		};
 
 		void Initialize()
 		{
-			for (Component* component : Components)
+			for (std::shared_ptr<Component> component : Components)
 			{
 				if (!component->IsEnable) continue;
 				component->gameObject = this;
@@ -52,7 +52,7 @@ namespace DirectX
 
 		void Update()
 		{
-			for (Component* component : Components)
+			for (std::shared_ptr<Component> component : Components)
 			{
 				if (!component->IsEnable) continue;
 				component->gameObject = this;
@@ -63,7 +63,7 @@ namespace DirectX
 
 		void Render()
 		{
-			for (Component* component : Components)
+			for (std::shared_ptr<Component> component : Components)
 			{
 				if (!component->IsEnable) continue;
 				component->gameObject = this;
@@ -74,7 +74,7 @@ namespace DirectX
 
 		void Finalize()
 		{
-			for (Component* component : Components)
+			for (std::shared_ptr<Component> component : Components)
 			{
 				component->gameObject = this;
 				component->transform = &transform;

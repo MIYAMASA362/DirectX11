@@ -10,28 +10,23 @@ using namespace DirectX;
 
 SceneManager* SceneManager::pInstance = NULL;
 
-std::list<Scene*> SceneManager::pSceneIndex;
-Scene* SceneManager::pActiveScene = NULL;
+std::list<std::shared_ptr<Scene>> SceneManager::pSceneIndex;
+std::weak_ptr<Scene> SceneManager::pActiveScene;
 
 //--- SceneManager ------------------------------------------------------------
 
 SceneManager::SceneManager()
 {
 	pSceneIndex.clear();
-	pActiveScene = NULL;
 }
 
 SceneManager::~SceneManager()
 {
-	if (pActiveScene != NULL)
-		pActiveScene = NULL;
+	if (!pActiveScene.expired())
+		pActiveScene.reset();
 
 	if (pSceneIndex.size() != 0)
-	{
-		for (Scene* scene : pSceneIndex)
-			if (scene != NULL) delete scene;
 		pSceneIndex.clear();
-	}
 }
 
 //--- Singleton Method ----------------------------------------------
@@ -52,26 +47,27 @@ void SceneManager::Destroy()
 
 void SceneManager::LoadScene(std::string SceneName)
 {
-	for (Scene* scene : pSceneIndex)
+	for (auto wp_Scene : pSceneIndex)
 	{
-		if (scene->name != SceneName) continue;
-		if (scene->IsLoaded == true) break;
-		pActiveScene = scene;
-		scene->IsLoaded = true;
+		if (wp_Scene->name != SceneName) continue;
+		if (wp_Scene->IsLoaded == true) break;
+		pActiveScene = wp_Scene;
+		pActiveScene.lock();
+		wp_Scene->IsLoaded = true;
 		break;
 	}
 }
 
 void SceneManager::UnLoadScene(std::string SceneName)
 {
-	if (pActiveScene->name != SceneName) return;
-	pActiveScene = NULL;
+	if (pActiveScene._Get()->name != SceneName) return;
+	pActiveScene.reset();
 }
 
 Scene* SceneManager::GetScene(std::string SceneNamae)
 {
-	for (Scene* scene : pSceneIndex)
-		if (scene->name == SceneNamae) return scene;
+	for (auto wp_Scene : pSceneIndex)
+		if (wp_Scene->name == SceneNamae) return &(*wp_Scene);
 	return NULL;
 }
 
@@ -79,26 +75,26 @@ Scene* SceneManager::GetScene(std::string SceneNamae)
 
 void SceneManager::Initialize()
 {
-	if(pActiveScene != NULL)
-		pActiveScene->Initialize();
+	if(!pActiveScene.expired())
+		pActiveScene._Get()->Initialize();
 }
 
 void SceneManager::Update()
 {
-	if (pActiveScene != NULL)
-		pActiveScene->Update();
+	if (!pActiveScene.expired())
+		pActiveScene._Get()->Update();
 }
 
 void SceneManager::Render()
 {
-	if (pActiveScene != NULL)
-		pActiveScene->Render();
+	if (!pActiveScene.expired())
+		pActiveScene._Get()->Render();
 }
 
 void SceneManager::Finalize()
 {
-	if (pActiveScene != NULL)
-		pActiveScene->Finalize();
+	if (!pActiveScene.expired())
+		pActiveScene._Get()->Finalize();
 }
 
 //--- Scene -------------------------------------------------------------------
@@ -110,32 +106,31 @@ Scene::Scene(std::string name):name(name)
 
 Scene::~Scene()
 {
-	for (GameObject* gameObject:pGameObjects)
-		delete gameObject;
+	GameObjectIndex.clear();
 }
 
 //--- Loop Method ---------------------------------------------------
 
 void Scene::Initialize()
 {
-	for (GameObject* gameObject : pGameObjects)
+	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
 		gameObject->Initialize();
 }
 
 void Scene::Update()
 {
-	for (GameObject* gameObject : pGameObjects)
+	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
 		gameObject->Update();
 }
 
 void Scene::Render()
 {
-	for (GameObject* gameObject : pGameObjects)
+	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
 		gameObject->Render();
 }
 
 void Scene::Finalize()
 {
-	for (GameObject* gameObject : pGameObjects)
+	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
 		gameObject->Finalize();
 }
