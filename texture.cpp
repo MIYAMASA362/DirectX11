@@ -1,7 +1,9 @@
 
-#include "main.h"
-#include "DirectX.h"
-#include "texture.h"
+#include"main.h"
+#include"Window.h"
+#include"DirectXStruct.h"
+#include"DirectX.h"
+#include"texture.h"
 
 
 void CTexture::Load(const char *FileName)

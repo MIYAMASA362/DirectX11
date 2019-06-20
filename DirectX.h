@@ -1,15 +1,10 @@
 #pragma once
 
+namespace System
+{
+	class Window;
+}
 class CTexture;
-
-#include"DirectXStruct.h"
-
-#include"Object.h"
-#include"Component.h"
-#include"Transform.h"
-#include"Tag.h"
-#include"GameObject.h"
-#include"Behaviour.h"
 
 namespace DirectX
 {

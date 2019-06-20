@@ -1,9 +1,14 @@
-
-
 #include "main.h"
+#include"Window.h"
+#include"DirectXStruct.h"
 #include "texture.h"
 #include "DirectX.h"
-#include "model.h"
+#include"Component.h"
+#include"Behaviour.h"
+#include"Tag.h"
+#include"Transform.h"
+#include"GameObject.h"
+#include"model.h"
 
 void CModel::Initialize()
 {

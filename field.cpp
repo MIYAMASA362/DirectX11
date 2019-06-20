@@ -1,5 +1,13 @@
 #include<Windows.h>
 #include"main.h"
+#include"DirectXStruct.h"
+#include"DirectX.h"
+#include"texture.h"
+#include"Component.h"
+#include"Tag.h"
+#include"Transform.h"
+#include"GameObject.h"
+#include"Behaviour.h"
 #include"field.h"
 
 void CField::Initialize()

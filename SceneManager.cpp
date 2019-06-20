@@ -2,7 +2,10 @@
 #include<string>
 #include"main.h"
 
+#include"DirectXStruct.h"
 #include"Transform.h"
+#include"Component.h"
+#include"Tag.h"
 #include"GameObject.h"
 #include"SceneManager.h"
 
@@ -133,4 +136,26 @@ void Scene::Finalize()
 {
 	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
 		gameObject->Finalize();
+}
+
+GameObject* Scene::AddSceneObject(std::string name, TagManager::TagName tag)
+{
+	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
+	GameObjectIndex.push_back(object);
+	return object.get();
+}
+
+GameObject* Scene::AddSceneObject(std::string name)
+{
+	return AddSceneObject(name, TagManager::Default);
+}
+
+void Scene::RemoveObject(GameObject* destroyObject)
+{
+	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
+	{
+		if (gameObject._Get() != destroyObject) continue;
+		GameObjectIndex.remove(gameObject);
+		return;
+	}
 }

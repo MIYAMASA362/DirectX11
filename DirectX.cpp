@@ -6,10 +6,12 @@
 #include<string>
 
 #include"main.h"
-#include"Time.h"
-#include"texture.h"
+#include"Window.h"
+#include"DirectXStruct.h"
 #include"DirectX.h"
+#include"texture.h"
 #include"manager.h"
+#include"Time.h"
 
 using namespace DirectX;
 
@@ -429,7 +431,7 @@ void D3DApp::Renderer::SetWorldViewProjection2D()
 	pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
 
 	XMMATRIX projection;
-	projection = XMMatrixOrthographicOffCenterLH(0.0f, pInstance->ScreenWidth, pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
+	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
 	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 

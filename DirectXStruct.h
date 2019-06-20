@@ -1,5 +1,7 @@
 #pragma once
 
+class CTexture;
+
 namespace DirectX
 {
 	typedef int Count;
@@ -111,7 +113,7 @@ namespace DirectX
 	typedef struct tagDX11_MODEL_MATERIAL
 	{
 		Material Material;
-		class CTexture* Texture;
+		CTexture* Texture;
 	}DX11_MODEL_MATERIAL;
 
 

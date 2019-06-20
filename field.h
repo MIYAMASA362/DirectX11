@@ -1,10 +1,4 @@
 #pragma once
-#ifndef FIELD_H
-#define FIELD_H
-
-#include<d3d11.h>
-#include"texture.h"
-#include"DirectX.h"
 
 using namespace DirectX;
 
@@ -49,5 +43,3 @@ public:
 	void Draw(XMFLOAT3 Position, XMFLOAT3 Rotation, XMFLOAT3 Scale);
 };
 
-
-#endif // !FIELD_H

@@ -1,6 +1,7 @@
 #include"main.h"
-
-
+#include"Window.h"
+#include"DirectXStruct.h"
+#include"DirectX.h"
 
 using namespace System;
 

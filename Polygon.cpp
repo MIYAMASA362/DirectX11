@@ -1,6 +1,9 @@
 #include"main.h"
-#include"texture.h"
+#include"DirectXStruct.h"
 #include"DirectX.h"
+#include"texture.h"
+#include"Component.h"
+#include"Behaviour.h"
 #include"Polygon.h"
 
 

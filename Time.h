@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 namespace DirectX
 {
 	class Time

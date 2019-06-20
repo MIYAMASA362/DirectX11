@@ -1,18 +1,24 @@
 //Main
 #include"main.h"
 #include"manager.h"
-#include"SceneManager.h"
+#include"DirectXStruct.h"
+#include"DirectX.h"
 #include"Time.h"
+#include"Component.h"
+#include"Behaviour.h"
+#include"Transform.h"
+#include"Tag.h"
+#include"GameObject.h"
+#include"SceneManager.h"
 
 //Objects
 #include"camera.h"
-#include "Polygon.h"
+#include"Polygon.h"
 #include"field.h"
 #include"model.h"
 
 //Scene
 #include"TestScene.h"
-
 
 CModel* pModel;
 

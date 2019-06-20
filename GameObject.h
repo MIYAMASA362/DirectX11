@@ -53,11 +53,7 @@ namespace DirectX
 			return NULL;
 		};
 
-		void Destroy()
-		{
-			scene->RemoveObject(this);
-			return;
-		}
+		void Destroy();
 
 		void Initialize()
 		{
