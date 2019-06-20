@@ -7,6 +7,7 @@ class CTexture;
 #include"Object.h"
 #include"Component.h"
 #include"Transform.h"
+#include"Tag.h"
 #include"GameObject.h"
 #include"Behaviour.h"
 

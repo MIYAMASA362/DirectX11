@@ -8,18 +8,34 @@ namespace DirectX
 	//ゲームオブジェクト :Entity
 	class GameObject final
 	{
+	//--- Attribute -------------------------------------------------
+	private:
+		std::list<std::shared_ptr<Component>> Components;
 	private:
 		const std::string name;
-		const Scene* scene;		//所属しているScene
-
-		std::list<std::shared_ptr<Component>> Components;
+		Scene* const scene;		//所属しているScene
+		const Tag tag;
 	public:
 		Transform transform;
+	//--- Constructor/Destructor ------------------------------------
 	public:
-		GameObject(std::string name,Scene* scene):name(name),scene(scene) {};
-		virtual ~GameObject() { Components.clear(); };
+		GameObject(std::string name,Scene* scene,TagManager::TagName tagName):
+			name(name),
+			scene(scene),
+			tag(tagName)
+		{};
+		GameObject(std::string name, Scene* scene) :
+			GameObject(name, scene, TagManager::Default) {};
 
-	//--- Component --------------------------------
+		virtual ~GameObject() { Components.clear(); };
+	//--- Method ----------------------------------------------------
+	public:
+		bool CompareTag(TagManager::TagName tag) 
+		{
+			return this->tag.name == tag;
+		};
+
+	//--- Component -------------------------------------------------
 	public:
 		template<typename Type> Type* AddComponent()
 		{
@@ -36,6 +52,12 @@ namespace DirectX
 				if (typeid(*component) ==  typeid(Type)) return static_cast<Type*>(component._Get());
 			return NULL;
 		};
+
+		void Destroy()
+		{
+			scene->RemoveObject(this);
+			return;
+		}
 
 		void Initialize()
 		{

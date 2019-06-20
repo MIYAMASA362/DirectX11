@@ -51,11 +51,26 @@ namespace DirectX
 		void Render();
 		void Finalize();
 	public:
-		GameObject* AddSceneObject(std::string name)
+		GameObject* AddSceneObject(std::string name,TagManager::TagName tag)
 		{
-			std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this));
+			std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name, this,tag));
 			GameObjectIndex.push_back(object);
 			return object.get();
+		}
+
+		GameObject* AddSceneObject(std::string name) 
+		{ 
+			return AddSceneObject(name, TagManager::Default); 
+		}
+
+		void RemoveObject(GameObject* destroyObject)
+		{
+			for(std::shared_ptr<GameObject> gameObject:GameObjectIndex)
+			{
+				if (gameObject._Get() != destroyObject) continue;
+				GameObjectIndex.remove(gameObject);
+				return;
+			}
 		}
 	};
 }

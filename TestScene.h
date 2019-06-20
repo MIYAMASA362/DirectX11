@@ -15,10 +15,10 @@ public:
 	{
 		//pCamera
 		{
-			pCamera = this->AddSceneObject("MainCamera");
+			pCamera = this->AddSceneObject("MainCamera",TagManager::MainCamera);
 			pCamera->AddComponent<CCamera>();
 			pCamera->transform =
-				Transform(Vector3(0.0f,10.0f,0.0f),Vector3::one(),Vector3::zero());
+				Transform(Vector3(0.0f,1.0f,5.0f),Vector3::one(),Vector3::zero());
 		}
 		//pWallField
 		{
