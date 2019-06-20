@@ -3,30 +3,36 @@
 #include "camera.h"
 #include"DirectX.h"
 
+using namespace DirectX;
 
+std::shared_ptr<GameObject> CCamera::MainCamera;
+
+CCamera::CCamera()
+{
+	
+}
 
 
 void CCamera::Initialize()
 {
+	if (this->gameObject->CompareTag(TagManager::MainCamera))
+		MainCamera = std::make_shared<GameObject>(*this->gameObject);
+
 	m_Viewport.left = 0;
 	m_Viewport.top = 0;
 	m_Viewport.right = D3DApp::GetScreenWidth();
 	m_Viewport.bottom = D3DApp::GetScreenHeight();
 }
 
-
 void CCamera::Finalize()
 {
 	
 }
 
-
 void CCamera::Update()
 {
 	gameObject->transform.rotation.y += XM_PI / 180 * 0.5;
 }
-
-
 
 void CCamera::Render()
 {
