@@ -3,6 +3,7 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 #include"texture.h"
+#include"Object.h"
 #include"Component.h"
 #include"Tag.h"
 #include"Transform.h"

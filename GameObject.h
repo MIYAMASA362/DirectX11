@@ -6,28 +6,37 @@ namespace DirectX
 	class Scene;
 
 	//ゲームオブジェクト :Entity
-	class GameObject final
+	class GameObject final:public Object
 	{
 	//--- Attribute -------------------------------------------------
 	private:
 		std::list<std::shared_ptr<Component>> Components;
 	private:
 		const std::string name;
-		Scene* const scene;		//所属しているScene
 		const Tag tag;
+		Scene* const scene;		//所属しているScene
+		bool IsDestroy;
+		bool IsActive;
 	public:
+		
 		Transform transform;
 	//--- Constructor/Destructor ------------------------------------
 	public:
-		GameObject(std::string name,Scene* scene,TagManager::TagName tagName):
+		//集約
+		GameObject(std::string name, Scene* scene, TagManager::TagName tagName) :
 			name(name),
 			scene(scene),
-			tag(tagName)
+			tag(tagName),
+			IsDestroy(false),
+			IsActive(true)
 		{};
-		GameObject(std::string name, Scene* scene) :
-			GameObject(name, scene, TagManager::Default) {};
 
-		virtual ~GameObject() { Components.clear(); };
+		GameObject(std::string name, Scene* scene) : GameObject(name, scene, TagManager::Default) {};
+
+		virtual ~GameObject() 
+		{ 
+			Components.clear();
+		};
 	//--- Method ----------------------------------------------------
 	public:
 		bool CompareTag(TagManager::TagName tag) 
@@ -35,10 +44,26 @@ namespace DirectX
 			return this->tag.name == tag;
 		};
 
+		bool GetIsDestroy()
+		{
+			return IsDestroy;
+		}
+
+		void SetActive(bool IsActive)
+		{
+			this->IsActive = IsActive;
+		}
+
 	//--- Component -------------------------------------------------
 	public:
 		template<typename Type> Type* AddComponent()
 		{
+			Type* have = this->GetComponent<Type>();
+			if (have)
+			{
+				OutputDebugString("重複しているComponentのAddComponentがあります。");
+				return have;
+			}
 			std::shared_ptr<Component> component = std::shared_ptr<Component>(new Type());
 			component->transform = &this->transform;
 			component->gameObject = this;
@@ -53,7 +78,7 @@ namespace DirectX
 			return NULL;
 		};
 
-		void Destroy();
+		void Destroy() override;
 
 		void Initialize()
 		{
@@ -68,6 +93,8 @@ namespace DirectX
 
 		void Update()
 		{
+			if (!IsActive) return;
+
 			for (std::shared_ptr<Component> component : Components)
 			{
 				if (!component->IsEnable) continue;
@@ -79,6 +106,8 @@ namespace DirectX
 
 		void Render()
 		{
+			if (!IsActive) return;
+
 			for (std::shared_ptr<Component> component : Components)
 			{
 				if (!component->IsEnable) continue;

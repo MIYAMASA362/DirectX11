@@ -5,7 +5,16 @@ namespace DirectX
 	class GameObject;
 	class Transform;
 
-	class Component
+	/**
+	@virtual
+	+ Initialize
+	+ Update
+	+ Render
+	+ Finalize
+	+ Destroy
+	+ OnDestroy
+	*/
+	class Component:public Object
 	{
 		friend GameObject;
 	private:
