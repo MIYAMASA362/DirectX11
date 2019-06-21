@@ -33,6 +33,7 @@ namespace DirectX
 		static void Update();
 		static void Render();
 		static void Finalize();
+		static void CleanUp();
 	};
 
 	class Scene
@@ -41,6 +42,7 @@ namespace DirectX
 	private:
 		bool IsLoaded = false;
 		const std::string name;
+		bool IsCeanUp = false;
 	private:
 		std::list<std::shared_ptr<GameObject>> GameObjectIndex;
 	protected:
@@ -51,9 +53,11 @@ namespace DirectX
 		void Update();
 		void Render();
 		void Finalize();
+
+		bool GetIsCeanUp() { return IsCeanUp; };
 	public:
 		GameObject* AddSceneObject(std::string name, TagManager::TagName tag);
 		GameObject* AddSceneObject(std::string name);
-		void RemoveObject(GameObject* destroyObject);
+		void SetIsCeanUp(bool IsEnable) { this->IsCeanUp = IsEnable; };
 	};
 }

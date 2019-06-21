@@ -4,6 +4,7 @@
 
 #include"DirectXStruct.h"
 #include"Transform.h"
+#include"Object.h"
 #include"Component.h"
 #include"Tag.h"
 #include"GameObject.h"
@@ -100,6 +101,14 @@ void SceneManager::Finalize()
 		pActiveScene._Get()->Finalize();
 }
 
+void DirectX::SceneManager::CleanUp()
+{
+	if (pActiveScene.expired()) return;
+	if (!pActiveScene._Get()->GetIsCeanUp()) return;
+	pActiveScene._Get()->GameObjectIndex.remove_if([](std::shared_ptr<GameObject> gameObject) { return gameObject->GetIsDestroy(); });
+	pActiveScene._Get()->SetIsCeanUp(false);
+}
+
 //--- Scene -------------------------------------------------------------------
 
 Scene::Scene(std::string name):name(name)
@@ -148,14 +157,4 @@ GameObject* Scene::AddSceneObject(std::string name, TagManager::TagName tag)
 GameObject* Scene::AddSceneObject(std::string name)
 {
 	return AddSceneObject(name, TagManager::Default);
-}
-
-void Scene::RemoveObject(GameObject* destroyObject)
-{
-	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
-	{
-		if (gameObject._Get() != destroyObject) continue;
-		GameObjectIndex.remove(gameObject);
-		return;
-	}
 }

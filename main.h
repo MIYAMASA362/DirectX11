@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <List>
+#include<stack>
 
 #include <d3d11.h>
 #include <DirectXMath.h>

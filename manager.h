@@ -8,6 +8,5 @@ public:
 	static void Uninit();
 	static void Update();
 	static void FixedUpdate();
-	static void Draw();
-
+	static void Draw(void);
 };

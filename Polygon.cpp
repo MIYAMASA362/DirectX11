@@ -2,6 +2,7 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 #include"texture.h"
+#include"Object.h"
 #include"Component.h"
 #include"Behaviour.h"
 #include"Polygon.h"
