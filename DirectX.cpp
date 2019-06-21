@@ -13,8 +13,16 @@
 #include"manager.h"
 #include"Time.h"
 
+#include"Object.h"
+#include"Component.h"
+#include"Transform.h"
+#include"Tag.h"
+#include"GameObject.h"
+#include"Behaviour.h"
+
 #include"Tag.h"
 #include"SceneManager.h"
+#include"camera.h"
 
 using namespace DirectX;
 
@@ -387,7 +395,7 @@ int D3DApp::Run(unsigned int fps)
 			// 描画処理
 			if(IsUpdate)
 			{
-				D3DApp::Renderer::Begin(CManager::Draw);
+				Camera::BeginRun(CManager::Draw, D3DApp::Renderer::Begin);
 				D3DApp::Renderer::End();
 			}
 		}
@@ -395,6 +403,7 @@ int D3DApp::Run(unsigned int fps)
 
 	CManager::Uninit();
 
+	Camera::Release();
 	TimeManager::Destroy();
 
 	D3DApp::Destroy();
@@ -405,12 +414,11 @@ int D3DApp::Run(unsigned int fps)
 
 //--- D3DApp::Renderer --------------------------------------------------------
 
-void D3DApp::Renderer::Begin(void(*Draw)(void))
+void D3DApp::Renderer::Begin(Color BGColor)
 {
 	// バックバッファクリア
-	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
+	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, BGColor);
 	pInstance->ImmediateContext->ClearDepthStencilView(pInstance->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	Draw();
 }
 
 void D3DApp::Renderer::End()

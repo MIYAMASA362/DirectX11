@@ -14,7 +14,10 @@ namespace DirectX
 		const std::string name;
 	public:
 		Object() :name(typeid(*this).name()),id(0){};
-		virtual ~Object() {  OnDestroy(); };
+		virtual ~Object() 
+		{ 
+			OnDestroy(); 
+		};
 	public:
 		virtual void Destroy(){};
 		virtual void OnDestroy() {};

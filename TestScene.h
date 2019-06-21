@@ -8,6 +8,7 @@ class TestScene:public Scene
 {
 private:
 	GameObject* pCamera;
+	GameObject* pSubCamera;
 	GameObject* pWallField;
 	GameObject* pModel;
 public:
@@ -21,6 +22,13 @@ public:
 			Camera* camera = pCamera->AddComponent<Camera>(); 
 			//camera->SetViewPort(0, 0, 400, 400);
 			camera->SetPriority(1);
+		}
+		//pSubCamera
+		{
+			pSubCamera = this->AddSceneObject("SubCamera");
+			Camera* camera = pSubCamera->AddComponent<Camera>();
+			camera->SetViewPort(0,0,400,400);
+			//pSubCamera->AddComponent<RemoveObjectMethod>();
 		}
 		//pWallField
 		{
