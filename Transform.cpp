@@ -3,15 +3,15 @@
 #include"DirectXStruct.h"
 #include"Transform.h"
 
-Transform::Transform(Vector3 position, Vector3 scale, Vector3 rotation) :
+Transform::Transform(Vector3 position, Vector3 rotation, Vector3 scale) :
 	position(position),
-	scale(scale),
-	rotation(rotation)
+	rotation(rotation),
+	scale(scale)
 {
 
 }
 
-Transform::Transform() :Transform(Vector3::zero(), Vector3::one(), Vector3::zero()) 
+Transform::Transform() :Transform(Vector3::zero(), Vector3::zero(), Vector3::one())
 {
 
 }

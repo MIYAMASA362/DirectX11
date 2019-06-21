@@ -9,10 +9,10 @@ namespace DirectX
 	{
 	public:
 		Vector3 position;
-		Vector3 scale;
 		Vector3 rotation;
+		Vector3 scale;
 	public:
-		Transform(Vector3 position, Vector3 scale, Vector3 rotation);
+		Transform(Vector3 position, Vector3 rotation, Vector3 scale);
 		Transform();
 	public:
 		Vector3 forward();
