@@ -13,6 +13,9 @@
 #include"manager.h"
 #include"Time.h"
 
+#include"Tag.h"
+#include"SceneManager.h"
+
 using namespace DirectX;
 
 //--- D3DApp ------------------------------------------------------------------
@@ -340,6 +343,7 @@ unsigned int D3DApp::GetScreenHeight()
 	return pInstance->ScreenHeight;
 }
 
+
 int D3DApp::Run(unsigned int fps)
 {
 	//フレームカウント初期化
@@ -377,11 +381,13 @@ int D3DApp::Run(unsigned int fps)
 			//一定更新
 			if(IsFixedUpdate) CManager::FixedUpdate();
 
+			//Destroyされた物を削除
+			if (IsFixedUpdate || IsUpdate) SceneManager::CleanUp();
+
 			// 描画処理
 			if(IsUpdate)
 			{
-				D3DApp::Renderer::Begin();
-				CManager::Draw();
+				D3DApp::Renderer::Begin(CManager::Draw);
 				D3DApp::Renderer::End();
 			}
 		}
@@ -399,12 +405,12 @@ int D3DApp::Run(unsigned int fps)
 
 //--- D3DApp::Renderer --------------------------------------------------------
 
-void D3DApp::Renderer::Begin()
+void D3DApp::Renderer::Begin(void(*Draw)(void))
 {
 	// バックバッファクリア
-	float ClearColor[4] = { 0.0f, 0.5f, 0.0f, 1.0f };
-	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, ClearColor);
+	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
 	pInstance->ImmediateContext->ClearDepthStencilView(pInstance->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	Draw();
 }
 
 void D3DApp::Renderer::End()
