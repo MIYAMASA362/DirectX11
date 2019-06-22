@@ -54,7 +54,7 @@ namespace DirectX
 		class Renderer
 		{
 		public:
-			static void Begin(Color BGColor);
+			static void Begin();
 			static void End();
 		public:
 			static void SetDepthEnable(bool Enable);

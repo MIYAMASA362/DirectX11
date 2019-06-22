@@ -395,7 +395,8 @@ int D3DApp::Run(unsigned int fps)
 			// 描画処理
 			if(IsUpdate)
 			{
-				Camera::BeginRun(CManager::Draw, D3DApp::Renderer::Begin);
+				pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
+				Camera::BeginRun(CManager::Draw,D3DApp::Renderer::Begin);
 				D3DApp::Renderer::End();
 			}
 		}
@@ -414,10 +415,8 @@ int D3DApp::Run(unsigned int fps)
 
 //--- D3DApp::Renderer --------------------------------------------------------
 
-void D3DApp::Renderer::Begin(Color BGColor)
+void D3DApp::Renderer::Begin()
 {
-	// バックバッファクリア
-	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, BGColor);
 	pInstance->ImmediateContext->ClearDepthStencilView(pInstance->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
