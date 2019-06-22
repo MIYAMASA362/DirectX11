@@ -5,28 +5,28 @@ namespace DirectX
 	class Camera :public Behaviour
 	{
 	private:
-		static std::list<std::shared_ptr<Camera>> CameraIndex;
+		static std::list<std::weak_ptr<Camera>> CameraIndex;
 
 		RECT viewport;
-		Color BGColor;	//”wŒiF
 		int priority;	//•`‰æ‡
 
 	public:
 		Camera();
 		virtual ~Camera();
-
+	private:
+		static void IndexSort(Camera* target);
 	public:
-		static void BeginRun(void (*Draw)(void),void (*Begin)(Color));
+		static void BeginRun(void (*Draw)(void), void(*Begin)(void));
 		static void Release();
 	private:
 		void Run();	//•`‰æ
 	public:
 		//Component
 		void Initialize()override;
+		void OnDestroy() override;
 	
 		//Method
-		void SetViewPort(long x, long y, long w, long h);
-		void SetPriority(int priority) { this->priority = priority; };
-		void SetBGColor(Color color) { this->BGColor = color; };
+		void SetViewPort(float x, float y,float w, float h);
+		void SetPriority(int priority);
 	};
 }

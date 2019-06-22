@@ -8,16 +8,15 @@
 #include"Tag.h"
 #include"Transform.h"
 #include"GameObject.h"
-#include "camera.h"
+#include"camera.h"
 
 using namespace DirectX;
 
-std::list<std::shared_ptr<Camera>> Camera::CameraIndex;
+std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
 
 Camera::Camera()
 :
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
-	BGColor(Color::gray()),
 	priority(1)
 {
 
@@ -28,18 +27,73 @@ DirectX::Camera::~Camera()
 
 }
 
-void Camera::Initialize()
+void DirectX::Camera::IndexSort(Camera* target)
 {
-	CameraIndex.push_back(std::shared_ptr<Camera>(this));
+	std::weak_ptr<Camera> wPtr = target->gameObject->GetComponent<Camera>();
+
+	//”z—ñ’·‚ª0
+	if(CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
+
+	bool IsInsert = false;
+
+	//”z—ñ
+	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end();)
+	{
+		Camera* camera = itr->lock().get();
+		//íœ
+		if (camera == target)
+		{
+			itr->reset();
+			itr = CameraIndex.erase(itr);
+			continue;
+		}
+
+		//‘}“ü
+		if (!IsInsert)
+			if (camera->priority >= target->priority)
+			{
+				IsInsert = true;
+				if (itr == CameraIndex.begin())
+					CameraIndex.push_front(wPtr);
+				else
+					CameraIndex.insert(itr, wPtr);
+			}
+		itr++;
+	}
+
+	if (!IsInsert) CameraIndex.push_back(wPtr);
+	return;
 }
 
-void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(Color))
+void Camera::Initialize()
 {
-	for(std::shared_ptr<Camera> camera:CameraIndex)
+	IndexSort(this);
+}
+
+void DirectX::Camera::OnDestroy()
+{
+	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
 	{
-		Begin(camera._Get()->BGColor);	
-		camera._Get()->Run();
-		Draw();
+		if (itr->lock().get() != this) continue;
+		CameraIndex.erase(itr);
+		break;
+	}
+}
+
+void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(void))
+{
+	auto itr = CameraIndex.begin();
+	while(itr != CameraIndex.end())
+	{
+		if (itr->expired()) 
+			itr = CameraIndex.erase(itr);
+		else 
+		{
+			Begin();
+			itr->lock().get()->Run();
+			Draw();
+			itr++;
+		}
 	}
 }
 
@@ -81,10 +135,25 @@ void Camera::Run()
 	D3DApp::Renderer::SetProjectionMatrix(&m_ProjectionMatrix);
 }
 
-void Camera::SetViewPort(long x, long y, long w, long h)
+void Camera::SetViewPort(float x, float y, float w, float h)
 {
-	viewport.left = x;
-	viewport.top = y;
-	viewport.right = x + w;
-	viewport.bottom = y + h;
+	x = min(x, 1.0f);
+	y = min(y, 1.0f);
+	w = min(w, 1.0f);
+	h = min(h, 1.0f);
+
+	viewport.left	= (long)(x == 0.0f ? 0 : D3DApp::GetScreenWidth() *x);
+	viewport.right	= (long)(w == 0.0f ? 0 : D3DApp::GetScreenWidth() *w);
+	viewport.top	= (long)(y == 0.0f ? 0 : D3DApp::GetScreenHeight()*y);
+	viewport.bottom = (long)(h == 0.0f ? 0 : D3DApp::GetScreenHeight()*h);
 }
+
+void DirectX::Camera::SetPriority(int priority)
+{
+	this->priority = priority;
+
+	
+
+	IndexSort(this);
+}
+
