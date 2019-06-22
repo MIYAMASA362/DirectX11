@@ -58,7 +58,7 @@ namespace DirectX
 	public:
 		template<typename Type> Type* AddComponent()
 		{
-			Type* have = this->GetComponent<Type>();
+			Type* have = this->GetComponent<Type>().lock().get();
 			if (have)
 			{
 				OutputDebugString("d•¡‚µ‚Ä‚¢‚éComponent‚ÌAddComponent‚ª‚ ‚è‚Ü‚·B");
@@ -71,12 +71,12 @@ namespace DirectX
 			return static_cast<Type*>(component._Get());
 		};
 
-		template<typename Type> Type* GetComponent()
+		template<typename Type> std::weak_ptr<Type> GetComponent()
 		{
 			for (std::shared_ptr<Component> component : Components)
-				if (typeid(*component) ==  typeid(Type)) return static_cast<Type*>(component._Get());
-			return NULL;
-		};
+				if (typeid(*component) == typeid(Type)) return std::static_pointer_cast<Type>(component) ;
+			return std::weak_ptr<Type>();
+		}
 
 		void Destroy() override;
 
