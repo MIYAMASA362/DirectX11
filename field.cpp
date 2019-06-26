@@ -165,7 +165,7 @@ void CWallField::Render()
 	UINT offset = 0;
 
 	XMMATRIX WorldPosition = this->gameObject->transform.MatrixTranslation();
-	XMMATRIX WorldRotation = this->gameObject->transform.MatrixRotationRollPitchYaw();
+	XMMATRIX WorldRotation = this->gameObject->transform.rotation().toMatrix();
 	XMMATRIX WorldScale = this->gameObject->transform.MatrixScaling();
 
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);

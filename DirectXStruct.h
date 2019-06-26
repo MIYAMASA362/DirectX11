@@ -27,40 +27,43 @@ namespace DirectX
 		static const float Deg2Rad;			//PI * 2.0f /360.0f
 		static const float Rad2Deg;			//1.0f / Deg2Rad
 
+		//valueをmin < value < maxの範囲にClamp
 		static float Clamp(float value,const float min, const float max) {
 			value = max < value ? max : value;
 			value = min > value ? min : value;
 			return value;
 		};
-
+		//valueを0.0f < value < 1.0fの範囲にClamp
 		static float Clamp01(float value) {
 			value = 1.0f < value ? 1.0f : value;
 			value = 0.0f > value ? 0.0f : value;
 			return value;
 		};
-
+		//線形補間
 		static float Lerp(const float start, const float end, float time)
 		{
 			time = Clamp01(time);
 			return (1 - time)*start + time*end;
 		};
-
+		//球面線形補間
+		static float Slerp(const float start,const float end,float time)
+		{
+			time = Clamp01(time);
+			return sinf((1.0f - time) * Mathf::PI_2) * start + sinf(time * Mathf::PI_2) * end;
+		}
 		//ラジアン角へ変更
 		static float ToRadian(float euler) 
 		{
 			return euler * ((float)XM_PI / 180.0f);
 		};
-
 		//オイラー角へ変更
 		static float ToEuler(float radian) {
 			return radian * 180.0f / (float)XM_PI;
 		};
-
 		//内積が許容範囲内で等しいのか
 		static bool IsEqualUsingDot(float dot) {
 			return dot > 1.0f - kEpsilon;
 		};
-
 		//逆Sinf
 		static float aSinf(float angle) {
 			return asinf(angle);
@@ -183,6 +186,7 @@ namespace DirectX
 			float t = Mathf::Clamp(0.0f,1.0f,time);
 
 		};
+		
 		//ベクトルの長さ
 		float Length()	 { 
 			return sqrtf(x*x + y*y + z*z); 
@@ -258,12 +262,14 @@ namespace DirectX
 			float dot = tagQuaternion::Dot(q1,q2);
 			return Mathf::IsEqualUsingDot(dot) ? 0.0f : Mathf::aCosf(min(abs(dot),1.0f)) * 2.0f * Mathf::Rad2Deg;
 		};
-		//Quaternion Normalize
-		static Quaternion Normalize(Quaternion q) {
-			float mag = sqrtf(Dot(q,q));
-			if (mag < 1.17549435E-38f)
-				return Quaternion::Identity();
-			return Quaternion(q.x / mag, q.y / mag, q.z / mag, q.w / mag);
+		//Quaternion ToEulerAngle(未推奨)
+		static tagVector3 ToEulerAngles(tagQuaternion q) {
+			XMMATRIX matrix = tagQuaternion::ToMatrix(q);
+			return tagVector3(
+				atan2f(matrix.r[2].m128_f32[1], matrix.r[2].m128_f32[2]),
+				asinf(-matrix.r[2].m128_f32[0]),
+				atan2f(matrix.r[1].m128_f32[0],matrix.r[0].m128_f32[0])
+			);
 		};
 		//Quaternion Identity
 		static tagQuaternion Identity() {
@@ -272,6 +278,13 @@ namespace DirectX
 		//Quaternion IsIdentity
 		static bool IsIdentity(tagQuaternion q1) {
 			return q1.x == 0.0f && q1.y == 0.0f && q1.z == 0.0f && q1.w == 1.0f;
+		};
+		//Quaternion Normalize
+		static tagQuaternion Normalize(tagQuaternion q) {
+			float mag = sqrtf(Dot(q,q));
+			if (mag < 1.17549435E-38f)
+				return tagQuaternion::Identity();
+			return tagQuaternion(q.x / mag, q.y / mag, q.z / mag, q.w / mag);
 		};
 		//Quaternion Conjugate 共役なクォータニオン
 		static tagQuaternion Conjugate(tagQuaternion q1) {
@@ -290,7 +303,7 @@ namespace DirectX
 		static tagQuaternion AngleAxis(const float angle,tagVector3 axis){
 			return AtMatrix(XMMatrixRotationAxis(axis, Mathf::ToRadian(angle)));
 		};
-		//Quaternion 行列に変換します
+		//Quaternion Quaternionを行列に変換します
 		static XMMATRIX ToMatrix(tagQuaternion q){
 			float xx = q.x * q.x * 2.0f;
 			float yy = q.y * q.y * 2.0f;
@@ -350,6 +363,32 @@ namespace DirectX
 			q.w = q1.w * q2.w + (-q1.x * q2.x) + (-q1.y * q2.y) + (-q1.z  * q2.z);
 			return q;
 		}
+		//Quaternion Lerp
+		static tagQuaternion Lerp(tagQuaternion start,tagQuaternion end,float time)
+		{
+			time = Mathf::Clamp01(time);
+			return tagQuaternion(
+				start.x * (1.0f - time) + end.x * time,
+				start.y * (1.0f - time) + end.y * time,
+				start.z * (1.0f - time) + end.z * time,
+				start.w * (1.0f - time) + end.w * time
+			);
+		}
+		//Quaternion Slerp　球面線形補間
+		static tagQuaternion Slerp(tagQuaternion start,tagQuaternion end,float time)
+		{
+			time = Mathf::Clamp01(time);
+			float dot = tagQuaternion::Dot(start,end);
+			float sinDot = sinf(dot);
+			float value1 = sinf((1.0f - time)*dot) / sinDot;
+			float value2 = sinf(time * dot) / sinDot;
+			return tagQuaternion(
+				value1*start.x + value2*end.x,
+				value1*start.y + value2*end.y,
+				value1*start.z + value2*end.z,
+				value1*start.w + value2*end.w
+			);
+		}
 
 		float length() {
 			return Length(*this);
@@ -365,6 +404,10 @@ namespace DirectX
 		};
 		tagQuaternion conjugate(){
 			return Conjugate(*this);
+		}
+		XMMATRIX toMatrix()
+		{
+			return Quaternion::ToMatrix(*this);
 		}
 
 		//Casting

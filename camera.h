@@ -23,6 +23,7 @@ namespace DirectX
 	public:
 		//Component
 		void Initialize()override;
+		void Update()override;
 		void OnDestroy() override;
 	
 		//Method

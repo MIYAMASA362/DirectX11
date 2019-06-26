@@ -38,7 +38,7 @@ void CModel::Render()
 	// マトリクス設定
 	XMMATRIX world;
 	world = this->gameObject->transform.MatrixScaling();
-	world *= this->gameObject->transform.MatrixRotationRollPitchYaw();
+	world *= this->gameObject->transform.rotation().toMatrix();
 	world *= this->gameObject->transform.MatrixTranslation();
 	D3DApp::Renderer::SetWorldMatrix( &world );
 

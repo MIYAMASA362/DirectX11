@@ -7,13 +7,22 @@ namespace DirectX
 	//•ÏŠ·
 	class Transform
 	{
+	private:
+		Vector3		m_Position;
+		Quaternion	m_Rotation;
+		Vector3		m_Scale;
 	public:
-		Vector3 position;
-		Vector3 rotation;
-		Vector3 scale;
-	public:
+		Transform(Vector3 position, Quaternion rotation, Vector3 scale);
 		Transform(Vector3 position, Vector3 rotation, Vector3 scale);
 		Transform();
+	public:
+		Vector3 position()		{ return m_Position; }
+		Quaternion rotation()	{ return m_Rotation; }
+		Vector3 scale()			{ return m_Scale; }
+	public:
+		void position(Vector3 position)		{ this->m_Position = position; }
+		void rotation(Quaternion rotation)	{ this->m_Rotation = rotation; }
+		void scale(Vector3 scale)			{ this->m_Scale	   = scale; }
 	public:
 		Vector3 forward();
 		Vector3 back();
@@ -22,7 +31,6 @@ namespace DirectX
 		Vector3 up();
 		Vector3 down();
 	public:
-		XMMATRIX MatrixRotationRollPitchYaw();
 		XMMATRIX MatrixTranslation();
 		XMMATRIX MatrixScaling();
 		XMMATRIX WorldMatrix();

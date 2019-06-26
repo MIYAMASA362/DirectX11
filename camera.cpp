@@ -27,6 +27,7 @@ DirectX::Camera::~Camera()
 
 }
 
+//整列
 void DirectX::Camera::IndexSort(Camera* target)
 {
 	std::weak_ptr<Camera> wPtr = target->gameObject->GetComponent<Camera>();
@@ -70,6 +71,11 @@ void Camera::Initialize()
 	IndexSort(this);
 }
 
+void Camera::Update()
+{
+	this->transform->rotation(Quaternion::Euler(Vector3::up() * 0.1f) * this->transform->rotation());
+}
+
 void DirectX::Camera::OnDestroy()
 {
 	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
@@ -80,6 +86,7 @@ void DirectX::Camera::OnDestroy()
 	}
 }
 
+//描画開始
 void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(void))
 {
 	auto itr = CameraIndex.begin();
@@ -102,6 +109,7 @@ void DirectX::Camera::Release()
 	CameraIndex.clear();
 }
 
+//描画
 void Camera::Run()
 {
 	XMMATRIX	m_ViewMatrix;
@@ -121,7 +129,7 @@ void Camera::Run()
 
 
 	// ビューマトリクス設定
-	m_InvViewMatrix = gameObject->transform.MatrixRotationRollPitchYaw();
+	m_InvViewMatrix = gameObject->transform.rotation().toMatrix();
 	m_InvViewMatrix *= gameObject->transform.MatrixTranslation();
 
 	XMVECTOR det;
@@ -151,9 +159,6 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 void DirectX::Camera::SetPriority(int priority)
 {
 	this->priority = priority;
-
-	
-
 	IndexSort(this);
 }
 

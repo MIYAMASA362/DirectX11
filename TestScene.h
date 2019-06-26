@@ -18,17 +18,9 @@ public:
 		{
 			pCamera = this->AddSceneObject("MainCamera",TagManager::MainCamera);
 			pCamera->transform =
-				Transform(Vector3(0.0f,1.0f,5.0f),Vector3(0.0f, XM_PI,0.0f), Vector3::one());
+				Transform(Vector3(0.0f,1.0f,5.0f),Vector3(0.0f,0.0f,0.0f), Vector3::one());
 			Camera* camera = pCamera->AddComponent<Camera>(); 
-			//camera->SetViewPort(0, 0, 400, 400);
 			camera->SetPriority(1);
-		}
-		//pSubCamera
-		{
-			pSubCamera = this->AddSceneObject("SubCamera");
-			Camera* camera = pSubCamera->AddComponent<Camera>();
-			camera->SetViewPort(0,0,400,400);
-			//pSubCamera->AddComponent<RemoveObjectMethod>();
 		}
 		//pWallField
 		{
