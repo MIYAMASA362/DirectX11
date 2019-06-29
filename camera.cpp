@@ -7,6 +7,7 @@
 #include"Behaviour.h"
 #include"Tag.h"
 #include"Transform.h"
+#include"Renderer.h"
 #include"GameObject.h"
 #include"camera.h"
 
@@ -30,7 +31,7 @@ DirectX::Camera::~Camera()
 //整列
 void DirectX::Camera::IndexSort(Camera* target)
 {
-	std::weak_ptr<Camera> wPtr = target->gameObject->GetComponent<Camera>();
+	std::weak_ptr<Camera> wPtr = target->gameObject.lock()->GetComponent<Camera>();
 
 	//配列長が0
 	if(CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
@@ -71,11 +72,6 @@ void Camera::Initialize()
 	IndexSort(this);
 }
 
-void Camera::Update()
-{
-	this->transform->rotation(Quaternion::Euler(Vector3::up() * 0.1f) * this->transform->rotation());
-}
-
 void DirectX::Camera::OnDestroy()
 {
 	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
@@ -90,17 +86,21 @@ void DirectX::Camera::OnDestroy()
 void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(void))
 {
 	auto itr = CameraIndex.begin();
-	while(itr != CameraIndex.end())
+	while (itr != CameraIndex.end())
 	{
-		if (itr->expired()) 
+		if (itr->expired()){
 			itr = CameraIndex.erase(itr);
-		else 
-		{
-			Begin();
-			itr->lock().get()->Run();
-			Draw();
-			itr++;
+			continue;
 		}
+		Camera* camera = itr->lock().get();
+		itr++;
+
+		if (!camera->gameObject.lock()->IsActive)continue;
+		if (!camera->IsEnable)continue;
+
+		Begin();
+		camera->Run();
+		Draw();
 	}
 }
 
@@ -129,8 +129,8 @@ void Camera::Run()
 
 
 	// ビューマトリクス設定
-	m_InvViewMatrix = gameObject->transform.rotation().toMatrix();
-	m_InvViewMatrix *= gameObject->transform.MatrixTranslation();
+	m_InvViewMatrix = gameObject.lock()->transform->MatrixQuaternion();
+	m_InvViewMatrix *= gameObject.lock()->transform->MatrixTranslation();
 
 	XMVECTOR det;
 	m_ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
@@ -161,4 +161,3 @@ void DirectX::Camera::SetPriority(int priority)
 	this->priority = priority;
 	IndexSort(this);
 }
-
