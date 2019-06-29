@@ -14,7 +14,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		hInstance,
 		"MainWindow",
 		"DirectX11 Lefact",
-		1024,576,
+		1024, 576,
 		WS_OVERLAPPEDWINDOW
 	);
 

@@ -7,8 +7,10 @@
 #include"Component.h"
 #include"Tag.h"
 #include"Transform.h"
-#include"GameObject.h"
+#include"Renderer.h"
 #include"Behaviour.h"
+#include"GameObject.h"
+#include"camera.h"
 #include"field.h"
 
 void CField::Initialize()
@@ -164,9 +166,9 @@ void CWallField::Render()
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 
-	XMMATRIX WorldPosition = this->gameObject->transform.MatrixTranslation();
-	XMMATRIX WorldRotation = this->gameObject->transform.rotation().toMatrix();
-	XMMATRIX WorldScale = this->gameObject->transform.MatrixScaling();
+	XMMATRIX WorldPosition = this->transform.lock()->MatrixTranslation();
+	XMMATRIX WorldRotation = this->transform.lock()->MatrixQuaternion();
+	XMMATRIX WorldScale = this->transform.lock()->MatrixScaling();
 
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
 	D3DApp::Renderer::SetTexture(this->m_FieldTexture);

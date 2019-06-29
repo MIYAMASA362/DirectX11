@@ -2,21 +2,19 @@
 
 namespace DirectX
 {
-	class TagManager
+
+
+	enum class TagName
 	{
-	public:
-		const enum TagName
-		{
-			Default =0,
-			MainCamera,
-		};
+		Default =0,
+		MainCamera,
 	};
 
 	class Tag
 	{
 	public:
-		const TagManager::TagName name;
+		const TagName name;
 	public:
-		Tag(TagManager::TagName tag) :name(tag) {};
+		Tag(TagName tag) :name(tag) {};
 	};
 }

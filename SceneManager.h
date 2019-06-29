@@ -7,7 +7,6 @@ namespace DirectX
 
 	class SceneManager
 	{
-		friend class Scene;
 	private:
 		static SceneManager* pInstance;
 		static std::list<std::shared_ptr<Scene>> pSceneIndex;
@@ -16,15 +15,17 @@ namespace DirectX
 		SceneManager();
 		~SceneManager();
 	public:
+		//Singleton
 		static void Create();
 		static void Destroy();
-	public:
+		//Scene
 		static void LoadScene(std::string SceneName);
 		static void UnLoadScene(std::string SceneName);
 		template<typename Type> static void CreateScene()
 		{
 			std::shared_ptr<Scene> AddScene = std::shared_ptr<Scene>(new Type());
 			pSceneIndex.push_back(AddScene);
+			AddScene->scene = AddScene;
 			return;
 		};
 		static Scene* GetScene(std::string SceneName);
@@ -36,28 +37,23 @@ namespace DirectX
 		static void CleanUp();
 	};
 
-	class Scene
+	class Scene 
 	{
 		friend class SceneManager;
 	private:
-		bool IsLoaded = false;
 		const std::string name;
+		bool IsLoaded = false;
 		bool IsCeanUp = false;
 	private:
+		std::weak_ptr<Scene> self;	//é©êgÇ÷ÇÃéQè∆
 		std::list<std::shared_ptr<GameObject>> GameObjectIndex;
 	protected:
 		Scene(std::string name);
 		virtual ~Scene();
-	private:
-		void Initialize();
-		void Update();
-		void Render();
-		void Finalize();
-
-		bool GetIsCeanUp() { return IsCeanUp; };
 	public:
-		GameObject* AddSceneObject(std::string name, TagManager::TagName tag);
+		GameObject* AddSceneObject(std::string name, TagName tag);
 		GameObject* AddSceneObject(std::string name);
 		void SetIsCeanUp(bool IsEnable) { this->IsCeanUp = IsEnable; };
 	};
+
 }

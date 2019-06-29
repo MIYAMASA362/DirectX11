@@ -34,23 +34,18 @@ struct MODEL
 class CModel:public Behaviour
 {
 private:
-	ID3D11Buffer*	m_VertexBuffer = NULL;
-	ID3D11Buffer*	m_IndexBuffer = NULL;
+	ID3D11Buffer*	m_VertexBuffer = nullptr;
+	ID3D11Buffer*	m_IndexBuffer = nullptr;
 
-	DX11_SUBSET*	m_SubsetArray = NULL;
+	DX11_SUBSET*	m_SubsetArray = nullptr;
 	unsigned short	m_SubsetNum;
 
+public:
+	virtual ~CModel();
+public:
+	void Render() override;
+public:
 	void LoadObj( const char *FileName, MODEL *Model );
 	void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned short *MaterialNum );
-public:
-
-public:
-	void Initialize() override;
-	void Update() override;
-	void Render() override;
-	void Finalize()override;
-
 	void Load( const char *FileName );
-	void Unload();
-
 };

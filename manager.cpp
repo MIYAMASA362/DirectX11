@@ -9,16 +9,20 @@
 #include"Behaviour.h"
 #include"Transform.h"
 #include"Tag.h"
+#include"Renderer.h"
 #include"GameObject.h"
 #include"SceneManager.h"
 #include"Input.h"
+#include"Renderer.h"
 
 //Objects
 #include"camera.h"
 #include"Polygon.h"
 #include"field.h"
 #include"model.h"
+
 #include"RemoveObject.h"
+#include"CameraFollow.h"
 
 //Scene
 #include"TestScene.h"
@@ -48,7 +52,7 @@ void CManager::FixedUpdate()
 	OutputDebugString(("\nFixedUpdate:" + std::to_string(Time::Get_FixedDeltaTime())).c_str());
 }
 
-void CManager::Draw(void)
+void CManager::Render(void)
 {
 	SceneManager::Render();
 }

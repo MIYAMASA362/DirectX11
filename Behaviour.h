@@ -6,7 +6,6 @@ namespace DirectX
 	@virtual
 	+ Initialize
 	+ Update
-	+ Render
 	+ Finalize
 	+ Destroy
 	+ OnDestroy

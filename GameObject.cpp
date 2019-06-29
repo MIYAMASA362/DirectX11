@@ -3,11 +3,30 @@
 #include"Component.h"
 #include"Transform.h"
 #include"Tag.h"
+#include"Renderer.h"
 #include"GameObject.h"
+#include"Behaviour.h"
+#include"camera.h"
 #include"SceneManager.h"
+
+GameObject::GameObject(std::string name, std::weak_ptr<Scene> scene, TagName tagName) :
+	Object(name),
+	scene(scene),
+	tag(tagName),
+	IsDestroy(false),
+	IsActive(true)
+{
+	transform = std::shared_ptr<Transform>(new Transform());
+	Components.push_back(transform);
+};
+
+GameObject::~GameObject() {
+	Components.clear();
+	transform.reset();
+};
 
 void DirectX::GameObject::Destroy()
 {
-	scene->SetIsCeanUp(true);
+	scene.lock()->SetIsCeanUp(true);
 	IsDestroy = true;
 }

@@ -4,128 +4,69 @@ namespace DirectX
 {
 	class GameObject;
 	class Scene;
+	class Camera;
 
 	//ゲームオブジェクト :Entity
 	class GameObject final:public Object
 	{
 	//--- Attribute -------------------------------------------------
+		friend class Renderer;
+		friend class Camera;
+		friend class SceneManager;
+		friend class Scene;
 	private:
+		std::weak_ptr<GameObject> self;
 		std::list<std::shared_ptr<Component>> Components;
-	private:
-		const std::string name;
+		std::weak_ptr<Scene> scene;	//所属Scene
 		const Tag tag;
-		Scene* const scene;		//所属しているScene
 		bool IsDestroy;
 		bool IsActive;
 	public:
-		
-		Transform transform;
+		std::shared_ptr<Transform> transform;
 	//--- Constructor/Destructor ------------------------------------
 	public:
-		//集約
-		GameObject(std::string name, Scene* scene, TagManager::TagName tagName) :
-			name(name),
-			scene(scene),
-			tag(tagName),
-			IsDestroy(false),
-			IsActive(true)
-		{};
-
-		GameObject(std::string name, Scene* scene) : GameObject(name, scene, TagManager::Default) {};
-
-		virtual ~GameObject() 
-		{ 
-			Components.clear();
-		};
+		GameObject(std::string name, std::weak_ptr<Scene> scene, TagName tagName);
+		GameObject(std::string name, std::weak_ptr<Scene> scene) : GameObject(name, scene, TagName::Default) {};
+		virtual ~GameObject();
 	//--- Method ----------------------------------------------------
 	public:
-		bool CompareTag(TagManager::TagName tag) 
+		bool CompareTag(TagName tag) 
 		{
 			return this->tag.name == tag;
 		};
-
 		bool GetIsDestroy()
 		{
 			return IsDestroy;
-		}
-
+		};
 		void SetActive(bool IsActive)
 		{
 			this->IsActive = IsActive;
-		}
-
+		};
 	//--- Component -------------------------------------------------
 	public:
+		//AddComponent
 		template<typename Type> Type* AddComponent()
 		{
-			Type* have = this->GetComponent<Type>().lock().get();
-			if (have)
+			std::weak_ptr<Type> have = this->GetComponent<Type>();
+			if (!have.expired())
 			{
 				OutputDebugString("重複しているComponentのAddComponentがあります。");
-				return have;
+				return have.lock().get();
 			}
 			std::shared_ptr<Component> component = std::shared_ptr<Component>(new Type());
-			component->transform = &this->transform;
-			component->gameObject = this;
 			Components.push_back(component);
-			return static_cast<Type*>(component._Get());
+			component->gameObject = self;
+			component->transform = transform;
+			return static_cast<Type*>(component.get());
 		};
-
+		//GetComponent
 		template<typename Type> std::weak_ptr<Type> GetComponent()
 		{
 			for (std::shared_ptr<Component> component : Components)
-				if (typeid(*component) == typeid(Type)) return std::static_pointer_cast<Type>(component) ;
+				if (typeid(*component) == typeid(Type)) return std::static_pointer_cast<Type>(component);
 			return std::weak_ptr<Type>();
 		}
-
-		void Destroy() override;
-
-		void Initialize()
-		{
-			for (std::shared_ptr<Component> component : Components)
-			{
-				if (!component->IsEnable) continue;
-				component->gameObject = this;
-				component->transform = &transform;
-				component->Initialize();
-			}
-		}
-
-		void Update()
-		{
-			if (!IsActive) return;
-
-			for (std::shared_ptr<Component> component : Components)
-			{
-				if (!component->IsEnable) continue;
-				component->gameObject = this;
-				component->transform = &transform;
-				component->Update();
-			}
-		}
-
-		void Render()
-		{
-			if (!IsActive) return;
-
-			for (std::shared_ptr<Component> component : Components)
-			{
-				if (!component->IsEnable) continue;
-				component->gameObject = this;
-				component->transform = &transform;
-				component->Render();
-			}
-		}
-
-		void Finalize()
-		{
-			for (std::shared_ptr<Component> component : Components)
-			{
-				component->gameObject = this;
-				component->transform = &transform;
-				component->Finalize();
-			}
-		}
-
+		//削除処理
+		void Destroy();
 	};
 }

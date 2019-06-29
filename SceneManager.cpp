@@ -3,11 +3,14 @@
 #include"main.h"
 
 #include"DirectXStruct.h"
-#include"Transform.h"
 #include"Object.h"
 #include"Component.h"
+#include"Transform.h"
 #include"Tag.h"
+#include"Renderer.h"
 #include"GameObject.h"
+#include"Behaviour.h"
+#include"camera.h"
 #include"SceneManager.h"
 
 using namespace DirectX;
@@ -80,33 +83,61 @@ Scene* SceneManager::GetScene(std::string SceneNamae)
 void SceneManager::Initialize()
 {
 	if(!pActiveScene.expired())
-		pActiveScene._Get()->Initialize();
+		for(std::shared_ptr<GameObject> gameObject:pActiveScene.lock()->GameObjectIndex)
+			for (std::shared_ptr<Component> component : gameObject->Components)
+			{
+				if (!component->GetEnable()) continue;
+				component->gameObject = gameObject;
+				component->transform = gameObject->transform;
+				component->Initialize();
+			}
 }
 
 void SceneManager::Update()
 {
 	if (!pActiveScene.expired())
-		pActiveScene._Get()->Update();
+		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
+			for (std::shared_ptr<Component> component : gameObject->Components)
+			{
+				if (!component->GetEnable()) continue;
+				component->gameObject = gameObject;
+				component->transform = gameObject->transform;
+				component->Update();
+			}
 }
 
 void SceneManager::Render()
 {
 	if (!pActiveScene.expired())
-		pActiveScene._Get()->Render();
+		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
+			for (std::shared_ptr<Component> component : gameObject->Components)
+			{
+				if (!component->GetEnable()) continue;
+				component->gameObject = gameObject;
+				component->transform = gameObject->transform;
+				component->Render();
+			}
 }
 
 void SceneManager::Finalize()
 {
 	if (!pActiveScene.expired())
-		pActiveScene._Get()->Finalize();
+		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
+			for (std::shared_ptr<Component> component : gameObject->Components)
+			{
+				if (!component->GetEnable()) continue;
+				component->gameObject = gameObject;
+				component->transform = gameObject->transform;
+				component->Finalize();
+			}
 }
 
 void DirectX::SceneManager::CleanUp()
 {
 	if (pActiveScene.expired()) return;
-	if (!pActiveScene._Get()->GetIsCeanUp()) return;
-	pActiveScene._Get()->GameObjectIndex.remove_if([](std::shared_ptr<GameObject> gameObject) { return gameObject->GetIsDestroy(); });
-	pActiveScene._Get()->SetIsCeanUp(false);
+	if (!pActiveScene._Get()->IsCeanUp) return;
+	pActiveScene._Get()->GameObjectIndex.remove_if([](std::shared_ptr<GameObject> gameObject) { return gameObject->IsDestroy; });
+	pActiveScene._Get()->IsCeanUp = false;
 }
 
 //--- Scene -------------------------------------------------------------------
@@ -121,40 +152,15 @@ Scene::~Scene()
 	GameObjectIndex.clear();
 }
 
-//--- Loop Method ---------------------------------------------------
-
-void Scene::Initialize()
+GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 {
-	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
-		gameObject->Initialize();
-}
-
-void Scene::Update()
-{
-	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
-		gameObject->Update();
-}
-
-void Scene::Render()
-{
-	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
-		gameObject->Render();
-}
-
-void Scene::Finalize()
-{
-	for (std::shared_ptr<GameObject> gameObject : GameObjectIndex)
-		gameObject->Finalize();
-}
-
-GameObject* Scene::AddSceneObject(std::string name, TagManager::TagName tag)
-{
-	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
+	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this->self,tag));
 	GameObjectIndex.push_back(object);
+	object->self = object;
 	return object.get();
 }
 
 GameObject* Scene::AddSceneObject(std::string name)
 {
-	return AddSceneObject(name, TagManager::Default);
+	return AddSceneObject(name, TagName::Default);
 }

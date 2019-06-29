@@ -198,6 +198,9 @@ namespace DirectX
 
 		operator const float*() { return &x; }
 		operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
+		tagVector3 operator= (const XMVECTOR& vec) { x = vec.m128_f32[0]; y = vec.m128_f32[1]; z = vec.m128_f32[2]; return *this; };
+		tagVector3 operator+ (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
+		tagVector3 operator- (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
 		tagVector3 operator/ (const float& scalar) { x /= scalar; y /= scalar; z /= scalar; return *this; };
 		tagVector3 operator* (const float& scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; };
 		bool operator== (const tagVector3& vec) { return (x == vec.x && y == vec.y && z == vec.z); };
@@ -301,7 +304,12 @@ namespace DirectX
 		}
 		//Quaternion AxisÇíÜêSÇ…AngleäpâÒì]ÇµÇ‹Ç∑
 		static tagQuaternion AngleAxis(const float angle,tagVector3 axis){
-			return AtMatrix(XMMatrixRotationAxis(axis, Mathf::ToRadian(angle)));
+			return tagQuaternion(
+				axis.x * sinf(Mathf::ToRadian(angle) * 0.5f),
+				axis.y * sinf(Mathf::ToRadian(angle) * 0.5f),
+				axis.z * sinf(Mathf::ToRadian(angle) * 0.5f),
+				cosf(Mathf::ToRadian(angle)*0.5f)
+			);
 		};
 		//Quaternion QuaternionÇçsóÒÇ…ïœä∑ÇµÇ‹Ç∑
 		static XMMATRIX ToMatrix(tagQuaternion q){
@@ -465,13 +473,16 @@ namespace DirectX
 		tagQuaternion& operator *	(const tagQuaternion& q) {
 			return Multiply(*this,q);
 		};
-
 		tagQuaternion& operator *	(const float& scalar){
 			return tagQuaternion( x * scalar, y * scalar, z * scalar, w * scalar);
 		};
 		tagQuaternion& operator /	(const float& scalar) {
 			float fInv = 1.0f / scalar;
 			return tagQuaternion(w*fInv, y*fInv, z*fInv, w*fInv);
+		};
+
+		tagQuaternion operator - (tagQuaternion q){
+			return tagQuaternion::Conjugate(q);
 		};
 
 		bool operator== (const tagQuaternion& q) {

@@ -3,7 +3,9 @@
 class RemoveObjectMethod:public Behaviour
 {
 public:
-	void Update() override;
-	void Destroy() override;
-	void OnDestroy() override;
-};	
+	void Update() override 
+	{
+		if (Input::GetKeyPress(VK_SPACE))
+			this->gameObject.lock()->Destroy();
+	};
+};

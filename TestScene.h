@@ -4,36 +4,47 @@ using namespace DirectX;
 
 class DirectX::GameObject;
 
-class TestScene:public Scene
+class TestScene final :public Scene
 {
-private:
-	GameObject* pCamera;
-	GameObject* pSubCamera;
-	GameObject* pWallField;
-	GameObject* pModel;
 public:
 	TestScene():Scene("TestScene")
 	{
 		//pCamera
 		{
-			pCamera = this->AddSceneObject("MainCamera",TagManager::MainCamera);
-			pCamera->transform =
-				Transform(Vector3(0.0f,1.0f,5.0f),Vector3(0.0f,0.0f,0.0f), Vector3::one());
-			Camera* camera = pCamera->AddComponent<Camera>(); 
+			GameObject* pCamera;
+			pCamera = this->AddSceneObject("MainCamera",TagName::MainCamera);
+			pCamera->transform.get()->position(Vector3(0.0f, 2.0f, -5.0f));
+			pCamera->transform.get()->rotation(Quaternion::AngleAxis(0.0f, Vector3::up()));
+			pCamera->transform.get()->scale(Vector3::one());
+			Camera* camera = pCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
+			pCamera->SetActive(false);
 		}
 		//pWallField
 		{
+			GameObject* pWallField;
 			pWallField = this->AddSceneObject("WallField");
 			pWallField->AddComponent<CWallField>();
-			pWallField->transform =
-				Transform(Vector3::zero(), Vector3::zero(), Vector3::one() * 10.0f);
+			pWallField->transform.get()->position(Vector3::zero());
+			pWallField->transform.get()->rotation(Vector3::zero());
+			pWallField->transform.get()->scale(Vector3::one()*10.0f);
 		}
 		//pModel
 		{
+			GameObject* pModel;
 			pModel = this->AddSceneObject("Miku");
 			pModel->AddComponent<RemoveObjectMethod>();
-			pModel->AddComponent<CModel>();
+			pModel->AddComponent<KeyMove>();
+			CModel* model = pModel->AddComponent<CModel>();
+			model->Load("asset/miku_01.obj");
+			{
+				auto pCamera = this->AddSceneObject("ModelCamera",TagName::MainCamera);
+				pCamera->AddComponent<Camera>();
+				pCamera->transform->SetParent(pModel);
+				pCamera->transform->position(Vector3(0.0f, 1.0f, -3.0f));
+				pCamera->transform->rotation(Vector3::zero());
+				pCamera->transform->scale(Vector3::one());
+			}
 		}
 	};
 };

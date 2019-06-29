@@ -8,38 +8,30 @@
 #include"Behaviour.h"
 #include"Tag.h"
 #include"Transform.h"
+#include"Renderer.h"
 #include"GameObject.h"
+#include"camera.h"
 #include"model.h"
 
-void CModel::Initialize()
+CModel::~CModel()
 {
-	Load( "asset/miku_01.obj" );
-		
-}
+	if (m_VertexBuffer)
+		m_VertexBuffer->Release();
+	if (m_IndexBuffer)
+		m_IndexBuffer->Release();
 
-
-void CModel::Finalize()
-{
-
-	Unload();
-
-}
-
-
-void CModel::Update()
-{
-
+	delete[] m_SubsetArray;
 
 }
 
 void CModel::Render()
 {
-
 	// マトリクス設定
 	XMMATRIX world;
-	world = this->gameObject->transform.MatrixScaling();
-	world *= this->gameObject->transform.rotation().toMatrix();
-	world *= this->gameObject->transform.MatrixTranslation();
+	world =  this->transform.lock()->MatrixScaling();
+	world *= this->transform.lock()->MatrixQuaternion();
+	world *= this->transform.lock()->MatrixTranslation();
+
 	D3DApp::Renderer::SetWorldMatrix( &world );
 
 	// 頂点バッファ設定
@@ -59,11 +51,7 @@ void CModel::Render()
 		// ポリゴン描画
 		D3DApp::Renderer::DrawIndexed( m_SubsetArray[i].IndexNum, m_SubsetArray[i].StartIndex, 0 );
 	}
-
 }
-
-
-
 
 void CModel::Load( const char *FileName )
 {
@@ -129,22 +117,6 @@ void CModel::Load( const char *FileName )
 	delete[] model.SubsetArray;
 
 }
-
-
-void CModel::Unload()
-{
-	if(m_VertexBuffer)
-		m_VertexBuffer->Release();
-	if(m_IndexBuffer)
-		m_IndexBuffer->Release();
-
-
-	delete[] m_SubsetArray;
-
-}
-
-
-
 
 
 //モデル読込////////////////////////////////////////////
