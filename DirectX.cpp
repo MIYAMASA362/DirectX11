@@ -17,6 +17,7 @@
 #include"Component.h"
 #include"Transform.h"
 #include"Tag.h"
+#include"Renderer.h"
 #include"GameObject.h"
 #include"Behaviour.h"
 
@@ -396,7 +397,7 @@ int D3DApp::Run(unsigned int fps)
 			if(IsUpdate)
 			{
 				pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
-				Camera::BeginRun(CManager::Draw,D3DApp::Renderer::Begin);
+				Camera::BeginRun(CManager::Render,D3DApp::Renderer::Begin);
 				D3DApp::Renderer::End();
 			}
 		}
