@@ -4,6 +4,7 @@ namespace DirectX
 {
 	class GameObject;
 	class Transform;
+	class Behaviour;
 
 	/**
 	@virtual
@@ -14,22 +15,23 @@ namespace DirectX
 	+ Destroy
 	+ OnDestroy
 	*/
-	class Component:public Object
+	class Component:private Object
 	{
 		friend GameObject;
-	private:
+	protected:
 		bool IsEnable = true;
+	private:
 		const int priority;
 	public:
-		GameObject* gameObject;
-		Transform* transform;
+		std::weak_ptr<GameObject> gameObject;
+		std::weak_ptr<Transform> transform;
 	public:
-		Component():priority(0) {};
-		Component(int priority):priority(priority) {};
+		Component(int priority) :Object(typeid(this).name()),priority(priority){};
+		Component() :Component(0) {};
 		virtual ~Component() {};
 	public:
 		void SetEnable(bool isEnable);
-	public:
+		bool GetEnable() { return IsEnable; };
 		virtual void Initialize() {};
 		virtual void Update() {};
 		virtual void Render() {};
