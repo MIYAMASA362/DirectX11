@@ -11,13 +11,13 @@ namespace DirectX
 	{
 	//--- Attribute -------------------------------------------------
 		friend class Renderer;
-		friend class Camera;
+		friend class CameraManager;
 		friend class SceneManager;
 		friend class Scene;
 	private:
 		std::weak_ptr<GameObject> self;
 		std::list<std::shared_ptr<Component>> Components;
-		std::weak_ptr<Scene> scene;	//Š‘®Scene
+		Scene* const scene;	//Š‘®Scene
 		const Tag tag;
 		bool IsDestroy;
 		bool IsActive;
@@ -25,8 +25,8 @@ namespace DirectX
 		std::shared_ptr<Transform> transform;
 	//--- Constructor/Destructor ------------------------------------
 	public:
-		GameObject(std::string name, std::weak_ptr<Scene> scene, TagName tagName);
-		GameObject(std::string name, std::weak_ptr<Scene> scene) : GameObject(name, scene, TagName::Default) {};
+		GameObject(std::string name,Scene* scene, TagName tagName);
+		GameObject(std::string name,Scene* scene) : GameObject(name, scene, TagName::Default) {};
 		virtual ~GameObject();
 	//--- Method ----------------------------------------------------
 	public:
@@ -57,6 +57,7 @@ namespace DirectX
 			Components.push_back(component);
 			component->gameObject = self;
 			component->transform = transform;
+			component->OnComponent();
 			return static_cast<Type*>(component.get());
 		};
 		//GetComponent

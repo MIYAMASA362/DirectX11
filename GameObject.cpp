@@ -9,7 +9,7 @@
 #include"camera.h"
 #include"SceneManager.h"
 
-GameObject::GameObject(std::string name, std::weak_ptr<Scene> scene, TagName tagName) :
+GameObject::GameObject(std::string name, Scene* scene, TagName tagName) :
 	Object(name),
 	scene(scene),
 	tag(tagName),
@@ -27,6 +27,6 @@ GameObject::~GameObject() {
 
 void DirectX::GameObject::Destroy()
 {
-	scene.lock()->SetIsCeanUp(true);
+	scene->SetIsCeanUp(true);
 	IsDestroy = true;
 }
