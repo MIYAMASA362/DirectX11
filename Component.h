@@ -8,20 +8,26 @@ namespace DirectX
 
 	/**
 	@virtual
-	+ Initialize
-	+ Update
-	+ Render
-	+ Finalize
-	+ Destroy
-	+ OnDestroy
+	+ Destroy()
+	+ OnDestroy()
+	+ OnComponent()
+	+ SendBehaviourMessage(Message message)
 	*/
 	class Component:private Object
 	{
 		friend GameObject;
-	protected:
-		bool IsEnable = true;
+	public:
+		enum Message
+		{
+			Initialize,
+			Update,
+			Render,
+			Finalize
+		};
 	private:
 		const int priority;
+	protected:
+		bool IsEnable = true;
 	public:
 		std::weak_ptr<GameObject> gameObject;
 		std::weak_ptr<Transform> transform;
@@ -32,9 +38,7 @@ namespace DirectX
 	public:
 		void SetEnable(bool isEnable);
 		bool GetEnable() { return IsEnable; };
-		virtual void Initialize() {};
-		virtual void Update() {};
-		virtual void Render() {};
-		virtual void Finalize() {};
+		virtual void SendBehaviourMessage(Message message) {};
+		virtual void OnComponent() {};
 	};
 }
