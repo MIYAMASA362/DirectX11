@@ -37,30 +37,29 @@ void CManager::Init()
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::LoadScene("TestScene");
 
-	SceneManager::Initialize();
+	SceneManager::RunActiveScene(Component::Initialize);
 }
 
 void CManager::Update()
 {
-	OutputDebugString(("\nUpdate:" + std::to_string(Time::Get_DeltaTime())).c_str());
 	Input::Update();
-	SceneManager::Update();
+	SceneManager::RunActiveScene(Component::Update);
 }
 
 void CManager::FixedUpdate()
 {
-	OutputDebugString(("\nFixedUpdate:" + std::to_string(Time::Get_FixedDeltaTime())).c_str());
+	
 }
 
 void CManager::Render(void)
 {
-	SceneManager::Render();
+	SceneManager::RunActiveScene(Component::Render);
 }
 
 
 void CManager::Uninit()
 {
 	Input::Uninit();
-	SceneManager::Finalize();
+	SceneManager::RunActiveScene(Component::Finalize);
 	SceneManager::Destroy();
 }
