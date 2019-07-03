@@ -83,6 +83,7 @@ namespace DirectX
 
 		tagVector3() :x(0.0f), y(0.0f), z(0.0f) {};
 		tagVector3(float _x, float _y, float _z) :x(_x),y(_y),z(_z) {};
+		tagVector3(XMVECTOR vec):x(vec.m128_f32[0]),y(vec.m128_f32[1]),z(vec.m128_f32[2]) { };
 
 		//	tagVector3(0.0f,0.0f,0.0f)
 		static tagVector3 zero()	{ 
@@ -181,10 +182,26 @@ namespace DirectX
 				(1 - t)*vec1.z + t*vec2.z
 			};
 		};
-		//tagVector3 SLerp(0.0f～1.0f)
+		//tagVector3 SLerp(0.0f～1.0f)未完成
 		static tagVector3 Slerp(const tagVector3 vec1, const tagVector3 vec2, const float time) {
 			float t = Mathf::Clamp(0.0f,1.0f,time);
+			return tagVector3::one();
+		};
 
+		static float Length(const tagVector3 vec)
+		{
+			return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+		}
+
+		static float LengthSq(const tagVector3 vec)
+		{
+			return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+		}
+
+		static tagVector3 Normalize(const tagVector3 vec1)
+		{
+			float length = tagVector3::Length(vec1);
+			return tagVector3(vec1.x / length,vec1.y /length,vec1.z/length);
 		};
 		
 		//ベクトルの長さ
@@ -195,6 +212,11 @@ namespace DirectX
 		float LengthSq() { 
 			return x*x + y*y + z*z; 
 		};
+		//単位化
+		tagVector3 normalize()
+		{
+			return tagVector3::Normalize(*this);
+		}
 
 		operator const float*() { return &x; }
 		operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
@@ -203,6 +225,8 @@ namespace DirectX
 		tagVector3 operator- (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
 		tagVector3 operator/ (const float& scalar) { x /= scalar; y /= scalar; z /= scalar; return *this; };
 		tagVector3 operator* (const float& scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; };
+		tagVector3 operator+= (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
+		tagVector3 operator-= (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
 		bool operator== (const tagVector3& vec) { return (x == vec.x && y == vec.y && z == vec.z); };
 	}Vector3;
 
@@ -293,14 +317,26 @@ namespace DirectX
 		static tagQuaternion Conjugate(tagQuaternion q1) {
 			return tagQuaternion(-q1.x,-q1.y,-q1.z,q1.w);
 		};
-		//Quaternion オイラー角を使った回転
+		//Quaternion オイラー角を使った回転   //不具合あり
 		static tagQuaternion Euler(tagVector3 vec) {
-			float roll	= Mathf::ToRadian(vec.x);
-			float pitch = Mathf::ToRadian(vec.y);
-			float yaw	= Mathf::ToRadian(vec.z);
+			float x	= Mathf::ToRadian(vec.x);
+			float y = Mathf::ToRadian(vec.y);
+			float z = Mathf::ToRadian(vec.z);
 
-			XMMATRIX RotMatrix = XMMatrixRotationRollPitchYaw(roll,pitch,yaw);
-			return tagQuaternion::AtMatrix(RotMatrix);
+			float cX = cosf(x * 0.5f);
+			float cY = cosf(y * 0.5f);
+			float cZ = cosf(z * 0.5f);
+
+			float sX = sinf(x * 0.5f);
+			float sY = sinf(y * 0.5f);
+			float sZ = sinf(z * 0.5f);
+
+			return tagQuaternion(
+				sX * cY * cZ + cX * sY * sZ,
+				cX * sY * cZ - sX * cY * sZ,
+				cX * cY * sZ - sX * sY * cZ,
+				cX * cY * cZ + sX * sY * sZ
+			);
 		}
 		//Quaternion Axisを中心にAngle角回転します
 		static tagQuaternion AngleAxis(const float angle,tagVector3 axis){
