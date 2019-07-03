@@ -358,6 +358,7 @@ int D3DApp::Run(unsigned int fps)
 	//フレームカウント初期化
 	TimeManager::Create(fps);
 
+	CameraManager::Create();
 	CManager::Init();
 
 	MSG msg;
@@ -396,8 +397,12 @@ int D3DApp::Run(unsigned int fps)
 			// 描画処理
 			if(IsUpdate)
 			{
+				//オブジェクトの行列変換
+
+
+				//描画設定
 				pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
-				Camera::BeginRun(CManager::Render,D3DApp::Renderer::Begin);
+				CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
 				D3DApp::Renderer::End();
 			}
 		}
@@ -405,7 +410,8 @@ int D3DApp::Run(unsigned int fps)
 
 	CManager::Uninit();
 
-	Camera::Release();
+	CameraManager::Release();
+	CameraManager::Destroy();
 	TimeManager::Destroy();
 
 	D3DApp::Destroy();

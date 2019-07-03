@@ -25,15 +25,12 @@ namespace DirectX
 		{
 			std::shared_ptr<Scene> AddScene = std::shared_ptr<Scene>(new Type());
 			pSceneIndex.push_back(AddScene);
-			AddScene->scene = AddScene;
+			AddScene->self = AddScene;
 			return;
 		};
 		static Scene* GetScene(std::string SceneName);
+		static void RunActiveScene(Component::Message message);
 	public:
-		static void Initialize();
-		static void Update();
-		static void Render();
-		static void Finalize();
 		static void CleanUp();
 	};
 
@@ -54,6 +51,7 @@ namespace DirectX
 		GameObject* AddSceneObject(std::string name, TagName tag);
 		GameObject* AddSceneObject(std::string name);
 		void SetIsCeanUp(bool IsEnable) { this->IsCeanUp = IsEnable; };
+		
 	};
 
 }

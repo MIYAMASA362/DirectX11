@@ -78,57 +78,15 @@ Scene* SceneManager::GetScene(std::string SceneNamae)
 	return NULL;
 }
 
-//--- SceneLoop ----------------------------------------------------------
-
-void SceneManager::Initialize()
-{
-	if(!pActiveScene.expired())
-		for(std::shared_ptr<GameObject> gameObject:pActiveScene.lock()->GameObjectIndex)
-			for (std::shared_ptr<Component> component : gameObject->Components)
-			{
-				if (!component->GetEnable()) continue;
-				component->gameObject = gameObject;
-				component->transform = gameObject->transform;
-				component->Initialize();
-			}
-}
-
-void SceneManager::Update()
+void DirectX::SceneManager::RunActiveScene(Component::Message message)
 {
 	if (!pActiveScene.expired())
 		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
-			for (std::shared_ptr<Component> component : gameObject->Components)
-			{
+			for (std::shared_ptr<Component> component : gameObject->Components) {
 				if (!component->GetEnable()) continue;
 				component->gameObject = gameObject;
 				component->transform = gameObject->transform;
-				component->Update();
-			}
-}
-
-void SceneManager::Render()
-{
-	if (!pActiveScene.expired())
-		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
-			for (std::shared_ptr<Component> component : gameObject->Components)
-			{
-				if (!component->GetEnable()) continue;
-				component->gameObject = gameObject;
-				component->transform = gameObject->transform;
-				component->Render();
-			}
-}
-
-void SceneManager::Finalize()
-{
-	if (!pActiveScene.expired())
-		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
-			for (std::shared_ptr<Component> component : gameObject->Components)
-			{
-				if (!component->GetEnable()) continue;
-				component->gameObject = gameObject;
-				component->transform = gameObject->transform;
-				component->Finalize();
+				component->SendBehaviourMessage(message);
 			}
 }
 
@@ -154,7 +112,7 @@ Scene::~Scene()
 
 GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 {
-	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this->self,tag));
+	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this,tag));
 	GameObjectIndex.push_back(object);
 	object->self = object;
 	return object.get();
@@ -164,3 +122,5 @@ GameObject* Scene::AddSceneObject(std::string name)
 {
 	return AddSceneObject(name, TagName::Default);
 }
+
+
