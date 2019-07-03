@@ -13,33 +13,37 @@
 
 using namespace DirectX;
 
-std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
+CameraManager* CameraManager::pInstance = nullptr;
+std::list<std::weak_ptr<Camera>> CameraManager::CameraIndex;
 
-Camera::Camera()
-:
-	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
-	priority(1)
+DirectX::CameraManager::~CameraManager()
 {
-
+	CameraIndex.clear();
 }
 
-DirectX::Camera::~Camera()
+void DirectX::CameraManager::Create()
 {
-
+	if (pInstance != nullptr) return;
+	pInstance = new CameraManager();
 }
 
-//整列
-void DirectX::Camera::IndexSort(Camera* target)
+void DirectX::CameraManager::Destroy()
+{
+	if (pInstance != nullptr)
+		delete pInstance;
+}
+
+void DirectX::CameraManager::IndexSort(Camera * target)
 {
 	std::weak_ptr<Camera> wPtr = target->gameObject.lock()->GetComponent<Camera>();
 
 	//配列長が0
-	if(CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
+	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
 
 	bool IsInsert = false;
 
 	//配列
-	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end();)
+	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end();)
 	{
 		Camera* camera = itr->lock().get();
 		//削除
@@ -67,31 +71,27 @@ void DirectX::Camera::IndexSort(Camera* target)
 	return;
 }
 
-void Camera::Initialize()
+void DirectX::CameraManager::RemoveCamera(Camera * camera)
 {
-	IndexSort(this);
-}
-
-void DirectX::Camera::OnDestroy()
-{
-	for(auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
+	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
 	{
-		if (itr->lock().get() != this) continue;
+		if (itr->lock().get() != camera) continue;
 		CameraIndex.erase(itr);
 		break;
 	}
 }
 
-//描画開始
-void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(void))
+void DirectX::CameraManager::SetRender(void(*Draw)(void), void(*Begin)(void))
 {
 	auto itr = CameraIndex.begin();
 	while (itr != CameraIndex.end())
 	{
-		if (itr->expired()){
+		//未使用枠を削除
+		if (itr->expired()) {
 			itr = CameraIndex.erase(itr);
 			continue;
 		}
+		//カメラ設定
 		Camera* camera = itr->lock().get();
 		itr++;
 
@@ -104,13 +104,32 @@ void DirectX::Camera::BeginRun(void (*Draw)(void),void (*Begin)(void))
 	}
 }
 
-void DirectX::Camera::Release()
+void DirectX::CameraManager::Release()
 {
 	CameraIndex.clear();
 }
 
+
+DirectX::Camera::Camera()
+:
+	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
+	priority(1)
+{
+
+}
+
+DirectX::Camera::~Camera()
+{
+
+}
+
+void DirectX::Camera::OnDestroy()
+{
+	CameraManager::RemoveCamera(this);
+}
+
 //描画
-void Camera::Run()
+void DirectX::Camera::Run()
 {
 	XMMATRIX	m_ViewMatrix;
 	XMMATRIX	m_InvViewMatrix;
@@ -127,10 +146,8 @@ void Camera::Run()
 
 	D3DApp::GetDeviceContext()->RSSetViewports(1, &dxViewport);
 
-
 	// ビューマトリクス設定
-	m_InvViewMatrix = gameObject.lock()->transform->MatrixQuaternion();
-	m_InvViewMatrix *= gameObject.lock()->transform->MatrixTranslation();
+	m_InvViewMatrix = gameObject.lock()->transform->WorldMatrix();
 
 	XMVECTOR det;
 	m_ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
@@ -143,7 +160,7 @@ void Camera::Run()
 	D3DApp::Renderer::SetProjectionMatrix(&m_ProjectionMatrix);
 }
 
-void Camera::SetViewPort(float x, float y, float w, float h)
+void DirectX::Camera::SetViewPort(float x, float y, float w, float h)
 {
 	x = min(x, 1.0f);
 	y = min(y, 1.0f);
@@ -159,5 +176,5 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 void DirectX::Camera::SetPriority(int priority)
 {
 	this->priority = priority;
-	IndexSort(this);
+	CameraManager::IndexSort(this);
 }
