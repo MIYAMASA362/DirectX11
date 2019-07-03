@@ -24,7 +24,7 @@ public:
 		{
 			GameObject* pWallField;
 			pWallField = this->AddSceneObject("WallField");
-			pWallField->AddComponent<CWallField>();
+			pWallField->AddComponent<MeshRender>()->SetMesh<CWallField>();
 			pWallField->transform.get()->position(Vector3::zero());
 			pWallField->transform.get()->rotation(Vector3::zero());
 			pWallField->transform.get()->scale(Vector3::one()*10.0f);
@@ -33,10 +33,9 @@ public:
 		{
 			GameObject* pModel;
 			pModel = this->AddSceneObject("Miku");
-			pModel->AddComponent<RemoveObjectMethod>();
-			pModel->AddComponent<KeyMove>();
-			CModel* model = pModel->AddComponent<CModel>();
-			model->Load("asset/miku_01.obj");
+			pModel->transform.get()->scale(Vector3::one() * 2.0f);
+			pModel->AddComponent<MikuMove>();
+			pModel->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
 			{
 				auto pCamera = this->AddSceneObject("ModelCamera",TagName::MainCamera);
 				pCamera->AddComponent<Camera>();
@@ -44,6 +43,7 @@ public:
 				pCamera->transform->position(Vector3(0.0f, 1.0f, -3.0f));
 				pCamera->transform->rotation(Vector3::zero());
 				pCamera->transform->scale(Vector3::one());
+				pCamera->AddComponent<KeyMove>();
 			}
 		}
 	};
