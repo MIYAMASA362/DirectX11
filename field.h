@@ -2,19 +2,18 @@
 
 using namespace DirectX;
 
-class CField:public Behaviour
+class CField:public Mesh
 {
 private:
 	ID3D11Buffer* m_VertexBuffer = NULL;
 	CTexture* m_Texture = NULL;
 public:
-	void Initialize()override;
-	void Update() override;
-	void Render() override;
-	void Finalize()override;
+	CField();
+	virtual ~CField();
+	void Render(XMMATRIX worldMatrix) override;
 };
 
-class CWallField:public Behaviour
+class CWallField:public Mesh
 {
 private:
 	ID3D11Buffer* m_FieldVertexBuffer = NULL;
@@ -23,10 +22,9 @@ private:
 	ID3D11Buffer* m_WallVertexBuffer = NULL;
 	CTexture* m_WallTexture = NULL;
 public:
-	void Initialize()override;
-	void Update()override;
-	void Render()override;
-	void Finalize()override;
+	CWallField();
+	~CWallField();
+	void Render(XMMATRIX worldMatrix)override;
 };
 
 class CMeshField

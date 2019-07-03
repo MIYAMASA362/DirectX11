@@ -29,9 +29,7 @@ struct MODEL
 	unsigned short	SubsetNum;
 };
 
-
-
-class CModel:public Behaviour
+class CModel:public Mesh
 {
 private:
 	ID3D11Buffer*	m_VertexBuffer = nullptr;
@@ -39,11 +37,10 @@ private:
 
 	DX11_SUBSET*	m_SubsetArray = nullptr;
 	unsigned short	m_SubsetNum;
-
 public:
 	virtual ~CModel();
 public:
-	void Render() override;
+	void Render(XMMATRIX worldMatrix) override;
 public:
 	void LoadObj( const char *FileName, MODEL *Model );
 	void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned short *MaterialNum );

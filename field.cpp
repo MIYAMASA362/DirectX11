@@ -13,7 +13,7 @@
 #include"camera.h"
 #include"field.h"
 
-void CField::Initialize()
+CField::CField()
 {
 	VERTEX_3D vertex[4] =
 	{
@@ -42,7 +42,7 @@ void CField::Initialize()
 	this->m_Texture->Load("asset/k-on0664.tga");
 }
 
-void CField::Finalize()
+CField::~CField()
 {
 	if (m_Texture) {
 		m_Texture->Unload();
@@ -53,15 +53,12 @@ void CField::Finalize()
 	}
 }
 
-void CField::Update()
-{
-
-}
-
-void CField::Render()
+void CField::Render(XMMATRIX worldMatrix)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
+
+	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
 	D3DApp::Renderer::SetTexture(this->m_Texture);
@@ -79,7 +76,7 @@ void CField::Render()
 
 }
 
-void CWallField::Initialize()
+CWallField::CWallField()
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA subResourceData;
@@ -135,7 +132,7 @@ void CWallField::Initialize()
 	this->m_WallTexture->Load("asset/k-on0664.tga");
 }
 
-void CWallField::Finalize()
+CWallField::~CWallField()
 {
 	if(m_WallTexture)
 	{
@@ -156,27 +153,15 @@ void CWallField::Finalize()
 	}
 }
 
-void CWallField::Update()
-{
-
-}
-
-void CWallField::Render()
+void CWallField::Render(XMMATRIX worldMatrix)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 
-	XMMATRIX WorldPosition = this->transform.lock()->MatrixTranslation();
-	XMMATRIX WorldRotation = this->transform.lock()->MatrixQuaternion();
-	XMMATRIX WorldScale = this->transform.lock()->MatrixScaling();
+	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
 	D3DApp::Renderer::SetTexture(this->m_FieldTexture);
-
-	//s—ñ•ÏŠ·
-	XMMATRIX world = WorldScale * WorldRotation * WorldPosition;
-
-	D3DApp::Renderer::SetWorldMatrix(&world);
 
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)@n:‘” i:‚Ç‚±‚©‚çŽn‚ß‚é‚©
@@ -193,7 +178,7 @@ void CWallField::Render()
 		D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
 		D3DApp::Renderer::SetTexture(this->m_WallTexture);
 
-		local = local * world;
+		local = local * worldMatrix;
 
 		D3DApp::Renderer::SetWorldMatrix(&local);
 

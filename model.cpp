@@ -8,8 +8,8 @@
 #include"Behaviour.h"
 #include"Tag.h"
 #include"Transform.h"
-#include"Renderer.h"
 #include"GameObject.h"
+#include"Renderer.h"
 #include"camera.h"
 #include"model.h"
 
@@ -24,16 +24,9 @@ CModel::~CModel()
 
 }
 
-void CModel::Render()
+void CModel::Render(XMMATRIX worldMatrix)
 {
-	// マトリクス設定
-	XMMATRIX world;
-	world =  this->transform.lock()->MatrixScaling();
-	world *= this->transform.lock()->MatrixQuaternion();
-	world *= this->transform.lock()->MatrixTranslation();
-
-	D3DApp::Renderer::SetWorldMatrix( &world );
-
+	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	// 頂点バッファ設定
 	D3DApp::Renderer::SetVertexBuffer( m_VertexBuffer );
 

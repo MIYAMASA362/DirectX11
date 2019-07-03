@@ -10,6 +10,6 @@ class CPolygon:public Behaviour
 	public:
 		void Initialize() override;
 		void Update() override;
-		void Render() override;
+		void Render();
 		void Finalize() override;
 };
