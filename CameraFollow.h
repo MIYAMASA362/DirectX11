@@ -3,19 +3,23 @@
 class KeyMove:public Behaviour
 {
 public:
+	GameObject* parent;
+	bool IsBool = true;
+public:
 	void Update()
 	{
 		if (Input::GetKeyPress('W'))
-			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->forward());
+			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->up());
 		if (Input::GetKeyPress('S'))
-			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->back());
+			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->down());
 		if (Input::GetKeyPress('A'))
-			this->transform.lock()->rotation(transform.lock()->rotation() * Quaternion::Euler(Vector3::up()).conjugate());
+			this->transform.lock()->rotation(this->transform.lock()->position() * Quaternion::Euler(Vector3::down()));
 		if (Input::GetKeyPress('D'))
-			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::up()));
+			this->transform.lock()->rotation(this->transform.lock()->position() * Quaternion::Euler(Vector3::up()));
+		if (Input::GetKeyTrigger(VK_SPACE))
+			this->transform.lock()->SetParent(parent);
 
-		XMMATRIX matrix = this->transform.lock()->MatrixScaling();
-		matrix = matrix;
+		transform.lock()->LookAt(parent->transform);
 	}
 };
 
@@ -25,15 +29,13 @@ public:
 	void Update()
 	{
 		if (Input::GetKeyPress(VK_UP))
-			this->transform.lock()->scale(this->transform.lock()->scale()*1.2f);
+			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->forward());
 		if (Input::GetKeyPress(VK_DOWN))
-			this->transform.lock()->scale(this->transform.lock()->scale()*0.8f);
+			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->back());
 		if (Input::GetKeyPress(VK_LEFT))
-			this->transform.lock()->rotation(transform.lock()->rotation() * Quaternion::Euler(Vector3::up()).conjugate());
+			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::down()));
 		if (Input::GetKeyPress(VK_RIGHT))
 			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::up()));
-
-		XMMATRIX matrix = this->transform.lock()->MatrixScaling();
-		matrix = matrix;
+		
 	}
 };
