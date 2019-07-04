@@ -17,6 +17,7 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName) :
 	IsActive(true)
 {
 	transform = std::shared_ptr<Transform>(new Transform());
+	transform->transform = transform;
 	Components.push_back(transform);
 };
 
