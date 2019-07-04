@@ -13,12 +13,11 @@ public:
 		{
 			GameObject* pCamera;
 			pCamera = this->AddSceneObject("MainCamera",TagName::MainCamera);
-			pCamera->transform.get()->position(Vector3(0.0f, 2.0f, -5.0f));
-			pCamera->transform.get()->rotation(Quaternion::AngleAxis(0.0f, Vector3::up()));
-			pCamera->transform.get()->scale(Vector3::one());
+			pCamera->transform.get()->position(Vector3(0.0f, 10.0f, -10.0f));
+			pCamera->transform.get()->rotation(Quaternion::AngleAxisToEuler(30.0f, Vector3::right()));
+			pCamera->transform.get()->localScale(Vector3::one());
 			Camera* camera = pCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
-			pCamera->SetActive(false);
 		}
 		//pWallField
 		{
@@ -27,23 +26,24 @@ public:
 			pWallField->AddComponent<MeshRender>()->SetMesh<CWallField>();
 			pWallField->transform.get()->position(Vector3::zero());
 			pWallField->transform.get()->rotation(Vector3::zero());
-			pWallField->transform.get()->scale(Vector3::one()*10.0f);
+			pWallField->transform.get()->localScale(Vector3::one()*50.0f);
 		}
 		//pModel
 		{
 			GameObject* pModel;
 			pModel = this->AddSceneObject("Miku");
-			pModel->transform.get()->scale(Vector3::one() * 2.0f);
+			pModel->transform.get()->position(Vector3::up()*2.0f);
+			pModel->transform.get()->localScale(Vector3::one()*2.0f);
 			pModel->AddComponent<MikuMove>();
 			pModel->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
 			{
-				auto pCamera = this->AddSceneObject("ModelCamera",TagName::MainCamera);
-				pCamera->AddComponent<Camera>();
-				pCamera->transform->SetParent(pModel);
-				pCamera->transform->position(Vector3(0.0f, 1.0f, -3.0f));
-				pCamera->transform->rotation(Vector3::zero());
-				pCamera->transform->scale(Vector3::one());
-				pCamera->AddComponent<KeyMove>();
+				auto pChild = this->AddSceneObject("ChildMiku");
+				pChild->AddComponent<KeyMove>()->parent = pModel;
+				pChild->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
+				//pChild->transform->SetParent(pModel);
+				pChild->transform->position(Vector3::up()*2.0f);
+				pChild->transform->rotation(Vector3::zero());
+				pChild->transform->localScale(Vector3::one()*2.0f);
 			}
 		}
 	};
