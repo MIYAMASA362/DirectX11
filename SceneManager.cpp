@@ -115,6 +115,7 @@ GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this,tag));
 	GameObjectIndex.push_back(object);
 	object->self = object;
+	object->transform->gameObject = object;
 	return object.get();
 }
 
