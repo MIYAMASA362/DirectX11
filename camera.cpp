@@ -95,7 +95,7 @@ void DirectX::CameraManager::SetRender(void(*Draw)(void), void(*Begin)(void))
 		Camera* camera = itr->lock().get();
 		itr++;
 
-		if (!camera->gameObject.lock()->IsActive)continue;
+		if (!camera->gameObject.lock()->GetActive())continue;
 		if (!camera->IsEnable)continue;
 
 		Begin();

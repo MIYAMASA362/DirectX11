@@ -10,8 +10,6 @@ namespace DirectX
 	class GameObject final:public Object
 	{
 	//--- Attribute -------------------------------------------------
-		friend class Renderer;
-		friend class CameraManager;
 		friend class SceneManager;
 		friend class Scene;
 	private:
@@ -42,6 +40,7 @@ namespace DirectX
 		{
 			this->IsActive = IsActive;
 		};
+		bool GetActive() { return IsActive; }
 	//--- Component -------------------------------------------------
 	public:
 		//AddComponent
@@ -56,7 +55,7 @@ namespace DirectX
 			std::shared_ptr<Component> component = std::shared_ptr<Component>(new Type());
 			Components.push_back(component);
 			component->gameObject = self;
-			component->transform = transform;
+			component->transform = self.lock()->transform;
 			component->OnComponent();
 			return static_cast<Type*>(component.get());
 		};
@@ -68,6 +67,7 @@ namespace DirectX
 			return std::weak_ptr<Type>();
 		}
 		//íœˆ—
-		void Destroy();
+		void Destroy()
+			;
 	};
 }
