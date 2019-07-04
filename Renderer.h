@@ -20,7 +20,7 @@ namespace DirectX
 		std::shared_ptr<Mesh> mesh;
 	public:
 		void OnComponent() override;
-		void SendBehaviourMessage(Message message);
+		void SendBehaviourMessage(Message message) override;
 		template<typename Type> Type* SetMesh()
 		{
 			mesh = std::shared_ptr<Mesh>(new Type());
