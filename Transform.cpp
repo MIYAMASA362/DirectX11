@@ -21,8 +21,19 @@ Transform::Transform()
 //SetParent
 void Transform::SetParent(std::weak_ptr<Transform> parent)
 {
+	//Šù‚Ée
+	if (pParent.lock() == parent.lock()) return;
+
+	XMMATRIX ParentMatrix = parent.lock()->WorldMatrix();
+	XMMATRIX MyMatrix = this->WorldMatrix();
+
 	pParent = parent;
-	parent.lock().get()->pChildren.push_back(transform);
+	parent.lock().get()->pChildren.push_back(this->transform);
+	
+	XMMATRIX matrix = MyMatrix * XMMatrixInverse(nullptr,ParentMatrix);
+	this->localPosition(Vector3(matrix.r[3]));
+	this->localScale(this->m_Scale / parent.lock()->m_Scale);
+	this->localRotation(Quaternion::AtMatrix(matrix));
 }
 void DirectX::Transform::SetParent(GameObject* parent)
 {
@@ -61,12 +72,15 @@ XMMATRIX Transform::MatrixScaling()
 }
 XMMATRIX Transform::WorldMatrix()
 {
-	worldMatrix  = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
-	worldMatrix *= this->m_Rotation.toMatrix();
-	worldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y,m_Position.z);
+	m_WorldMatrix  = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
+	m_WorldMatrix *= this->rotation().toMatrix();
+	m_WorldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y,m_Position.z);
+
+	if (this->m_Rotation.isIdentity())
+		bool istrue = true;
 
 	if (!pParent.expired())
-		worldMatrix *= pParent.lock()->WorldMatrix();
+		m_WorldMatrix *= pParent.lock()->WorldMatrix();
 
-	return worldMatrix;
+	return m_WorldMatrix;
 }
