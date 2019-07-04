@@ -72,6 +72,10 @@ namespace DirectX
 		static float aCosf(float angle){
 			return acosf(angle);
 		};
+		//ãtTanf
+		static float aTan2f(float y,float x){
+			return atan2f(y,x);
+		}
 	};
 
 	//tagVector3
@@ -205,11 +209,11 @@ namespace DirectX
 		};
 		
 		//ÉxÉNÉgÉãÇÃí∑Ç≥
-		float Length()	 { 
+		float length()	 { 
 			return sqrtf(x*x + y*y + z*z); 
 		};
 		//ÉxÉNÉgÉãí∑ÇÃ2èÊ
-		float LengthSq() { 
+		float lengthSq() {
 			return x*x + y*y + z*z; 
 		};
 		//íPà âª
@@ -227,9 +231,9 @@ namespace DirectX
 		tagVector3 operator* (const float& scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; };
 		tagVector3 operator+= (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
 		tagVector3 operator-= (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
+		tagVector3 operator*= (const tagVector3& vec) { x *= vec.x; y *= vec.y; z *= vec.z; return *this; };
 		bool operator== (const tagVector3& vec) { return (x == vec.x && y == vec.y && z == vec.z); };
 	}Vector3;
-
 
 	//tagVector4
 	typedef struct tagVector4
@@ -248,6 +252,28 @@ namespace DirectX
 		operator const float*() { return &x; };
 		
 	}Vector4;
+
+	//tagMatrix
+	typedef struct tagMatrix
+	{
+		//óvëf
+		struct Element
+		{
+			float _0, _1, _2, _3;
+			Element(float _0, float _1, float _2, float _3) :_0(_0), _1(_1), _2(_2), _3(_3) {};
+			Element(tagVector4 vec) :Element(vec.x,vec.y,vec.z,vec.w) {};
+			Element(XMVECTOR vec) :Element(vec.m128_f32[0], vec.m128_f32[1], vec.m128_f32[2], vec.m128_f32[3]) {};
+			Element():Element(0.0f,0.0f,0.0f,0.0f) {};
+		};
+
+		Element m0,m1,m2,m3;
+
+		tagMatrix(tagVector4 m0, tagVector4 m1, tagVector4 m2, tagVector4 m3)
+			:m0(m0), m1(m1), m2(m2),m3(m3) {};
+		tagMatrix(XMMATRIX matrix)
+			:m0(matrix.r[0]), m1(matrix.r[1]), m2(matrix.r[2]), m3(matrix.r[3]) {};
+		tagMatrix(){};
+	}Matrix;
 
 	//tagQuaternion
 	typedef struct tagQuaternion
@@ -317,7 +343,7 @@ namespace DirectX
 		static tagQuaternion Conjugate(tagQuaternion q1) {
 			return tagQuaternion(-q1.x,-q1.y,-q1.z,q1.w);
 		};
-		//Quaternion ÉIÉCÉâÅ[äpÇégÇ¡ÇΩâÒì]   //ïsãÔçáÇ†ÇË
+		//Quaternion ÉIÉCÉâÅ[äpÇégÇ¡ÇΩâÒì] 
 		static tagQuaternion Euler(tagVector3 vec) {
 			float x	= Mathf::ToRadian(vec.x);
 			float y = Mathf::ToRadian(vec.y);
@@ -338,15 +364,43 @@ namespace DirectX
 				cX * cY * cZ + sX * sY * sZ
 			);
 		}
-		//Quaternion AxisÇíÜêSÇ…AngleäpâÒì]ÇµÇ‹Ç∑
-		static tagQuaternion AngleAxis(const float angle,tagVector3 axis){
+		//Quaternion ÉâÉWÉAÉìäpÇégÇ¡ÇΩâÒì]
+		static tagQuaternion Radian(tagVector3 vec)
+		{
+			float cX = cosf(vec.x * 0.5f);
+			float cY = cosf(vec.y * 0.5f);
+			float cZ = cosf(vec.z * 0.5f);
+
+			float sX = sinf(vec.x * 0.5f);
+			float sY = sinf(vec.y * 0.5f);
+			float sZ = sinf(vec.z * 0.5f);
+
 			return tagQuaternion(
-				axis.x * sinf(Mathf::ToRadian(angle) * 0.5f),
-				axis.y * sinf(Mathf::ToRadian(angle) * 0.5f),
-				axis.z * sinf(Mathf::ToRadian(angle) * 0.5f),
-				cosf(Mathf::ToRadian(angle)*0.5f)
+				sX * cY * cZ + cX * sY * sZ,
+				cX * sY * cZ - sX * cY * sZ,
+				cX * cY * sZ - sX * sY * cZ,
+				cX * cY * cZ + sX * sY * sZ
+			);
+		}
+		//Quaternion AxisÇíÜêSÇ…AngleäpâÒì]ÇµÇ‹Ç∑
+		static tagQuaternion AngleAxisToEuler(const float angle,tagVector3 axis){
+			float RadAngle = Mathf::ToRadian(angle) * 0.5f;
+			return tagQuaternion(
+				axis.x * sinf(RadAngle),
+				axis.y * sinf(RadAngle),
+				axis.z * sinf(RadAngle),
+				cosf(RadAngle)
 			);
 		};
+		static tagQuaternion AngleAxisToRadian(const float angle,tagVector3 axis){
+			float RadAngle = angle*0.5f;
+			return tagQuaternion(
+				axis.x * sinf(RadAngle),
+				axis.y * sinf(RadAngle),
+				axis.z * sinf(RadAngle),
+				cosf(RadAngle)
+			);
+		}
 		//Quaternion QuaternionÇçsóÒÇ…ïœä∑ÇµÇ‹Ç∑
 		static XMMATRIX ToMatrix(tagQuaternion q){
 			float xx = q.x * q.x * 2.0f;
@@ -387,15 +441,43 @@ namespace DirectX
 		};
 		//Quaternion çsóÒÇ©ÇÁïœä∑ÇµÇ‹Ç∑
 		static tagQuaternion AtMatrix(XMMATRIX matrix){
-			
+			/*
 			tagQuaternion q;
 
-			q.x = (sqrtf( matrix.r[0].m128_f32[0] - matrix.r[1].m128_f32[1] - matrix.r[2].m128_f32[2] + matrix.r[3].m128_f32[3])) * 0.5f;
-			q.y = (sqrtf(-matrix.r[0].m128_f32[0] + matrix.r[1].m128_f32[1] - matrix.r[2].m128_f32[2] + matrix.r[3].m128_f32[3])) * 0.5f;
-			q.z = (sqrtf(-matrix.r[0].m128_f32[0] - matrix.r[1].m128_f32[1] + matrix.r[2].m128_f32[2] + matrix.r[3].m128_f32[3])) * 0.5f;
-			q.w = (sqrtf( matrix.r[0].m128_f32[0] + matrix.r[1].m128_f32[1] + matrix.r[2].m128_f32[2] + matrix.r[3].m128_f32[3])) * 0.5f;
+			float trace = matrix.r[0].m128_f32[0] + matrix.r[1].m128_f32[1] + matrix.r[2].m128_f32[2];
+			if(trace > 0){
+				float s = 0.5f;
+				q.w = 0.25f / s;
+				q.x = (matrix.r[2].m128_f32[1] - matrix.r[1].m128_f32[2]) * s;
+				q.y = (matrix.r[0].m128_f32[2] - matrix.r[2].m128_f32[0]) * s;
+				q.z = (matrix.r[1].m128_f32[0] - matrix.r[0].m128_f32[1]) * s;
+			}else{
+				if( matrix.r[0].m128_f32[0] > matrix.r[1].m128_f32[1] && matrix.r[0].m128_f32[0] > matrix.r[2].m128_f32[2]){
+					float s = 2.0f * sqrtf( 1.0f + matrix.r[0].m128_f32[0] - matrix.r[1].m128_f32[1] - matrix.r[2].m128_f32[2]);
+					q.w = (matrix.r[2].m128_f32[1] - matrix.r[1].m128_f32[2]) / s;
+					q.x = 0.25f * s;
+					q.y = (matrix.r[0].m128_f32[1] + matrix.r[1].m128_f32[0]) / s;
+					q.z = (matrix.r[0].m128_f32[2] + matrix.r[2].m128_f32[0]) / s;
+				}
+				else if(matrix.r[1].m128_f32[1] > matrix.r[2].m128_f32[2]){
+					float s = 2.0f * sqrtf(1.0f + matrix.r[1].m128_f32[1] - matrix.r[0].m128_f32[0] - matrix.r[2].m128_f32[2]);
+					q.w = (matrix.r[0].m128_f32[2] - matrix.r[2].m128_f32[0]) / s;
+					q.x = (matrix.r[0].m128_f32[1] + matrix.r[1].m128_f32[0]) / s;
+					q.y = 0.25f * s;
+					q.z = (matrix.r[1].m128_f32[2] + matrix.r[2].m128_f32[1]) / s;
+				}
+				else
+				{
+					float s = 2.0f *  sqrtf(1.0f + matrix.r[2].m128_f32[2] - matrix.r[0].m128_f32[0] - matrix.r[1].m128_f32[1]);
+					q.w = (matrix.r[1].m128_f32[0] - matrix.r[0].m128_f32[1]) / s;
+					q.x = (matrix.r[0].m128_f32[2] + matrix.r[2].m128_f32[0]) / s;
+					q.y = (matrix.r[1].m128_f32[2] + matrix.r[2].m128_f32[1]) / s;
+					q.z = 0.25f * s;
+				}
+			}
+			*/
 
-			return q;
+			return tagQuaternion(XMQuaternionRotationMatrix(matrix));
 		}
 		//Quaternion Multiply çáê¨
 		static tagQuaternion Multiply(tagQuaternion q1,tagQuaternion q2)
