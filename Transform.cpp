@@ -24,14 +24,16 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 	//既に親
 	if (pParent.lock() == parent.lock()) return;
 
-	XMMATRIX ParentMatrix = parent.lock()->WorldMatrix();
-	XMMATRIX MyMatrix = this->WorldMatrix();
+	this->WorldMatrix();
 
+	//親設定
 	pParent = parent;
+	//親の子に設定
 	parent.lock().get()->pChildren.push_back(this->transform);
 	
-	XMMATRIX matrix = MyMatrix * XMMatrixInverse(nullptr,ParentMatrix);
-	this->localPosition(Vector3(matrix.r[3]));
+	//向きなどを保持したまま子になる
+	XMMATRIX matrix = this->m_WorldMatrix * XMMatrixInverse(nullptr, parent.lock()->WorldMatrix());
+	this->localPosition({ matrix.r[3] });
 	this->localScale(this->m_Scale / parent.lock()->m_Scale);
 	this->localRotation(Quaternion::AtMatrix(matrix));
 }
@@ -73,7 +75,7 @@ XMMATRIX Transform::MatrixScaling()
 XMMATRIX Transform::WorldMatrix()
 {
 	m_WorldMatrix  = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
-	m_WorldMatrix *= this->rotation().toMatrix();
+	m_WorldMatrix *= this->m_Rotation.toMatrix();
 	m_WorldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y,m_Position.z);
 
 	if (this->m_Rotation.isIdentity())

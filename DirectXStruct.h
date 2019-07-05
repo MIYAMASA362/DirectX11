@@ -283,7 +283,7 @@ namespace DirectX
 		float z;
 		float w;
 
-		tagQuaternion():x(0.0f),y(0.0f),z(0.0f),w(0.0f){};
+		tagQuaternion():x(0.0f),y(0.0f),z(0.0f),w(1.0f){};
 		tagQuaternion(float _x, float _y, float _z, float _w):x(_x),y(_y),z(_z),w(_w){};
 		tagQuaternion(tagVector3 rotation) 
 		{
@@ -514,6 +514,11 @@ namespace DirectX
 				value1*start.z + value2*end.z,
 				value1*start.w + value2*end.w
 			);
+		}
+		static tagQuaternion LookRotation(tagVector3 lookAt,tagVector3 up)
+		{
+			float angle = Mathf::aTan2f(lookAt.x, lookAt.z);
+			return Quaternion::AngleAxisToRadian(angle,up);
 		}
 
 		float length() {

@@ -57,7 +57,12 @@ namespace DirectX
 		}
 	public:
 		Vector3 position()		{ return this->WorldMatrix().r[3]; }
-		Quaternion rotation()	{ return this->m_Rotation; }
+		Quaternion rotation()	{
+			Quaternion q = this->m_Rotation;
+			if (!pParent.expired())
+				q *= pParent.lock()->rotation();
+			return q;
+		}
 		Vector3 Scale()			{ return pParent.expired() ? m_Scale : m_Scale *= pParent.lock()->Scale();}
 
 		Vector3 localPosition()		{ return m_Position; }
@@ -67,15 +72,19 @@ namespace DirectX
 		void position(Vector3 position)	{
 			this->m_Position += position - this->position();			
 		}
-		void rotation(Quaternion rotation)	{ this->m_Rotation = rotation; }
+		void rotation(Quaternion rotation)	{
+			if (!pParent.expired())
+				rotation = pParent.lock()->rotation().conjugate() * rotation;
+			this->m_Rotation = rotation;
+		}
 
 		void localPosition(Vector3 position) {
-			this->m_Position = position; 
+			this->m_Position = position;
 		}
 		void localRotation(Quaternion rotation)	{ 
 			this->m_Rotation = rotation;
 		}
-		void localScale(Vector3 scale)			{ 
+		void localScale(Vector3 scale)	{ 
 			this->m_Scale = scale;
 		}
 	public:
@@ -104,12 +113,12 @@ namespace DirectX
 		}
 	public:
 		//Direction
-		Vector3 right()		{ return TransformDirection(Vector3::right()); };
-		Vector3 left()		{ return right()*-1.0f; };
-		Vector3 up()		{ return TransformDirection(Vector3::up());};
-		Vector3 down()		{ return up() * -1.0f; };
-		Vector3 forward()	{ return TransformDirection(Vector3::forward()); };
-		Vector3 back()		{ return forward() * -1.0f; };
+		Vector3 right()		{ return TransformDirection(Vector3::right()); }
+		Vector3 left()		{ return right()*-1.0f; }
+		Vector3 up()		{ return TransformDirection(Vector3::up());}
+		Vector3 down()		{ return up() * -1.0f; }
+		Vector3 forward()	{ return TransformDirection(Vector3::forward()); }
+		Vector3 back()		{ return forward() * -1.0f; }
 	public:
 		//Matrix
 		XMMATRIX MatrixQuaternion();
@@ -117,11 +126,14 @@ namespace DirectX
 		XMMATRIX MatrixScaling();
 		XMMATRIX WorldMatrix();
 	public:
+		//‚»‚Ì•ûŒü‚ðŒü‚­ (XZ•½–Ê‚Ì‚Ý‘Î‰ž)
 		void LookAt(std::weak_ptr<Transform> target)
 		{
 			Vector3 mPos = this->position();
-			float angle = Mathf::aTan2f(target.lock()->position().x - mPos.x, target.lock()->position().z - mPos.z);
-			this->m_Rotation = Quaternion::AngleAxisToRadian(angle,this->transform.lock()->up());
+			Vector3 pPos = target.lock()->position();
+			this->m_Rotation = Quaternion::LookRotation(target.lock()->position() - this->position(),this->up());
+			if (!pParent.expired())
+				this->m_Rotation *= pParent.lock()->rotation().conjugate();
 		}
 	};
 }

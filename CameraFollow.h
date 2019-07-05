@@ -13,13 +13,20 @@ public:
 		if (Input::GetKeyPress('S'))
 			this->transform.lock()->position(this->transform.lock()->position() + this->transform.lock()->down());
 		if (Input::GetKeyPress('A'))
-			this->transform.lock()->rotation(this->transform.lock()->position() * Quaternion::Euler(Vector3::down()));
+			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::down()));
 		if (Input::GetKeyPress('D'))
-			this->transform.lock()->rotation(this->transform.lock()->position() * Quaternion::Euler(Vector3::up()));
+			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::up()));
 		if (Input::GetKeyTrigger(VK_SPACE))
-			this->transform.lock()->SetParent(parent);
+			if (IsBool)
+			{
+				this->transform.lock()->SetParent(parent); IsBool = false;
+			}
+			else
+			{
+				this->transform.lock()->DetachParent(); IsBool = true;
+			}
 
-		transform.lock()->LookAt(parent->transform);
+		this->transform.lock()->LookAt(parent->transform);
 	}
 };
 
