@@ -29,8 +29,10 @@ void DirectX::CameraManager::Create()
 
 void DirectX::CameraManager::Destroy()
 {
-	if (pInstance != nullptr)
+	if (pInstance != nullptr){
+		CameraIndex.clear();
 		delete pInstance;
+	}
 }
 
 void DirectX::CameraManager::IndexSort(Camera * target)
