@@ -1,15 +1,14 @@
 #include"main.h"
+#include"GUI_ImGui.h"
 #include"Window.h"
 #include"DirectXStruct.h"
 #include"DirectX.h"
 
 using namespace System;
 
-Window* MainWindow;
-
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	MainWindow = new Window();
+	Window* MainWindow = new ImGui_Window();
 	MainWindow->Create(
 		hInstance,
 		"MainWindow",
