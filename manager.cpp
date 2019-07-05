@@ -1,8 +1,11 @@
 //Main
 #include"main.h"
+
+//System
 #include"manager.h"
 #include"DirectXStruct.h"
 #include"DirectX.h"
+#include<DirectXCollision.h>
 #include"Time.h"
 #include"Object.h"
 #include"Component.h"
@@ -14,6 +17,7 @@
 #include"SceneManager.h"
 #include"Input.h"
 #include"Renderer.h"
+#include"Collision.h"
 
 //Objects
 #include"camera.h"

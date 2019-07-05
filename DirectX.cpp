@@ -7,6 +7,7 @@
 
 #include"main.h"
 #include"Window.h"
+#include"GUI_ImGui.h"
 #include"DirectXStruct.h"
 #include"DirectX.h"
 #include"texture.h"
@@ -355,6 +356,8 @@ unsigned int D3DApp::GetScreenHeight()
 
 int D3DApp::Run(unsigned int fps)
 {
+	//ImGuiの設定
+	GUI::guiImGui::Create(pInstance);
 	//フレームカウント初期化
 	TimeManager::Create(fps);
 
@@ -362,6 +365,7 @@ int D3DApp::Run(unsigned int fps)
 	CManager::Init();
 
 	MSG msg;
+	
 	while (1)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -377,42 +381,52 @@ int D3DApp::Run(unsigned int fps)
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+			continue;
 		}
-		else
-		{
-			TimeManager::Update();
+
+		TimeManager::Update();
 			
-			bool IsUpdate = TimeManager::IsUpdate();
-			bool IsFixedUpdate = TimeManager::IsFixedUpdate();
+		bool IsUpdate = TimeManager::IsUpdate();
+		bool IsFixedUpdate = TimeManager::IsFixedUpdate();
 
-			//更新処理
-			if (IsUpdate) CManager::Update();
+		//更新処理
+		if (IsUpdate) CManager::Update();
 
-			//一定更新
-			if(IsFixedUpdate) CManager::FixedUpdate();
+		//一定更新
+		if(IsFixedUpdate) CManager::FixedUpdate();
 
-			//Destroyされた物を削除
-			if (IsFixedUpdate || IsUpdate) SceneManager::CleanUp();
+		//Destroyされた物を削除
+		if (IsFixedUpdate || IsUpdate) SceneManager::CleanUp();
 
-			// 描画処理
-			if(IsUpdate)
-			{
-				//オブジェクトの行列変換
+		// 描画処理
+		if(IsUpdate)
+		{
+			GUI::guiImGui::SetFrame();
 
+			char* buf = new char[10];
+			float f = 0.0f;
 
-				//描画設定
-				pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
-				CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
-				D3DApp::Renderer::End();
-			}
+			//ImGui
+			ImGui::Begin("Text");
+			ImGui::Text("deltaTime %f", Time::Get_DeltaTime());
+			ImGui::End();
+
+			delete buf;
+
+			//オブジェクトの行列変換
+			
+			//描画設定
+			pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
+			CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
+			GUI::guiImGui::Render();
+			D3DApp::Renderer::End();
 		}
 	}
 
 	CManager::Uninit();
-
-	CameraManager::Release();
 	CameraManager::Destroy();
 	TimeManager::Destroy();
+	GUI::guiImGui::Destroy();
 
 	D3DApp::Destroy();
 	
