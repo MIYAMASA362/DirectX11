@@ -29,12 +29,18 @@ namespace DirectX
 			case Component::Finalize:
 				Finalize();
 				break;
+			case Component::FixedUpdate:
+				FixedUpdate();
+				break;
 			default:
 				break;
 			}
 		};
+
+		//Defualt Method
 		virtual void Initialize() {};
 		virtual void Update() {};
+		virtual void FixedUpdate() {};
 		virtual void Finalize() {};
 	};
 }
