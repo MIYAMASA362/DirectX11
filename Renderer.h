@@ -19,6 +19,9 @@ namespace DirectX
 	private:
 		std::shared_ptr<Mesh> mesh;
 	public:
+		MeshRender();
+		virtual ~MeshRender();
+	public:
 		void OnComponent() override;
 		void SendBehaviourMessage(Message message) override;
 		template<typename Type> Type* SetMesh()
