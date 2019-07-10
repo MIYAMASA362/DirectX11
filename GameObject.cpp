@@ -9,6 +9,32 @@
 #include"camera.h"
 #include"SceneManager.h"
 
+std::shared_ptr<DirectX::Manager::GameObjectManager> DirectX::Manager::GameObjectManager::pInstance;
+
+DirectX::Manager::GameObjectManager::GameObjectManager()
+{
+}
+
+DirectX::Manager::GameObjectManager::~GameObjectManager()
+{
+	pIndex.clear();
+}
+
+void DirectX::Manager::GameObjectManager::Create()
+{
+	if (pInstance.get() == nullptr)
+		pInstance = std::shared_ptr<GameObjectManager>(new GameObjectManager());
+}
+
+void DirectX::Manager::GameObjectManager::Destry()
+{
+	if (pInstance.get() != nullptr)
+		pInstance.reset();
+}
+
+
+
+
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName) :
 	Object(name),
 	scene(scene),
@@ -31,3 +57,4 @@ void DirectX::GameObject::Destroy()
 	scene->SetIsCeanUp(true);
 	IsDestroy = true;
 }
+

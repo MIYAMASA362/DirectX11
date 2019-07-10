@@ -87,6 +87,18 @@ void DirectX::SceneManager::RunActiveScene(Component::Message message)
 		gameObject->RunComponent(message);
 }
 
+void DirectX::SceneManager::OnTriggerUpdate()
+{
+	if (pActiveScene.expired()) return;
+	for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex){
+		
+	}
+}
+
+void DirectX::SceneManager::OnCollisionUpdate()
+{
+}
+
 void DirectX::SceneManager::DebugGUI_ActiveScene()
 {
 	if (pActiveScene.expired()) return;

@@ -53,14 +53,13 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
-	
+	SceneManager::RunActiveScene(Component::FixedUpdate);
 }
 
 void CManager::Render(void)
 {
 	SceneManager::RunActiveScene(Component::Render);
 }
-
 
 void CManager::Uninit()
 {

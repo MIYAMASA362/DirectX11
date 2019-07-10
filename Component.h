@@ -1,5 +1,7 @@
 #pragma once
 
+#include<typeinfo>
+
 namespace DirectX
 {
 	class GameObject;
@@ -13,7 +15,7 @@ namespace DirectX
 	+ OnComponent()
 	+ SendBehaviourMessage(Message message)
 	*/
-	class Component:private Object
+	class Component:public Object
 	{
 		friend GameObject;
 	public:
@@ -21,8 +23,9 @@ namespace DirectX
 		{
 			Initialize,
 			Update,
+			FixedUpdate,
 			Render,
-			Finalize
+			Finalize,
 		};
 	private:
 		const int priority;
@@ -32,7 +35,7 @@ namespace DirectX
 		std::weak_ptr<GameObject> gameObject;
 		std::weak_ptr<Transform> transform;
 	public:
-		Component(int priority) :Object(typeid(this).name()),priority(priority){};
+		Component(int priority) :priority(priority){};
 		Component() :Component(0) {};
 		virtual ~Component() {};
 	public:

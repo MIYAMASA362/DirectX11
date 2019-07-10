@@ -10,9 +10,11 @@ namespace DirectX
 	class Object
 	{
 	protected:
-		const unsigned int id;
-		const std::string name;
+		
+		unsigned int id;
+		std::string name;
 	public:
+		Object() :name(typeid(*this).name()),id(0){};
 		Object(std::string name) :name(name),id(0){};
 		virtual ~Object() 
 		{ 
@@ -20,5 +22,8 @@ namespace DirectX
 		};
 	public:
 		virtual void OnDestroy() {};
+		std::string ObjectName(){
+			return name;
+		}
 	};
 }

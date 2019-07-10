@@ -362,12 +362,13 @@ int D3DApp::Run(unsigned int fps)
 	TimeManager::Create(fps);
 
 	CameraManager::Create();
-	CManager::Init();
+	CManager::Initialize();
 
 	MSG msg;
 	
 	while (1)
 	{
+		//Message
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -401,22 +402,11 @@ int D3DApp::Run(unsigned int fps)
 		// 描画処理
 		if(IsUpdate)
 		{
-			GUI::guiImGui::SetFrame();
-
-			char* buf = new char[10];
-			float f = 0.0f;
-
-			//ImGui
-			ImGui::Begin("Text");
-			ImGui::Text("deltaTime %f", Time::Get_DeltaTime());
-			ImGui::End();
-
-			delete buf;
-
-			//オブジェクトの行列変換
-			
-			//描画設定
 			pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
+			GUI::guiImGui::SetFrame();
+			TimeManager::DebugGUI_Time();
+			SceneManager::DebugGUI_ActiveScene();
+			//描画設定
 			CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
 			GUI::guiImGui::Render();
 			D3DApp::Renderer::End();

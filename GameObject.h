@@ -5,6 +5,23 @@ namespace DirectX
 	class GameObject;
 	class Scene;
 	class Camera;
+	class Collider;
+
+	namespace Manager {
+		//EntityManager
+		class GameObjectManager final
+		{
+		private:
+			static std::shared_ptr<GameObjectManager> pInstance;
+			std::list<std::shared_ptr<GameObject>> pIndex;
+		private:
+			GameObjectManager();
+			~GameObjectManager();
+		public:
+			void Create();
+			void Destry();
+		};
+	}
 
 	//ゲームオブジェクト :Entity
 	class GameObject final:public Object
@@ -27,6 +44,17 @@ namespace DirectX
 		GameObject(std::string name,Scene* scene) : GameObject(name, scene, TagName::Default) {};
 		virtual ~GameObject();
 	//--- Method ----------------------------------------------------
+	private:
+		//Componentにメッセージを走らせる
+		void RunComponent(Component::Message message)
+		{
+			for(auto component:Components){
+				if (!component->GetEnable())return;
+				component->gameObject = self;
+				component->transform = transform;
+				component->SendBehaviourMessage(message);
+			}
+		}
 	public:
 		bool CompareTag(TagName tag) 
 		{
@@ -67,7 +95,6 @@ namespace DirectX
 			return std::weak_ptr<Type>();
 		}
 		//削除処理
-		void Destroy()
-			;
+		void Destroy();
 	};
 }

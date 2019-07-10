@@ -36,15 +36,17 @@ public:
 			pModel->transform.get()->localScale(Vector3::one()*2.0f);
 			pModel->AddComponent<MikuMove>();
 			pModel->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
+
 			{
 				auto pChild = this->AddSceneObject("ChildMiku");
 				pChild->AddComponent<KeyMove>()->parent = pModel;
 				pChild->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
-				//pChild->transform->SetParent(pModel);
-				pChild->transform->position(Vector3::up()*2.0f);
+				pChild->transform->position(Vector3::forward()*2.0f + Vector3::up());
 				pChild->transform->rotation(Vector3::zero());
-				pChild->transform->localScale(Vector3::one()*2.0f);
+				pChild->transform->localScale(Vector3::one() * 2.0f);
 			}
 		}
+
+		
 	};
 };

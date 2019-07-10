@@ -30,6 +30,8 @@ namespace DirectX
 		};
 		static Scene* GetScene(std::string SceneName);
 		static void RunActiveScene(Component::Message message);
+		static void OnTriggerUpdate();
+		static void OnCollisionUpdate();
 		static void DebugGUI_ActiveScene();
 	public:
 		static void CleanUp();
