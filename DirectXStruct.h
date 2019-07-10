@@ -315,14 +315,49 @@ namespace DirectX
 			float dot = tagQuaternion::Dot(q1,q2);
 			return Mathf::IsEqualUsingDot(dot) ? 0.0f : Mathf::aCosf(min(abs(dot),1.0f)) * 2.0f * Mathf::Rad2Deg;
 		};
-		//Quaternion ToEulerAngle(ñ¢êÑèß)
+		//Quaternion ToEulerAngle
 		static tagVector3 ToEulerAngles(tagQuaternion q) {
-			XMMATRIX matrix = tagQuaternion::ToMatrix(q);
-			return tagVector3(
-				atan2f(matrix.r[2].m128_f32[1], matrix.r[2].m128_f32[2]),
-				asinf(-matrix.r[2].m128_f32[0]),
-				atan2f(matrix.r[1].m128_f32[0],matrix.r[0].m128_f32[0])
-			);
+			float xx = q.x * q.x;
+			float yy = q.y * q.y;
+			float zz = q.z * q.z;
+			float ww = q.w * q.w;
+
+			float xy = q.x * q.y;
+			float xz = q.x * q.z;
+			float yz = q.y * q.z;
+			float wx = q.w * q.x;
+			float wy = q.w * q.y;
+			float wz = q.w * q.z;
+
+			float m00 = 1.0f - (2.0f * yy) - (2.0f * zz);
+			float m01 = (2.0f * xy) + (2.0f * wz);
+			float m10 = (2.0f + xy) - (2.0f * wz);
+			float m11 = 1.0f - (2.0f * xx) - (2.0f * zz);
+			float m20 = (2.0f * xz) + (2.0f * wy);
+			float m21 = (2.0f * yz) - (2.0f * wx);
+			float m22 = 1.0f - (2.0f * xx) - (2.0f * yy);
+
+			tagVector3 euler;
+			if (1.0f  - Mathf::kEpsilon < m10 && m10 <1.0f + Mathf::kEpsilon) {
+				euler.x = -Mathf::PI_2;
+				euler.y = 0.0f;
+				euler.z = Mathf::aTan2f(m10,m00);
+			}
+			else if (-1.0f - Mathf::kEpsilon < m21 && m21 < -1.0f - Mathf::kEpsilon) {
+				euler.x = -Mathf::PI_2;
+				euler.y = 0.0f;
+				euler.z = Mathf::aTan2f(m10,m00);
+			}
+			else{
+				euler.x = Mathf::aSinf(-m21);
+				euler.y = Mathf::aTan2f(m20,m22);
+				euler.z = Mathf::aTan2f(m01,m11);
+			}
+
+			euler.x *= Mathf::Rad2Deg;
+			euler.y *= Mathf::Rad2Deg;
+			euler.z *= Mathf::Rad2Deg;
+			return euler;
 		};
 		//Quaternion Identity
 		static tagQuaternion Identity() {
@@ -519,6 +554,65 @@ namespace DirectX
 		{
 			float angle = Mathf::aTan2f(lookAt.x, lookAt.z);
 			return Quaternion::AngleAxisToRadian(angle,up);
+		}
+		static tagQuaternion QuaternionLookRotation(tagVector3 forward,tagVector3 up)
+		{
+			tagVector3 vector  = tagVector3::Normalize(forward);
+			tagVector3 vector2 = tagVector3::Normalize(tagVector3::Cross(up,vector));
+			tagVector3 vector3 = tagVector3::Cross(vector, vector2);
+			
+			float m00 = vector2.x;
+			float m01 = vector2.y;
+			float m02 = vector2.z;
+
+			float m10 = vector3.x;
+			float m11 = vector3.y;
+			float m12 = vector3.z;
+
+			float m20 = vector.x;
+			float m21 = vector.y;
+			float m22 = vector.z;
+
+			float num8 = (m00 + m11) + m22;
+			tagQuaternion q;
+			if (num8 > 0.0f) {
+				float num = sqrtf(num8 + 1);
+				q.w = num * 0.5f;
+				num = 0.5f / num;
+				q.x = (m12 - m21)*num;
+				q.y = (m20 - m02)*num;
+				q.z = (m01 - m10)*num;
+				return q;
+			}
+			if((m00 >= m11) && (m00 >= m22)){
+				float num7 = sqrtf((1.0f+m00) - m11-m22);
+				float num4 = 0.5f / num7;
+				q.x = 0.5f * num7;
+				q.y = (m01 + m10) * num4;
+				q.z = (m02 + m20) * num4;
+				q.w = (m11 - m21) * num4;
+				return q;
+			}
+			if(m11 > m22){
+				float num6 = sqrtf((1.0f + m11) - m00-m22);
+				float num3 = 0.5f / num6;
+				q.x = (m10 + m01) * num3;
+				q.y = 0.5f * num6;
+				q.z = (m21 + m12) * num3;
+				q.w = (m20 - m02) * num3;
+				return q;
+			}
+			float num5 = sqrtf((1.0f + m22) - m00 - m11);
+			float num2 = 0.5f / num5;
+			q.x = (m20 + m02) * num2;
+			q.y = (m21 + m11) * num2;
+			q.z = 0.5f* num5;
+			q.w = (m01 - m10) *num2;
+
+			if (isnan(q.x) || (isnan(q.y) || isnan(q.z) || isnan(q.w)))
+				q = Quaternion::Identity();
+
+			return q;
 		}
 
 		float length() {
