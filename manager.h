@@ -4,7 +4,7 @@ class CManager
 {
 
 public:
-	static void Init();
+	static void Initialize();
 	static void Uninit();
 	static void Update();
 	static void FixedUpdate();

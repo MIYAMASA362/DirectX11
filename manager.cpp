@@ -2,6 +2,7 @@
 #include"main.h"
 
 //System
+#include"GUI_ImGui.h"
 #include"manager.h"
 #include"DirectXStruct.h"
 #include"DirectX.h"
@@ -33,7 +34,7 @@
 
 CModel* pModel;
 
-void CManager::Init()
+void CManager::Initialize()
 {
 	Input::Init();
 
