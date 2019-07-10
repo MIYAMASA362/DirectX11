@@ -2,7 +2,9 @@
 #include<string>
 #include"main.h"
 
+#include"GUI_ImGui.h"
 #include"DirectXStruct.h"
+#include"DirectX.h"
 #include"Object.h"
 #include"Component.h"
 #include"Transform.h"
@@ -80,14 +82,41 @@ Scene* SceneManager::GetScene(std::string SceneNamae)
 
 void DirectX::SceneManager::RunActiveScene(Component::Message message)
 {
-	if (!pActiveScene.expired())
-		for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
-			for (std::shared_ptr<Component> component : gameObject->Components) {
-				if (!component->GetEnable()) continue;
-				component->gameObject = gameObject;
-				component->transform = gameObject->transform;
-				component->SendBehaviourMessage(message);
+	if (pActiveScene.expired()) return;
+	for (std::shared_ptr<GameObject> gameObject : pActiveScene.lock()->GameObjectIndex)
+		gameObject->RunComponent(message);
+}
+
+void DirectX::SceneManager::DebugGUI_ActiveScene()
+{
+	if (pActiveScene.expired()) return;
+	
+	std::string label = "Scene:";
+	label += pActiveScene.lock()->name;
+	ImGui::Begin(label.c_str());
+	
+	for(auto gameObject : pActiveScene.lock()->GameObjectIndex)
+	{
+		ImGui::SetNextTreeNodeOpen(false,ImGuiCond_Once);
+		if(ImGui::TreeNode(gameObject->name.c_str())){
+			Vector3 position = gameObject->transform.get()->position();
+			Vector3 rotation = Quaternion::ToEulerAngles(gameObject->transform.get()->rotation());
+			Quaternion q = gameObject->transform.get()->rotation();
+			Vector3 scale = gameObject->transform.get()->scale();
+			ImGui::InputFloat3("Position",&position.x);
+			ImGui::InputFloat3("Rotation",&rotation.x);
+			ImGui::InputFloat3("Scale",&scale.x);
+
+			if(ImGui::TreeNode("Component")){
+				for(auto component : gameObject->Components){
+					ImGui::Text(component->ObjectName().c_str());
+				}
+				ImGui::TreePop();
 			}
+			ImGui::TreePop();
+		}
+	}
+	ImGui::End();
 }
 
 void DirectX::SceneManager::CleanUp()
