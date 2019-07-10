@@ -12,7 +12,7 @@
 
 //Constrcutor
 Transform::Transform(Vector3 position, Quaternion rotation, Vector3 scale)
-	:m_Position(position), m_Rotation(rotation), m_Scale(scale){}
+	:m_Position(position), m_Rotation(rotation), m_Scale(scale) {}
 Transform::Transform(Vector3 position,Vector3 rotation,Vector3 scale)
 	:Transform(position,Quaternion::Euler(rotation),scale){}
 Transform::Transform()

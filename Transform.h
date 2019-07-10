@@ -27,7 +27,7 @@ namespace DirectX
 		void detachParent()
 		{
 			Vector3 position = this->position();
-			Vector3 scale = this->Scale();
+			Vector3 scale = this->scale();
 			Quaternion q = Quaternion::AtMatrix(this->MatrixQuaternion());
 			pParent.reset();
 
@@ -56,21 +56,29 @@ namespace DirectX
 					child.lock()->WorldMatrix();
 		}
 	public:
-		Vector3 position()		{ return this->WorldMatrix().r[3]; }
+		Vector3 position()		{
+			Vector3 position = this->WorldMatrix().r[3];
+			return position;
+		}
 		Quaternion rotation()	{
 			Quaternion q = this->m_Rotation;
 			if (!pParent.expired())
 				q *= pParent.lock()->rotation();
 			return q;
 		}
-		Vector3 Scale()			{ return pParent.expired() ? m_Scale : m_Scale *= pParent.lock()->Scale();}
+		Vector3 scale()			{
+			Vector3 scale = this->m_Scale;
+			if (!pParent.expired())
+				scale *= pParent.lock()->scale();
+			return scale;
+		}
 
 		Vector3 localPosition()		{ return m_Position; }
 		Quaternion localRotation()	{ return m_Rotation; }
 		Vector3 localScale()		{ return m_Scale; }
 	public:
 		void position(Vector3 position)	{
-			this->m_Position += position - this->position();			
+			this->m_Position += position - this->position();
 		}
 		void rotation(Quaternion rotation)	{
 			if (!pParent.expired())
@@ -131,7 +139,7 @@ namespace DirectX
 		{
 			Vector3 mPos = this->position();
 			Vector3 pPos = target.lock()->position();
-			this->m_Rotation = Quaternion::LookRotation(target.lock()->position() - this->position(),this->up());
+			this->m_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos,Vector3::up());
 			if (!pParent.expired())
 				this->m_Rotation *= pParent.lock()->rotation().conjugate();
 		}
