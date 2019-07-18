@@ -17,16 +17,16 @@ public:
 		if (Input::GetKeyPress('D'))
 			this->transform.lock()->rotation(this->transform.lock()->rotation() * Quaternion::Euler(Vector3::up()));
 		if (Input::GetKeyTrigger(VK_SPACE))
-			if (IsBool)
-			{
-				this->transform.lock()->SetParent(parent); IsBool = false;
+			if (IsBool) {
+				this->transform.lock()->SetParent(parent);
+				IsBool = false;
 			}
-			else
-			{
-				this->transform.lock()->DetachParent(); IsBool = true;
+			else {
+				this->transform.lock()->DetachParent();
+				IsBool = true;
 			}
 
-		this->transform.lock()->LookAt(parent->transform);
+			this->transform.lock()->LookAt(parent->transform);
 	}
 };
 
