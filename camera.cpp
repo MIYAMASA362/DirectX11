@@ -180,3 +180,9 @@ void DirectX::Camera::SetPriority(int priority)
 	this->priority = priority;
 	CameraManager::IndexSort(this);
 }
+
+void DirectX::Camera::Finalize()
+{
+	CameraManager::RemoveCamera(this);
+}
+

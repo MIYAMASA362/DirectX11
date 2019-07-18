@@ -21,7 +21,7 @@ namespace DirectX
 		static void Release();
 	};
 
-	class Camera final :public Component
+	class Camera final :public Behaviour
 	{
 		friend class CameraManager;
 	private:
@@ -33,11 +33,10 @@ namespace DirectX
 	private:
 		void Run();	//•`‰æ
 	public:
-		//Component
 		void OnComponent() override { CameraManager::IndexSort(this); };
 		void OnDestroy() override;
-		//Method
 		void SetViewPort(float x, float y,float w, float h);
 		void SetPriority(int priority);
+		void Finalize();
 	};
 }
