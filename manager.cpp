@@ -2,37 +2,15 @@
 #include"main.h"
 
 //System
-#include"GUI_ImGui.h"
-#include"manager.h"
-#include"DirectXStruct.h"
-#include"DirectX.h"
-#include<DirectXCollision.h>
-#include"Time.h"
-#include"Object.h"
-#include"Component.h"
-#include"Behaviour.h"
-#include"Transform.h"
-#include"Tag.h"
-#include"Renderer.h"
-#include"GameObject.h"
-#include"SceneManager.h"
-#include"Input.h"
-#include"Renderer.h"
-#include"Collision.h"
+#include"SystemAssets.h"
 
-//Objects
-#include"camera.h"
-#include"Polygon.h"
-#include"field.h"
-#include"model.h"
-
-#include"RemoveObject.h"
-#include"CameraFollow.h"
+//Components
+#include"ComponentAssets.h"
 
 //Scene
-#include"TestScene.h"
+#include"SceneAssets.h"
 
-CModel* pModel;
+static Audio* audio;
 
 void CManager::Initialize()
 {
@@ -40,9 +18,13 @@ void CManager::Initialize()
 
 	SceneManager::Create();
 	SceneManager::CreateScene<TestScene>();
-	SceneManager::LoadScene("TestScene");
+	SceneManager::CreateScene<TestScene2>();
+	SceneManager::CreateScene<TestScene3>();
+	SceneManager::LoadScene("TestScene2");
 
-	SceneManager::RunActiveScene(Component::Initialize);
+	AudioManager::Create();
+	audio = AudioManager::LoadAudio("asset/Sound/Experimental_Model_long .wav");
+	audio->Play(true);
 }
 
 void CManager::Update()
@@ -54,6 +36,8 @@ void CManager::Update()
 void CManager::FixedUpdate()
 {
 	SceneManager::RunActiveScene(Component::FixedUpdate);
+	SceneManager::OnTriggerUpdate();
+	SceneManager::OnCollisionUpdate();
 }
 
 void CManager::Render(void)
@@ -63,7 +47,7 @@ void CManager::Render(void)
 
 void CManager::Uninit()
 {
-	Input::Uninit();
-	SceneManager::RunActiveScene(Component::Finalize);
+	AudioManager::Destroy();
 	SceneManager::Destroy();
+	Input::Uninit();
 }

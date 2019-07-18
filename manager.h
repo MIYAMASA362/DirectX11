@@ -2,7 +2,6 @@
 
 class CManager
 {
-
 public:
 	static void Initialize();
 	static void Uninit();
