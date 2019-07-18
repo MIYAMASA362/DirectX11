@@ -1,5 +1,6 @@
 #pragma once
 
+#include<typeinfo>
 #include"main.h"
 #include"DirectXStruct.h"
 #include"Object.h"
@@ -20,11 +21,15 @@ namespace DirectX
 	public:
 		Vector3 center;			//’†SˆÊ’u
 	public:
+		Collider() {};
+		virtual ~Collider() {};
 		void SetTrigger(bool isTrigger)
 		{
 			this->IsTrigger = isTrigger;
 		}
-
+		bool GetTrigger(){
+			return IsTrigger;
+		}
 	public:
 		//Collision
 		virtual void OnCollisionEnter(std::weak_ptr<Collision> other) {};
@@ -35,26 +40,28 @@ namespace DirectX
 		virtual void OnTriggerEnter(std::weak_ptr<Collider> other){};
 		virtual void OnTriggerStay(std::weak_ptr<Collider>other) {};
 		virtual void OnTriggerExit(std::weak_ptr<Collider>other) {};
+	public:
+		static void OnTrigger(std::weak_ptr<Collider> trigger1,std::weak_ptr<Collider> trigger2);
 	};
 
 	//Box
-	class BoxCollier:public Collider
+	class BoxCollier final:public Collider
 	{
 	public:
 		Vector3 scale;			//‘å‚«‚³
 	public:
 		BoxCollier() = default;
-		virtual ~BoxCollier() = default;
+		virtual ~BoxCollier() {};
 	};
 
 	//Sphere
-	class SphereCollider:public Collider
+	class SphereCollider final:public Collider
 	{
 	public:
 		float raidus;			//”¼Œa
 	public:
 		SphereCollider() = default;
-		virtual ~SphereCollider() = default;
+		virtual ~SphereCollider() {};
 	};
 
 	//Collision
