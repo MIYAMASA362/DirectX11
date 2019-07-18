@@ -44,5 +44,7 @@ public:
 public:
 	void LoadObj( const char *FileName, MODEL *Model );
 	void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned short *MaterialNum );
+public:
 	void Load( const char *FileName );
+	void UnLoad();
 };

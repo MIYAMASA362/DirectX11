@@ -111,6 +111,14 @@ void CModel::Load( const char *FileName )
 
 }
 
+void CModel::UnLoad()
+{
+	m_VertexBuffer->Release();
+	m_IndexBuffer->Release();
+
+	delete[] m_SubsetArray;
+}
+
 
 //ÉÇÉfÉãì«çû////////////////////////////////////////////
 void CModel::LoadObj( const char *FileName, MODEL *Model )
