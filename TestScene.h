@@ -7,17 +7,19 @@ class DirectX::GameObject;
 class TestScene final :public Scene
 {
 public:
-	TestScene():Scene("TestScene")
+	TestScene() :Scene("TestScene") {};
+	void Load() override
 	{
 		//pCamera
 		{
 			GameObject* pCamera;
-			pCamera = this->AddSceneObject("MainCamera",TagName::MainCamera);
-			pCamera->transform.get()->position(Vector3(0.0f, 10.0f, -10.0f));
-			pCamera->transform.get()->rotation(Quaternion::AngleAxisToEuler(30.0f, Vector3::right()));
+			pCamera = this->AddSceneObject("MainCamera", TagName::MainCamera);
+			pCamera->transform.get()->position(Vector3(0.0f, 2.0f, -10.0f));
+			//pCamera->transform.get()->rotation(Quaternion::AngleAxisToEuler(30.0f, Vector3::right()));
 			pCamera->transform.get()->localScale(Vector3::one());
 			Camera* camera = pCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
+			pCamera->AddComponent<CameraMouse>();
 		}
 		//pWallField
 		{
@@ -36,6 +38,7 @@ public:
 			pModel->transform.get()->localScale(Vector3::one()*2.0f);
 			pModel->AddComponent<MikuMove>();
 			pModel->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("asset/miku_01.obj");
+			pModel->AddComponent<BoxCollier>();
 
 			{
 				auto pChild = this->AddSceneObject("ChildMiku");
@@ -46,7 +49,12 @@ public:
 				pChild->transform->localScale(Vector3::one() * 2.0f);
 			}
 		}
+		//SceneChange
+		{
+			auto SceneChanger = this->AddSceneObject("SceneChanger");
+			auto sceneChange = SceneChanger->AddComponent<SceneChange>();
+			sceneChange->nextScene = "TestScene3";
+		}
 
-		
-	};
+	}
 };
