@@ -1,27 +1,12 @@
 #pragma once
 
+#include"Collision.h"
 namespace DirectX
 {
 	class GameObject;
 	class Scene;
 	class Camera;
 	class Collider;
-
-	namespace Manager {
-		//EntityManager
-		class GameObjectManager final
-		{
-		private:
-			static std::shared_ptr<GameObjectManager> pInstance;
-			std::list<std::shared_ptr<GameObject>> pIndex;
-		private:
-			GameObjectManager();
-			~GameObjectManager();
-		public:
-			void Create();
-			void Destry();
-		};
-	}
 
 	//ゲームオブジェクト :Entity
 	class GameObject final:public Object
@@ -31,13 +16,18 @@ namespace DirectX
 		friend class Scene;
 	private:
 		std::weak_ptr<GameObject> self;
-		std::list<std::shared_ptr<Component>> Components;
 		Scene* const scene;	//所属Scene
 		const Tag tag;
 		bool IsDestroy;
 		bool IsActive;
+	//--- Component --------------------------------
+	private:
+		std::list<std::shared_ptr<Component>> Components;
 	public:
 		std::shared_ptr<Transform> transform;
+		std::list<std::shared_ptr<Component>> colliders;
+		std::shared_ptr<Component> camera;
+		std::shared_ptr<Component> meshRenderer;
 	//--- Constructor/Destructor ------------------------------------
 	public:
 		GameObject(std::string name,Scene* scene, TagName tagName);
@@ -68,7 +58,9 @@ namespace DirectX
 		{
 			this->IsActive = IsActive;
 		};
-		bool GetActive() { return IsActive; }
+		bool GetActive() { 
+			return IsActive;
+		}
 	//--- Component -------------------------------------------------
 	public:
 		//AddComponent
@@ -85,8 +77,20 @@ namespace DirectX
 			component->gameObject = self;
 			component->transform = self.lock()->transform;
 			component->OnComponent();
+
+			//Camera
+			if (Camera* camera = dynamic_cast<Camera*>(component.get()))
+				this->camera = component;
+			//Collider
+			if (Collider* collider = dynamic_cast<Collider*>(component.get()))
+				this->colliders.push_back(component);
+			//MeshRenderer
+			if (MeshRender* meshRenderer = dynamic_cast<MeshRender*>(component.get()))
+				this->meshRenderer = component;
+
 			return static_cast<Type*>(component.get());
 		};
+
 		//GetComponent
 		template<typename Type> std::weak_ptr<Type> GetComponent()
 		{
@@ -94,6 +98,8 @@ namespace DirectX
 				if (typeid(*component) == typeid(Type)) return std::static_pointer_cast<Type>(component);
 			return std::weak_ptr<Type>();
 		}
+
+
 		//削除処理
 		void Destroy();
 	};
