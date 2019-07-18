@@ -17,7 +17,7 @@ namespace DirectX
 		unsigned int ScreenHeight;
 		const std::string path = "";	//Applicaion Path
 	private:
-		HWND hWnd;
+		System::Window* window;
 
 		D3D_FEATURE_LEVEL featureLevel;
 
@@ -46,6 +46,7 @@ namespace DirectX
 		static ID3D11Device* GetDevice();
 		static ID3D11DeviceContext* GetDeviceContext();
 		static HWND GetWindow();
+		static HINSTANCE GethInstance();
 		static unsigned int GetScreenWidth();
 		static unsigned int GetScreenHeight();
 	public:

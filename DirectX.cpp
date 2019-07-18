@@ -37,11 +37,12 @@ HRESULT D3DApp::Create(System::Window* pAppWind)
 	HRESULT hr = E_FAIL;
 	if (pInstance) return hr;
 	pInstance = new D3DApp();
+	pInstance->window = pAppWind;
 
-	pInstance->hWnd = pAppWind->Get_Window();
+	pInstance->window = pAppWind;
 
 	RECT rect;
-	GetClientRect(pInstance->hWnd,&rect);
+	GetClientRect(pInstance->window->Get_Window(),&rect);
 	pInstance->ScreenWidth = rect.right - rect.left;
 	pInstance->ScreenHeight = rect.bottom - rect.top;
 
@@ -55,7 +56,7 @@ HRESULT D3DApp::Create(System::Window* pAppWind)
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = pInstance->hWnd;
+	sd.OutputWindow = pInstance->window->Get_Window();
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
@@ -340,7 +341,12 @@ ID3D11DeviceContext* D3DApp::GetDeviceContext()
 
 HWND D3DApp::GetWindow()
 {
-	return pInstance->hWnd;
+	return pInstance->window->Get_Window();
+}
+
+HINSTANCE DirectX::D3DApp::GethInstance()
+{
+	return pInstance->window->Get_hInstance();
 }
 
 unsigned int D3DApp::GetScreenWidth()
@@ -396,21 +402,30 @@ int D3DApp::Run(unsigned int fps)
 		//一定更新
 		if(IsFixedUpdate) CManager::FixedUpdate();
 
-		//Destroyされた物を削除
-		if (IsFixedUpdate || IsUpdate) SceneManager::CleanUp();
+		//Destroy宣言された物を削除
+		if (IsFixedUpdate || IsUpdate)SceneManager::CleanUp();
 
 		// 描画処理
 		if(IsUpdate)
 		{
+			//描画開始
 			pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, Color::gray());
+			//ImGUIのフレーム設定
 			GUI::guiImGui::SetFrame();
+			//タイマーのデバッグ表示
 			TimeManager::DebugGUI_Time();
+			//アクティブなSceneのデバッグ表示
 			SceneManager::DebugGUI_ActiveScene();
 			//描画設定
 			CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
+			//ImGuiの描画
 			GUI::guiImGui::Render();
+			//描画終了
 			D3DApp::Renderer::End();
 		}
+
+		//ActiveSceneの切り替え
+		if (IsFixedUpdate || IsUpdate) SceneManager::ChangeScene();
 	}
 
 	CManager::Uninit();
