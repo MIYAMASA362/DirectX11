@@ -73,12 +73,6 @@ HRESULT Window::Destroy()
 	return S_OK;
 }
 
-
-HWND Window::Get_Window()
-{
-	return this->hWnd;
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
 	switch(uMsg)
@@ -152,6 +146,9 @@ HRESULT System::ImGui_Window::Create(HINSTANCE hInstance, LPSTR lpClassName, LPS
 
 	ShowWindow(this->hWnd, SW_SHOW);
 	UpdateWindow(this->hWnd);
+
+	this->hInstance = hInstance;
+
 	return S_OK;
 }
 

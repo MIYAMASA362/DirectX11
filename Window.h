@@ -7,6 +7,7 @@ namespace System
 	protected:
 		HWND hWnd;
 		WNDCLASSEX WndClass;
+		HINSTANCE hInstance;
 	public:
 		Window();
 		~Window();
@@ -14,7 +15,8 @@ namespace System
 		virtual HRESULT Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style);
 		HRESULT Destroy();
 	public:
-		HWND Get_Window();
+		HWND Get_Window() { return hWnd; }
+		HINSTANCE Get_hInstance() { return hInstance; }
 	};
 	
 #ifdef GUI_ImGui_H
