@@ -81,7 +81,7 @@ void main(
 
 	outDiffuse = inDiffuse * Material.Diffuse * light * Light.Diffuse;
 	outDiffuse += inDiffuse * Material.Ambient * Light.Ambient;
-	outDiffuse.a = 1.0;
-
+	//outDiffuse.a = 1.0;
+	outDiffuse.a = inDiffuse * Material.Diffuse.a;
 }
 
