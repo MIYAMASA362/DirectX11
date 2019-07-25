@@ -40,13 +40,16 @@ using namespace DirectX;
 
 D3DApp* D3DApp::pInstance = NULL;
 
-HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance)
+HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 {
 	HRESULT hr = E_FAIL;
 	if (pInstance) return hr;
+
 	pInstance = new D3DApp();
 	pInstance->hWnd = hWnd;
 	pInstance->hInstance = hInstance;
+	pInstance->fps = fps;
+
 
 	RECT rect;
 	GetClientRect(hWnd,&rect);
@@ -366,20 +369,24 @@ unsigned int D3DApp::GetScreenHeight()
 	return pInstance->ScreenHeight;
 }
 
-
-int D3DApp::Run(unsigned int fps)
+unsigned int DirectX::D3DApp::GetFps()
 {
+	return pInstance->fps;
+}
+
+
+int D3DApp::Run()
+{
+	MSG msg;
+
 	//ImGuiの設定
 	GUI::guiImGui::Create(pInstance->hWnd,pInstance->D3DDevice,pInstance->ImmediateContext);
 	
 	//フレームカウント初期化
-	TimeManager::Create(fps);
-	CameraManager::Create();
+	TimeManager::Create(pInstance->fps);
 
 	CManager::Initialize();
 
-	MSG msg;
-	
 	while (1)
 	{
 		//Message
@@ -437,9 +444,8 @@ int D3DApp::Run(unsigned int fps)
 
 	CManager::Uninit();
 	TimeManager::Destroy();
-	CameraManager::Destroy();
 
-	//GUI::guiImGui::Destroy();
+	GUI::guiImGui::Destroy();
 
 	D3DApp::Destroy();
 	
@@ -531,7 +537,7 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void D3DApp::Renderer::SetTexture(CTexture* Texture)
+void DirectX::D3DApp::Renderer::SetTexture(Texture * Texture)
 {
 	ID3D11ShaderResourceView* srv[1] = { Texture->GetShaderResourceView() };
 	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);

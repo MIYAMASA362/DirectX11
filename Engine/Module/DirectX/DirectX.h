@@ -6,8 +6,11 @@ namespace System
 }
 class CTexture;
 
+
 namespace DirectX
 {
+	class Texture;
+
 	class D3DApp
 	{
 	private:
@@ -16,6 +19,7 @@ namespace DirectX
 		unsigned int ScreenWidth;
 		unsigned int ScreenHeight;
 		const std::string path = "";	//Applicaion Path
+		unsigned int fps;
 	private:
 		System::Window* window;
 		HWND hWnd;
@@ -41,8 +45,11 @@ namespace DirectX
 
 		ID3D11DepthStencilState* DepthStateEnable;
 		ID3D11DepthStencilState* DepthStateDisable;
+	private:
+		D3DApp() = default;
+		~D3DApp() = default;
 	public:
-		static HRESULT Create(HWND hWnd,HINSTANCE hInstance);
+		static HRESULT Create(HWND hWnd,HINSTANCE hInstance,unsigned int fps);
 		static void Destroy();
 	public:
 		static ID3D11Device* GetDevice();
@@ -51,8 +58,9 @@ namespace DirectX
 		static HINSTANCE GethInstance();
 		static unsigned int GetScreenWidth();
 		static unsigned int GetScreenHeight();
+		static unsigned int GetFps();
 	public:
-		static int Run(unsigned int fps);
+		static int Run();
 	public:
 		class Renderer
 		{
@@ -74,7 +82,7 @@ namespace DirectX
 			static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
 			static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
-			static void SetTexture(CTexture* Texture);
+			static void SetTexture(Texture* Texture);
 			static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
 		};
 	};
