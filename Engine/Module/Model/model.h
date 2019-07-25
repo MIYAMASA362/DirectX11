@@ -28,22 +28,20 @@ struct MODEL
 	unsigned short	SubsetNum;
 };
 
-class CModel:public Mesh
+namespace DirectX
 {
-private:
-	ID3D11Buffer*	m_VertexBuffer = nullptr;
-	ID3D11Buffer*	m_IndexBuffer = nullptr;
+	//Model
+	class Model:public Mesh
+	{
+		friend class ModelManager;
+	private:
+		ID3D11Buffer* VertexBuffer = nullptr;
+		ID3D11Buffer* IndexBuffer = nullptr;
 
-	DX11_SUBSET*	m_SubsetArray = nullptr;
-	unsigned short	m_SubsetNum;
-public:
-	virtual ~CModel();
-public:
-	void Render(XMMATRIX worldMatrix) override;
-public:
-	void LoadObj( const char *FileName, MODEL *Model );
-	void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned short *MaterialNum );
-public:
-	void Load( const char *FileName );
-	void UnLoad();
-};
+		DX11_SUBSET* SubsetArray = nullptr;
+		unsigned short SubsetNum;
+	public:
+		void Render(XMMATRIX worldMatrix) override;
+		void GetAsset(std::string name);
+	};
+}

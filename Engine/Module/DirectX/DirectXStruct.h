@@ -740,44 +740,12 @@ namespace DirectX
 
 	}Color, COLOR;
 
-
-	//tagMaterial
-	typedef struct tagMaterial
-	{
-		Color Ambient;
-		Color Diffuse;
-		Color Specular;
-		Color Emission;
-		float Shininess;
-		float Dummy[3];	//16bit境界用
-
-		tagMaterial() {};
-	}Material, MATERIAL;
-
-
 	//tagLight
 	typedef struct tagLight {
 		Vector4 Direction;
 		Color Diffuse;
 		Color Ambient;
 	}Light, LIGHT;
-
-
-	//Model用のマテリアル
-	typedef struct tagDX11_MODEL_MATERIAL
-	{
-		Material Material;
-		CTexture* Texture;
-	}DX11_MODEL_MATERIAL;
-
-
-	//SubSet
-	typedef struct tagDX11_SUBSET
-	{
-		unsigned short	StartIndex;
-		unsigned short	IndexNum;
-		DX11_MODEL_MATERIAL	Material;
-	}DX11_SUBSET;
-
-	
 }
+
+#include"Module\Material\Material.h"
