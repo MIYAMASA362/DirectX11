@@ -3,16 +3,21 @@
 struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
 
-class CTexture
+namespace DirectX
 {
-public:
-	void Load( const char *FileName );
-	void Unload();
-
-	ID3D11ShaderResourceView* GetShaderResourceView(){ return m_ShaderResourceView; }
-private:
-
-	ID3D11Texture2D*			m_Texture;
-	ID3D11ShaderResourceView*	m_ShaderResourceView;
-
-};
+	//Texture
+	class Texture
+	{
+		friend class TextureManager;
+	private:
+		ID3D11Texture2D* texture;
+		ID3D11ShaderResourceView* srv;
+	public:
+		Texture()= default;
+		~Texture();
+	public:
+		ID3D11Texture2D* GetTexture() { return this->texture; };
+		ID3D11ShaderResourceView* GetShaderResourceView() { return this->srv; };
+		void GetAsset(std::string name);
+	};
+}
