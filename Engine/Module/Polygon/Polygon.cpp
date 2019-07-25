@@ -43,14 +43,13 @@ void CPolygon::Initialize()
 	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 	
 	//テクスチャの読み込み
-	this->m_Texture = new CTexture();
-	this->m_Texture->Load("asset/k-on0664.tga");
+	this->m_Texture = new Texture();
+	this->m_Texture->GetAsset("k-on0664");
 }
 
 void CPolygon::Finalize()
 {
 	if (m_Texture) {
-		m_Texture->Unload();
 		delete m_Texture;
 	}
 	if (m_VertexBuffer){

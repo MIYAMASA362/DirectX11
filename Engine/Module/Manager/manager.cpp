@@ -6,30 +6,10 @@
 #include<d3d11.h>
 #include<DirectXMath.h>
 
-//DirectX
-#include"Module\DirectX\DirectXStruct.h"
-#include"Module\DirectX\DirectX.h"
+//Module
+#include"Module\Module.h"
 
 #include"manager.h"
-
-#include"../Audio/Audio.h"
-#include"../Input/Input.h"
-
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-
-#include"Module\Transform\Transform.h"
-#include"Module\Behaviour\Behaviour.h"
-#include"Module\Tag\Tag.h"
-#include"Module\GameObject\GameObject.h"
-
-//Component Module
-#include"Module\Renderer\Renderer.h"
-#include"Module\Field\field.h"
-#include"Module\Model\model.h"
-#include"Module\Camera\camera.h"
-#include"Module\Collision\Collision.h"
 
 //Project Component
 #include"../Project/CameraMouse.h"
@@ -45,21 +25,29 @@
 
 using namespace DirectX;
 
-static Audio* audio;
-
 void CManager::Initialize()
 {
+	//Input
 	Input::Init();
 
+	//Texture
+	TextureManager::LoadAsset(TextureAsset("field004","field004.tga"));
+	TextureManager::LoadAsset(TextureAsset("number","number.tga"));
+	TextureManager::LoadAsset(TextureAsset("k-on0664","k-on0664.tga"));
+
+	//Model
+	ModelManager::LoadAsset(ModelAsset("Miku","Miku","miku_01.obj"));
+
+	//Audio
+	AudioManager::CreateDevice();
+	AudioManager::LoadAsset(AudioAsset("Experimental","Experimental_Model_long .wav"));
+
+	//Scene
 	SceneManager::Create();
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();
 	SceneManager::LoadScene("TestScene2");
-
-	AudioManager::Create();
-	audio = AudioManager::LoadAudio("Asset/Sound/Experimental_Model_long .wav");
-	audio->Play(true);
 }
 
 void CManager::Update()
@@ -82,7 +70,11 @@ void CManager::Render(void)
 
 void CManager::Uninit()
 {
-	AudioManager::Destroy();
+	CameraManager::Release();
 	SceneManager::Destroy();
+	AudioManager::Release();
+	ModelManager::Release();
+	TextureManager::Release();
 	Input::Uninit();
 }
+

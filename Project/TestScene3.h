@@ -19,9 +19,14 @@ public:
 			Camera* camera = pCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
 		}
-		//Object
+		//pModel
 		{
-			auto gameObject = this->AddSceneObject("gameObject");
+			GameObject* pModel;
+			pModel = this->AddSceneObject("Miku");
+			pModel->transform.get()->position(Vector3::up()*2.0f);
+			pModel->transform.get()->localScale(Vector3::one()*2.0f);
+			pModel->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
+			pModel->AddComponent<BoxCollier>();
 		}
 		//SceneChange
 		{

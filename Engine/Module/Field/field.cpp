@@ -5,6 +5,7 @@
 #include<d3d11.h>
 
 #include"Module\Texture\texture.h"
+#include"Module\Texture\TextureManager.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -44,14 +45,13 @@ CField::CField()
 	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 
 	//テクスチャの読み込み
-	this->m_Texture = new CTexture();
-	this->m_Texture->Load("Asset/Texture/k-on0664.tga");
+	this->m_Texture = new Texture();
+	this->m_Texture->GetAsset("k-on0664");
 }
 
 CField::~CField()
 {
 	if (m_Texture) {
-		m_Texture->Unload();
 		delete m_Texture;
 	}
 	if (m_VertexBuffer) {
@@ -84,73 +84,65 @@ void CField::Render(XMMATRIX worldMatrix)
 
 CWallField::CWallField()
 {
-	D3D11_BUFFER_DESC bufferDesc;
-	D3D11_SUBRESOURCE_DATA subResourceData;
-
-	VERTEX_3D field[4] =
+	//Mesh設定
 	{
-		{ XMFLOAT3(1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
-	};
+		D3D11_BUFFER_DESC bufferDesc;
+		D3D11_SUBRESOURCE_DATA subResourceData;
 
-	//頂点バッファの生成
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(field) / sizeof(VERTEX_3D));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
+		VERTEX_3D field[4] =
+		{
+			{ XMFLOAT3(1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
+		};
 
-	ZeroMemory(&subResourceData, sizeof(subResourceData));
-	subResourceData.pSysMem = field;
+		//頂点バッファの生成
+		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(field) / sizeof(VERTEX_3D));
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.CPUAccessFlags = 0;
 
-	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
+		ZeroMemory(&subResourceData, sizeof(subResourceData));
+		subResourceData.pSysMem = field;
+
+		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
 
 
-	VERTEX_3D wall[4] =
+		VERTEX_3D wall[4] =
+		{
+			{ XMFLOAT3(1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
+		};
+
+		//頂点バッファの生成
+		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(wall) / sizeof(VERTEX_3D));
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.CPUAccessFlags = 0;
+
+		ZeroMemory(&subResourceData, sizeof(subResourceData));
+		subResourceData.pSysMem = wall;
+
+		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_WallVertexBuffer);
+	}
+
+	//Texture設定
 	{
-		{ XMFLOAT3(1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
-	};
-
-	//頂点バッファの生成
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(wall) / sizeof(VERTEX_3D));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-
-	ZeroMemory(&subResourceData, sizeof(subResourceData));
-	subResourceData.pSysMem = wall;
-
-	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_WallVertexBuffer);
-
-	//テクスチャの読み込み
-	this->m_FieldTexture = new CTexture();
-	this->m_FieldTexture->Load("Asset/Texture/field004.tga");
-
-	this->m_WallTexture = new CTexture();
-	this->m_WallTexture->Load("Asset/Texture/k-on0664.tga");
+		this->FieldTexture = new Texture();
+		this->WallTexture = new Texture();
+	}
 }
 
 CWallField::~CWallField()
 {
-	if(m_WallTexture)
-	{
-		m_WallTexture->Unload();
-		delete m_WallTexture;
-	}
 	if(m_WallVertexBuffer)
 	{
 		m_WallVertexBuffer->Release();
-	}
-
-	if (m_FieldTexture) {
-		m_FieldTexture->Unload();
-		delete m_FieldTexture;
 	}
 	if (m_FieldVertexBuffer) {
 		m_FieldVertexBuffer->Release();
@@ -165,7 +157,7 @@ void CWallField::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
-	D3DApp::Renderer::SetTexture(this->m_FieldTexture);
+	D3DApp::Renderer::SetTexture(this->FieldTexture);
 
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)　n:総数 i:どこから始めるか
@@ -180,7 +172,7 @@ void CWallField::Render(XMMATRIX worldMatrix)
 		XMMATRIX local = localScale* localPosition * localRotation;
 
 		D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
-		D3DApp::Renderer::SetTexture(this->m_WallTexture);
+		D3DApp::Renderer::SetTexture(this->WallTexture);
 
 		local = local * worldMatrix;
 

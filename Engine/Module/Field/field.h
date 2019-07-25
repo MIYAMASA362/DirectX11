@@ -2,12 +2,16 @@
 
 using namespace DirectX;
 struct ID3D11Buffer;
+namespace DirectX
+{
+	class Texture;
+}
 
 class CField:public Mesh
 {
 private:
 	ID3D11Buffer* m_VertexBuffer = NULL;
-	CTexture* m_Texture = NULL;
+	Texture* m_Texture = NULL;
 public:
 	CField();
 	virtual ~CField();
@@ -17,11 +21,11 @@ public:
 class CWallField:public Mesh
 {
 private:
-	ID3D11Buffer* m_FieldVertexBuffer = NULL;
-	CTexture* m_FieldTexture = NULL;
-
-	ID3D11Buffer* m_WallVertexBuffer = NULL;
-	CTexture* m_WallTexture = NULL;
+	ID3D11Buffer* m_FieldVertexBuffer = nullptr;
+	ID3D11Buffer* m_WallVertexBuffer = nullptr;
+public:
+	Texture* FieldTexture = nullptr;
+	Texture* WallTexture = nullptr;
 public:
 	CWallField();
 	~CWallField();

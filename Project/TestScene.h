@@ -5,10 +5,7 @@ class DirectX::GameObject;
 class TestScene final :public Scene
 {
 public:
-	TestScene():Scene("TestScene")
-	{
-	
-	};
+	TestScene():Scene("TestScene"){};
 	void Load() override
 	{
 		//pCamera
@@ -26,10 +23,16 @@ public:
 		{
 			GameObject* pWallField;
 			pWallField = this->AddSceneObject("WallField");
-			pWallField->AddComponent<MeshRender>()->SetMesh<CWallField>();
 			pWallField->transform.get()->position(Vector3::zero());
 			pWallField->transform.get()->rotation(Vector3::zero());
 			pWallField->transform.get()->localScale(Vector3::one()*50.0f);
+			//MeshÝ’è
+			{
+				auto field = pWallField->AddComponent<MeshRender>()->SetMesh<CWallField>();
+				field->FieldTexture->GetAsset("field004");
+				field->WallTexture->GetAsset("k-on0664");
+			}
+			
 		}
 		//pModel
 		{
@@ -38,13 +41,13 @@ public:
 			pModel->transform.get()->position(Vector3::up()*2.0f);
 			pModel->transform.get()->localScale(Vector3::one()*2.0f);
 			pModel->AddComponent<MikuMove>();
-			pModel->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("Asset/Model/miku_01.obj");
+			pModel->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
 			pModel->AddComponent<BoxCollier>();
 
 			{
 				auto pChild = this->AddSceneObject("ChildMiku");
 				pChild->AddComponent<KeyMove>()->parent = pModel;
-				pChild->AddComponent<MeshRender>()->SetMesh<CModel>()->Load("Asset/Model/miku_01.obj");
+				pChild->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
 				pChild->transform->position(Vector3::forward()*2.0f + Vector3::up());
 				pChild->transform->rotation(Vector3::zero());
 				pChild->transform->localScale(Vector3::one() * 2.0f);

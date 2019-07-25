@@ -19,12 +19,6 @@ public:
 			Camera* camera = pCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
 		}
-
-		//Object
-		{
-			auto gameObject = this->AddSceneObject("gameObject");
-		}
-
 		//SceneChange
 		{
 			auto SceneChanger = this->AddSceneObject("SceneChanger");

@@ -24,12 +24,14 @@ namespace DirectX
 	public:
 		void OnComponent() override;
 		void SendBehaviourMessage(Message message) override;
+		//Mesh‚ğİ’è
 		template<typename Type> Type* SetMesh()
 		{
 			mesh = std::shared_ptr<Mesh>(new Type());
 
 			return static_cast<Type*>(mesh.get());
 		}
+		//Meshƒf[ƒ^‚Ìæ“¾
 		Mesh* GetMesh()
 		{
 			return mesh.get();

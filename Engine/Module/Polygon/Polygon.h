@@ -1,6 +1,6 @@
 #pragma once
 
-class CTexture;
+class Texture;
 struct ID3D11Buffer;
 
 namespace DirectX
@@ -9,7 +9,7 @@ namespace DirectX
 	{
 	private:
 		ID3D11Buffer* m_VertexBuffer = NULL;
-		CTexture* m_Texture = NULL;
+		Texture* m_Texture = NULL;
 	public:
 		void Initialize() override;
 		void Update() override;
