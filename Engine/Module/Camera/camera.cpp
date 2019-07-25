@@ -26,7 +26,6 @@ using namespace DirectX;
 
 //--- CameraManager -----------------------------------------------------------
 
-CameraManager* CameraManager::pInstance = nullptr;
 std::list<std::weak_ptr<Camera>> CameraManager::CameraIndex;
 
 DirectX::CameraManager::~CameraManager()
@@ -34,19 +33,6 @@ DirectX::CameraManager::~CameraManager()
 	CameraIndex.clear();
 }
 
-void DirectX::CameraManager::Create()
-{
-	if (pInstance != nullptr) return;
-	pInstance = new CameraManager();
-}
-
-void DirectX::CameraManager::Destroy()
-{
-	if (pInstance != nullptr){
-		CameraIndex.clear();
-		delete pInstance;
-	}
-}
 
 void DirectX::CameraManager::IndexSort(Camera * target)
 {
