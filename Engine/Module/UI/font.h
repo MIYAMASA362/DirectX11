@@ -14,7 +14,8 @@ namespace DirectX
 		~Font();
 	public:
 		void Load(const char* fileName, const char* name);
-		Texture* TransformToTexture(const char* pChar);
+		Texture* TransformToTexture();
+		HFONT GetFont() { return m_font; };
 	};
 
 	//テクスチャ上の読み込み位置
@@ -33,7 +34,5 @@ namespace DirectX
 		const char* path;	//保存先
 		FontData* onebyte;	//1byte文字
 		FontData* twobyte;	//2byte文字
-	public:
-		FontAsset(const char* path);
 	};
 }

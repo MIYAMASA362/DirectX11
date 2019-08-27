@@ -29,6 +29,7 @@ DirectX::Font::~Font()
 
 void DirectX::Font::Load(const char* fileName,const char* name)
 {
+	DeleteObject(this->m_font);
 	DESIGNVECTOR design;
 
 	//リソース読み込み
@@ -62,68 +63,108 @@ void DirectX::Font::Load(const char* fileName,const char* name)
 	}
 }
 
+//Charのバイトを認識する
+//int len = IsDBCSLeadByte(pChar[0]) ? 2 : 1;
+//UINT uChar = (len == 2 ? (unsigned char)pChar[0] << 8 | (unsigned char)pChar[1] : (unsigned char)pChar[0]);
+
 //HFONTからFontテクスチャを生成
 //参考:https://blogoftrueone.wordpress.com/2013/06/02/directx11%E3%81%A7%E6%96%87%E5%AD%97%E6%8F%8F%E7%94%BB%E3%81%A8%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF/
 //参考:http://marupeke296.com/DXG_No67_NewFont.html
 //参考:http://marupeke296.com/WINT_GetGlyphOutline.html
-DirectX::Texture* DirectX::Font::TransformToTexture(const char* pChar)
+DirectX::Texture* DirectX::Font::TransformToTexture()
 {
+	if (this->m_texture != nullptr)
+		delete this->m_texture;
+
 	HRESULT hr;
 
 	//文字造形情報
-	GLYPHMETRICS gm;
+	//GLYPHMETRICS gm;
 	TEXTMETRIC tm;
 
-	int len = IsDBCSLeadByte(pChar[0]) ? 2 : 1;
-	UINT uChar = (len == 2 ? (unsigned char)pChar[0] << 8 | (unsigned char)pChar[1] : (unsigned char)pChar[0]);
-
-	BYTE* pFontBMP;				//フォントビットマップ
-	ID3D11Texture2D* texture;	//テクスチャ
+	//テクスチャ
+	ID3D11Texture2D* texture;
 	ID3D11ShaderResourceView* srv;
-	
-	//フォントビットマップ取得
+
+	//検出範囲
+	const BYTE hs_bit = 0x81;	//上位開始bit
+	const BYTE he_bit = 0xea;	//上位終了bit
+
+	const BYTE ss_bit = 0x40;	//下位開始bit
+	const BYTE se_bit = 0xfc;	//下位終了bit
+
+	const UINT s_bit = ((hs_bit << 8) | ss_bit);	//開始bit
+	const UINT e_bit = ((he_bit << 8) | se_bit);	//終了bit
+
+	const int length = e_bit - s_bit;	//配列長
+
+	GLYPHMETRICS* index = new GLYPHMETRICS[length];	//フォント位置
+	BYTE** pFontBMP		= new BYTE*[length];		//ビットマップ
+
+	//テクスチャ
+	int texSizeX = 0;
+	int texSizeY = 0;
+
+	//ビットマップの生成
 	{
 		HDC hdc = GetDC(NULL);
 		HFONT oldFont = (HFONT)SelectObject(hdc, this->m_font);
 		GetTextMetrics(hdc, &tm);
-		const MAT2 mat = { {0,1},{0,0},{0,0},{0,1} };
+		const MAT2 mat = { { 0,1 },{ 0,0 },{ 0,0 },{ 0,1 } };
 
-		//フォントビットマップのメモリサイズ取得
-		DWORD size = GetGlyphOutline(
-			hdc,
-			uChar,				//表示文字
-			GGO_GRAY4_BITMAP,	//ビットマップ
-			&gm,				//ビットマップ情報
-			0,					//ビットマップサイズ
-			NULL,				//フォントビットマップ
-			&mat				//特殊変換
-		);
+		int count = 0;
+		int x = 0;
+		for (BYTE hightbyte = hs_bit; hightbyte <= he_bit; hightbyte++) {
+			for (BYTE subordbyte = ss_bit; subordbyte <= se_bit; subordbyte++) {
+				UINT uChar = ((hightbyte << 8) | subordbyte);
 
-		//フォントビットマップの取得
-		pFontBMP = new BYTE[size];
-		GetGlyphOutline(
-			hdc,
-			uChar,
-			GGO_GRAY4_BITMAP,
-			&gm,
-			size,
-			pFontBMP,
-			&mat
-		);
+				//フォントビットマップ取得
+				{
+					//フォントビットマップのメモリサイズ取得
+					DWORD size = GetGlyphOutline(
+						hdc,
+						uChar,				//表示文字
+						GGO_GRAY4_BITMAP,	//ビットマップ
+						&index[count],		//ビットマップ情報
+						0,					//ビットマップサイズ
+						NULL,				//フォントビットマップ
+						&mat				//特殊変換
+					);
+
+					//フォントビットマップの取得
+					pFontBMP[count] = new BYTE[size];
+					GetGlyphOutline(
+						hdc,
+						uChar,
+						GGO_GRAY4_BITMAP,
+						&index[count],
+						size,
+						pFontBMP[count],
+						&mat
+					);
+				}
+
+				//テクスチャの横幅
+				x += index[count].gmCellIncX;
+				count++;
+			}
+			//テクスチャサイズ
+			texSizeX = texSizeX < x ? x : texSizeX;
+			texSizeY += tm.tmHeight;
+			x = 0;
+		}
 
 		//解放
 		SelectObject(hdc, oldFont);
 		ReleaseDC(NULL, hdc);
 	}
 
-	int charNum = 2;
-
 	//テクスチャ生成
 	{
 		D3D11_TEXTURE2D_DESC desc;
-		ZeroMemory(&desc,sizeof(D3D11_TEXTURE2D_DESC));
-		desc.Width = gm.gmCellIncX;
-		desc.Height = tm.tmHeight;
+		ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+		desc.Width = texSizeX;
+		desc.Height = texSizeY;
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -134,11 +175,13 @@ DirectX::Texture* DirectX::Font::TransformToTexture(const char* pChar)
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		desc.MiscFlags = 0;
 
-		hr = D3DApp::GetDevice()->CreateTexture2D(&desc,NULL,&texture);
+		hr = D3DApp::GetDevice()->CreateTexture2D(&desc, NULL, &texture);
 		if (FAILED(hr))
 			assert(false);
+	}
 
-		//フォント情報をテクスチャに書き込み
+	//フォント情報をテクスチャに書き込み
+	{
 		D3D11_MAPPED_SUBRESOURCE hMappedResource = {};
 
 		hr = D3DApp::GetDeviceContext()->Map(
@@ -151,34 +194,54 @@ DirectX::Texture* DirectX::Font::TransformToTexture(const char* pChar)
 
 		if (FAILED(hr))
 			assert(false);
-		
 		//テクスチャの画像情報を取得
 		BYTE* pBits = (BYTE*)hMappedResource.pData;
 
-		//ベースラインをそろえた配置
-		int iofs_x = (gm.gmptGlyphOrigin.x);
-		int iofs_y = (tm.tmAscent - gm.gmptGlyphOrigin.y);
-		int iBmp_w = gm.gmBlackBoxX + (4 - (gm.gmBlackBoxX %4)) %4;
-		int iBmp_h = gm.gmBlackBoxY;
-
-		int level = 17;
-
-		DWORD alpha, color;
-		ZeroMemory(&pBits,sizeof(BYTE));
-		for(int y = iofs_y,loopY = iofs_y+iBmp_h ; y <loopY; y++)
-			for(int x = iofs_x,loopX = iofs_x + iBmp_w; x < loopX; x++)
+		int m_x = 0, m_y = 0,count = 0;
+		for (BYTE hightbyte = hs_bit; hightbyte <= he_bit; hightbyte++) {
+			m_x = index[count].gmptGlyphOrigin.x;
+			for (BYTE subordbyte = ss_bit; subordbyte <= se_bit; subordbyte++)
 			{
-				alpha = (255 * pFontBMP[x - iofs_x+iBmp_w*(y-iofs_y)])/(level-1);
-				color = 0x00ffffff | (alpha << 24);
+				GLYPHMETRICS gm = index[count];
+				//ベースラインをそろえた配置
+				int iofs_y = m_y + tm.tmAscent - index[count].gmptGlyphOrigin.y;
+				int iBmp_w = gm.gmBlackBoxX + (4 - (gm.gmBlackBoxX % 4)) % 4;
+				int iBmp_h = gm.gmBlackBoxY;
 
-				memcpy(
-					(BYTE*)pBits + hMappedResource.RowPitch*y + 4 * x,
-					&color,
-					sizeof(DWORD)
-				);
+				int level = 17;
+
+				DWORD alpha, color;
+				ZeroMemory(&pBits, sizeof(BYTE));
+
+				//データ書き込み
+				for (int y = iofs_y; y < iofs_y + iBmp_h; y++){
+					for (int x = m_x; x < m_x + iBmp_w; x++){
+						BYTE bot = pFontBMP[count][x - m_x + iBmp_w*(y - iofs_y)];
+						alpha = (255 * bot) / (level - 1);
+						color = 0x00ffffff | (alpha << 24);
+						//セット
+						memcpy(
+							(BYTE*)pBits + hMappedResource.RowPitch*y + 4 * x,
+							&color,
+							sizeof(DWORD)
+						);
+					}
+				}
+				m_x += iBmp_w;
+				count++;
 			}
+			m_y += tm.tmHeight;
+		}
+	}
+	D3DApp::GetDeviceContext()->Unmap(texture, 0);
 
-		D3DApp::GetDeviceContext()->Unmap(texture,0);
+	//解放処理
+	{
+		for (int count = 0; count < sizeof(pFontBMP)/sizeof(pFontBMP[0]); count++)
+			delete pFontBMP[count];
+
+		delete[] pFontBMP;
+		delete[] index;
 	}
 
 	//SRV設定
