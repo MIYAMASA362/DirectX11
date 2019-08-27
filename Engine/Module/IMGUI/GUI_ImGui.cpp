@@ -17,6 +17,10 @@ void GUI::guiImGui::Create(HWND hwnd,ID3D11Device* device,ID3D11DeviceContext* c
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device,context);
+
+	ImGuiStyle* style = &ImGui::GetStyle();
+	ImVec4* colors = style->Colors;
+	colors[ImGuiCol_WindowBg] = ImVec4(0.0f,0.0f,0.0f,0.8f);
 }
 
 void GUI::guiImGui::Destroy()
