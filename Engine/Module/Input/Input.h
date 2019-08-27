@@ -16,6 +16,7 @@ namespace DirectX
 		static LPDIRECTINPUT8 m_pInput;
 		static LPDIRECTINPUTDEVICE8 m_pDevMouse;
 		static DIMOUSESTATE2 m_MouseState2;
+		static BYTE m_OldMouseButtons[8];
 	public:
 		static void Init();
 		static void Uninit();
@@ -40,9 +41,14 @@ namespace DirectX
 		public:
 			static float GetMouseX();
 			static float GetMouseY();
+		public:
 			static bool IsLeftDown();
 			static bool IsRightDown();
 			static bool IsWheelDown();
+			static bool IsLeftTrigger();
+			static bool IsRightTrigger();
+			static bool IsWheelTrigger();
+		public:
 			static float GetAccelerationX();
 			static float GetAccelerationY();
 			static float GetAccelerationZ();

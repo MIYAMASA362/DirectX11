@@ -9,6 +9,8 @@
 
 #include "input.h"
 
+#include"Module\IMGUI\GUI_ImGui.h"
+
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
@@ -24,6 +26,7 @@ bool Input::IsCursorLoop = false;
 LPDIRECTINPUT8		 Input::m_pInput = nullptr;
 LPDIRECTINPUTDEVICE8 Input::m_pDevMouse = nullptr;
 DIMOUSESTATE2		 Input::m_MouseState2 = { NULL };
+BYTE				 Input::m_OldMouseButtons[8];
 
 void Input::Init()
 {
@@ -54,6 +57,8 @@ void Input::Init()
 	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::GetWindow(),(DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 
 	m_pDevMouse->Acquire();
+
+	Mouse::SetScreenLoop(true);
 }
 
 void Input::Uninit()
@@ -82,6 +87,8 @@ void Input::Update()
 
 	//マウス処理
 	{
+		memcpy(m_OldMouseButtons, m_MouseState2.rgbButtons, 8);
+
 		//マウス情報
 		GetCursorPos(&m_MousePos);
 		//カーソルループ
@@ -130,7 +137,10 @@ bool Input::GetKeyUp(BYTE KeyCode)
 
 void DirectX::Input::DebugGUI()
 {
-
+	ImGui::Begin("Input");
+	ImGui::Text("Mouse X:%f",Input::Mouse::GetMouseX());
+	ImGui::Text("Mouse Y:%f",Input::Mouse::GetMouseY());
+	ImGui::End();
 }
 
 float DirectX::Input::Mouse::GetMouseX()
@@ -156,6 +166,21 @@ bool DirectX::Input::Mouse::IsRightDown()
 bool DirectX::Input::Mouse::IsWheelDown()
 {
 	return (m_MouseState2.rgbButtons[2] & 0x80) ? true : false;
+}
+
+bool DirectX::Input::Mouse::IsLeftTrigger()
+{
+	return ((m_OldMouseButtons[0] & 0x80) && !(m_MouseState2.rgbButtons[0] & 0x80));
+}
+
+bool DirectX::Input::Mouse::IsRightTrigger()
+{
+	return ((m_OldMouseButtons[1] & 0x80) && !(m_MouseState2.rgbButtons[1] & 0x80));
+}
+
+bool DirectX::Input::Mouse::IsWheelTrigger()
+{
+	return ((m_OldMouseButtons[2] & 0x80) && !(m_MouseState2.rgbButtons[2] & 0x80));
 }
 
 void DirectX::Input::Mouse::SetMouseShow()
