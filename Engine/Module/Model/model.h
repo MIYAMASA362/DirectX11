@@ -35,13 +35,20 @@ namespace DirectX
 	{
 		friend class ModelManager;
 	private:
+		XMMATRIX offsetMatrix;
 		ID3D11Buffer* VertexBuffer = nullptr;
 		ID3D11Buffer* IndexBuffer = nullptr;
 
 		DX11_SUBSET* SubsetArray = nullptr;
 		unsigned short SubsetNum;
+		bool IsCulling = false;
+		bool IsDepth = true;
 	public:
+		Model();
 		void Render(XMMATRIX worldMatrix) override;
 		void GetAsset(std::string name);
+		void SetCulling(bool enable);
+		void SetDepth(bool enable);
+		void SetoffsetMatrix(XMMATRIX matrix);
 	};
 }

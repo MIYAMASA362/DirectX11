@@ -27,9 +27,19 @@
 
 #include"Module\Texture\TextureManager.h"
 
+DirectX::Model::Model()
+{
+	offsetMatrix = XMMatrixIdentity();
+}
+
 //ï`âÊ
 void DirectX::Model::Render(XMMATRIX worldMatrix)
 {
+	if(IsCulling)
+		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
+	
+	worldMatrix = offsetMatrix * worldMatrix;
+
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::Renderer::SetVertexBuffer(VertexBuffer);
@@ -43,6 +53,8 @@ void DirectX::Model::Render(XMMATRIX worldMatrix)
 		
 		D3DApp::Renderer::DrawIndexed(SubsetArray[i].IndexNum, SubsetArray[i].StartIndex,0);
 	}
+	if(IsCulling)
+		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID, D3D11_CULL_BACK);
 }
 
 //ModelManagerÇÃAssetÇ©ÇÁì«Ç›çûÇ›
@@ -50,4 +62,19 @@ void DirectX::Model::GetAsset(std::string name)
 {
 	Model* asset = ModelManager::GetModel(name).lock().get();
 	*this = *asset;
+}
+
+void DirectX::Model::SetCulling(bool enable)
+{
+	IsCulling = enable;
+}
+
+void DirectX::Model::SetDepth(bool enable)
+{
+	IsDepth = enable;
+}
+
+void DirectX::Model::SetoffsetMatrix(XMMATRIX matrix)
+{
+	offsetMatrix = matrix;
 }
