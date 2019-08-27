@@ -12,10 +12,3 @@
 #include"TextureManager.h"
 
 using namespace DirectX;
-
-//Destrcutor
-DirectX::Texture::~Texture()
-{
-	texture->Release();
-	srv->Release();
-}
