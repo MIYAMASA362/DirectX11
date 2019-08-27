@@ -14,20 +14,6 @@
 
 using namespace DirectX;
 
-//--- Texture Asset -----------------------------------------------------------
-
-DirectX::TextureAsset::TextureAsset(std::string name, std::string path)
-	:
-	name(name), path(path)
-{
-
-}
-
-DirectX::TextureAsset::~TextureAsset()
-{
-
-}
-
 //--- TextureManager ----------------------------------------------------------
 
 //Asset\Textureへのアクセス
@@ -37,7 +23,8 @@ std::map<std::string, std::shared_ptr<Texture>> TextureManager::TextureIndex;
 //Texture読み込み
 Texture * DirectX::TextureManager::LoadTexture(const char* path)
 {
-	Texture* texture = new Texture();
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* srv;
 
 	//読み込み
 	{
@@ -113,7 +100,7 @@ Texture * DirectX::TextureManager::LoadTexture(const char* path)
 		initData.SysMemPitch = width * 4;
 		initData.SysMemSlicePitch = size;
 
-		auto hr = D3DApp::GetDevice()->CreateTexture2D(&desc, &initData, &texture->texture);
+		auto hr = D3DApp::GetDevice()->CreateTexture2D(&desc, &initData, &texture);
 		if (FAILED(hr)) {
 			assert(false);
 		}
@@ -123,7 +110,7 @@ Texture * DirectX::TextureManager::LoadTexture(const char* path)
 		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = 1;
 
-		hr = D3DApp::GetDevice()->CreateShaderResourceView(texture->texture, &SRVDesc, &texture->srv);
+		hr = D3DApp::GetDevice()->CreateShaderResourceView(texture, &SRVDesc, &srv);
 		if (FAILED(hr))
 		{
 			assert(false);
@@ -132,17 +119,14 @@ Texture * DirectX::TextureManager::LoadTexture(const char* path)
 		delete image;
 	}
 
-	return texture;
+	return new Texture(texture,srv);
 }
 
 //Assetを読み込み
-void DirectX::TextureManager::LoadAsset(TextureAsset asset)
+void DirectX::TextureManager::LoadAsset(std::string name,std::string path)
 {
-	//Textureデータ
-	Texture* data = LoadTexture((AssetDataBase + asset.path).c_str());
-
 	//TextureIndexへの追加
-	TextureIndex.emplace(asset.name, std::shared_ptr<Texture>(data));
+	TextureIndex.emplace(name, std::shared_ptr<Texture>(LoadTexture((AssetDataBase + path).c_str())));
 }
 
 //Assetを解放
@@ -152,7 +136,10 @@ void DirectX::TextureManager::Release()
 }
 
 //Asset内のTextureを取得
-std::weak_ptr<Texture> DirectX::TextureManager::GetTexture(std::string name)
+Texture* DirectX::TextureManager::GetTexture(std::string name)
 {
-	return TextureIndex[name];
+	Texture* texture = TextureIndex[name].get();
+	if (texture == nullptr)
+		MessageBox(NULL,"Textureが存在しません。","TextureManager",MB_OK);
+	return texture;
 }
