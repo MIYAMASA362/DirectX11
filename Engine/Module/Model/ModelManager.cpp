@@ -76,8 +76,10 @@ void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 			data->SubsetArray[i].IndexNum = model.SubsetArray[i].IndexNum;
 
 			data->SubsetArray[i].Material.Material = model.SubsetArray[i].Material.Material;
-
-			data->SubsetArray[i].Material.Texture = TextureManager::LoadTexture(model.SubsetArray[i].Material.TextureName);
+			if (strlen(model.SubsetArray[i].Material.TextureName) == 0) 
+				data->SubsetArray[i].Material.Texture = TextureManager::GetTexture("sky");
+			else
+				data->SubsetArray[i].Material.Texture = TextureManager::LoadTexture(model.SubsetArray[i].Material.TextureName);
 		}
 	}
 
