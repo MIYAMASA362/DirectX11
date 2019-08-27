@@ -19,12 +19,3 @@ DirectX::Texture::~Texture()
 	texture->Release();
 	srv->Release();
 }
-
-
-//TextureManager‚ÌAsset‚©‚çŽæ“¾
-void DirectX::Texture::GetAsset(std::string name)
-{
-	Texture* asset = TextureManager::GetTexture(name).lock().get();
-	this->texture = asset->texture;
-	this->srv = asset->srv;
-}
