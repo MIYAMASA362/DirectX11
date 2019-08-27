@@ -1,8 +1,11 @@
 #include<assert.h>
 #include<string>
 #include<memory>
+#include<list>
 #include<map>
 #include<Windows.h>
+#include<d3d11.h>
+#include<DirectXMath.h>
 #include<xaudio2.h>
 
 #include"Audio.h"
@@ -78,10 +81,4 @@ void DirectX::Audio::Stop()
 {
 	for (int j = 0; j < SOUND_SOURCE_MAX; j++)
 		SourceVoice[j]->Stop();
-}
-
-void DirectX::Audio::GetAsset(std::string name)
-{
-	Audio* asset = AudioManager::GetAudio(name).lock().get();
-	*this = *asset;
 }

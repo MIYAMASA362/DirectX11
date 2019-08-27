@@ -8,8 +8,6 @@ struct IXAudio2MasteringVoice;
 
 namespace DirectX
 {
-	class Audio;
-
 	//Audio
 	class Audio final
 	{
@@ -17,7 +15,6 @@ namespace DirectX
 	private:
 		IXAudio2SourceVoice* SourceVoice[SOUND_SOURCE_MAX];
 		BYTE* SoundData;
-
 		int length;
 		int PlayLength;
 	public:
@@ -26,6 +23,5 @@ namespace DirectX
 	public:
 		void Play(bool loop = false);
 		void Stop();
-		void GetAsset(std::string name);
 	};
 };
