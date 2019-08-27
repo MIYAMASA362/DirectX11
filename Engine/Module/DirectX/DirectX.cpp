@@ -134,20 +134,7 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 
 
 	// ラスタライザステート設定
-	D3D11_RASTERIZER_DESC rd;
-	ZeroMemory(&rd, sizeof(rd));
-	rd.FillMode = D3D11_FILL_SOLID;
-	rd.CullMode = D3D11_CULL_NONE;
-	rd.DepthClipEnable = TRUE;
-	rd.MultisampleEnable = FALSE;
-
-	ID3D11RasterizerState *rs;
-	pInstance->D3DDevice->CreateRasterizerState(&rd, &rs);
-
-	pInstance->ImmediateContext->RSSetState(rs);
-
-
-
+	Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_BACK);
 
 	// ブレンドステート設定
 	D3D11_BLEND_DESC blendDesc;
@@ -167,8 +154,6 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 	ID3D11BlendState* blendState = NULL;
 	pInstance->D3DDevice->CreateBlendState(&blendDesc, &blendState);
 	pInstance->ImmediateContext->OMSetBlendState(blendState, blendFactor, 0xffffffff);
-
-
 
 	// 深度ステンシルステート設定
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
@@ -426,10 +411,15 @@ int D3DApp::Run()
 			Renderer::ClearRenderTargetView(Color::gray());
 			//ImGUIのフレーム設定
 			GUI::guiImGui::SetFrame();
-			//タイマーのデバッグ表示
-			TimeManager::DebugGUI_Time();
-			//アクティブなSceneのデバッグ表示
-			SceneManager::DebugGUI_ActiveScene();
+			//デバッグ表示
+			{
+				//タイマーのデバッグ表示
+				TimeManager::DebugGUI_Time();
+				//アクティブなSceneのデバッグ表示
+				SceneManager::DebugGUI_ActiveScene();
+				//マネージャーのデバッグ表示
+				CManager::DebugRender();
+			}
 			//描画設定
 			CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
 			//ImGuiの描画
@@ -478,6 +468,22 @@ void D3DApp::Renderer::SetDepthEnable(bool Enable)
 		pInstance->ImmediateContext->OMSetDepthStencilState(pInstance->DepthStateDisable, NULL);
 }
 
+void DirectX::D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode)
+{
+	// ラスタライザステート設定
+	D3D11_RASTERIZER_DESC rd;
+	ZeroMemory(&rd, sizeof(rd));
+	rd.FillMode = fillmode;
+	rd.CullMode = cullmode;
+	rd.DepthClipEnable = TRUE;
+	rd.MultisampleEnable = FALSE;
+
+	ID3D11RasterizerState *rs;
+	pInstance->D3DDevice->CreateRasterizerState(&rd, &rs);
+
+	pInstance->ImmediateContext->RSSetState(rs);
+}
+
 void D3DApp::Renderer::SetWorldViewProjection2D()
 {
 	XMMATRIX world;
@@ -511,6 +517,14 @@ void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
 {
 	XMMATRIX projection;
 	projection = *ProjectionMatrix;
+	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
+}
+
+void DirectX::D3DApp::Renderer::SetProjectionMatrix2D()
+{
+	SetViewMatrix(&XMMatrixIdentity());
+	XMMATRIX projection;
+	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
 	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 

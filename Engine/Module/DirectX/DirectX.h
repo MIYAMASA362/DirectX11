@@ -70,11 +70,13 @@ namespace DirectX
 			static void ClearRenderTargetView(Color clearColor);
 
 			static void SetDepthEnable(bool Enable);
+			static void SetRasterize(D3D11_FILL_MODE fillmode,D3D11_CULL_MODE cullmode);
 
 			static void SetWorldViewProjection2D();
 			static void SetWorldMatrix(XMMATRIX* WorldMatrix);
 			static void SetViewMatrix(XMMATRIX* ViewMatrix);
 			static void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
+			static void SetProjectionMatrix2D();
 
 			static void SetMaterial(MATERIAL Material);
 			static void SetLight(LIGHT Light);
