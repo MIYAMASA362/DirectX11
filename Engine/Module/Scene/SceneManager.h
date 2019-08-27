@@ -1,5 +1,10 @@
 #pragma once
 
+#define SCENE_OPTION_UPDATE_DEFAULT	(0x00)	//標準
+#define SCENE_OPTION_UPDATE_ALL		(0x01)	//例外なくすべて更新
+#define SCENE_OPTION_UPDATE_PARENT	(0x02)	//親子階層を利用した更新
+#define SCENE_OPTION_UPDATE_ACTIVE	(0x04)	//アクティブのみ更新
+
 namespace DirectX
 {
 	class Scene;
@@ -30,7 +35,7 @@ namespace DirectX
 		static void Create();			//インスタンス生成
 		static void Destroy();			//インスタンス削除
 
-	//--- Scene -----------------------------------------------------
+	//--- Scene処理 -------------------------------------------------
 	public:
 		//Sceneの生成
 		template<typename Type>
@@ -47,11 +52,11 @@ namespace DirectX
 		//Sceneの読み込み
 		static void LoadScene(std::weak_ptr<Scene> scene);	
 		//ActiveSceneへメッセージを送信
-		static void RunActiveScene(Component::Message message);
-		//ActiveSceneの当たり判定を更新
-		static void OnTriggerUpdate();
-		//ActiveSceneの物理当たり判定を更新
-		static void OnCollisionUpdate();
+		static void RunActiveScene(Component::Message message,BYTE option = SCENE_OPTION_UPDATE_DEFAULT);
+		//ActiveSceneの描画処理
+		static void RunActiveScene_Render();
+		//ColliderUpdate
+		static void ColliderUpdate();
 		//ActiveScene内オブジェクトのImGUI表示
 		static void DebugGUI_ActiveScene();
 		//ActiveScene内で削除指定されたオブジェクトを削除
@@ -62,15 +67,12 @@ namespace DirectX
 		static std::weak_ptr<Scene>GetActiveScene();
 		//GetSceneByName
 		static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
+		static void ApplyRigidbody();
 
 	//--- 内部処理 --------------------------------------------------
 	private:
 		//SetIsChangeScene
-		static void SetIsChangeScene(std::weak_ptr<Scene> scene)
-		{
-			pNextScene = scene;
-			IsChangeScene = true;
-		}
+		static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 		//SetActiveScene
 		static void AttachActiveScene(std::weak_ptr<Scene> scene);
 		//DitachActiveScene
@@ -96,8 +98,7 @@ namespace DirectX
 		virtual void Load() = 0;
 		//ゲームオブジェクトの生成
 		GameObject* AddSceneObject(std::string name, TagName tag);
-		GameObject* AddSceneObject(std::string name);
 		//ゲームオブジェクトの削除処理を予約
-		void SetIsCeanUp(bool IsEnable) { this->IsCeanUp = IsEnable; };
+		void SetIsCeanUp(bool IsEnable);
 	};
 }
