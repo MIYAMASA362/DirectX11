@@ -26,6 +26,7 @@ using namespace DirectX;
 
 //--- CameraManager -----------------------------------------------------------
 
+Camera* CameraManager::pActiveCamera = nullptr;
 std::list<std::weak_ptr<Camera>> CameraManager::CameraIndex;
 
 DirectX::CameraManager::~CameraManager()
@@ -98,6 +99,7 @@ void DirectX::CameraManager::SetRender(void(*Draw)(void), void(*Begin)(void))
 
 		if (!camera->gameObject.lock()->GetActive())continue;
 		if (!camera->IsEnable)continue;
+		pActiveCamera = camera;
 
 		Begin();
 		camera->Run();
@@ -110,10 +112,15 @@ void DirectX::CameraManager::Release()
 	CameraIndex.clear();
 }
 
-//--- Camera ------------------------------------------------------------------
+Camera * DirectX::CameraManager::GetActiveCamera()
+{
+	return pActiveCamera;
+}
 
+//--- Camera ------------------------------------------------------------------
 DirectX::Camera::Camera()
-:
+	:
+	Behaviour("Camera"),
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
@@ -133,7 +140,7 @@ void DirectX::Camera::OnDestroy()
 //描画
 void DirectX::Camera::Run()
 {
-	XMMATRIX	m_ViewMatrix;
+	XMMATRIX	ViewMatrix;
 	XMMATRIX	m_InvViewMatrix;
 	XMMATRIX	m_ProjectionMatrix;
 
@@ -152,9 +159,11 @@ void DirectX::Camera::Run()
 	m_InvViewMatrix = gameObject.lock()->transform->WorldMatrix();
 
 	XMVECTOR det;
-	m_ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
+	ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
 
-	D3DApp::Renderer::SetViewMatrix(&m_ViewMatrix);
+	this->m_ViewMatrix = gameObject.lock()->transform->MatrixScaling() * gameObject.lock()->transform->MatrixQuaternion();
+
+	D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
 
 	// プロジェクションマトリクス設定
 	m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
@@ -184,5 +193,10 @@ void DirectX::Camera::SetPriority(int priority)
 void DirectX::Camera::Finalize()
 {
 	CameraManager::RemoveCamera(this);
+}
+
+XMMATRIX DirectX::Camera::GetViewMatrix()
+{
+	return this->m_ViewMatrix;
 }
 
