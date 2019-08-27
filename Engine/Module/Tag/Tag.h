@@ -6,6 +6,9 @@ namespace DirectX
 	{
 		Default =0,
 		MainCamera,
+		ChildMiku,
+		Player,
+		Enemy
 	};
 
 	class Tag
