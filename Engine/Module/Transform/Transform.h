@@ -3,142 +3,79 @@ namespace DirectX
 {
 	class GameObject;
 
-	//変換
-	class Transform final :public Component
+	//変換Component
+	class Transform :public Component
 	{
-	private:
+	//--- Attribute -------------------------------------------------
+	protected:
 		std::weak_ptr<Transform> pParent;					//親
 		std::list<std::weak_ptr<Transform>> pChildren;		//子
-	private:
-		Vector3		m_Position;				//位置
-		Quaternion	m_Rotation;				//回転
-		Vector3		m_Scale;				//サイズ
+	protected:
+		Vector3		m_Position;		//位置
+		Quaternion	m_Rotation;		//回転
+		Vector3		m_Scale;		//サイズ
 
-		XMMATRIX  m_WorldMatrix;				//ワールド行列
+		XMMATRIX	m_WorldMatrix;	//ワールド行列
+
+	//--- Constrcutor/Destrcutor ------------------------------------
 	public:
 		Transform(Vector3 position, Quaternion rotation, Vector3 scale);
 		Transform(Vector3 position, Vector3 rotation, Vector3 scale);
 		Transform();
-	private:
-		//親を離す
-		void detachParent()
-		{
-			Vector3 position = this->position();
-			Vector3 scale = this->scale();
-			Quaternion q = Quaternion::AtMatrix(this->MatrixQuaternion());
-			pParent.reset();
+		~Transform() = default;
 
-			this->position(position);
-			this->localScale(scale);
-			this->rotation(q);
-		}
-		//親がターゲットの子を見つけると削除する
-		void detachChildSearch(Transform* target)
-		{
-			for (auto itr = pChildren.begin(); itr != pChildren.end(); itr++)
-				if (itr->lock().get() == target)
-				{
-					pChildren.erase(itr);
-					return;
-				}
-		}
-		//回転行列を使ってDirectionを変換
-		Vector3 TransformDirection(Vector3 direction){
-			return XMVector3Normalize(XMVector3Transform(direction,this->rotation().toMatrix()));
-		}
-		//子の行列に変更を加える
-		void childTransformUpdate(){
-			if (pChildren.size() != 0)
-				for (auto child : pChildren)
-					child.lock()->WorldMatrix();
-		}
+	//--- Getter ----------------------------------------------------
 	public:
-		Vector3 position()		{
-			Vector3 position = this->WorldMatrix().r[3];
-			return position;
-		}
-		Quaternion rotation()	{
-			Quaternion q = this->m_Rotation;
-			if (!pParent.expired())
-				q *= pParent.lock()->rotation();
-			return q;
-		}
-		Vector3 scale()			{
-			Vector3 scale = this->m_Scale;
-			if (!pParent.expired())
-				scale *= pParent.lock()->scale();
-			return scale;
-		}
+		Vector3		position();								//ワールド位置
+		Quaternion	rotation();								//ワールド回転
+		Vector3		scale();								//ワールド大きさ
 
-		Vector3 localPosition()		{ return m_Position; }
-		Quaternion localRotation()	{ return m_Rotation; }
-		Vector3 localScale()		{ return m_Scale; }
-	public:
-		void position(Vector3 position)	{
-			this->m_Position += position - this->position();
-		}
-		void rotation(Quaternion rotation)	{
-			if (!pParent.expired())
-				rotation = pParent.lock()->rotation().conjugate() * rotation;
-			this->m_Rotation = rotation;
-		}
+		Vector3		localPosition();						//ローカル位置
+		Quaternion	localRotation();						//ローカル回転
+		Vector3		localScale();							//ローカル大きさ
 
-		void localPosition(Vector3 position) {
-			this->m_Position = position;
-		}
-		void localRotation(Quaternion rotation)	{ 
-			this->m_Rotation = rotation;
-		}
-		void localScale(Vector3 scale)	{ 
-			this->m_Scale = scale;
-		}
+	//--- Setter ----------------------------------------------------
 	public:
-		//親子関係
-		void SetParent(std::weak_ptr<Transform> parent);
+		void position(Vector3 position);					//ワールド位置
+		void rotation(Quaternion rotation);					//ワールド回転
+
+		void localPosition(Vector3 position);				//ローカル位置
+		void localRotation(Quaternion rotation);			//ローカル回転
+		void localScale(Vector3 scale);						//ローカル大きさ
+
+	//--- 親子関係 --------------------------------------------------
+	protected:
+		void detachParent();								//親を離す
+		void detachChildSearch(Transform* target);			//親がターゲットの子を見つけると削除する
+		void childTransformUpdate();						//子の行列に変更を加える
+	public:
+		void SetParent(std::weak_ptr<Transform> parent);	//親子を設定
 		void SetParent(GameObject* parent);
+		void DetachParent();								//親を離す
+		void DetachChildren();								//子を離す
+		std::weak_ptr<Transform> GetParent();				//親取得
+		std::list<std::weak_ptr<Transform>> GetChildren();	//子取得
+		void SendComponentMessageChildren(Component::Message message);
 
-		//親を離す
-		void DetachParent()
-		{
-			if (pParent.expired()) return;
-			pParent.lock()->detachChildSearch(this);
-			detachParent();
-		}
-		//子を離す
-		void DetachChildren()
-		{
-			//子を参照
-			for (auto itr = pChildren.begin(); itr != pChildren.end(); itr++)
-			{
-				//親と離す
-				itr->lock()->detachParent();
-			}
-			//子リストを削除
-			pChildren.clear();
-		}
+	//--- Direction -------------------------------------------------
+	protected:
+		Vector3 TransformDirection(Vector3 direction);	//回転行列を使ってDirectionを変換
 	public:
-		//Direction
-		Vector3 right()		{ return TransformDirection(Vector3::right()); }
-		Vector3 left()		{ return right()*-1.0f; }
-		Vector3 up()		{ return TransformDirection(Vector3::up());}
-		Vector3 down()		{ return up() * -1.0f; }
-		Vector3 forward()	{ return TransformDirection(Vector3::forward()); }
-		Vector3 back()		{ return forward() * -1.0f; }
+		Vector3 right();			//右
+		Vector3 left();				//左
+		Vector3 up();				//上
+		Vector3 down();				//下
+		Vector3 forward();			//前
+		Vector3 back();				//後
+
+	//--- Matrix ----------------------------------------------------
 	public:
-		//Matrix
-		XMMATRIX MatrixQuaternion();
-		XMMATRIX MatrixTranslation();
-		XMMATRIX MatrixScaling();
-		XMMATRIX WorldMatrix();
+		XMMATRIX MatrixQuaternion();		//回転行列
+		XMMATRIX MatrixTranslation();		//移動行列
+		XMMATRIX MatrixScaling();			//スケール行列
+		XMMATRIX WorldMatrix();				//ワールド行列
 	public:
-		//その方向を向く (XZ平面のみ対応)
-		void LookAt(std::weak_ptr<Transform> target)
-		{
-			Vector3 mPos = this->position();
-			Vector3 pPos = target.lock()->position();
-			this->m_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos,Vector3::up());
-			if (!pParent.expired())
-				this->m_Rotation *= pParent.lock()->rotation().conjugate();
-		}
+		void LookAt(std::weak_ptr<Transform> target);	//その方向を見る
+		virtual const std::type_info& GetType() override { return typeid(*this); };
 	};
 }
