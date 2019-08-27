@@ -10,5 +10,6 @@ public:
 	static void Uninit();
 	static void Update();
 	static void FixedUpdate();
+	static void DebugRender();
 	static void Render(void);
 };
