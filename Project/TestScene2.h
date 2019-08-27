@@ -21,7 +21,7 @@ public:
 		}
 		//SceneChange
 		{
-			auto SceneChanger = this->AddSceneObject("SceneChanger");
+			auto SceneChanger = this->AddSceneObject("SceneChanger",TagName::Default);
 			auto sceneChange = SceneChanger->AddComponent<SceneChange>();
 			sceneChange->nextScene = "TestScene";
 		}

@@ -3,10 +3,21 @@
 class CameraMouse:public Behaviour
 {
 public:
+	CameraMouse() :Behaviour("CameraMouse") {};
+public:
+	const float MouseSpeed = 0.001f;
+	std::shared_ptr<Transform>looktarget;
+public:
 	void Update() override
 	{
-		this->transform.lock()->rotation(
-			this->transform.lock()->rotation()*(this->transform.lock()->up()*Input::Mouse::GetAccelerationX()* 0.0001f)
+		float horizontal = 0.0f, vertical = 0.0f;
+
+		vertical = Input::Mouse::GetAccelerationY() * MouseSpeed;
+
+		this->transform.lock()->localRotation(
+			this->transform.lock()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
 		);
+
+		//this->transform.lock()->LookAt(looktarget);
 	}
 };

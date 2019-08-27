@@ -22,17 +22,17 @@ public:
 		//pModel
 		{
 			GameObject* pModel;
-			pModel = this->AddSceneObject("Miku");
+			pModel = this->AddSceneObject("Miku",TagName::Default);
 			pModel->transform.get()->position(Vector3::up()*2.0f);
 			pModel->transform.get()->localScale(Vector3::one()*2.0f);
 			pModel->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
-			pModel->AddComponent<BoxCollier>();
+			pModel->AddComponent<BoxCollider>();
 		}
 		//SceneChange
 		{
-			auto SceneChanger = this->AddSceneObject("SceneChanger");
+			auto SceneChanger = this->AddSceneObject("SceneChanger",TagName::Default);
 			auto sceneChange = SceneChanger->AddComponent<SceneChange>();
-			sceneChange->nextScene = "TestScene2";
+			sceneChange->nextScene = "TitleScene";
 		}
 	}
 };
