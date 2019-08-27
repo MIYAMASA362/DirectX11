@@ -8,8 +8,8 @@ namespace DirectX
 	class CPolygon :public Behaviour
 	{
 	private:
-		ID3D11Buffer* m_VertexBuffer = NULL;
-		Texture* m_Texture = NULL;
+		ID3D11Buffer* m_VertexBuffer = nullptr;
+		Texture** m_Texture = nullptr;
 	public:
 		void Initialize() override;
 		void Update() override;
