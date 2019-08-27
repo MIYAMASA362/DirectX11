@@ -20,8 +20,10 @@
 #include"Module\GameObject\GameObject.h"
 
 DirectX::MeshRender::MeshRender()
+:
+	Component("MeshRender")
 {
-	Object::name = "MeshRender";
+	
 }
 
 DirectX::MeshRender::~MeshRender()

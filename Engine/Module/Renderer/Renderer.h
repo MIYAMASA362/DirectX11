@@ -22,6 +22,7 @@ namespace DirectX
 		MeshRender();
 		virtual ~MeshRender();
 	public:
+		virtual const std::type_info& GetType() override { return typeid(*this); };
 		void OnComponent() override;
 		void SendBehaviourMessage(Message message) override;
 		//Mesh‚ğİ’è
