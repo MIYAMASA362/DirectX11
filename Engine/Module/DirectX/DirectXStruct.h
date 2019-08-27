@@ -138,6 +138,20 @@ namespace DirectX
 				vec1.z < vec2.z ? vec1.z : vec2.z
 			}; 
 		};
+		//最大要素を返す
+		float MaxElement(){
+			float e;
+			e = x < y ? y : x;
+			e = e < z ? z : e;
+			return e;
+		};
+		//最小要素を返す
+		float MinElement() {
+			float e;
+			e = x < y ? x : y;
+			e = e < z ? e : z;
+			return e;
+		}
 		//2つのベクトルの内積
 		static float Dot(const tagVector3 vec1, const tagVector3 vec2) {
 			return 
@@ -194,18 +208,34 @@ namespace DirectX
 
 		static float Length(const tagVector3 vec)
 		{
-			return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+			tagVector3 r;
+			r.x = vec.x == 0.0f ? 0.0f : vec.x * vec.x;
+			r.y = vec.y == 0.0f ? 0.0f : vec.y * vec.y;
+			r.z = vec.z == 0.0f ? 0.0f : vec.z * vec.z;
+			return sqrtf(r.x + r.y + r.z);
 		}
 
 		static float LengthSq(const tagVector3 vec)
 		{
-			return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+			tagVector3 r;
+			r.x = vec.x == 0.0f ? 0.0f : vec.x * vec.x;
+			r.y = vec.y == 0.0f ? 0.0f : vec.y * vec.y;
+			r.z = vec.z == 0.0f ? 0.0f : vec.z * vec.z;
+			return r.x + r.y + r.z;
 		}
 
 		static tagVector3 Normalize(const tagVector3 vec1)
 		{
+			tagVector3 r;
 			float length = tagVector3::Length(vec1);
-			return tagVector3(vec1.x / length,vec1.y /length,vec1.z/length);
+			if (length == 0)
+				r = tagVector3::zero();
+			else {
+				r.x = vec1.x == 0.0f ? 0.0f : vec1.x / length;
+				r.y = vec1.y == 0.0f ? 0.0f : vec1.y / length;
+				r.z = vec1.z == 0.0f ? 0.0f : vec1.z / length;
+			}
+			return r;
 		};
 		
 		//ベクトルの長さ
@@ -225,14 +255,16 @@ namespace DirectX
 		operator const float*() { return &x; }
 		operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
 		tagVector3 operator= (const XMVECTOR& vec) { x = vec.m128_f32[0]; y = vec.m128_f32[1]; z = vec.m128_f32[2]; return *this; };
-		tagVector3 operator+ (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
-		tagVector3 operator- (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
-		tagVector3 operator/ (const float& scalar) { x /= scalar; y /= scalar; z /= scalar; return *this; };
-		tagVector3 operator* (const float& scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; };
+		tagVector3 operator+ (const tagVector3& vec) {  return { x + vec.x,y + vec.y,z + vec.z }; };
+		tagVector3 operator- (const tagVector3& vec) {  return { x - vec.x,y - vec.y,z - vec.z }; };
+		tagVector3 operator/ (const float& scalar) { return {x / scalar, y / scalar,z / scalar}; };
+		tagVector3 operator* (const float& scalar) { return {x * scalar, y * scalar,z * scalar}; };
 		tagVector3 operator+= (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
 		tagVector3 operator-= (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
 		tagVector3 operator*= (const tagVector3& vec) { x *= vec.x; y *= vec.y; z *= vec.z; return *this; };
+		tagVector3 operator*= (const float& scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; };
 		bool operator== (const tagVector3& vec) { return (x == vec.x && y == vec.y && z == vec.z); };
+		bool operator!= (const tagVector3& vec) { return (x != vec.x && y != vec.y && z != vec.z); };
 	}Vector3;
 
 	//tagVector4
