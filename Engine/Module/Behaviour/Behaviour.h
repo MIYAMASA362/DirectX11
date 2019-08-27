@@ -2,6 +2,9 @@
 
 namespace DirectX
 {
+	class Collider;
+	class Collision;
+
 	/**
 	@virtual
 	+ Initialize
@@ -13,35 +16,24 @@ namespace DirectX
 	class Behaviour :public Component
 	{
 	public:
-		Behaviour() {};
+		Behaviour(std::string name):Component(name) {};
 		virtual ~Behaviour(){};
 	public:
-		virtual void SendBehaviourMessage(Component::Message message) override
-		{
-			switch (message)
-			{
-			case Component::Initialize:
-				Initialize();
-				break;
-			case Component::Update:
-				Update();
-				break;
-			case Component::Finalize:
-				Finalize();
-				break;
-			case Component::FixedUpdate:
-				FixedUpdate();
-				break;
-			default:
-				break;
-			}
-		};
-
+		virtual const std::type_info& GetType() override { return typeid(*this); };
+		virtual void SendBehaviourMessage(Component::Message message) override;
 		//Defualt Method
 		virtual void Initialize() {};
 		virtual void Update() {};
 		virtual void FixedUpdate() {};
 		virtual void Finalize() {};
 		virtual void OnDestroy() {};
+		//“–‚½‚è”»’èŒnMessage
+	public:
+		virtual void OnTriggerEnter(std::weak_ptr<Collider> other) override {};
+		virtual void OnTriggerExit(std::weak_ptr<Collider> other) override {};
+		virtual void OnTriggerStay(std::weak_ptr<Collider> other) override {};
+		virtual void OnCollisionEnter(std::weak_ptr<Collision> collision) override {};
+		virtual void OnCollisionExit(std::weak_ptr<Collision> collision)  override {};
+		virtual void OnCollisionStay(std::weak_ptr<Collision> collision) override {};
 	};
 }
