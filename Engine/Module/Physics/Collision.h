@@ -107,6 +107,4 @@ namespace DirectX
 	protected:
 		bool Judgment(Collider* other) override;
 	};
-
-
 }

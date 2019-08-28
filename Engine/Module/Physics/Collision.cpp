@@ -26,8 +26,7 @@ void DirectX::Collider::Hitjudgment(GameObject * gameObject, GameObject * otherO
 		if (collider->IsEnable)
 			continue;
 		for (auto othercollider : otherObject->colliders) {
-			if (othercollider->IsEnable)
-				continue;
+			if (othercollider->IsEnable) continue;
 			collider->Judgment(othercollider.get());
 		}
 	}
@@ -54,9 +53,8 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 	if ((pos2_min.x <= pos1_min.x && pos1_min.x <= pos2_max.x || pos2_min.x <= pos1_max.x && pos1_max.x <= pos2_max.x) &&
 		(pos2_min.y <= pos1_min.y && pos1_min.y <= pos2_max.y || pos2_min.y <= pos1_max.y && pos1_max.y <= pos2_max.y) &&
 		(pos2_min.z <= pos1_min.z && pos1_min.z <= pos2_max.z || pos2_min.z <= pos1_max.z && pos1_max.z <= pos2_max.z)
-		)
+		) 
 		return true;
-	
 	return false;
 }
 
