@@ -14,6 +14,7 @@
 #include"Input\Input.h"
 
 //Asset
+#include"AssetData\AssetData.h"
 #include"Audio\Audio.h"
 #include"Texture\texture.h"
 
