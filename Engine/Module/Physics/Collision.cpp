@@ -20,6 +20,115 @@ void DirectX::Collider::SendBehaviourMessage(Message message)
 	Render();
 }
 
+void DirectX::Collider::Hitjudgment(GameObject * gameObject, GameObject * otherObject)
+{
+	for(auto collider:gameObject->colliders) {
+		if (collider->IsEnable)
+			continue;
+		for (auto othercollider : otherObject->colliders) {
+			if (othercollider->IsEnable)
+				continue;
+			collider->Judgment(othercollider.get());
+		}
+	}
+}
+
+bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
+{
+	Bounds& bound1 = collider->bound;
+	Bounds& bound2 = other->bound;
+
+	Vector3 pos1 = collider->transform.lock()->position() + bound1.GetCenter();
+	Vector3 pos2 = other->transform.lock()->position() + bound2.GetCenter();
+
+	Vector3 scale1 = collider->transform.lock()->scale() * 2.0f;
+	Vector3 scale2 = other->transform.lock()->scale() * 2.0f;
+
+	Vector3 pos1_max = pos1 + Vector3(bound1.GetMax() * scale1);
+	Vector3 pos1_min = pos1 + Vector3(bound1.GetMin() * scale1);
+
+	Vector3 pos2_max = pos2 + Vector3(bound2.GetMax() * scale2);
+	Vector3 pos2_min = pos2 + Vector3(bound2.GetMin() * scale2);
+
+	//è’ìÀ
+	if ((pos2_min.x <= pos1_min.x && pos1_min.x <= pos2_max.x || pos2_min.x <= pos1_max.x && pos1_max.x <= pos2_max.x) &&
+		(pos2_min.y <= pos1_min.y && pos1_min.y <= pos2_max.y || pos2_min.y <= pos1_max.y && pos1_max.y <= pos2_max.y) &&
+		(pos2_min.z <= pos1_min.z && pos1_min.z <= pos2_max.z || pos2_min.z <= pos1_max.z && pos1_max.z <= pos2_max.z)
+		)
+		return true;
+	
+	return false;
+}
+
+bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
+{
+	Bounds& BoxBound = collider->bound;
+	Bounds& SphereBound = other->bound;
+
+	Vector3 BoxPos = collider->transform.lock()->position() + BoxBound.GetCenter();
+	Vector3 SphPos = other->transform.lock()->position() + SphereBound.GetCenter();
+
+	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform.lock()->scale());
+	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform.lock()->scale());
+
+	float radius = SphereBound.GetSize().x;
+
+	Vector3 posMax,posMin,pos;
+
+	//Xé≤
+	posMax = pos1_max + Vector3(1.0f, 0.0f, 0.0f) * radius;
+	posMin = pos1_min - Vector3(1.0f, 0.0f, 0.0f) * radius;
+	if (posMin.x <= SphPos.x && SphPos.x <= posMax.x &&
+		posMin.y <= SphPos.y && SphPos.y <= posMax.y &&
+		posMin.z <= SphPos.z && SphPos.z <= posMax.z)
+		return true;
+
+	//Yé≤
+	posMax = pos1_max + Vector3(0.0f, 0.0f, 1.0f) * radius;
+	posMin = pos1_min - Vector3(0.0f, 0.0f, 1.0f) * radius;
+	if (posMin.x <= SphPos.x && SphPos.x <= posMax.x &&
+		posMin.y <= SphPos.y && SphPos.y <= posMax.y &&
+		posMin.z <= SphPos.z && SphPos.z <= posMax.z)
+		return true;
+
+	//Zé≤
+	posMax = pos1_max + Vector3(0.0f, 0.0f, 1.0f) * radius;
+	posMin = pos1_min - Vector3(0.0f, 0.0f, 1.0f) * radius;
+	if (posMin.x <= SphPos.x && SphPos.x <= posMax.x &&
+		posMin.y <= SphPos.y && SphPos.y <= posMax.y &&
+		posMin.z <= SphPos.z && SphPos.z <= posMax.z)
+		return true;
+
+	pos.x = SphPos.x - pos1_max.x < SphPos.x - pos1_min.x ? pos1_max.x : pos1_min.x;
+	pos.y = SphPos.y - pos1_max.y < SphPos.y - pos1_min.y ? pos1_max.y : pos1_min.y;
+	pos.z = SphPos.z - pos1_max.z < SphPos.z - pos1_min.z ? pos1_max.z : pos1_min.z;
+
+	pos = pos - SphPos;
+	if (pos.lengthSq() < radius * radius)
+		return true;
+
+	return false;
+}
+
+bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
+{
+	Bounds& bound1 = collider->bound;
+	Bounds& bound2 = other->bound;
+
+	float radius1 = bound1.GetSize().x * collider->transform.lock()->scale().MaxElement();
+	float radius2 = bound2.GetSize().x * other->transform.lock()->scale().MaxElement();
+
+	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform.lock()->WorldMatrix());
+	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform.lock()->WorldMatrix());
+
+	Vector3 distance = pos1 - pos2;
+	//è’ìÀ
+	if (distance.lengthSq() < (radius1 + radius2) * (radius1 + radius2))
+		return true;
+
+	return false;
+}
+
 //--- SphereCollider ----------------------------------------------------------
 
 ID3D11Buffer* SphereCollider::m_VertexBuffer = nullptr;
@@ -148,6 +257,22 @@ void DirectX::SphereCollider::Render()
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
 
+bool DirectX::SphereCollider::Judgment(Collider * other)
+{
+	IsHit = false;
+	switch (other->GetShapeType())
+	{
+	case ShapeType::Box:
+		IsHit = BoxVsShpere(this,other);
+		break;
+	case ShapeType::Sphere:
+		IsHit = SphereVsSphere(this,other);
+		break;
+	}
+
+	return IsHit;
+}
+
 //--- BoxCollider -------------------------------------------------------------
 
 ID3D11Buffer* BoxCollider::m_IndexBuffer = nullptr;
@@ -270,6 +395,21 @@ void DirectX::BoxCollider::Render()
 
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
+}
+
+bool DirectX::BoxCollider::Judgment(Collider * other)
+{
+	switch (other->GetShapeType())
+	{
+	case ShapeType::Box:
+		IsHit = BoxVsShpere(this,other);
+		break;
+	case ShapeType::Sphere:
+		IsHit = SphereVsSphere(this,other);
+	default:
+		break;
+	}
+	return IsHit;
 }
 
 

@@ -38,30 +38,30 @@ namespace DirectX
 		friend class SceneManager;
 	public:
 		//Collider‚ÌŽí—Þ
-		enum class ShapeType {
+		enum ShapeType {
 			Box,
 			Sphere
 		};
 	protected:
-		bool IsTrigger;			//•¨—‹““®‚·‚é‚©
 		bool IsHit = false;		//Õ“Ë‚µ‚Ä‚¢‚é
 		Bounds bound;
 	public:
+		bool IsTrigger = false;			//•¨—‹““®‚·‚é‚©
+	public:
 		Collider();
-		virtual ~Collider() {};
-		void SetTrigger(bool isTrigger)
-		{
-			this->IsTrigger = isTrigger;
-		}
-		bool GetTrigger(){
-			return IsTrigger;
-		}
-		virtual ShapeType GetShapeType() = 0;
+		virtual ~Collider() = default;
+		virtual ShapeType GetShapeType() = 0;	//Type
 	public:
 		virtual const std::type_info& GetType() override { return typeid(Collider); };
+		virtual void Render()=0;
 		void Center(Vector3 center) { this->bound.SetCenter(center); };
 		void SendBehaviourMessage(Message message) override;
-		virtual void Render() {};
+		static void Hitjudgment(GameObject* gameObject,GameObject* otherObject);
+	protected:
+		virtual bool Judgment(Collider* other) = 0;
+		static bool BoxVsBox(Collider* collider,Collider* other);
+		static bool BoxVsShpere(Collider* collider,Collider* other);
+		static bool SphereVsSphere(Collider* collider, Collider* other);
 	};
 
 	//Sphere
@@ -74,13 +74,16 @@ namespace DirectX
 		static int m_IndexNum;
 		static Texture* m_Texture;
 	public:
-		SphereCollider();
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
+	public:
+		SphereCollider();
+		virtual ~SphereCollider() = default;
 		virtual ShapeType GetShapeType() override { return ShapeType::Sphere; };
-		virtual ~SphereCollider() {};
 		void SetRadius(float radius);
 		void Render() override;
+	protected:
+		bool Judgment(Collider* other) override;
 	};
 
 	//Box
@@ -93,13 +96,16 @@ namespace DirectX
 		static int m_IndexNum;
 		static Texture* m_Texture;
 	public:
-		BoxCollider() = default;
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
+	public:
+		BoxCollider() = default;
+		virtual ~BoxCollider() = default;
 		virtual ShapeType GetShapeType() override { return ShapeType::Box; };
-		virtual ~BoxCollider() {};
 		void SetSize(Vector3 size);
 		void Render() override;
+	protected:
+		bool Judgment(Collider* other) override;
 	};
 
 
