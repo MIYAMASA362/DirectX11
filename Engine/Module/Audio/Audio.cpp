@@ -8,6 +8,8 @@
 #include<DirectXMath.h>
 #include<xaudio2.h>
 
+#include"Module\AssetData\AssetData.h"
+
 #include"Audio.h"
 #include"AudioManager.h"
 

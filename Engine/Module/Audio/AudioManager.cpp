@@ -5,10 +5,12 @@
 #include<assert.h>
 #include<xaudio2.h>
 
+#include"Module\AssetData\AssetData.h"
+
 #include"Audio.h"
 #include"AudioManager.h"
 
-const std::string DirectX::AudioManager::AssetDataBase = "Asset/Sound/";
+const std::string DirectX::AudioManager::AssetDataBase = DirectX::AssetManager::AssetPath + "Sound/";
 std::map<std::string,std::shared_ptr<DirectX::Audio>> DirectX::AudioManager::AudioIndex;
 
 IXAudio2* DirectX::AudioManager::pXAudio = nullptr;

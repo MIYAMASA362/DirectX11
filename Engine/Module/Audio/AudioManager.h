@@ -3,7 +3,7 @@
 namespace DirectX
 {
 	//AudioŽ‘Œ¹
-	class AudioAsset final
+	class AudioAsset final:public AssetManager
 	{
 		friend class AudioManager;
 	private:
