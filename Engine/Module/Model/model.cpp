@@ -11,6 +11,8 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\AssetData\AssetData.h"
+
 #include"Module\Material\Material.h"
 #include"Module\Texture\texture.h"
 

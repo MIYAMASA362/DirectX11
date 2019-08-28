@@ -12,6 +12,7 @@
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
 
+#include"Module\AssetData\AssetData.h"
 
 // Component
 #include"Module\Object\Object.h"
@@ -23,7 +24,7 @@
 #include"model.h"
 #include"ModelManager.h"
 
-const std::string ModelManager::AssetDataBase = "Asset/Model/";
+const std::string ModelManager::AssetDataBase = DirectX::AssetManager::AssetPath+ "Model/";
 std::map<std::string, std::shared_ptr<Model>> ModelManager::ModelIndex;
 
 void DirectX::ModelManager::LoadAsset(ModelAsset asset)

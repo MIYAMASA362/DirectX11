@@ -16,7 +16,7 @@ namespace DirectX
 	};
 
 	//ModelŠÇ—
-	class ModelManager
+	class ModelManager:public AssetManager
 	{
 	private:
 		static const std::string AssetDataBase;								//AssetƒtƒHƒ‹ƒ_‚Ü‚Å‚ÌPath
