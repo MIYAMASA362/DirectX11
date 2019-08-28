@@ -551,7 +551,7 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void DirectX::D3DApp::Renderer::SetTexture(Texture * Texture)
+void DirectX::D3DApp::Renderer::SetTexture(BaseTexture * Texture)
 {
 	ID3D11ShaderResourceView* srv[1] = { Texture->GetShaderResourceView() };
 	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);

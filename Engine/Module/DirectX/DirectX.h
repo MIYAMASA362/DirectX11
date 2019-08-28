@@ -4,12 +4,10 @@ namespace System
 {
 	class Window;
 }
-class CTexture;
-
 
 namespace DirectX
 {
-	class Texture;
+	class BaseTexture;
 
 	class D3DApp
 	{
@@ -84,7 +82,7 @@ namespace DirectX
 			static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
 			static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
-			static void SetTexture(Texture* Texture);
+			static void SetTexture(BaseTexture* Texture);
 			static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
 		};
 	};

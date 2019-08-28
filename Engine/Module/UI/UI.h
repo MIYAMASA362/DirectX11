@@ -4,6 +4,7 @@ struct ID3D11Buffer;
 
 namespace DirectX
 {
+	class BaseTexture;
 	class Texture;
 	class UI;
 	class Font;
@@ -35,7 +36,7 @@ namespace DirectX
 	class Image:public UI
 	{
 	public:
-		Texture* texture = nullptr;
+		BaseTexture* texture = nullptr;
 		ID3D11Buffer* vertexBuffer = nullptr;
 	public:
 		Image();
