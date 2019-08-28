@@ -95,7 +95,7 @@ public:
 			auto boxCollider = ChildMiku->AddComponent<SphereCollider>();
 			boxCollider->Center(Vector3::zero());
 			boxCollider->SetRadius(2.0f);
-			boxCollider->SetTrigger(true);
+			boxCollider->IsTrigger = true;
 		}
 
 		//Billboard

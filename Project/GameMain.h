@@ -123,7 +123,7 @@ public:
 				auto sphereCollider = enemy->AddComponent<SphereCollider>();
 				sphereCollider->Center(Vector3(0.0f,0.0f,0.0f));
 				sphereCollider->SetRadius(2.0f);
-				sphereCollider->SetTrigger(true);
+				sphereCollider->IsTrigger = true;
 			}
 			//Rigidbody
 			{
@@ -162,7 +162,7 @@ public:
 				boxCollider->SetSize(Vector3(0.5f,0.5f,0.5f));
 				auto sphereCollider = player->AddComponent<SphereCollider>();
 				sphereCollider->Center(Vector3(0.0f,0.0f,0.5f));
-				sphereCollider->SetTrigger(true);
+				sphereCollider->IsTrigger = true;
 				auto sphereCollider2 = player->AddComponent<SphereCollider>();
 				sphereCollider2->SetRadius(0.25f);
 			}
@@ -212,7 +212,7 @@ public:
 		//Canvas
 		GameObject* canvas = this->AddSceneObject("Canvas",TagName::Default);
 		{
-			canvas->transform->position(Vector3(D3DApp::GetScreenWidth(),D3DApp::GetScreenHeight(),0.0f));
+			canvas->transform->position(Vector3((float)D3DApp::GetScreenWidth(),(float)D3DApp::GetScreenHeight(),0.0f));
 			canvas->AddComponent<Canvas>();
 
 			GameObject* ItemSlot = this->AddSceneObject("ItemSlot",TagName::Default);
