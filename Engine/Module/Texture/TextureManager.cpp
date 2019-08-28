@@ -9,6 +9,8 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\AssetData\AssetData.h"
+
 #include"texture.h"
 #include"TextureManager.h"
 
@@ -17,7 +19,8 @@ using namespace DirectX;
 //--- TextureManager ----------------------------------------------------------
 
 //Asset\Textureへのアクセス
-const std::string TextureManager::AssetDataBase = "Asset/Texture/";
+const std::string TextureManager::AssetDataBase = AssetManager::AssetPath +"Texture/";
+//Textureデータ
 std::map<std::string, std::shared_ptr<Texture>> TextureManager::TextureIndex;
 
 //Texture読み込み

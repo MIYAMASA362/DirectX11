@@ -8,7 +8,7 @@ struct ID3D11ShaderResourceView;
 namespace DirectX
 {
 	//Texture管理
-	class TextureManager final
+	class TextureManager final:public AssetManager
 	{
 	private:
 		static const std::string AssetDataBase;			//Assetフォルダパス
