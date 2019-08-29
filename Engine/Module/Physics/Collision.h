@@ -42,11 +42,10 @@ namespace DirectX
 			Box,
 			Sphere
 		};
-	protected:
-		bool IsHit = false;		//Õ“Ë‚µ‚Ä‚¢‚é
-		Bounds bound;
 	public:
-		bool IsTrigger = false;			//•¨—‹““®‚·‚é‚©
+		Bounds bound;
+		bool IsHit = false;			//Õ“Ë‚µ‚Ä‚¢‚é
+		bool IsTrigger = false;		//•¨—‹““®‚·‚é‚©
 	public:
 		Collider();
 		virtual ~Collider() = default;

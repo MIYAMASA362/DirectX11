@@ -6,13 +6,14 @@ DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 	this->m_size = size;
 }
 
+//--- Collider --------------------------------------------
+
+//Constrcutor
 DirectX::Collider::Collider()
 :
 	bound(Vector3::zero(),Vector3::one()),
 	DirectX::Component("Collider")
-{
-
-}
+{}
 
 void DirectX::Collider::SendBehaviourMessage(Message message)
 {
@@ -23,11 +24,10 @@ void DirectX::Collider::SendBehaviourMessage(Message message)
 void DirectX::Collider::Hitjudgment(GameObject * gameObject, GameObject * otherObject)
 {
 	for(auto collider:gameObject->colliders) {
-		if (collider->IsEnable)
-			continue;
+		if (collider->IsEnable) continue;	//Enable
 		for (auto othercollider : otherObject->colliders) {
-			if (othercollider->IsEnable) continue;
-			collider->Judgment(othercollider.get());
+			if (othercollider->IsEnable) continue;	//Enable
+			collider->Judgment(othercollider.get());	//”»’è
 		}
 	}
 }
@@ -53,8 +53,30 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 	if ((pos2_min.x <= pos1_min.x && pos1_min.x <= pos2_max.x || pos2_min.x <= pos1_max.x && pos1_max.x <= pos2_max.x) &&
 		(pos2_min.y <= pos1_min.y && pos1_min.y <= pos2_max.y || pos2_min.y <= pos1_max.y && pos1_max.y <= pos2_max.y) &&
 		(pos2_min.z <= pos1_min.z && pos1_min.z <= pos2_max.z || pos2_min.z <= pos1_max.z && pos1_max.z <= pos2_max.z)
-		) 
+		)
+	{
+		//Rigidbody‚ðŠŽ
+		if(collider->gameObject.lock()->rigidbody)
+		{
+			Rigidbody& rigidbody = *collider->gameObject.lock()->rigidbody.get();
+
+			Vector3 Intrusion;
+			Vector3 velocity = rigidbody.GetVelocity();
+			Vector3 direction = (pos1 - pos2).normalize();
+
+			if (direction.y < 0.0f) {
+				Intrusion.y = pos1_max.y - pos2_min.y;
+				velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
+			}
+			else{
+				Intrusion.y = pos1_min.y - pos2_max.y;
+				velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
+			}
+			rigidbody.SetVelocity(velocity);
+			collider->transform.lock()->position(collider->transform.lock()->position() - Intrusion);
+		}
 		return true;
+	}
 	return false;
 }
 
