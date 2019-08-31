@@ -53,10 +53,7 @@ void GameObject::RunComponent(Component::Message message)
 	if (!this->IsActive) return;
 	//Ž©g‚ÌComponent‚ð‘–‚ç‚·
 	for (auto component : Components) {
-		if (!component->GetEnable())continue;
-		component->gameObject = self;
-		component->transform = transform;
-		component->SendBehaviourMessage(message);
+		component->Run(self,transform,message);
 	}
 }
 
@@ -82,30 +79,6 @@ void GameObject::SetActive(bool IsActive) {
 
 bool GameObject::GetActive() {
 	return IsActive;
-}
-
-GameObject * DirectX::GameObject::Instantiate(GameObject * original)
-{
-	Transform* transform = original->transform.get();
-	return GameObject::Instantiate(original,transform->localPosition(),transform->localScale(),transform->localRotation());
-}
-
-GameObject * DirectX::GameObject::Instantiate(GameObject* original, std::weak_ptr<Transform> parent)
-{
-	GameObject* instance = GameObject::Instantiate(original,parent.lock()->localPosition(),parent.lock()->localScale(),parent.lock()->localRotation());
-	instance->transform->SetParent(parent);
-	return instance;
-}
-
-GameObject * DirectX::GameObject::Instantiate(GameObject * original, Vector3 position, Vector3 scale, Quaternion rotation)
-{
-	GameObject* instance = SceneManager::GetActiveScene().lock()->AddSceneObject(original->name + "(clone)",TagName::Default);
-
-	auto childindex = original->transform->GetChildren();
-	for(auto itr = childindex.begin(); itr != childindex.end(); itr++)
-		GameObject* child = GameObject::Instantiate(itr->lock()->gameObject.lock().get(),instance->transform);
-
-	return instance;
 }
 
 void DirectX::GameObject::Destroy()

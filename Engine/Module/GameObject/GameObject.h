@@ -13,6 +13,10 @@ namespace DirectX
 	class Canvas;
 	class Rigidbody;
 
+	/*
+		scene メンバ変数はSceneのCreanUp時に必要になる
+	*/
+
 	//ゲームオブジェクト :Entity
 	class GameObject final:public Object
 	{
@@ -58,10 +62,6 @@ namespace DirectX
 		void SetActive(bool IsActive);
 		//アクティブか確認
 		bool GetActive();
-		//
-		static GameObject* Instantiate(GameObject* original);
-		static GameObject* Instantiate(GameObject* original,std::weak_ptr<Transform> parent);
-		static GameObject* Instantiate(GameObject* original,Vector3 position,Vector3 scale,Quaternion rotation);
 	//--- Component -------------------------------------------------
 	public:
 		//AddComponent
@@ -116,7 +116,6 @@ namespace DirectX
 
 			return add;
 		}
-
 		//GetComponent
 		template<typename Type> std::weak_ptr<Type> GetComponent()
 		{
@@ -126,7 +125,6 @@ namespace DirectX
 			}
 			return std::weak_ptr<Type>();
 		}
-
 		//削除処理
 		void Destroy();
 	};
