@@ -3,8 +3,6 @@
 #include<Windows.h>
 #include<stdio.h>
 #include<io.h>
-#include<list>
-#include<memory>
 #include<string>
 
 #include<d3d11.h>
@@ -17,22 +15,9 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 
-#include"../IMGUI/GUI_ImGui.h"
-
-
 #include"../Texture/texture.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-#include"Module\Behaviour\Behaviour.h"
-
-#include"Module\Tag\Tag.h"
-
-#include"../Time/Time.h"
-#include"../Camera/camera.h"
-#include"../Manager/manager.h"
-#include"../Scene/SceneManager.h"
+#include"Module\Manager\manager.h"
 
 using namespace DirectX;
 
@@ -364,12 +349,6 @@ int D3DApp::Run()
 {
 	MSG msg;
 
-	//ImGuiの設定
-	GUI::guiImGui::Create(pInstance->hWnd,pInstance->D3DDevice,pInstance->ImmediateContext);
-	
-	//フレームカウント初期化
-	TimeManager::Create(pInstance->fps);
-
 	CManager::Initialize();
 
 	while (1)
@@ -391,51 +370,10 @@ int D3DApp::Run()
 			continue;
 		}
 
-		TimeManager::Update();
-			
-		bool IsUpdate = TimeManager::IsUpdate();
-		bool IsFixedUpdate = TimeManager::IsFixedUpdate();
-
-		//更新処理
-		if (IsUpdate) CManager::Update();
-
-		//一定更新
-		if(IsFixedUpdate) CManager::FixedUpdate();
-
-		//Destroy宣言された物を削除
-		if (IsFixedUpdate || IsUpdate)SceneManager::CleanUp();
-
-		// 描画処理
-		if(IsUpdate) {
-			//描画開始
-			Renderer::ClearRenderTargetView(Color::gray());
-			//ImGUIのフレーム設定
-			GUI::guiImGui::SetFrame();
-			//デバッグ表示
-			{
-				//タイマーのデバッグ表示
-				TimeManager::DebugGUI_Time();
-				//アクティブなSceneのデバッグ表示
-				SceneManager::DebugGUI_ActiveScene();
-				//マネージャーのデバッグ表示
-				CManager::DebugRender();
-			}
-			//描画設定
-			CameraManager::SetRender(SceneManager::RunActiveScene_Render,D3DApp::Renderer::Begin);
-			//ImGuiの描画
-			GUI::guiImGui::Render();
-			//描画終了
-			D3DApp::Renderer::End();
-		}
-
-		//ActiveSceneの切り替え
-		if (IsFixedUpdate || IsUpdate) SceneManager::ChangeScene();
+		CManager::Update();
 	}
 
 	CManager::Uninit();
-	TimeManager::Destroy();
-
-	GUI::guiImGui::Destroy();
 
 	D3DApp::Destroy();
 	
