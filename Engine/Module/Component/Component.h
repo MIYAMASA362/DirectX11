@@ -1,4 +1,6 @@
 #pragma once
+#include<list>
+#include<map>
 
 namespace DirectX
 {
@@ -7,7 +9,6 @@ namespace DirectX
 	class Behaviour;
 	class Collision;
 	class Collider;
-
 
 	/**
 	@override
@@ -48,6 +49,8 @@ namespace DirectX
 		void SetEnable(bool isEnable);
 		bool GetEnable() { return IsEnable; };
 	public:
+		//Componentを走らせる
+		void Run(std::weak_ptr<GameObject> gameObject,std::weak_ptr<Transform> transform,Component::Message message);
 		//Messageを送る
 		virtual void SendBehaviourMessage(Message message) {};
 		//Componentがアタッチされたら呼ばれる
