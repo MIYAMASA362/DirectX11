@@ -51,7 +51,7 @@ void DirectX::Model::Render(XMMATRIX worldMatrix)
 	{
 		D3DApp::Renderer::SetMaterial(SubsetArray[i].Material.Material);
 
-		D3DApp::Renderer::SetTexture(SubsetArray[i].Material.Texture);
+		D3DApp::Renderer::SetTexture(SubsetArray[i].Material.Texture->GetShaderResourceView());
 		
 		D3DApp::Renderer::DrawIndexed(SubsetArray[i].IndexNum, SubsetArray[i].StartIndex,0);
 	}

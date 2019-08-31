@@ -70,7 +70,7 @@ void CField::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
-	D3DApp::Renderer::SetTexture(this->m_Texture);
+	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 
 	//s—ñ•ÏŠ·
 	XMMATRIX world;
@@ -158,7 +158,7 @@ void WallField::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
-	D3DApp::Renderer::SetTexture(this->FieldTexture);
+	D3DApp::Renderer::SetTexture(this->FieldTexture->GetShaderResourceView());
 
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)@n:‘” i:‚Ç‚±‚©‚çŽn‚ß‚é‚©
@@ -173,7 +173,7 @@ void WallField::Render(XMMATRIX worldMatrix)
 		XMMATRIX local = localScale* localPosition * localRotation;
 
 		D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
-		D3DApp::Renderer::SetTexture(this->WallTexture);
+		D3DApp::Renderer::SetTexture(this->WallTexture->GetShaderResourceView());
 
 		local = local * worldMatrix;
 
@@ -312,7 +312,7 @@ void SkySphere::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
-	D3DApp::Renderer::SetTexture(this->m_Texture);
+	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
@@ -437,7 +437,7 @@ void MeshField::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
-	D3DApp::Renderer::SetTexture(this->m_Texture);
+	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
@@ -561,7 +561,7 @@ void DirectX::MeshWall::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 
-	D3DApp::Renderer::SetTexture(this->m_Texture);
+	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	XMMATRIX world;
@@ -671,7 +671,7 @@ void DirectX::MeshCircle::Render(XMMATRIX worldMatrix)
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
-	D3DApp::Renderer::SetTexture(this->m_Texture);
+	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);

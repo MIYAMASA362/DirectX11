@@ -252,7 +252,7 @@ void DirectX::SphereCollider::Render()
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
-	D3DApp::Renderer::SetTexture(m_Texture);
+	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 	float rad = this->transform.lock()->scale().MaxElement();
 	Vector3 scale = bound.GetSize() * rad;
 	Vector3 pos = bound.GetCenter();
@@ -401,7 +401,7 @@ void DirectX::BoxCollider::Render()
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
-	D3DApp::Renderer::SetTexture(m_Texture);
+	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 
 	Vector3 scale = bound.GetSize() * 2.0f;
 	Vector3 pos = this->transform.lock()->position() + bound.GetCenter();

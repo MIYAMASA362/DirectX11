@@ -63,7 +63,7 @@ void CPolygon::Render()
 
 	//頂点バッファ設定 複数個登録もできる
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&m_VertexBuffer,&stride,&offset);
-	D3DApp::Renderer::SetTexture(*this->m_Texture);
+	D3DApp::Renderer::SetTexture((*this->m_Texture)->GetShaderResourceView());
 	D3DApp::Renderer::SetWorldViewProjection2D();
 	//どうやって頂点を繋げるのか頂点の設定をトポロジという
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);

@@ -65,7 +65,7 @@ void DirectX::Image::Render(XMMATRIX world)
 	//頂点バッファ設定
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&this->vertexBuffer,&stride,&offset);
 	//テクスチャ設定
-	D3DApp::Renderer::SetTexture(this->texture);
+	D3DApp::Renderer::SetTexture(this->texture->GetShaderResourceView());
 	//ワールド行列設定
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
@@ -155,7 +155,7 @@ void DirectX::Button::Render(XMMATRIX world)
 	//頂点バッファ設定
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &this->m_vertexBuffer, &stride, &offset);
 	//テクスチャ設定
-	D3DApp::Renderer::SetTexture(this->texture);
+	D3DApp::Renderer::SetTexture(this->texture->GetShaderResourceView());
 	//ワールド行列設定
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
