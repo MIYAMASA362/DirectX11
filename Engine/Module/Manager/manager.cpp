@@ -39,8 +39,10 @@ using namespace DirectX;
 
 void CManager::Initialize()
 {
-	//Input
-	Input::Init();
+	SystemManager::CreateManager<SceneManager>();
+	SystemManager::CreateManager<Input>();
+
+	SystemManager::Initialize();
 
 	//Texture
 	TextureManager::LoadAsset("field004","field004.tga");
@@ -65,7 +67,6 @@ void CManager::Initialize()
 	AudioManager::LoadAsset(AudioAsset("Experimental","Experimental_Model_long .wav"));
 
 	//Scene
-	SceneManager::Create();
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();
@@ -81,11 +82,7 @@ void CManager::Initialize()
 
 void CManager::Update()
 {
-	Input::Update();
-	SceneManager::RunActiveScene(Component::Update,SCENE_OPTION_UPDATE_ACTIVE | SCENE_OPTION_UPDATE_PARENT);
-	SceneManager::RunActiveScene(Component::FixedUpdate);
-	SceneManager::ApplyRigidbody();
-	SceneManager::ColliderUpdate();
+	SystemManager::Update();
 }
 
 void CManager::FixedUpdate()
@@ -100,7 +97,7 @@ void CManager::DebugRender()
 
 void CManager::Render(void)
 {
-	SceneManager::RunActiveScene_Render();
+	SystemManager::Render();
 }
 
 void CManager::Uninit()
@@ -109,10 +106,10 @@ void CManager::Uninit()
 	SphereCollider::ReleaseRenderBuffer();
 
 	CameraManager::Release();
-	SceneManager::Destroy();
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
-	Input::Uninit();
-}
 
+	SystemManager::Finalize();
+	SystemManager::Release();
+}
