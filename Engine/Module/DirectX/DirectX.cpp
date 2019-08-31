@@ -421,7 +421,7 @@ int D3DApp::Run()
 				CManager::DebugRender();
 			}
 			//•`‰æİ’è
-			CameraManager::SetRender(CManager::Render,D3DApp::Renderer::Begin);
+			CameraManager::SetRender(SceneManager::RunActiveScene_Render,D3DApp::Renderer::Begin);
 			//ImGui‚Ì•`‰æ
 			GUI::guiImGui::Render();
 			//•`‰æI—¹
