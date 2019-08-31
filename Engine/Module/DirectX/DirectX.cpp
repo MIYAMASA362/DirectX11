@@ -15,8 +15,6 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 
-#include"../Texture/texture.h"
-
 #include"Module\Manager\manager.h"
 
 using namespace DirectX;
@@ -354,25 +352,18 @@ int D3DApp::Run()
 	while (1)
 	{
 		//Message
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT)
-			{
-				// PostQuitMessage()が呼ばれたらループ終了
-				break;
-			}
-			else
-			{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
+			if (msg.message == WM_QUIT){
+				break;	// PostQuitMessage()が呼ばれたらループ終了
+			}else{
 				// メッセージの翻訳とディスパッチ
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
 			continue;
 		}
-
 		CManager::Update();
 	}
-
 	CManager::Uninit();
 
 	D3DApp::Destroy();
@@ -489,9 +480,9 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void DirectX::D3DApp::Renderer::SetTexture(BaseTexture * Texture)
+void DirectX::D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
 {
-	ID3D11ShaderResourceView* srv[1] = { Texture->GetShaderResourceView() };
+	ID3D11ShaderResourceView* srv[1] = { texture };
 	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);
 }
 
