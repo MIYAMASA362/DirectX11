@@ -8,6 +8,8 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\IMGUI\GUI_ImGui.h"
+
 //Component
 #include"Module\Object\Object.h"
 #include"Module\Component\Component.h"
@@ -113,6 +115,19 @@ void DirectX::Transform::SendComponentMessageChildren(Component::Message message
 		child.lock()->gameObject.lock()->RunComponent(message);
 		if (child.lock()->pChildren.size() != 0)
 			child.lock()->SendComponentMessageChildren(message);
+	}
+}
+
+void DirectX::Transform::DebugImGui()
+{
+	if(ImGui::TreeNode("Transform")){
+		Vector3 position = this->position();
+		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
+		Vector3 scale = this->scale();
+		ImGui::InputFloat3("Position",&position.x);
+		ImGui::InputFloat3("Rotation",&rotation.x);
+		ImGui::InputFloat3("Scale",&scale.x);
+		ImGui::TreePop();
 	}
 }
 

@@ -56,6 +56,7 @@ namespace DirectX
 		std::weak_ptr<Transform> GetParent();				//eæ“¾
 		std::list<std::weak_ptr<Transform>> GetChildren();	//qæ“¾
 		void SendComponentMessageChildren(Component::Message message);
+		void DebugImGui() override;
 
 	//--- Direction -------------------------------------------------
 	protected:
