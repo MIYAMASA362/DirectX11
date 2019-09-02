@@ -9,6 +9,8 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\IMGUI\GUI_ImGui.h"
+
 //Component
 #include"Module\Object\Object.h"
 #include"Module\Component\Component.h"
@@ -20,6 +22,7 @@
 #include"Module\Tag\Tag.h"
 #include"GameObject.h"
 
+#include"Module\SystemManager\SystemManager.h"
 #include"Module\Scene\SceneManager.h"
 
 using namespace DirectX;
@@ -52,39 +55,24 @@ void GameObject::RunComponent(Component::Message message)
 	//Active‚Å‚È‚¢
 	if (!this->IsActive) return;
 	//Ž©g‚ÌComponent‚ð‘–‚ç‚·
-	for (auto component : Components) {
+	for (auto component : Components)
 		component->Run(self,transform,message);
-	}
-}
-
-void DirectX::GameObject::AddComponents(std::shared_ptr<Component> add)
-{
-	Components.push_back(add);
-	add->gameObject = self;
-	add->transform = self.lock()->transform;
-	add->OnComponent();
-}
-
-bool GameObject::CompareTag(TagName tag) {
-	return this->tag.name == tag;
-}
-
-bool GameObject::GetIsDestroy() {
-	return IsDestroy;
-}
-
-void GameObject::SetActive(bool IsActive) {
-	this->IsActive = IsActive;
-}
-
-bool GameObject::GetActive() {
-	return IsActive;
 }
 
 void DirectX::GameObject::Destroy()
 {
-	scene->SetIsCeanUp(true);
+	SceneManager::SetCleanUp();
 	IsDestroy = true;
 	for (auto child : transform->GetChildren())
 		child.lock()->gameObject.lock()->IsDestroy = true;
+}
+
+void DirectX::GameObject::DebugGUI() 
+{
+	ImGui::SetNextTreeNodeOpen(false,ImGuiCond_Once);
+	if(ImGui::TreeNode(this->name.c_str())){
+		for (auto component : this->Components)
+			component->DebugImGui();
+		ImGui::TreePop();
+	}
 }

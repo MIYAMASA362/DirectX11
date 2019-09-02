@@ -1,6 +1,5 @@
 #pragma once
 
-#include<functional>
 #include<typeinfo>
 
 namespace DirectX
@@ -13,16 +12,10 @@ namespace DirectX
 	class Canvas;
 	class Rigidbody;
 
-	/*
-		scene メンバ変数はSceneのCreanUp時に必要になる
-	*/
-
 	//ゲームオブジェクト :Entity
 	class GameObject final:public Object
 	{
-	//--- Attribute -------------------------------------------------
-		friend class SceneManager;
-		friend class Scene;
+		friend Scene;
 	private:
 		const std::string name;				//GameObject名
 		std::weak_ptr<GameObject> self;		//Sceneが持っている自身へのポインタ
@@ -32,7 +25,6 @@ namespace DirectX
 		bool IsActive  = true;
 	public:
 		static const std::string TypeName;
-	//--- Component -------------------------------------------------
 	private:
 		std::list<std::shared_ptr<Component>> Components;
 	public:
@@ -42,27 +34,16 @@ namespace DirectX
 		std::shared_ptr<MeshRender> meshRenderer;
 		std::shared_ptr<Canvas> canvas;
 		std::shared_ptr<Rigidbody>rigidbody;
-
-	//--- Constructor/Destructor ------------------------------------
 	public:
 		GameObject(std::string name,Scene* scene, TagName tagName);
-		GameObject(std::string name,Scene* scene) : GameObject(name, scene, TagName::Default) {};
 		virtual ~GameObject();
-	//--- Method ----------------------------------------------------
 	public:
-		//Componentにメッセージを走らせる
-		void RunComponent(Component::Message message);
-		void AddComponents(std::shared_ptr<Component> add);
-	public:
-		//タグ比較
-		bool CompareTag(TagName tag);
-		//削除されるか
-		bool GetIsDestroy();
-		//アクティブを設定
-		void SetActive(bool IsActive);
-		//アクティブか確認
-		bool GetActive();
-	//--- Component -------------------------------------------------
+		void RunComponent(Component::Message message);	//Componentにメッセージを走らせる
+		void SetActive(bool IsActive);					//アクティブを設定
+		bool CompareTag(TagName tag);					//タグ比較
+		bool GetIsDestroy();							//削除されるか
+		bool GetActive();								//アクティブか確認
+		void DebugGUI();
 	public:
 		//AddComponent
 		template<typename Type> Type* AddComponent()
@@ -112,8 +93,12 @@ namespace DirectX
 			}
 
 			//Componentsへ追加
-			AddComponents(component);
-
+			{
+				Components.push_back(component);
+				component->gameObject = self;
+				component->transform = self.lock()->transform;
+				component->OnComponent();
+			}
 			return add;
 		}
 		//GetComponent
@@ -128,4 +113,17 @@ namespace DirectX
 		//削除処理
 		void Destroy();
 	};
+
+	inline bool GameObject::CompareTag(TagName tag) {
+		return this->tag.name == tag;
+	};
+	inline bool GameObject::GetIsDestroy() {
+		return this->IsDestroy;
+	}
+	inline void GameObject::SetActive(bool IsActive) {
+		this->IsActive = IsActive;
+	};
+	inline bool GameObject::GetActive() {
+		return this->IsActive;
+	}
 }
