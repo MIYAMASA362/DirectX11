@@ -7,9 +7,10 @@ private:
 	~CManager() = default;
 public:
 	static void Initialize();
-	static void Uninit();
+	static void Run();
 	static void Update();
 	static void FixedUpdate();
+	static void Render();
 	static void DebugRender();
-	static void Render(void);
+	static void Finalize();
 };

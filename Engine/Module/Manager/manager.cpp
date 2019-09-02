@@ -6,12 +6,14 @@
 #include<d3d11.h>
 #include<DirectXMath.h>
 
-//Module
+//--- Module ------------------------------------
 #include"Module\Module.h"
+
+#include"Module\IMGUI\GUI_ImGui.h"
 
 #include"manager.h"
 
-//Project Component
+//--- Project Component -------------------------
 #include"../Project/CameraMouse.h"
 #include"../Project/CameraFollow.h"
 #include"../Project/RemoveObject.h"
@@ -23,7 +25,7 @@
 #include"../Project/ItemSlotScript.h"
 #include"../Project/MapUIScript.h"
 
-//Scene
+//--- Scene -------------------------------------
 
 //Test
 #include"../Project/SceneChange.h"
@@ -35,12 +37,18 @@
 #include"../Project/Title.h"
 #include"../Project/GameMain.h"
 
+//------------------------------------------------
+
 using namespace DirectX;
 
 void CManager::Initialize()
 {
-	SystemManager::CreateManager<SceneManager>();
+	GUI::guiImGui::Create(D3DApp::GetWindow(),D3DApp::GetDevice(),D3DApp::GetDeviceContext());
+
+	TimeManager::Create(D3DApp::GetFps());
+
 	SystemManager::CreateManager<Input>();
+	SystemManager::CreateManager<SceneManager>();
 
 	SystemManager::Initialize();
 
@@ -80,6 +88,26 @@ void CManager::Initialize()
 	BoxCollider::SetRenderBuffer();
 }
 
+void CManager::Run()
+{
+	TimeManager::Update();
+
+	bool IsUpdate = TimeManager::IsUpdate();
+	bool IsFixedUpdate = TimeManager::IsFixedUpdate();
+
+	if (!IsUpdate && !IsFixedUpdate) return;
+
+	if (IsUpdate) CManager::Update();
+
+	if (IsFixedUpdate) CManager::FixedUpdate();
+
+	if (IsUpdate || IsFixedUpdate) SceneManager::CleanUp();
+
+	if (IsUpdate) CManager::Render();
+
+	if (IsUpdate || IsFixedUpdate) SceneManager::ChangeScene();
+}
+
 void CManager::Update()
 {
 	SystemManager::Update();
@@ -87,20 +115,32 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
-	
+	SystemManager::FixedUpdate();
+}
+
+void CManager::Render()
+{
+	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
+
+	CameraManager::SetRender(SceneManager::RunActiveScene_Render, D3DApp::Renderer::Begin);
+
+	CManager::DebugRender();
+
+	D3DApp::Renderer::End();
 }
 
 void CManager::DebugRender()
 {
+	GUI::guiImGui::SetFrame();
+
 	Input::DebugGUI();
+	SceneManager::DebugGUI_ActiveScene();
+	TimeManager::DebugGUI_Time();
+
+	GUI::guiImGui::Render();
 }
 
-void CManager::Render(void)
-{
-	SystemManager::Render();
-}
-
-void CManager::Uninit()
+void CManager::Finalize()
 {
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
@@ -112,4 +152,7 @@ void CManager::Uninit()
 
 	SystemManager::Finalize();
 	SystemManager::Release();
+
+	TimeManager::Destroy();
+	GUI::guiImGui::Destroy();
 }
