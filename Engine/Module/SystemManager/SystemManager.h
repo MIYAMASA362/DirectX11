@@ -20,6 +20,10 @@ namespace DirectX
 			for (auto manager : ManagerIndex)
 				manager->update();
 		}
+		static void FixedUpdate(){
+			for (auto manager : ManagerIndex)
+				manager->fixedUpdate();
+		}
 		static void Render() {
 			for (auto manager : ManagerIndex)
 				manager->render();
@@ -35,6 +39,7 @@ namespace DirectX
 	public:
 		virtual void initialize() {};
 		virtual void update() {};
+		virtual void fixedUpdate() {};
 		virtual void render() {};
 		virtual void finalize() {};
 	};
