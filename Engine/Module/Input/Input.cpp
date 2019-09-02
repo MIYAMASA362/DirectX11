@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<list>
+#include<memory>
 #include<string>
 #include<d3d11.h>
 #include<DirectXMath.h>
@@ -7,6 +9,7 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\SystemManager\SystemManager.h"
 #include "input.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"
@@ -27,94 +30,6 @@ LPDIRECTINPUT8		 Input::m_pInput = nullptr;
 LPDIRECTINPUTDEVICE8 Input::m_pDevMouse = nullptr;
 DIMOUSESTATE2		 Input::m_MouseState2 = { NULL };
 BYTE				 Input::m_OldMouseButtons[8];
-
-void Input::Init()
-{
-	//キーボード設定
-	memset(m_OldKeyState, 0, 256);
-	memset(m_KeyState, 0, 256);
-
-	HRESULT hr;
-
-	hr = DirectInput8Create(
-		D3DApp::GethInstance(),
-		DIRECTINPUT_VERSION,
-		IID_IDirectInput8,
-		(void**)&m_pInput,
-		NULL
-	);
-
-	if(FAILED(hr))
-	{
-		MessageBox(NULL,"Inputデバイスの生成に失敗しました。","エラー",MB_OK);
-		return;
-	}
-
-	hr = m_pInput->CreateDevice(GUID_SysMouse, &m_pDevMouse, NULL);
-
-	hr = m_pDevMouse->SetDataFormat(&c_dfDIMouse2);
-
-	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::GetWindow(),(DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
-
-	m_pDevMouse->Acquire();
-
-	Mouse::SetScreenLoop(true);
-}
-
-void Input::Uninit()
-{
-	if(m_pDevMouse != nullptr)
-	{
-		m_pDevMouse->Unacquire();
-		m_pDevMouse->Release();
-		m_pDevMouse = nullptr;
-	}
-
-	if(m_pInput != nullptr){
-		m_pInput->Release();
-		m_pInput = nullptr;
-	}
-}
-
-void Input::Update()
-{
-	//キー処理
-	{
-		memcpy(m_OldKeyState, m_KeyState, 256);
-
-		GetKeyboardState(m_KeyState);
-	}
-
-	//マウス処理
-	{
-		memcpy(m_OldMouseButtons, m_MouseState2.rgbButtons, 8);
-
-		//マウス情報
-		GetCursorPos(&m_MousePos);
-		//カーソルループ
-		if (!Input::GetKeyPress(VK_CONTROL) && IsCursorLoop) {
-			WINDOWINFO info;
-			GetWindowInfo(D3DApp::GetWindow(),&info);
-			//--- 左右 -------------------------------------------------------------------
-			if ((UINT)m_MousePos.x <= info.rcWindow.left + info.cxWindowBorders)
-				SetCursorPos(info.rcWindow.right - info.cxWindowBorders, m_MousePos.y);
-			else if ((UINT)m_MousePos.x >= info.rcWindow.right - info.cxWindowBorders)
-				SetCursorPos(info.rcClient.left + info.cxWindowBorders,m_MousePos.y);
-			//--- 上下 -------------------------------------------------------------------
-			if ((UINT)m_MousePos.y <= info.rcWindow.top + info.cyWindowBorders)
-				SetCursorPos(m_MousePos.x, info.rcWindow.bottom - info.cyWindowBorders);
-			else if ((UINT)m_MousePos.y >= info.rcWindow.bottom - info.cyWindowBorders)
-				SetCursorPos(m_MousePos.x,info.rcWindow.top + info.cyWindowBorders);
-			
-			GetCursorPos(&m_MousePos);
-		}
-		ScreenToClient(D3DApp::GetWindow(), &m_MousePos);
-
-		//DirectInput
-		if (FAILED(m_pDevMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState2)))
-			m_pDevMouse->Acquire();
-	}
-}
 
 bool Input::GetKeyPress(BYTE KeyCode)
 {
@@ -141,6 +56,94 @@ void DirectX::Input::DebugGUI()
 	ImGui::Text("Mouse X:%f",Input::Mouse::GetMouseX());
 	ImGui::Text("Mouse Y:%f",Input::Mouse::GetMouseY());
 	ImGui::End();
+}
+
+void DirectX::Input::initialize()
+{
+	//キーボード設定
+	memset(m_OldKeyState, 0, 256);
+	memset(m_KeyState, 0, 256);
+
+	HRESULT hr;
+
+	hr = DirectInput8Create(
+		D3DApp::GethInstance(),
+		DIRECTINPUT_VERSION,
+		IID_IDirectInput8,
+		(void**)&m_pInput,
+		NULL
+	);
+
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, "Inputデバイスの生成に失敗しました。", "エラー", MB_OK);
+		return;
+	}
+
+	hr = m_pInput->CreateDevice(GUID_SysMouse, &m_pDevMouse, NULL);
+
+	hr = m_pDevMouse->SetDataFormat(&c_dfDIMouse2);
+
+	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::GetWindow(), (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+
+	m_pDevMouse->Acquire();
+
+	Mouse::SetScreenLoop(true);
+}
+
+void DirectX::Input::update()
+{
+	//キー処理
+	{
+		memcpy(m_OldKeyState, m_KeyState, 256);
+
+		GetKeyboardState(m_KeyState);
+	}
+
+	//マウス処理
+	{
+		memcpy(m_OldMouseButtons, m_MouseState2.rgbButtons, 8);
+
+		//マウス情報
+		GetCursorPos(&m_MousePos);
+		//カーソルループ
+		if (!Input::GetKeyPress(VK_CONTROL) && IsCursorLoop) {
+			WINDOWINFO info;
+			GetWindowInfo(D3DApp::GetWindow(), &info);
+			//--- 左右 -------------------------------------------------------------------
+			if ((UINT)m_MousePos.x <= info.rcWindow.left + info.cxWindowBorders)
+				SetCursorPos(info.rcWindow.right - info.cxWindowBorders, m_MousePos.y);
+			else if ((UINT)m_MousePos.x >= info.rcWindow.right - info.cxWindowBorders)
+				SetCursorPos(info.rcClient.left + info.cxWindowBorders, m_MousePos.y);
+			//--- 上下 -------------------------------------------------------------------
+			if ((UINT)m_MousePos.y <= info.rcWindow.top + info.cyWindowBorders)
+				SetCursorPos(m_MousePos.x, info.rcWindow.bottom - info.cyWindowBorders);
+			else if ((UINT)m_MousePos.y >= info.rcWindow.bottom - info.cyWindowBorders)
+				SetCursorPos(m_MousePos.x, info.rcWindow.top + info.cyWindowBorders);
+
+			GetCursorPos(&m_MousePos);
+		}
+		ScreenToClient(D3DApp::GetWindow(), &m_MousePos);
+
+		//DirectInput
+		if (FAILED(m_pDevMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState2)))
+			m_pDevMouse->Acquire();
+	}
+}
+
+void DirectX::Input::finalize()
+{
+	if (m_pDevMouse != nullptr)
+	{
+		m_pDevMouse->Unacquire();
+		m_pDevMouse->Release();
+		m_pDevMouse = nullptr;
+	}
+
+	if (m_pInput != nullptr) {
+		m_pInput->Release();
+		m_pInput = nullptr;
+	}
 }
 
 float DirectX::Input::Mouse::GetMouseX()

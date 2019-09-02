@@ -5,7 +5,7 @@
 
 namespace DirectX
 {
-	class Input
+	class Input:public SystemManager
 	{
 	private:
 		static BYTE m_OldKeyState[256];
@@ -18,16 +18,11 @@ namespace DirectX
 		static DIMOUSESTATE2 m_MouseState2;
 		static BYTE m_OldMouseButtons[8];
 	public:
-		static void Init();
-		static void Uninit();
-		static void Update();
-
 		//à¯êî:VK_@@@ '@'
 		static bool GetKeyPress(BYTE KeyCode);
 		static bool GetKeyCodePress(BYTE keyCode);
 		static bool GetKeyTrigger(BYTE KeyCode);
 		static bool GetKeyUp(BYTE KeyCode);
-
 	public:
 		static void DebugGUI();
 	public:
@@ -53,5 +48,9 @@ namespace DirectX
 			static float GetAccelerationY();
 			static float GetAccelerationZ();
 		};
+	public:
+		virtual void initialize() override;
+		virtual void update() override;
+		virtual void finalize() override;
 	};
 }
