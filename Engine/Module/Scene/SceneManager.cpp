@@ -80,9 +80,6 @@ void DirectX::SceneManager::RunActiveScene(Component::Message message)
 }
 
 //	RunActiveScene_Render()
-//	
-//	Canvasがアタッチされている場合、そのオブジェクトと子を2D描画として扱う
-//
 void DirectX::SceneManager::RunActiveScene_Render()
 {
 	pActiveScene.lock()->Render();
@@ -146,6 +143,11 @@ void DirectX::SceneManager::ApplyRigidbody()
 	pActiveScene.lock()->ApplyRigidbody();
 }
 
+void DirectX::SceneManager::SetCleanUp()
+{
+	pActiveScene.lock()->SetIsCleanUp();
+}
+
 //次のSceneを設定
 void DirectX::SceneManager::SetIsChangeScene(std::weak_ptr<Scene> scene)
 {
@@ -170,7 +172,7 @@ void DirectX::SceneManager::DetachActiveScene()
 //--- Scene -------------------------------------------------------------------
 
 //GameObjectをTag指定で追加
-GameObject* Scene::AddSceneObject(std::string name,TagName tag)
+GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 {
 	//GameObjectの生成
 	std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject(name,this,tag));
@@ -178,10 +180,6 @@ GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 	object->self = object;
 	object->AddComponent<Transform>();
 	return object.get();
-}
-
-void Scene::SetIsCleanUp() {
-	this->IsCleanUp = true;
 }
 
 void DirectX::Scene::SendComponentMessage(Component::Message message)
@@ -211,6 +209,11 @@ void DirectX::Scene::CleanUp()
 	this->IsCleanUp = false;
 }
 
+/*
+	毎描画時にRenderで列を組むのは無駄。
+	・RendererにGameObjectをセットしてソートするべき
+	・2D/3Dを引数で選択できるようにする
+*/
 void DirectX::Scene::Render()
 {
 	//2D描画するオブジェクトのインデックス
@@ -242,7 +245,7 @@ void DirectX::Scene::Render()
 		//2D描画
 		for (auto gameObject : RenderIndex_2D)
 			//親がいない
-			if (gameObject.lock()->transform->GetParent().expired()) {
+			if (gameObject.lock()->transform->GetParent().expired()){
 				gameObject.lock()->RunComponent(Component::Render);
 				gameObject.lock()->transform->SendComponentMessageChildren(Component::Render);
 			}
@@ -252,10 +255,10 @@ void DirectX::Scene::Render()
 void DirectX::Scene::ColliderUpdate()
 {
 	for(auto gameObject:this->GameObjectIndex){
-		if (!gameObject->IsActive)continue;
+		if (!gameObject->GetActive())continue;
 		for (auto otherObject : this->GameObjectIndex) {
 			if (gameObject == otherObject) continue;
-			if (!otherObject->IsActive) continue;
+			if (!otherObject->GetActive()) continue;
 			Collider::Hitjudgment(gameObject.get(),otherObject.get());
 		}
 	}
@@ -264,7 +267,7 @@ void DirectX::Scene::ColliderUpdate()
 void DirectX::Scene::ApplyRigidbody()
 {
 	for(auto gameObject:this->GameObjectIndex){
-		if (!gameObject->IsActive) continue;
+		if (!gameObject->GetActive()) continue;
 		if (!gameObject->rigidbody) continue;
 		if (!gameObject->rigidbody->GetEnable()) continue;
 		gameObject->rigidbody->ApplyRigidbody();
@@ -273,24 +276,6 @@ void DirectX::Scene::ApplyRigidbody()
 
 void DirectX::Scene::DebugGUI()
 {
-	for (auto gameObject : this->GameObjectIndex) {
-		ImGui::SetNextTreeNodeOpen(false, ImGuiCond_Once);
-		if(ImGui::TreeNode(gameObject->name.c_str())){
-			Vector3 position = gameObject->transform.get()->position();
-			Vector3 rotation = Quaternion::ToEulerAngles(gameObject->transform.get()->rotation());
-			Quaternion q = gameObject->transform.get()->rotation();
-			Vector3 scale = gameObject->transform.get()->scale();
-			ImGui::InputFloat3("Position", &position.x);
-			ImGui::InputFloat3("Rotation", &rotation.x);
-			ImGui::InputFloat3("Scale", &scale.x);
-
-			if (ImGui::TreeNode("Component")) {
-				for (auto component : gameObject->Components) {
-					component->DebugImGui();
-				}
-				ImGui::TreePop();
-			}
-			ImGui::TreePop();
-		}
-	}
+	for (auto gameObject : this->GameObjectIndex)
+		gameObject->DebugGUI();
 }

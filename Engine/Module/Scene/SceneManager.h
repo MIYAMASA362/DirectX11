@@ -54,13 +54,15 @@ namespace DirectX
 		static std::weak_ptr<Scene>GetActiveScene();
 		static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
 		static void ApplyRigidbody();
+		static void SetCleanUp();
 	private:
 		static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 		static void AttachActiveScene(std::weak_ptr<Scene> scene);
 		static void DetachActiveScene();
 	};
 
-	inline void SceneManager::initialize() {};
+	inline void SceneManager::initialize() {
+	};
 	inline void SceneManager::update() {
 		RunActiveScene(Component::Update);
 		RunActiveScene(Component::FixedUpdate);
@@ -119,5 +121,8 @@ namespace DirectX
 	inline std::string DirectX::Scene::GetSceneName(){
 		return this->name;
 	}
+	inline void Scene::SetIsCleanUp() {
+		this->IsCleanUp = true;
+	};
 
 }
