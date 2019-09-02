@@ -362,9 +362,9 @@ int D3DApp::Run()
 			}
 			continue;
 		}
-		CManager::Update();
+		CManager::Run();
 	}
-	CManager::Uninit();
+	CManager::Finalize();
 
 	D3DApp::Destroy();
 	
