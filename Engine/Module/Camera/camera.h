@@ -33,12 +33,19 @@ namespace DirectX
 	private:
 		void Run();	//•`‰æ
 	public:
-		virtual const std::type_info& GetType() override { return typeid(*this); };
-		void OnComponent() override { CameraManager::IndexSort(this); };
+		virtual const std::type_info& GetType() override;
+		void OnComponent() override;
 		void OnDestroy() override;
 		void SetViewPort(float x, float y,float w, float h);
 		void SetPriority(int priority);
 		void Finalize();
 		XMMATRIX GetViewMatrix();
+	};
+
+	inline const std::type_info& Camera::GetType() {
+		return typeid(*this);
+	};
+	inline void Camera::OnComponent(){
+		CameraManager::IndexSort(this);
 	};
 }
