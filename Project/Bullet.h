@@ -28,11 +28,6 @@ public:
 
 	void Update()override
 	{
-		if (Input::GetKeyTrigger('Q'))
-		{
-			auto bullet = GameObject::Instantiate(this->gameObject.lock().get());
-			bullet->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
-			bullet->AddComponent<Bullet>();
-		}
+
 	}
 };
