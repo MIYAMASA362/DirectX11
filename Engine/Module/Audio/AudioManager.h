@@ -3,7 +3,7 @@
 namespace DirectX
 {
 	//Audio資源
-	class AudioAsset final:public AssetManager
+	class AudioAsset final
 	{
 		friend class AudioManager;
 	private:
@@ -15,7 +15,7 @@ namespace DirectX
 	};
 
 	//Audio管理
-	class AudioManager final
+	class AudioManager final:public AssetManager
 	{
 	private:
 		static const std::string AssetDataBase;		//Assetフォルダパス
