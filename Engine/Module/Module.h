@@ -10,8 +10,11 @@
 #include"DirectX\DirectXStruct.h"
 #include"DirectX\DirectX.h"
 
+#include"SystemManager\SystemManager.h"
+
 //Device
 #include"Input\Input.h"
+#include"Time\Time.h"
 
 //Asset
 #include"AssetData\AssetData.h"
