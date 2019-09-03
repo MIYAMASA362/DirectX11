@@ -4,6 +4,12 @@ namespace DirectX
 {
 	class MeshRender;
 
+	class Renderer
+	{
+	private:
+
+	};
+
 	class Mesh
 	{
 		friend class MeshRender;
@@ -25,14 +31,12 @@ namespace DirectX
 		virtual const std::type_info& GetType() override { return typeid(*this); };
 		void OnComponent() override;
 		void SendBehaviourMessage(Message message) override;
-		//Mesh‚ğİ’è
 		template<typename Type> Type* SetMesh()
 		{
 			mesh = std::shared_ptr<Mesh>(new Type());
 
 			return static_cast<Type*>(mesh.get());
 		}
-		//Meshƒf[ƒ^‚Ìæ“¾
 		Mesh* GetMesh()
 		{
 			return mesh.get();
