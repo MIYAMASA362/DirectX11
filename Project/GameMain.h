@@ -272,7 +272,7 @@ public:
 
 		GameObject* canvas2 = this->AddSceneObject("Canvas2",TagName::Default);
 		{
-			canvas2->transform->position(Vector3(0.0f, D3DApp::GetScreenHeight(), 0.0f));
+			canvas2->transform->position(Vector3(0.0f, (float)D3DApp::GetScreenHeight(), 0.0f));
 			canvas2->AddComponent<Canvas>();
 
 			GameObject* mapBG = this->AddSceneObject("mapBG",TagName::Default);
