@@ -1,26 +1,73 @@
 #pragma once
 
+#include<memory>
+#include<map>
+#include<vector>
 namespace DirectX
 {
-	template<typename Type>
-	class IComponent
+	typedef unsigned int ComponentID;
+	typedef unsigned int EntityID;
+
+	class Transform;
+
+	using Components = std::map<ComponentID, std::weak_ptr<IComponent>>;
+	using EntityComponents = std::map<EntityID, std::shared_ptr<Components>>;
+	
+	//--- ComponentManager -----------------------------------------------------------------
+	class ComponentManager
 	{
-	protected:
-		std::map<EntityID, std::shared_ptr<Type>> ComponentIndex;
-	protected:
-		void AddComponent(EntityID id);
-		void RemoveComponent(EntityID id);
+	private:
+		ComponentID m_id;
+		EntityComponents EntityComponentIndex;	//EntityÇ™èäéùÇµÇƒÇ¢ÇÈComponentÇÃï€ä«å…
+	public:
+		void Create();
+		void Release();
+	public:
+		template<typename Type> Type* AddComponent(EntityID id);
+		void DestroyComponents(EntityID id);
+		template<typename Type> void DestroyComponent(EntityID id);
+		template<typename Type> void CreateComponent();
 	};
 
-	//-------------------------------------------------------------------------
-	template<typename Type>
-	inline void IComponent<Type>::AddComponent(EntityID id)
+	//--------------------------------------------------------------------------------------
+	inline void ComponentManager::Create(){
+		EntityComponentIndex.clear();
+	}
+	inline void ComponentManager::Release(){
+		EntityComponentIndex.clear();
+	}
+	inline void ComponentManager::DestroyComponents(EntityID id)
 	{
-		ComponentIndex.emplace(id,std::shared_ptr<Type>(new Type()));
+		EntityComponentIndex.at(id)->clear();
 	}
 	template<typename Type>
-	inline void IComponent<Type>::RemoveComponent(EntityID id)
+	inline Type* ComponentManager::AddComponent(EntityID id)
 	{
-		ComponentIndex.erase(id);
+		auto add = new Type();
+
+		auto components = std::shared_ptr<Components>();
+		try{
+			components = EntityComponentIndex.at(id);
+		}
+		catch (const std::out_of_range&){
+			components = std::shared_ptr<Components>();
+			EntityComponentIndex.emplace(id,components);
+		}
+		components->emplace(add->GetComponentID(),add->AddComponent(id));
+		return add;
+	}
+	template<typename Type>
+	inline void ComponentManager::DestroyComponent(EntityID id)
+	{
+		auto components = EntityComponentIndex.at(id);
+		components->erase(Type::GetID());
+		return;
+	}
+	template<typename Type>
+	inline void ComponentManager::CreateComponent()
+	{
+		int n = m_id;
+		m_id++;
+		return n;
 	}
 }
