@@ -2,27 +2,18 @@
 
 namespace DirectX
 {
-	typedef unsigned int EntityID;
-	
+	using EntityID = unsigned int;
+
 	//Entity Interface
 	class IEntity:public Object
 	{
 	protected:
-		const EntityID m_id;
+		const EntityID m_EntityID;
+		bool m_IsEnable;
 	public:
-		IEntity(EntityID id);
+		IEntity();
 		~IEntity() = default;
 		const EntityID GetEntityID();
+		bool GetIsEnable();
 	};
-
-	//------------------------------------------------------------------------
-	inline IEntity::IEntity(EntityID id)
-	:
-		m_id(id)
-	{
-
-	}
-	inline const EntityID IEntity::GetEntityID(){
-		return m_id;
-	}
 }
