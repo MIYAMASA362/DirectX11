@@ -11,6 +11,9 @@
 
 #include"Module\IMGUI\GUI_ImGui.h"
 
+//ECS
+#include"../ECSEngine.h"
+
 //Component
 #include"Module\Object\Object.h"
 #include"Module\Component\Component.h"
@@ -37,42 +40,21 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	IsDestroy(false),
 	IsActive(true)
 {
+
 }
 
 GameObject::~GameObject() 
 {
-	canvas.reset();
-	camera.reset();
-	meshRenderer.reset();
-	transform.reset();
-	colliders.clear();
-
-	Components.clear();
+	
 }
 
-void GameObject::RunComponent(Component::Message message)
-{
-	//Active‚Å‚È‚¢
-	if (!this->IsActive) return;
-	//Ž©g‚ÌComponent‚ð‘–‚ç‚·
-	for (auto component : Components)
-		component->Run(self,transform,message);
-}
-
-void DirectX::GameObject::Destroy()
-{
-	SceneManager::SetCleanUp();
-	IsDestroy = true;
-	for (auto child : transform->GetChildren())
-		child.lock()->gameObject.lock()->IsDestroy = true;
-}
 
 void DirectX::GameObject::DebugGUI() 
 {
-	ImGui::SetNextTreeNodeOpen(false,ImGuiCond_Once);
-	if(ImGui::TreeNode(this->name.c_str())){
-		for (auto component : this->Components)
-			component->DebugImGui();
-		ImGui::TreePop();
-	}
+
+}
+
+std::weak_ptr<Transform> DirectX::GameObject::transform()
+{
+	return ComponentManager::GetComponent<Transform>(this->m_EntityID);
 }
