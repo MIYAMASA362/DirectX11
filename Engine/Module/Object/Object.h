@@ -2,23 +2,29 @@
 
 namespace DirectX
 {
-	/**
-		@virtual
-		+ Destroy
-		+ OnDestroy
-	*/
 	class Object
 	{
 	public:
-		Object(){};
-		virtual ~Object() 
-		{ 
-			OnDestroy(); 
-		};
+		Object();
+		virtual ~Object();
 	public:
-		virtual void OnDestroy() {};
-		std::string ObjectTypeName() {
-			return typeid(*this).name();
-		};
+		virtual void OnDestroy();
+		virtual void Destroy();
 	};
+
+	//----------------------------------------------------------------
+	Object::Object(){
+		
+	}
+	Object::~Object(){
+		OnDestroy();
+	};
+	inline void Object::OnDestroy()
+	{
+	
+	}
+	inline void Object::Destroy() 
+	{
+
+	}
 }
