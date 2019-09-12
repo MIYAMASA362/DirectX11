@@ -1,7 +1,8 @@
-#include<map>
-#include<memory>
-#include"Module\Entity\IEntity.h"
+#include"IComponent.h"
+#include"Component.h"
 #include"ComponentManager.h"
 
-using namespace DirectX;
-
+//ComponentIDのカウント
+DirectX::ComponentID DirectX::ComponentManager::m_id;
+//EntityにアタッチされたComponentのリスト
+DirectX::EntityComponents DirectX::ComponentManager::EntityComponentIndex;

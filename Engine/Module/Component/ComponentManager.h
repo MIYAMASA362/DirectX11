@@ -3,30 +3,30 @@
 #include<memory>
 #include<map>
 #include<vector>
+
 namespace DirectX
 {
-	typedef unsigned int ComponentID;
-	typedef unsigned int EntityID;
-
-	class Transform;
+	using ComponentID = unsigned int;
+	using EntityID = unsigned int;
 
 	using Components = std::map<ComponentID, std::weak_ptr<IComponent>>;
 	using EntityComponents = std::map<EntityID, std::shared_ptr<Components>>;
-	
+
 	//--- ComponentManager -----------------------------------------------------------------
 	class ComponentManager
 	{
 	private:
-		ComponentID m_id;
-		EntityComponents EntityComponentIndex;	//Entity‚ªŠ‚µ‚Ä‚¢‚éComponent‚Ì•ÛŠÇŒÉ
+		static ComponentID m_id;
+		static EntityComponents EntityComponentIndex;
 	public:
-		void Create();
-		void Release();
+		static void Create();
+		static void Release();
 	public:
-		template<typename Type> Type* AddComponent(EntityID id);
-		void DestroyComponents(EntityID id);
-		template<typename Type> void DestroyComponent(EntityID id);
-		template<typename Type> void CreateComponent();
+		template<typename Type> static Type* AddComponent(EntityID id);
+		template<typename Type> static std::weak_ptr<Type> GetComponent(EntityID id);
+		static void DestroyComponents(EntityID id);
+		template<typename Type> static void DestroyComponent(EntityID id);
+		template<typename Type> static ComponentID CreateComponent();
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -47,14 +47,22 @@ namespace DirectX
 
 		auto components = std::shared_ptr<Components>();
 		try{
+			//id‚ÌComponentsƒŠƒXƒg‚ª‘¶İ‚·‚é‚Ì‚©
 			components = EntityComponentIndex.at(id);
 		}
 		catch (const std::out_of_range&){
+			//‘¶İ‚µ‚Ä‚¢‚È‚¢
 			components = std::shared_ptr<Components>();
 			EntityComponentIndex.emplace(id,components);
 		}
-		components->emplace(add->GetComponentID(),add->AddComponent(id));
+		components->emplace(add->GetComponentID(),add);
+		add->m_OwnerId = id;
 		return add;
+	}
+	template<typename Type>
+	inline std::weak_ptr<Type> ComponentManager::GetComponent(EntityID id)
+	{
+		return std::static_pointer_cast<Type>(EntityComponentIndex.at(id)->at(Type::GetID()).lock());
 	}
 	template<typename Type>
 	inline void ComponentManager::DestroyComponent(EntityID id)
@@ -64,9 +72,9 @@ namespace DirectX
 		return;
 	}
 	template<typename Type>
-	inline void ComponentManager::CreateComponent()
+	inline ComponentID ComponentManager::CreateComponent()
 	{
-		int n = m_id;
+		ComponentID n = m_id;
 		m_id++;
 		return n;
 	}
