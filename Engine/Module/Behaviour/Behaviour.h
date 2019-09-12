@@ -2,38 +2,34 @@
 
 namespace DirectX
 {
-	class Collider;
-	class Collision;
-
-	/**
-	@virtual
-	+ Initialize
-	+ Update
-	+ Finalize
-	+ Destroy
-	+ OnDestroy
-	*/
-	class Behaviour :public Component
+	//=== Behaviour =====================================================================
+	template<typename Type>
+	class Behaviour:public Component<Type>
 	{
+	protected:
+		bool m_IsEnable;
 	public:
-		Behaviour(std::string name):Component(name) {};
-		virtual ~Behaviour(){};
+		Behaviour(std::string name) :Component(name) {};
+		virtual ~Behaviour() = default;
 	public:
-		virtual const std::type_info& GetType() override { return typeid(*this); };
-		virtual void SendBehaviourMessage(Component::Message message) override;
-		//Defualt Method
-		virtual void Initialize() {};
-		virtual void Update() {};
-		virtual void FixedUpdate() {};
-		virtual void Finalize() {};
-		virtual void OnDestroy() {};
-		//“–‚½‚è”»’èŒnMessage
+		bool GetEnable();
+		void SetEnable(bool IsEnable);
 	public:
-		virtual void OnTriggerEnter(std::weak_ptr<Collider> other) override {};
-		virtual void OnTriggerExit(std::weak_ptr<Collider> other) override {};
-		virtual void OnTriggerStay(std::weak_ptr<Collider> other) override {};
-		virtual void OnCollisionEnter(std::weak_ptr<Collision> collision) override {};
-		virtual void OnCollisionExit(std::weak_ptr<Collision> collision)  override {};
-		virtual void OnCollisionStay(std::weak_ptr<Collision> collision) override {};
+		virtual void Run()			override {};
+		virtual void OnComponent()	override {};
+		virtual void OnDestroy()	override {};
+		virtual void DebugImGui()	override {};
 	};
+
+	//-----------------------------------------------------------------------------------
+	template<typename Type>
+	inline bool Behaviour<Type>::GetEnable()
+	{
+		return this->m_IsEnable;
+	}
+	template<typename Type>
+	inline void Behaviour<Type>::SetEnable(bool IsEnable)
+	{
+		this->m_IsEnable = IsEnable;
+	}
 }
