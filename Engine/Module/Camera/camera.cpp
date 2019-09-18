@@ -1,5 +1,7 @@
 #include<list>
+#include<vector>
 #include<memory>
+#include<map>
 #include<Windows.h>
 #include<d3d11.h>
 #include<DirectXMath.h>
@@ -9,9 +11,7 @@
 #include"Module\DirectX\DirectX.h"
 
 //Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-#include"Module\Behaviour\Behaviour.h"
+#include"Module\ECSEngine.h"
 
 //Component Module
 #include"camera.h"
@@ -21,105 +21,14 @@
 #include"Module\Tag\Tag.h"
 #include"Module\GameObject\GameObject.h"
 
-
 using namespace DirectX;
 
-//--- CameraManager -----------------------------------------------------------
-
-Camera* CameraManager::pActiveCamera = nullptr;
-std::list<std::weak_ptr<Camera>> CameraManager::CameraIndex;
-
-DirectX::CameraManager::~CameraManager()
-{
-	CameraIndex.clear();
-}
-
-
-void DirectX::CameraManager::IndexSort(Camera * target)
-{
-	std::weak_ptr<Camera> wPtr = target->gameObject.lock()->GetComponent<Camera>();
-
-	//配列長が0
-	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
-
-	bool IsInsert = false;
-
-	//配列
-	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end();)
-	{
-		Camera* camera = itr->lock().get();
-		//削除
-		if (camera == target)
-		{
-			itr->reset();
-			itr = CameraIndex.erase(itr);
-			continue;
-		}
-
-		//挿入
-		if (!IsInsert)
-			if (camera->priority >= target->priority)
-			{
-				IsInsert = true;
-				if (itr == CameraIndex.begin())
-					CameraIndex.push_front(wPtr);
-				else
-					CameraIndex.insert(itr, wPtr);
-			}
-		itr++;
-	}
-
-	if (!IsInsert) CameraIndex.push_back(wPtr);
-	return;
-}
-
-void DirectX::CameraManager::RemoveCamera(Camera * camera)
-{
-	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
-	{
-		if (itr->lock().get() != camera) continue;
-		CameraIndex.erase(itr);
-		break;
-	}
-}
-
-void DirectX::CameraManager::SetRender(void(*Draw)(void), void(*Begin)(void))
-{
-	auto itr = CameraIndex.begin();
-	while (itr != CameraIndex.end())
-	{
-		//未使用枠を削除
-		if (itr->expired()) {
-			itr = CameraIndex.erase(itr);
-			continue;
-		}
-		//カメラ設定
-		Camera* camera = itr->lock().get();
-		itr++;
-
-		if (!camera->gameObject.lock()->GetActive())continue;
-		if (!camera->IsEnable)continue;
-		pActiveCamera = camera;
-
-		Begin();
-		camera->Run();
-		Draw();
-	}
-}
-
-void DirectX::CameraManager::Release()
-{
-	CameraIndex.clear();
-}
-
-Camera * DirectX::CameraManager::GetActiveCamera()
-{
-	return pActiveCamera;
-}
-
 //--- Camera ------------------------------------------------------------------
-DirectX::Camera::Camera()
-	:
+Camera* Camera::pActiveCamera = nullptr;
+std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
+
+Camera::Camera()
+:
 	Behaviour("Camera"),
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
@@ -127,18 +36,13 @@ DirectX::Camera::Camera()
 
 }
 
-DirectX::Camera::~Camera()
+Camera::~Camera()
 {
 
-}
-
-void DirectX::Camera::OnDestroy()
-{
-	CameraManager::RemoveCamera(this);
 }
 
 //描画
-void DirectX::Camera::Run()
+void Camera::Run()
 {
 	XMMATRIX	ViewMatrix;
 	XMMATRIX	m_InvViewMatrix;
@@ -156,12 +60,12 @@ void DirectX::Camera::Run()
 	D3DApp::GetDeviceContext()->RSSetViewports(1, &dxViewport);
 
 	// ビューマトリクス設定
-	m_InvViewMatrix = gameObject.lock()->transform->WorldMatrix();
+	m_InvViewMatrix = ComponentManager::GetComponent<Transform>(this->m_id).lock()->WorldMatrix();
 
 	XMVECTOR det;
 	ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
 
-	this->m_ViewMatrix = gameObject.lock()->transform->MatrixScaling() * gameObject.lock()->transform->MatrixQuaternion();
+	this->m_ViewMatrix = ComponentManager::GetComponent<Transform>(this->m_id).lock()->MatrixScaling() * ComponentManager::GetComponent<Transform>(this->m_id).lock()->MatrixQuaternion();
 
 	D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
 
@@ -184,19 +88,109 @@ void DirectX::Camera::SetViewPort(float x, float y, float w, float h)
 	viewport.bottom = (long)(h == 0.0f ? 0 : D3DApp::GetScreenHeight()*h);
 }
 
-void DirectX::Camera::SetPriority(int priority)
+void Camera::SetPriority(int priority)
 {
 	this->priority = priority;
-	CameraManager::IndexSort(this);
+	Camera::IndexSort(this);
 }
 
-void DirectX::Camera::Finalize()
+void Camera::SetRender(void(*Draw)(void), void(*Begin)(void))
 {
-	CameraManager::RemoveCamera(this);
+	auto itr = CameraIndex.begin();
+	while (itr != CameraIndex.end())
+	{
+		//未使用枠を削除
+		if (itr->expired()) {
+			itr = CameraIndex.erase(itr);
+			continue;
+		}
+		//カメラ設定
+		Camera* camera = itr->lock().get();
+		itr++;
+	
+		if (!camera->gameObject().lock()->GetActive()) continue;
+		if (!camera->GetEnable()) continue;
+		pActiveCamera = camera;
+	
+		Begin();
+		camera->Run();
+		Draw();
+	}
 }
 
-XMMATRIX DirectX::Camera::GetViewMatrix()
+void Camera::Finalize()
+{
+	Camera::RemoveCamera(this);
+}
+
+XMMATRIX Camera::GetViewMatrix()
 {
 	return this->m_ViewMatrix;
+}
+
+Camera* Camera::GetActiveCamera()
+{
+	return pActiveCamera;
+}
+
+void Camera::OnComponent()
+{
+	Camera::IndexSort(this);
+}
+
+void Camera::IndexSort(Camera* target)
+{
+	std::weak_ptr<Camera> wPtr = target->gameObject().lock()->GetComponent<Camera>();
+	
+	//配列長が0
+	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
+	
+	bool IsInsert = false;
+	
+	//配列
+	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end();) {
+		Camera* camera = itr->lock().get();
+		//削除(重複を防ぐ)
+		if (camera == target)
+		{
+			itr->reset();
+			itr = CameraIndex.erase(itr);
+			continue;
+		}
+	
+		//挿入
+		if (!IsInsert)
+			if (camera->priority >= target->priority){
+				IsInsert = true;
+				if (itr == CameraIndex.begin())
+					CameraIndex.push_front(wPtr);
+				else
+					CameraIndex.insert(itr, wPtr);
+			}
+		itr++;
+	}
+	
+	if (!IsInsert) CameraIndex.push_back(wPtr);	//末尾
+	return;
+}
+
+void DirectX::Camera::RemoveCamera(Camera * camera)
+{
+	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
+	{
+		if (itr->lock().get() != camera) continue;
+		CameraIndex.erase(itr);
+		break;
+	}
+}
+
+void DirectX::Camera::Release()
+{
+
+}
+
+void Camera::OnDestroy()
+{
+	Camera::RemoveCamera(this);
 }
 
