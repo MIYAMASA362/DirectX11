@@ -1,6 +1,7 @@
 #pragma once
 #include<typeinfo>
 #include<memory>
+#include<map>
 #include<list>
 #include<string>
 
@@ -23,14 +24,13 @@
 
 #include"Physics\Physics.h"
 
-//Component
-#include"Object\Object.h"
-#include"Component\Component.h"
+//ECS
+#include"ECSEngine.h"
 
-#include"Transform\Transform.h"
-#include"Behaviour\Behaviour.h"
+//Component
 #include"Tag\Tag.h"
 #include"GameObject\GameObject.h"
+#include"Mesh\Mesh.h"
 
 #include"Audio\AudioSource.h"
 

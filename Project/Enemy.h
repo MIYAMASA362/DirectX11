@@ -1,6 +1,6 @@
 #pragma once
 
-class Enemy:public Behaviour
+class Enemy:public MonoBehaviour<Enemy>
 {
 private:
 	const float maxHp = 10.0f;
@@ -8,7 +8,7 @@ private:
 public:
 	GameObject* hpBoard;
 public:
-	Enemy() :Behaviour("Enemy") {};
+	Enemy() :MonoBehaviour("Enemy") {};
 
 	void Update()
 	{
@@ -17,11 +17,11 @@ public:
 
 	void Damage()
 	{
-		this->hp -= 1.0f;
+		/*this->hp -= 1.0f;
 		if (hp <= 0.0f)
 		{
 			this->gameObject.lock()->Destroy();
-			SceneManager::LoadScene("TitleScene");
+			SceneManager::LoadScene(SceneManager::GetSceneByName("TitleScene"));
 		}
 		else
 		{
@@ -29,7 +29,7 @@ public:
 			scale.x = hp / maxHp;
 			scale.z = scale.x;
 			hpBoard->transform->localScale(scale);
-		}
+		}*/
 	}
 
 };

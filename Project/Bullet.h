@@ -1,25 +1,25 @@
 #pragma once
 
-class Bullet:public Behaviour
+class Bullet:public MonoBehaviour<Bullet>
 {
 public:
 	const float speed = 0.5f;
 public:
-	Bullet():Behaviour("Bullet")
+	Bullet():MonoBehaviour("Bullet")
 	{
 		
 	};
 public:
 	void Update()
 	{
-		this->transform.lock()->position(this->transform.lock()->position()+this->transform.lock()->forward() * speed);
+		//this->transform.lock()->position(this->transform.lock()->position()+this->transform.lock()->forward() * speed);
 	}
 };
 
-class Shot:public Behaviour
+class Shot:public MonoBehaviour<Shot>
 {
 public:
-	Shot() :Behaviour("Shot") {};
+	Shot() :MonoBehaviour("Shot") {};
 public:
 	void Initialize()override
 	{

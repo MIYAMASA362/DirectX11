@@ -6,10 +6,10 @@ public:
 	Texture* m_texture;
 };
 
-class ItemSlotScript:public Behaviour
+class ItemSlotScript:public MonoBehaviour<ItemSlotScript>
 {
 public:
-	ItemSlotScript() :Behaviour("ItemSlotScript"){};
+	ItemSlotScript() :MonoBehaviour("ItemSlotScript"){};
 public:
 	void Update()
 	{

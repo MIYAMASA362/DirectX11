@@ -1,31 +1,31 @@
 #pragma once
 
-class SceneChange:public Behaviour
+class SceneChange:public MonoBehaviour<SceneChange>
 {
 public:
 	std::string nextScene;
 public:
-	SceneChange() :Behaviour("SceneChange") {};
+	SceneChange() :MonoBehaviour("SceneChange") {};
 	void Update()
 	{
-		auto button = this->gameObject.lock()->GetComponent<Button>();
+		/*auto button = this->gameObject.lock()->GetComponent<Button>();
 		if (!button.expired() && button.lock()->IsClick())
 			SceneManager::LoadScene(nextScene);
 
 		if (Input::GetKeyTrigger(VK_TAB))
-			SceneManager::LoadScene(nextScene);
+			SceneManager::LoadScene(nextScene);*/
 	}
 };
 
-class PressMessageScript:public Behaviour
+class PressMessageScript:public MonoBehaviour<PressMessageScript>
 {
 public:
 	std::string nextScene;
 public:
-	PressMessageScript() :Behaviour("PressMessageScript") {};
+	PressMessageScript() :MonoBehaviour("PressMessageScript") {};
 	void Update()
 	{
-		if (Input::GetKeyTrigger(VK_SPACE))
-			SceneManager::LoadScene(nextScene);
+		/*if (Input::GetKeyTrigger(VK_SPACE))
+			SceneManager::LoadScene(nextScene);*/
 	}
 };

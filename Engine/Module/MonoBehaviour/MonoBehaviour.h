@@ -11,11 +11,11 @@ namespace DirectX
 		MonoBehaviour(std::string name) :Behaviour(name) {};
 		virtual ~MonoBehaviour() = default;
 	public:
-		virtual void Initialize() override {};
-		virtual void Update() override {};
-		virtual void FixedUpdate() override {};
-		virtual void Render() override {};
-		virtual void Finalize() override {};
+		virtual void Initialize(){};
+		virtual void Update(){};
+		virtual void FixedUpdate(){};
+		virtual void Render(){};
+		virtual void Finalize(){};
 	public:
 		virtual void Run()			override {};
 		virtual void OnComponent()	override {};

@@ -3,6 +3,7 @@
 #include<memory>
 #include<string>
 #include<Windows.h>
+#include<vector>
 #include<d3d11.h>
 #include<DirectXMath.h>
 
@@ -43,12 +44,18 @@ using namespace DirectX;
 
 void CManager::Initialize()
 {
+	//ECS
+	EntityManager::Create();
+	ComponentManager::Create();
+
+	//GUI
 	GUI::guiImGui::Create(D3DApp::GetWindow(),D3DApp::GetDevice(),D3DApp::GetDeviceContext());
 
+	//Time
 	TimeManager::Create(D3DApp::GetFps());
 
+	//System
 	SystemManager::CreateManager<Input>();
-	SystemManager::CreateManager<SceneManager>();
 
 	SystemManager::Initialize();
 
@@ -82,7 +89,7 @@ void CManager::Initialize()
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
 
-	SceneManager::LoadScene("TitleScene");
+	SceneManager::LoadScene(SceneManager::GetSceneByName("TitleScene"));
 
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
@@ -100,8 +107,6 @@ void CManager::Run()
 	if (IsUpdate) CManager::Update();
 
 	if (IsFixedUpdate) CManager::FixedUpdate();
-
-	if (IsUpdate || IsFixedUpdate) SceneManager::CleanUp();
 
 	if (IsUpdate) CManager::Render();
 
@@ -122,7 +127,7 @@ void CManager::Render()
 {
 	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
 
-	CameraManager::SetRender(SceneManager::RunActiveScene_Render, D3DApp::Renderer::Begin);
+	Camera::SetRender(SceneManager::Render, D3DApp::Renderer::Begin);
 
 	CManager::DebugRender();
 
@@ -145,7 +150,7 @@ void CManager::Finalize()
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 
-	CameraManager::Release();
+	Camera::Release();
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
@@ -155,4 +160,7 @@ void CManager::Finalize()
 
 	TimeManager::Destroy();
 	GUI::guiImGui::Destroy();
+
+	ComponentManager::Release();
+	EntityManager::Release();
 }

@@ -13,10 +13,10 @@ namespace DirectX
 	};
 
 	//----------------------------------------------------------------
-	Object::Object(){
+	inline Object::Object(){
 		
 	}
-	Object::~Object(){
+	inline Object::~Object(){
 		OnDestroy();
 	};
 	inline void Object::OnDestroy()

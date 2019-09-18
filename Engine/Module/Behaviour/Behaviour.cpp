@@ -1,4 +1,5 @@
 #include<string>
+#include<map>
 #include<memory>
 
 #include"Module\Object\Object.h"
