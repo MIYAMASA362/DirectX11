@@ -10,25 +10,22 @@ namespace DirectX
 	class Font;
 
 	//Canvas@2D‰æ–Êã‚Ìî•ñ‚ğŠ‚·‚é
-	class Canvas:public Component
+	class Canvas:public Component<Canvas>
 	{
 	private:
 		std::list<std::weak_ptr<UI>> UIIndex;
 	public:
-		virtual const std::type_info& GetType() override { return typeid(*this); };
 		Canvas():Component("Canvas"){};
 	};
 
 	//UI
-	class UI:public Component
+	class UI:public Component<UI>
 	{
 	public:
 		UI(std::string name):Component(name){};
 		virtual ~UI() = default;
 	public:
-		virtual const std::type_info& GetType() override { return typeid(*this); };
 		virtual void OnComponent() override;
-		virtual void SendBehaviourMessage(Message message) override;
 		virtual void Render(XMMATRIX world) = 0;
 	};
 
@@ -56,7 +53,6 @@ namespace DirectX
 	public:
 		Button();
 		virtual ~Button();
-		void SendBehaviourMessage(Message message) override;
 		void Update();
 		void Render(XMMATRIX world) override;
 	public:

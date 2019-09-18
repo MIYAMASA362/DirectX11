@@ -1,4 +1,25 @@
-#include"Module\Module.h"
+#include<list>
+#include<memory>
+#include<string>
+#include<map>
+#include<d3d11.h>
+#include<DirectXMath.h>
+
+#include"Module\DirectX\DirectXStruct.h"
+#include"Module\DirectX\DirectX.h"
+
+#include"Module\SystemManager\SystemManager.h"
+#include"Module\Input\Input.h"
+
+//ECS
+#include"Module\ECSEngine.h"
+
+#include"Module\Texture\texture.h"
+
+#include"font.h"
+#include"UI.h"
+
+#include"Module\Transform\Transform.h"
 
 using namespace DirectX;
 
@@ -8,18 +29,18 @@ using namespace DirectX;
 
 void DirectX::UI::OnComponent()
 {
-	//Canvas‚ªÝ’è‚³‚ê‚Ä‚È‚¯‚ê‚Î
-	if (!gameObject.lock()->canvas)
-		gameObject.lock()->AddComponent<DirectX::Canvas>();
+	////Canvas‚ªÝ’è‚³‚ê‚Ä‚È‚¯‚ê‚Î
+	//if (!gameObject.lock()->canvas)
+	//	gameObject.lock()->AddComponent<DirectX::Canvas>();
 }
 
-void DirectX::UI::SendBehaviourMessage(Message message)
-{
-	if (message != Component::Render) return;
-	XMMATRIX world;
-	world = this->transform.lock()->WorldMatrix();
-	Render(world);
-}
+//void DirectX::UI::SendBehaviourMessage(Message message)
+//{
+//	if (message != Component::Render) return;
+//	XMMATRIX world;
+//	world = this->transform.lock()->WorldMatrix();
+//	Render(world);
+//}
 
 //--- Image ---------------------------------------------------------
 
@@ -112,20 +133,20 @@ DirectX::Button::~Button()
 	this->m_vertexBuffer->Release();
 }
 
-void DirectX::Button::SendBehaviourMessage(Message message)
-{
-	switch (message)
-	{
-	case DirectX::Component::Update:
-		Update();
-		break;
-	case DirectX::Component::Render:
-		UI::SendBehaviourMessage(message);
-		break;
-	default:
-		return;
-	}
-}
+//void DirectX::Button::SendBehaviourMessage(Message message)
+//{
+//	switch (message)
+//	{
+//	case DirectX::Component::Update:
+//		Update();
+//		break;
+//	case DirectX::Component::Render:
+//		UI::SendBehaviourMessage(message);
+//		break;
+//	default:
+//		return;
+//	}
+//}
 
 void DirectX::Button::Update()
 {
@@ -136,8 +157,8 @@ void DirectX::Button::Update()
 	mouseX = Input::Mouse::GetMouseX();
 	mouseY = Input::Mouse::GetMouseY();
 
-	center = this->transform.lock()->position();
-	scale = this->transform.lock()->scale() * this->m_scale;
+	center = this->transform().lock()->position();
+	scale = this->transform().lock()->scale() * this->m_scale;
 
 	left	= center.x - scale.x;
 	right	= center.x + scale.x;
