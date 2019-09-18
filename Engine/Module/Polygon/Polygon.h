@@ -5,7 +5,7 @@ struct ID3D11Buffer;
 
 namespace DirectX
 {
-	class CPolygon :public Behaviour
+	class CPolygon :public MonoBehaviour<CPolygon>
 	{
 	private:
 		ID3D11Buffer* m_VertexBuffer = nullptr;

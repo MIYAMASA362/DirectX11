@@ -1,5 +1,8 @@
 #include<string>
 #include<memory>
+#include<vector>
+#include<list>
+#include<map>
 #include<d3d11.h>
 #include<DirectXMath.h>
 
@@ -9,10 +12,8 @@
 
 #include"Module\Texture\texture.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-#include"Module\Behaviour\Behaviour.h"
+//ECS
+#include"Module\ECSEngine.h"
 
 #include"Polygon.h"
 
