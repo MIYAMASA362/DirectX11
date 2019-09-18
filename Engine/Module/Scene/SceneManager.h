@@ -1,128 +1,112 @@
 #pragma once
 
+/*
+設計：
+・SceneManager
+	ActiveSceneは必ず存在する(存在しない場合はnullptrとして例外を起こすべき)
+*/
+
 namespace DirectX
 {
 	class Scene;
 	class GameObject;
 
-	/*
-	設計：
-		ActiveSceneは必ず存在する(存在しない場合はnullptrとして例外を起こすべき)
-	*/
+	using SceneID = unsigned int;
 
-	//=== Scene管理 ===========================================================
-	class SceneManager:public SystemManager
+	//=== SceneManager ===========================================================
+	class SceneManager
 	{
+		friend Scene;
 	private:
-		//Sceneの保管庫
-		static std::map<std::string, std::shared_ptr<Scene>> pSceneDictionary;
-		//現在のScene
+		static SceneID m_SceneID;
+		static std::map<SceneID, std::shared_ptr<Scene>> pSceneDictionary;
+	private:
 		static std::weak_ptr<Scene> pActiveScene;
-		//次のScene
 		static std::weak_ptr<Scene> pNextScene;
-		//Scene遷移フラグ
 		static bool IsChangeScene;
 	public:
-		SceneManager() = default;
-		~SceneManager() = default;
+		SceneManager() = delete;
+		~SceneManager() = delete;
 	public:
+		template<typename Type> static std::weak_ptr<Scene> CreateScene();
 		static void Destroy();
-	//--- Scene処理 -------------------------------------------------
 	public:
-		//Sceneの生成
-		template<typename Type> static void CreateScene()
-		{
-			std::shared_ptr<Scene> AddScene = std::shared_ptr<Scene>(new Type());
-			pSceneDictionary.emplace(AddScene->GetSceneName(),AddScene);
-			AddScene->SetSelfScene(AddScene);
-			return;
-		};
-	public:
-		virtual void initialize();
-		virtual void update();
-		virtual void render();
-		virtual void finalize();
-	public:
-		static void LoadScene(std::string SceneName);
 		static void LoadScene(std::weak_ptr<Scene> scene);
-		static void RunActiveScene(Component::Message message);
-		static void RunActiveScene_Render();
-		static void ColliderUpdate();
-		static void DebugGUI_ActiveScene();
-		static void CleanUp();
-		static void ChangeScene();
 		static std::weak_ptr<Scene>GetActiveScene();
+		static std::weak_ptr<Scene>GetScene(SceneID id);
 		static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
-		static void ApplyRigidbody();
-		static void SetCleanUp();
+	public:
+		static void ChangeScene();
+		static void DebugGUI_ActiveScene();
+		static void Render(){};
 	private:
 		static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 		static void AttachActiveScene(std::weak_ptr<Scene> scene);
 		static void DetachActiveScene();
+		static SceneID AttachID();
 	};
 
-	inline void SceneManager::initialize() {
-	};
-	inline void SceneManager::update() {
-		RunActiveScene(Component::Update);
-		RunActiveScene(Component::FixedUpdate);
-		ApplyRigidbody();
-		ColliderUpdate();
-	};
-	inline void SceneManager::render() {
-		RunActiveScene_Render();
-	};
-	inline void SceneManager::finalize() {
-		SceneManager::Destroy();
-	};
+	//----------------------------------------------------------------------------
+	template<typename Type> static std::weak_ptr<Scene> SceneManager::CreateScene()
+	{
+		auto AddScene = std::shared_ptr<Scene>(new Type());
+		pSceneDictionary.emplace(AddScene->GetSceneID(), AddScene);
+		return AddScene;
+	}
 
 	//=== Scene ==================================================================
 	class Scene
 	{
 	private:
-		const std::string name;
+		const SceneID m_id;
+		const std::string m_name;
 		bool IsLoaded = false;
-		bool IsCleanUp = false;
-	private:
-		std::weak_ptr<Scene> self;
-		std::list<std::shared_ptr<GameObject>> GameObjectIndex;
+		std::vector<EntityID> Index;
 	protected:
 		Scene(std::string name);
 		virtual ~Scene();
 	public:
-		bool CompareName(std::string name);
-		virtual void Load() = 0;
+		std::string GetSceneName();
+	public:
 		GameObject* AddSceneObject(std::string name, TagName tag);
-		void SetIsCleanUp();
-		void SendComponentMessage(Component::Message message);
+		std::weak_ptr<Scene> GetSelfScene();
+		void RemoveSceneObject(EntityID id);
 		void AttachActiveScene();
 		void DetachActiveScene();
-		void CleanUp();
-		void Render();
-		void ColliderUpdate();
-		void ApplyRigidbody();
 		void DebugGUI();
-		void SetSelfScene(std::shared_ptr<Scene> self);
-		std::string GetSceneName();
+		bool CompareName(std::string name);
+		SceneID GetSceneID();
+	public:
+		virtual void Load() = 0;
+		void UnLoad();	//削除処理
 	};
 
-	inline Scene::Scene(std::string name):name(name){
-		GameObjectIndex.clear();
-	}
-	inline Scene::~Scene(){
-		GameObjectIndex.clear();
-	}
-	inline void Scene::SetSelfScene(std::shared_ptr<Scene> self){
-		this->self = self;
-	}
-	inline bool Scene::CompareName(std::string name){
-		return this->name == name;
-	}
-	inline std::string DirectX::Scene::GetSceneName(){
-		return this->name;
-	}
-	inline void Scene::SetIsCleanUp() {
-		this->IsCleanUp = true;
-	};
+	//----------------------------------------------------------------------------
+	inline Scene::Scene(std::string name)
+	:
+		m_name(name),
+		m_id(SceneManager::AttachID())
+	{
 
+	};
+	inline Scene::~Scene()
+	{
+	
+	};
+	inline bool Scene::CompareName(std::string name)
+	{
+		return this->m_name == name;
+	};
+	inline SceneID Scene::GetSceneID()
+	{
+		return this->m_id;
+	}
+	inline std::string Scene::GetSceneName()
+	{
+		return this->m_name;
+	};
+	inline std::weak_ptr<Scene> Scene::GetSelfScene() 
+	{
+		return SceneManager::GetScene(this->m_id);
+	};
 }
