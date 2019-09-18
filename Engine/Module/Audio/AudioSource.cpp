@@ -1,6 +1,17 @@
-#include"Module\Module.h"
+#include<memory>
+#include<Windows.h>
+#include<string>
+#include<map>
 
-#include "AudioSource.h"
+#include"Module\Object\Object.h"
+#include"Module\Component\IComponent.h"
+#include"Module\Component\ComponentManager.h"
+#include"Module\Component\Component.h"
+
+#include"Module\AssetData\AssetData.h"
+#include"Audio.h"
+#include"AudioManager.h"
+#include"AudioSource.h"
 
 DirectX::AudioSource::AudioSource()
 :

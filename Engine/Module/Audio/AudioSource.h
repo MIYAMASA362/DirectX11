@@ -4,7 +4,7 @@ namespace DirectX
 {
 	class Audio;
 
-	class AudioSource final :public Component
+	class AudioSource final :public Component<AudioSource>
 	{
 	private:
 		std::weak_ptr<Audio>audio;
@@ -13,7 +13,6 @@ namespace DirectX
 		AudioSource();
 		~AudioSource();
 	public:
-		virtual const std::type_info& GetType() override { return typeid(*this); };
 		void GetAsset(std::string name);
 		void Play();
 		void SetLoop(bool loop);
