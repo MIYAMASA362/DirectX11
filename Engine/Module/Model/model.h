@@ -45,7 +45,7 @@ namespace DirectX
 		bool IsDepth = true;
 	public:
 		Model();
-		void Render(XMMATRIX worldMatrix) override;
+		void Render(XMMATRIX& worldMatrix) override;
 		void GetAsset(std::string name);
 		void SetCulling(bool enable);
 		void SetDepth(bool enable);

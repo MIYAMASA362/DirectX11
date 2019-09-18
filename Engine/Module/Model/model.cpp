@@ -3,6 +3,8 @@
 #include<assert.h>
 #include<map>
 #include<string>
+#include<vector>
+#include<list>
 #include<memory>
 #include<d3d11.h>
 #include<DirectXMath.h>
@@ -11,23 +13,25 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
+//Engine
+#include"Module\ECSEngine.h"
+
 #include"Module\AssetData\AssetData.h"
 
 #include"Module\Material\Material.h"
 #include"Module\Texture\texture.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-
 //Component Module
 #include"Module\Renderer\Renderer.h"
-
-#include"model.h"
 
 #include"ModelManager.h"
 
 #include"Module\Texture\TextureManager.h"
+
+#include"Module\Mesh\Mesh.h"
+
+#include"model.h"
+#include"Module\Model\ModelManager.h"
 
 DirectX::Model::Model()
 {
@@ -35,7 +39,7 @@ DirectX::Model::Model()
 }
 
 //•`‰æ
-void DirectX::Model::Render(XMMATRIX worldMatrix)
+void DirectX::Model::Render(XMMATRIX& worldMatrix)
 {
 	if(IsCulling)
 		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
