@@ -1,4 +1,25 @@
-#include"Module\Module.h"
+#include<string>
+#include<memory>
+#include<list>
+#include<d3d11.h>
+#include<DirectXMath.h>
+
+#include"Module\DirectX\DirectXStruct.h"
+#include"Module\DirectX\DirectX.h"
+
+#include"Module\Texture\texture.h"
+#include"Module\AssetData\AssetData.h"
+#include"Module\Texture\TextureManager.h"
+#include"Module\ECSEngine.h"
+
+#include"Module\Tag\Tag.h"
+#include"Module\GameObject\GameObject.h"
+#include"Module\Transform\Transform.h"
+
+#include"Rigidbody.h"
+#include"Collision.h"
+
+using namespace DirectX;
 
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {
@@ -11,25 +32,27 @@ DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 //Constrcutor
 DirectX::Collider::Collider()
 :
-	bound(Vector3::zero(),Vector3::one()),
-	DirectX::Component("Collider")
-{}
-
-void DirectX::Collider::SendBehaviourMessage(Message message)
+	Component("Collider"),
+	bound(Vector3::zero(),Vector3::one())
 {
-	if (message != Message::Render) return;
-	Render();
+
 }
+
+//void DirectX::Collider::SendBehaviourMessage(Message message)
+//{
+//	if (message != Message::Render) return;
+//	Render();
+//}
 
 void DirectX::Collider::Hitjudgment(GameObject * gameObject, GameObject * otherObject)
 {
-	for(auto collider:gameObject->colliders) {
-		if (collider->IsEnable) continue;	//Enable
-		for (auto othercollider : otherObject->colliders) {
-			if (othercollider->IsEnable) continue;	//Enable
-			collider->Judgment(othercollider.get());	//”»’è
-		}
-	}
+	//for(auto collider:gameObject->colliders) {
+	//	if (collider->IsEnable) continue;	//Enable
+	//	for (auto othercollider : otherObject->colliders) {
+	//		if (othercollider->IsEnable) continue;	//Enable
+	//		collider->Judgment(othercollider.get());	//”»’è
+	//	}
+	//}
 }
 
 bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
@@ -37,11 +60,11 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	Vector3 pos1 = collider->transform.lock()->position() + bound1.GetCenter();
-	Vector3 pos2 = other->transform.lock()->position() + bound2.GetCenter();
+	Vector3 pos1 = collider->transform().lock()->position() + bound1.GetCenter();
+	Vector3 pos2 = other->transform().lock()->position() + bound2.GetCenter();
 
-	Vector3 scale1 = collider->transform.lock()->scale() * 2.0f;
-	Vector3 scale2 = other->transform.lock()->scale() * 2.0f;
+	Vector3 scale1 = collider->transform().lock()->scale() * 2.0f;
+	Vector3 scale2 = other->transform().lock()->scale() * 2.0f;
 
 	Vector3 pos1_max = pos1 + Vector3(bound1.GetMax() * scale1);
 	Vector3 pos1_min = pos1 + Vector3(bound1.GetMin() * scale1);
@@ -56,25 +79,25 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 		)
 	{
 		//Rigidbody‚ðŠŽ
-		if(collider->gameObject.lock()->rigidbody)
-		{
-			Rigidbody& rigidbody = *collider->gameObject.lock()->rigidbody.get();
+		//if(collider->gameObject.lock()->rigidbody)
+		//{
+		//	Rigidbody& rigidbody = *collider->gameObject.lock()->rigidbody.get();
 
-			Vector3 Intrusion;
-			Vector3 velocity = rigidbody.GetVelocity();
-			Vector3 direction = (pos1 - pos2).normalize();
+		//	Vector3 Intrusion;
+		//	Vector3 velocity = rigidbody.GetVelocity();
+		//	Vector3 direction = (pos1 - pos2).normalize();
 
-			if (direction.y < 0.0f) {
-				Intrusion.y = pos1_max.y - pos2_min.y;
-				velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
-			}
-			else{
-				Intrusion.y = pos1_min.y - pos2_max.y;
-				velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
-			}
-			rigidbody.SetVelocity(velocity);
-			collider->transform.lock()->position(collider->transform.lock()->position() - Intrusion);
-		}
+		//	if (direction.y < 0.0f) {
+		//		Intrusion.y = pos1_max.y - pos2_min.y;
+		//		velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
+		//	}
+		//	else{
+		//		Intrusion.y = pos1_min.y - pos2_max.y;
+		//		velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
+		//	}
+		//	rigidbody.SetVelocity(velocity);
+		//	collider->transform().lock()->position(collider->transform().lock()->position() - Intrusion);
+		//}
 		return true;
 	}
 	return false;
@@ -85,11 +108,11 @@ bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
 	Bounds& BoxBound = collider->bound;
 	Bounds& SphereBound = other->bound;
 
-	Vector3 BoxPos = collider->transform.lock()->position() + BoxBound.GetCenter();
-	Vector3 SphPos = other->transform.lock()->position() + SphereBound.GetCenter();
+	Vector3 BoxPos = collider->transform().lock()->position() + BoxBound.GetCenter();
+	Vector3 SphPos = other->transform().lock()->position() + SphereBound.GetCenter();
 
-	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform.lock()->scale());
-	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform.lock()->scale());
+	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform().lock()->scale());
+	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform().lock()->scale());
 
 	float radius = SphereBound.GetSize().x;
 
@@ -135,11 +158,11 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	float radius1 = bound1.GetSize().x * collider->transform.lock()->scale().MaxElement();
-	float radius2 = bound2.GetSize().x * other->transform.lock()->scale().MaxElement();
+	float radius1 = bound1.GetSize().x * collider->transform().lock()->scale().MaxElement();
+	float radius2 = bound2.GetSize().x * other->transform().lock()->scale().MaxElement();
 
-	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform.lock()->WorldMatrix());
-	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform.lock()->WorldMatrix());
+	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform().lock()->WorldMatrix());
+	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform().lock()->WorldMatrix());
 
 	Vector3 distance = pos1 - pos2;
 	//Õ“Ë
@@ -253,14 +276,14 @@ void DirectX::SphereCollider::Render()
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
-	float rad = this->transform.lock()->scale().MaxElement();
+	float rad = this->transform().lock()->scale().MaxElement();
 	Vector3 scale = bound.GetSize() * rad;
 	Vector3 pos = bound.GetCenter();
 
 	XMMATRIX world;
 	XMMATRIX local;
 	world = XMMatrixScaling(scale.x, scale.y, scale.z) *  XMMatrixTranslation(pos.x, pos.y, pos.z);
-	world *= this->transform.lock()->MatrixQuaternion()* this->transform.lock()->MatrixTranslation();
+	world *= this->transform().lock()->MatrixQuaternion()* this->transform().lock()->MatrixTranslation();
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
@@ -404,11 +427,11 @@ void DirectX::BoxCollider::Render()
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 
 	Vector3 scale = bound.GetSize() * 2.0f;
-	Vector3 pos = this->transform.lock()->position() + bound.GetCenter();
+	Vector3 pos = this->transform().lock()->position() + bound.GetCenter();
 
 	XMMATRIX world = XMMatrixIdentity();
 	world *= XMMatrixScaling(scale.x, scale.y, scale.z);
-	world *= this->transform.lock()->MatrixScaling();
+	world *= this->transform().lock()->MatrixScaling();
 	world *= XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	D3DApp::Renderer::SetWorldMatrix(&world);

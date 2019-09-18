@@ -5,24 +5,34 @@ namespace DirectX
 	class Rigidbody;
 	class GameObject;
 	class Transform;
+	class Collider;
 
-	//Bounds
+	//=== Bounds ========================================================================
 	class Bounds {
 	private:
 		Vector3 m_center;
 		Vector3 m_size;
 	public:
 		Bounds(Vector3 center,Vector3 size);
-		Vector3 GetCenter()	{ return this->m_center; };
-		Vector3 GetExtents() { return this->m_size * 0.5f; };
-		Vector3 GetMax() { return this->m_center + this->GetExtents(); };
-		Vector3 GetMin() { return this->m_center - this->GetExtents(); };
-		Vector3 GetSize(){ return this->m_size; };
-		void SetCenter(Vector3 center) { this->m_center = center; };
-		void SetSize(Vector3 size) { this->m_size = size; };
+		Vector3 GetCenter();
+		Vector3 GetExtents();
+		Vector3 GetMax();
+		Vector3 GetMin();
+		Vector3 GetSize();
+		void SetCenter(Vector3 center);
+		void SetSize(Vector3 size);
 	};
 
-	//Collision
+	//-----------------------------------------------------------------------------------
+	inline Vector3 Bounds::GetCenter()		{ return this->m_center; }
+	inline Vector3 Bounds::GetExtents()	{ return this->m_size * 0.5f; }
+	inline Vector3 Bounds::GetMax()		{ return this->m_center + this->GetExtents(); }
+	inline Vector3 Bounds::GetMin()		{ return this->m_center - this->GetExtents(); }
+	inline Vector3 Bounds::GetSize()		{ return this->m_size; }
+	inline void Bounds::SetCenter(Vector3 center)	{ this->m_center = center; }
+	inline void Bounds::SetSize(Vector3 size)		{ this->m_size = size; }
+
+	//=== Collision =====================================================================
 	class Collision
 	{
 	public:
@@ -32,16 +42,23 @@ namespace DirectX
 		Transform* transform;
 	};
 
-	//Collider
-	class Collider:public Component
+	//=== Collider ======================================================================
+	class Collider:public Component<Collider>
 	{
 		friend class SceneManager;
 	public:
 		//Collider‚ÌŽí—Þ
-		enum ShapeType {
+		enum ShapeType 
+		{
 			Box,
 			Sphere
 		};
+	public:
+		static void Hitjudgment(GameObject* gameObject,GameObject* otherObject);
+	protected:
+		static bool BoxVsBox(Collider* collider,Collider* other);
+		static bool BoxVsShpere(Collider* collider,Collider* other);
+		static bool SphereVsSphere(Collider* collider, Collider* other);
 	public:
 		Bounds bound;
 		bool IsHit = false;			//Õ“Ë‚µ‚Ä‚¢‚é
@@ -51,19 +68,15 @@ namespace DirectX
 		virtual ~Collider() = default;
 		virtual ShapeType GetShapeType() = 0;	//Type
 	public:
-		virtual const std::type_info& GetType() override { return typeid(Collider); };
 		virtual void Render()=0;
-		void Center(Vector3 center) { this->bound.SetCenter(center); };
-		void SendBehaviourMessage(Message message) override;
-		static void Hitjudgment(GameObject* gameObject,GameObject* otherObject);
+		void Center(Vector3 center);
 	protected:
 		virtual bool Judgment(Collider* other) = 0;
-		static bool BoxVsBox(Collider* collider,Collider* other);
-		static bool BoxVsShpere(Collider* collider,Collider* other);
-		static bool SphereVsSphere(Collider* collider, Collider* other);
 	};
+	//-----------------------------------------------------------------------------------
+	inline void Collider::Center(Vector3 center) { this->bound.SetCenter(center); }
 
-	//Sphere
+	//=== SphereCollider ================================================================
 	class SphereCollider final:public Collider
 	{
 	private:
@@ -85,7 +98,7 @@ namespace DirectX
 		bool Judgment(Collider* other) override;
 	};
 
-	//Box
+	//=== BoxCollider ===================================================================
 	class BoxCollider final:public Collider
 	{
 	private:
