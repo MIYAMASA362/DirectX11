@@ -1,6 +1,8 @@
 #include<memory>
 #include<list>
 #include<string>
+#include<map>
+#include<vector>
 #include<d3d11.h>
 #include<DirectXMath.h>
 
@@ -10,12 +12,11 @@
 
 #include"Module\IMGUI\GUI_ImGui.h"
 
+//ECS
+#include"Module\ECSEngine.h"
+
 //Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-
 #include"Transform.h"
-
 #include"Module\Tag\Tag.h"
 #include"Module\GameObject\GameObject.h"
 
@@ -53,7 +54,7 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 	//親設定
 	pParent = parent;
 	//親の子に設定
-	parent.lock().get()->pChildren.push_back(this->transform);
+	//parent.lock().get()->pChildren.push_back(this->transform);
 	
 	//向きなどを保持したまま子になる
 	XMMATRIX matrix = this->m_WorldMatrix * XMMatrixInverse(nullptr, parent.lock()->WorldMatrix());
@@ -64,7 +65,7 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 
 void Transform::SetParent(GameObject* parent)
 {
-	this->SetParent(parent->transform);
+	//this->SetParent(parent->transform);
 }
 
 void Transform::detachParent() {
@@ -80,8 +81,7 @@ void Transform::detachParent() {
 
 void Transform::detachChildSearch(Transform* target) {
 	for (auto itr = pChildren.begin(); itr != pChildren.end(); itr++)
-		if (itr->lock().get() == target)
-		{
+		if (itr->lock().get() == target){
 			pChildren.erase(itr);
 			return;
 		}
@@ -108,14 +108,14 @@ std::list<std::weak_ptr<Transform>> DirectX::Transform::GetChildren()
 	return this->pChildren;
 }
 
-void DirectX::Transform::SendComponentMessageChildren(Component::Message message)
+void DirectX::Transform::SendComponentMessageChildren()
 {
-	for(auto child:pChildren)
+	/*for(auto child:pChildren)
 	{
 		child.lock()->gameObject.lock()->RunComponent(message);
 		if (child.lock()->pChildren.size() != 0)
 			child.lock()->SendComponentMessageChildren(message);
-	}
+	}*/
 }
 
 void DirectX::Transform::DebugImGui()
@@ -124,6 +124,7 @@ void DirectX::Transform::DebugImGui()
 		Vector3 position = this->position();
 		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
 		Vector3 scale = this->scale();
+		
 		ImGui::InputFloat3("Position",&position.x);
 		ImGui::InputFloat3("Rotation",&rotation.x);
 		ImGui::InputFloat3("Scale",&scale.x);
@@ -275,8 +276,8 @@ XMMATRIX Transform::WorldMatrix()
 	m_WorldMatrix *= XMMatrixRotationQuaternion(m_Rotation);
 	m_WorldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 
-	if (!pParent.expired())
+	/*if (!pParent.expired())
 		m_WorldMatrix *= pParent.lock()->transform.lock()->WorldMatrix();
-
+	*/
 	return m_WorldMatrix;
 }
