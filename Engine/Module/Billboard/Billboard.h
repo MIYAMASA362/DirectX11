@@ -3,6 +3,7 @@
 namespace DirectX
 {
 	class Texture;
+	struct XMMATRIX;
 
 	//é≤ÉçÉbÉN
 	struct Lock
@@ -28,6 +29,6 @@ namespace DirectX
 		Billboard();
 		~Billboard();
 	public:
-		void Render(XMMATRIX worldMatrix)override;
+		void Render(XMMATRIX& worldMatrix)override;
 	};
 }

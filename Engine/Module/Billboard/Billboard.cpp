@@ -1,4 +1,21 @@
-#include"Module\Module.h"
+#include<List>
+#include<map>
+#include<memory>
+#include<d3d11.h>
+#include<DirectXMath.h>
+
+#include"Module\DirectX\DirectXStruct.h"
+#include"Module\DirectX\DirectX.h"
+
+#include"Module\Texture\texture.h"
+
+#include"Module\ECSEngine.h"
+
+#include"Module\Camera\camera.h"
+
+#include"Module\Renderer\Renderer.h"
+#include"Module\Mesh\Mesh.h"
+#include"Billboard.h"
 
 DirectX::Billboard::Billboard()
 {
@@ -38,7 +55,7 @@ DirectX::Billboard::Billboard()
 	{
 		this->m_IndexNum = 4;
 		WORD* pIndex = new WORD[this->m_IndexNum];
-		for (int i = 0; i < this->m_IndexNum; i++) {
+		for (unsigned int i = 0; i < this->m_IndexNum; i++) {
 			pIndex[i] = i;
 		}
 
@@ -69,9 +86,9 @@ DirectX::Billboard::~Billboard()
 	delete[] this->m_VertexIndex;
 }
 
-void DirectX::Billboard::Render(XMMATRIX worldMatrix)
+void DirectX::Billboard::Render(XMMATRIX& worldMatrix)
 {
-	XMMATRIX InvView = CameraManager::GetActiveCamera()->GetViewMatrix();
+	XMMATRIX InvView = Camera::GetActiveCamera()->GetViewMatrix();
 	InvView.r[0].m128_f32[3] = 0.0f;
 	InvView.r[1].m128_f32[3] = 0.0f;
 	InvView.r[2].m128_f32[3] = 0.0f;
