@@ -1,7 +1,11 @@
 #pragma once
+struct MODEL_MATERIAL;
+struct MODEL;
 
 namespace DirectX
 {
+	class Model;
+
 	//ModelŽ‘Œ¹
 	class ModelAsset
 	{

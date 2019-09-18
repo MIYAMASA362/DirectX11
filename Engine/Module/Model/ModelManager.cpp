@@ -2,6 +2,8 @@
 #include<string>
 #include<map>
 #include<memory>
+#include<list>
+#include<vector>
 #include<d3d11.h>
 #include<DirectXMath.h>
 
@@ -14,9 +16,11 @@
 
 #include"Module\AssetData\AssetData.h"
 
+//ECS
+#include"Module\ECSEngine.h"
+
 // Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
+#include"Module\Mesh\Mesh.h"
 #include"Module\Renderer\Renderer.h"
 
 #include"Module\Texture\TextureManager.h"
