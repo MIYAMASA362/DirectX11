@@ -1,45 +1,34 @@
-#include<string>
 #include<list>
 #include<memory>
+#include<map>
+
 #include<d3d11.h>
 #include<DirectXMath.h>
 
-//DirectX
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
+//ECS
+#include"Module\ECSEngine.h"
 
-//Component Module
 #include"Renderer.h"
-
 #include"Module\Transform\Transform.h"
-#include"Module\Tag\Tag.h"
-#include"Module\GameObject\GameObject.h"
 
-DirectX::MeshRender::MeshRender()
+using namespace DirectX;
+
+DirectX::Renderer::Renderer()
 :
-	Component("MeshRender")
+	Component("Renderer")
 {
-	
 }
 
-DirectX::MeshRender::~MeshRender()
+void DirectX::Renderer::Run()
 {
-	mesh.reset();
+	if (!this->m_IsEnable)return;
+	this->Render(ComponentManager::GetComponent<Transform>(this->m_OwnerId).lock()->WorldMatrix());
 }
 
-void DirectX::MeshRender::OnComponent()
-{
-	
-}
 
-void DirectX::MeshRender::SendBehaviourMessage(Message message)
+void DirectX::Renderer::OnComponent()
 {
-	if (!this->IsEnable)return;
-	if (message != Component::Render) return;
-	if (!gameObject.lock()->GetActive()) return;
-	mesh->Render(this->transform.lock()->WorldMatrix());
-}
+};
