@@ -2,6 +2,7 @@
 
 using namespace DirectX;
 struct ID3D11Buffer;
+
 namespace DirectX
 {
 	class Texture;
@@ -14,7 +15,7 @@ namespace DirectX
 		Texture* m_Texture = nullptr;
 		CField();
 		virtual ~CField();
-		void Render(XMMATRIX worldMatrix) override;
+		void Render(XMMATRIX& worldMatrix) override;
 	};
 
 	class WallField :public Mesh
@@ -28,7 +29,7 @@ namespace DirectX
 	public:
 		WallField();
 		~WallField();
-		void Render(XMMATRIX worldMatrix)override;
+		void Render(XMMATRIX& worldMatrix)override;
 	};
 
 
@@ -44,7 +45,7 @@ namespace DirectX
 	public:
 		SkySphere();
 		~SkySphere();
-		void Render(XMMATRIX worldMatrix) override;
+		void Render(XMMATRIX& worldMatrix) override;
 	};
 
 	class MeshField final :public Mesh
@@ -59,7 +60,7 @@ namespace DirectX
 	public:
 		MeshField();
 		~MeshField();
-		void Render(XMMATRIX worldMatrix)override;
+		void Render(XMMATRIX& worldMatrix)override;
 	};
 
 	class MeshWall final :public Mesh
@@ -75,7 +76,7 @@ namespace DirectX
 	public:
 		MeshWall();
 		~MeshWall();
-		void Render(XMMATRIX worldMatrix) override;
+		void Render(XMMATRIX& worldMatrix) override;
 	};
 
 	class MeshCircle final:public Mesh
@@ -90,6 +91,6 @@ namespace DirectX
 	public:
 		MeshCircle();
 		~MeshCircle();
-		void Render(XMMATRIX worldMatrix)override;
+		void Render(XMMATRIX& worldMatrix)override;
 	};
 }

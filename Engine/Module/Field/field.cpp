@@ -1,6 +1,8 @@
 #include<Windows.h>
 #include<memory>
 #include<string>
+#include<list>
+#include<vector>
 #include<DirectXMath.h>
 #include<d3d11.h>
 
@@ -13,14 +15,13 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\AssetData\AssetData.h"
+#include"Module\ECSEngine.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
+#include"Module\AssetData\AssetData.h"
 
 //Component Module
 #include"Module\Renderer\Renderer.h"
+#include"Module\Mesh\Mesh.h"
 
 #include"field.h"
 
@@ -62,7 +63,7 @@ CField::~CField()
 	}
 }
 
-void CField::Render(XMMATRIX worldMatrix)
+void CField::Render(XMMATRIX& worldMatrix)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -150,7 +151,7 @@ WallField::~WallField()
 	}
 }
 
-void WallField::Render(XMMATRIX worldMatrix)
+void WallField::Render(XMMATRIX& worldMatrix)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -306,7 +307,7 @@ SkySphere::~SkySphere()
 	delete[] this->m_pVertexIndex;
 }
 
-void SkySphere::Render(XMMATRIX worldMatrix)
+void SkySphere::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
@@ -431,7 +432,7 @@ MeshField::~MeshField()
 	delete[] this->m_VertexIndex;
 }
 
-void MeshField::Render(XMMATRIX worldMatrix)
+void MeshField::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
@@ -556,7 +557,7 @@ DirectX::MeshWall::~MeshWall()
 	delete[] this->m_pVertexIndex;
 }
 
-void DirectX::MeshWall::Render(XMMATRIX worldMatrix)
+void DirectX::MeshWall::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
@@ -665,7 +666,7 @@ DirectX::MeshCircle::~MeshCircle()
 	delete[] this->m_pVertexIndex;
 }
 
-void DirectX::MeshCircle::Render(XMMATRIX worldMatrix)
+void DirectX::MeshCircle::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
