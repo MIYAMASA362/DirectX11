@@ -1,9 +1,5 @@
 #pragma once
 
-#include<memory>
-#include<map>
-#include<vector>
-
 namespace DirectX
 {
 	using ComponentID = unsigned int;

@@ -71,8 +71,8 @@ namespace DirectX
 		static ComponentID m_id;
 		static std::map<EntityID, std::shared_ptr<Type>> ComponentIndex;
 	public:
-		static std::weak_ptr<Type> AddComponent(EntityID id = m_OwnerId);
-		static std::weak_ptr<Type> GetComponent(EntityID id = m_OwnerId);
+		static std::weak_ptr<Type> AddComponent(EntityID id);
+		static std::weak_ptr<Type> GetComponent(EntityID id);
 		static void DestroyComponent(EntityID id);
 		static ComponentID GetID();
 	protected:

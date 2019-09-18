@@ -1,5 +1,20 @@
 #include<memory>
-#include"../ECSEngine.h"
+#include<map>
+#include<vector>
+#include<list>
+
+#include<d3d11.h>
+#include<DirectXMath.h>
+
+#include"Module\DirectX\DirectXStruct.h"
+#include"Module\DirectX\DirectX.h"
+
+#include"Module\ECSEngine.h"
+
+#include"Module\Transform\Transform.h"
+
+#include"Module\Tag\Tag.h"
+#include"Module\GameObject\GameObject.h"
 
 using namespace DirectX;
 

@@ -1,6 +1,8 @@
 #include<memory>
 #include<typeinfo>
 #include<string>
+#include<map>
+
 #include"../Object/Object.h"
 #include"Component.h"
 
