@@ -17,6 +17,7 @@ EntityID EntityManager::AttachEntityID()
 void EntityManager::Create()
 {
 	EntityIndex.clear();
+	m_EntityID = 0;
 }
 void EntityManager::Release()
 {

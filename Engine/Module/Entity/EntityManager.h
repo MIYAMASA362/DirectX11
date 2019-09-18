@@ -11,14 +11,14 @@ namespace DirectX
 		friend IEntity;
 	private:
 		static EntityID m_EntityID;
-		static std::map<EntityID, std::weak_ptr<IEntity>> EntityIndex;
+		static std::map<EntityID, std::shared_ptr<IEntity>> EntityIndex;
 		static EntityID AttachEntityID();
 	public:
 		static void Create();
 		static void Release();
 	public:
 		template<typename Type>
-		static Type* CreateEntity(Type* instance);
+		static std::weak_ptr<Type> CreateEntity(Type* instance);
 		static void RemoveEntity(EntityID id);
 		static std::weak_ptr<IEntity> GetEntity(EntityID id);
 	};
@@ -26,11 +26,10 @@ namespace DirectX
 	//----------------------------------------------------------------------------
 	
 	template<typename Type>
-	inline Type* EntityManager::CreateEntity(Type* instance)
+	inline std::weak_ptr<Type> EntityManager::CreateEntity(Type* instance)
 	{
-		auto add = std::weak_ptr<IEntity>(instance);
-		EntityIndex.emplace(add.lock()->GetEntityID(),add);
-		return instance;
+		auto add = std::shared_ptr<Type>(instance);
+		EntityIndex.emplace(add->GetEntityID(),add);
+		return add;
 	}
-	
 }

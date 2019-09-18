@@ -1,6 +1,8 @@
 #include<string>
 #include<map>
 #include<memory>
+#include<list>
+#include<vector>
 #include"Module\Object\Object.h"
 #include"Module\Entity\EntityManager.h"
 #include"IEntity.h"

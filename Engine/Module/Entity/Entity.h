@@ -1,7 +1,5 @@
 #pragma once
 
-#include<memory>
-#include<map>
 namespace DirectX
 {
 	using EntityID = unsigned int;
@@ -12,35 +10,38 @@ namespace DirectX
 	class Entity:public IEntity
 	{
 	protected:
-		static std::map<EntityID, std::shared_ptr<Type>> m_EntityIndex;
+		static std::list<EntityID> m_EntityIndex;
 	public:
-		static std::weak_ptr<Type> CreateEntity();
+		static std::weak_ptr<Type> CreateEntity(Type* instance);
 		static std::weak_ptr<Type> GetEntity(EntityID id);
 		static void RemoveEntity(EntityID id);
 	public:
 		Entity();
 		virtual ~Entity();
+	protected:
+		void AddIndex(Type* instance);
 	};
 	//-------------------------------------------------------------------------
 
 	template<typename Type>
-	inline std::weak_ptr<Type> Entity<Type>::CreateEntity()
+	inline std::weak_ptr<Type> Entity<Type>::CreateEntity(Type* instance)
 	{
-		auto add = std::shared_ptr<Type>(new Type());
-		m_EntityIndex.emplace(add->GetEntityID(),add);
+		auto add = EntityManager::CreateEntity<Type>(instance)->;
+		m_EntityIndex.push_back(add->GetEntityID());
 		return add;
 	}
 
 	template<typename Type>
 	inline std::weak_ptr<Type> Entity<Type>::GetEntity(EntityID id)
 	{
-		return m_EntityIndex.at(id);
+		return std::static_pointer_cast<Type>(EntityManager::GetEntity(id).lock());
 	}
 
 	template<typename Type>
 	inline void Entity<Type>::RemoveEntity(EntityID id)
 	{
 		m_EntityIndex.erase(id);
+		EntityManager::RemoveEntity(id);
 	}
 	
 	template<typename Type>
@@ -52,5 +53,11 @@ namespace DirectX
 	inline Entity<Type>::~Entity()
 	{
 
+	}
+	template<typename Type>
+	inline void Entity<Type>::AddIndex(Type* instance)
+	{
+		m_EntityIndex.push_back(instance->GetEntityID());
+		EntityManager::CreateEntity<IEntity>(instance);
 	}
 }
