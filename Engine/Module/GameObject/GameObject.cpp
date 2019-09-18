@@ -1,5 +1,7 @@
 #include<typeinfo>
 #include<memory>
+#include<map>
+#include<vector>
 #include<list>
 
 #include<d3d11.h>
@@ -31,16 +33,17 @@
 using namespace DirectX;
 
 const std::string GameObject::TypeName = "GameObject";
+std::list<EntityID> GameObject::m_EntityIndex;
 
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 :
 	name(name),
-	scene(scene),
 	tag(tagName),
+	scene(scene),
 	IsDestroy(false),
 	IsActive(true)
 {
-
+	this->AddIndex(this);
 }
 
 GameObject::~GameObject() 
@@ -48,13 +51,17 @@ GameObject::~GameObject()
 	
 }
 
-
 void DirectX::GameObject::DebugGUI() 
 {
-
+	for(auto id : m_EntityIndex)
+	{
+		auto object = Entity<GameObject>::GetEntity(id);
+		ImGui::Text(object.lock()->name.c_str());
+	}
 }
 
 std::weak_ptr<Transform> DirectX::GameObject::transform()
 {
 	return ComponentManager::GetComponent<Transform>(this->m_EntityID);
 }
+
