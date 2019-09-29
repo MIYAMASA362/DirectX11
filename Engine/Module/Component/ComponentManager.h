@@ -5,7 +5,7 @@ namespace DirectX
 	using ComponentID = unsigned int;
 	using EntityID = unsigned int;
 
-	using Components = std::map<ComponentID, std::weak_ptr<IComponent>>;
+	using Components = std::map<ComponentID, std::shared_ptr<IComponent>>;
 	using EntityComponents = std::map<EntityID, std::shared_ptr<Components>>;
 
 	//--- ComponentManager -----------------------------------------------------------------
@@ -20,6 +20,7 @@ namespace DirectX
 	public:
 		template<typename Type> static Type* AddComponent(EntityID id);
 		template<typename Type> static std::weak_ptr<Type> GetComponent(EntityID id);
+		static std::weak_ptr<Components> GetComponents(EntityID id);
 		static void DestroyComponents(EntityID id);
 		template<typename Type> static void DestroyComponent(EntityID id);
 		template<typename Type> static ComponentID CreateComponent();
@@ -32,39 +33,39 @@ namespace DirectX
 	inline void ComponentManager::Release(){
 		EntityComponentIndex.clear();
 	}
-	inline void ComponentManager::DestroyComponents(EntityID id)
+	inline std::weak_ptr<Components> ComponentManager::GetComponents(EntityID id)
 	{
-		EntityComponentIndex.at(id)->clear();
+		return EntityComponentIndex.at(id);
 	}
 	template<typename Type>
 	inline Type* ComponentManager::AddComponent(EntityID id)
 	{
 		auto add = new Type();
-
-		auto components = std::shared_ptr<Components>();
-		try{
-			//idのComponentsリストが存在するのか
-			components = EntityComponentIndex.at(id);
+		//idのComponentsリストが存在するのか
+		try {
+			EntityComponentIndex.at(id);
 		}
-		catch (const std::out_of_range&){
-			//存在していない
-			components = std::shared_ptr<Components>();
-			EntityComponentIndex.emplace(id,components);
+		//存在していない
+		catch (const std::out_of_range&) {
+			EntityComponentIndex.emplace(id, std::shared_ptr<Components>(new Components()));
 		}
-		components->emplace(add->GetComponentID(),add);
-		add->m_OwnerId = id;
+		//Componentを設定
+		auto component = std::shared_ptr<Type>(add);
+		Component<Type>::AddComponent(id,component);
+		EntityComponentIndex.at(id)->emplace(component->GetComponentID(),component);
+		component->OnComponent();
 		return add;
 	}
 	template<typename Type>
 	inline std::weak_ptr<Type> ComponentManager::GetComponent(EntityID id)
 	{
-		return std::static_pointer_cast<Type>(EntityComponentIndex.at(id)->at(Type::GetID()).lock());
+		return std::static_pointer_cast<Type>(EntityComponentIndex.at(id)->at(Component<Type>::GetID()));
 	}
 	template<typename Type>
 	inline void ComponentManager::DestroyComponent(EntityID id)
 	{
-		auto components = EntityComponentIndex.at(id);
-		components->erase(Type::GetID());
+		Component<Type>::DestroyComponent(id);
+		EntityComponentIndex.at(id)->erase(Component<Type>::GetID());
 		return;
 	}
 	template<typename Type>

@@ -69,9 +69,9 @@ namespace DirectX
 	{
 	protected:
 		static ComponentID m_id;
-		static std::map<EntityID, std::shared_ptr<Type>> ComponentIndex;
+		static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
 	public:
-		static std::weak_ptr<Type> AddComponent(EntityID id);
+		static void AddComponent(EntityID id,std::weak_ptr<Type> instance);
 		static std::weak_ptr<Type> GetComponent(EntityID id);
 		static void DestroyComponent(EntityID id);
 		static ComponentID GetID();
@@ -94,12 +94,11 @@ namespace DirectX
 	ComponentID Component<Type>::m_id = ComponentManager::CreateComponent<Type>();
 
 	template<typename Type>
-	inline std::weak_ptr<Type> Component<Type>::AddComponent(EntityID id)
+	inline void Component<Type>::AddComponent(EntityID id,std::weak_ptr<Type> instance)
 	{
-		auto add = ComponentManager::AddComponent<Type>(id);
-		add->m_OwnerId = id;
-		ComponentIndex.emplace(id,std::shared_ptr<Type>(add));
-		return add;
+		instance.lock()->m_OwnerId = id;
+		ComponentIndex.emplace(id, instance);
+		return;
 	}
 
 	template<typename Type>
@@ -111,6 +110,7 @@ namespace DirectX
 	template<typename Type> 
 	inline void Component<Type>::DestroyComponent(EntityID id)
 	{
+		ComponentIndex.at(id).lock()->OnDestroy();
 		ComponentIndex.erase(id);
 	}
 
@@ -136,7 +136,7 @@ namespace DirectX
 	template<typename Type>
 	inline Component<Type>::~Component()
 	{
-		
+		ComponentIndex.erase(m_OwnerId);
 	}
 
 	template<typename Type>
