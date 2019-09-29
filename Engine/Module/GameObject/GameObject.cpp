@@ -48,15 +48,24 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 
 GameObject::~GameObject() 
 {
-	
+
 }
 
 void DirectX::GameObject::DebugGUI() 
 {
 	for(auto id : m_EntityIndex)
 	{
+		//Object•\Ž¦
 		auto object = Entity<GameObject>::GetEntity(id);
 		ImGui::Text(object.lock()->name.c_str());
+		//Component•\Ž¦
+		auto components = ComponentManager::GetComponents(id);
+		auto itr = components.lock()->begin();
+		auto end = components.lock()->end();
+		while (itr != end) {
+			itr->second->DebugImGui();
+			itr++;
+		}
 	}
 }
 

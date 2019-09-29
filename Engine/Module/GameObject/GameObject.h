@@ -30,20 +30,9 @@ namespace DirectX
 		bool GetActive();
 	public:
 		std::weak_ptr<Transform> transform();
-	public:
-		template<typename Type> Type* AddComponent();
-		template<typename Type> std::weak_ptr<Type> GetComponent();
 	};
 
 	//----------------------------------------------------------------------------
-	template<typename Type> Type* GameObject::AddComponent()
-	{
-		return ComponentManager::AddComponent<Type>(this->m_EntityID);
-	}
-	template<typename Type> std::weak_ptr<Type> GameObject::GetComponent()
-	{
-		return ComponentManager::GetComponent<Type>(this->m_EntityID);
-	}	
 
 	inline bool GameObject::CompareTag(TagName tag) {
 		return this->tag.name == tag;
