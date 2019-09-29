@@ -3,10 +3,8 @@
 #include<memory>
 #include<list>
 #include<vector>
-#include"Module\Object\Object.h"
-#include"Module\Entity\EntityManager.h"
-#include"IEntity.h"
-#include"Entity.h"
+
+#include"Module\ECSEngine.h"
 
 using namespace DirectX;
 
@@ -17,6 +15,11 @@ IEntity::IEntity()
 
 }
 
+DirectX::IEntity::~IEntity()
+{
+	this->DestroyComponents();
+}
+
 const EntityID IEntity::GetEntityID()
 {
 	return this->m_EntityID;
@@ -25,4 +28,9 @@ const EntityID IEntity::GetEntityID()
 bool DirectX::IEntity::GetIsEnable()
 {
 	return this->m_IsEnable;
+}
+
+void DirectX::IEntity::DestroyComponents()
+{
+	ComponentManager::DestroyComponents(this->m_EntityID);
 }

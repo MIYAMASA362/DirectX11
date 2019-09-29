@@ -52,7 +52,7 @@ namespace DirectX
 	template<typename Type>
 	inline Entity<Type>::~Entity()
 	{
-
+		
 	}
 	template<typename Type>
 	inline void Entity<Type>::AddIndex(Type* instance)
