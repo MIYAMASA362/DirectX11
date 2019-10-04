@@ -18,7 +18,7 @@
 #include"../Project/CameraMouse.h"
 #include"../Project/CameraFollow.h"
 #include"../Project/RemoveObject.h"
-#include"../Project//Bullet.h"
+#include"../Project/Bullet.h"
 
 #include"../Project/Enemy.h"
 #include"../Project/Player.h"
@@ -102,7 +102,7 @@ void CManager::Run()
 	bool IsUpdate = TimeManager::IsUpdate();
 	bool IsFixedUpdate = TimeManager::IsFixedUpdate();
 
-	if (!IsUpdate && !IsFixedUpdate) return;
+	if (!IsUpdate && !IsFixedUpdate)return;
 
 	if (IsUpdate) CManager::Update();
 
@@ -116,6 +116,8 @@ void CManager::Run()
 void CManager::Update()
 {
 	SystemManager::Update();
+
+	CameraMouse::OnUpdate();
 }
 
 void CManager::FixedUpdate()
@@ -127,7 +129,7 @@ void CManager::Render()
 {
 	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
 
-	Camera::SetRender(SceneManager::Render, D3DApp::Renderer::Begin);
+	Camera::Render(Renderer::BeginRender, D3DApp::Renderer::Begin);
 
 	CManager::DebugRender();
 
@@ -150,7 +152,6 @@ void CManager::Finalize()
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 
-	Camera::Release();
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
@@ -161,6 +162,6 @@ void CManager::Finalize()
 	TimeManager::Destroy();
 	GUI::guiImGui::Destroy();
 
-	ComponentManager::Release();
 	EntityManager::Release();
+	ComponentManager::Release();
 }
