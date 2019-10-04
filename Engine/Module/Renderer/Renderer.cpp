@@ -15,20 +15,37 @@
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
+std::map<EntityID, std::weak_ptr<Renderer>> Renderer::ComponentIndex;
 
-DirectX::Renderer::Renderer()
-:
-	Component("Renderer")
+void DirectX::Renderer::BeginRender()
 {
+	auto itr = ComponentIndex.begin();
+	auto end = ComponentIndex.end();
+	while (itr != end) {
+		auto renderer = itr->second.lock();
+		renderer->Run();
+		itr++;
+	}
+}
+
+DirectX::Renderer::Renderer(EntityID OwnerID,std::string name)
+	:
+	Component(OwnerID,name)
+{
+
 }
 
 void DirectX::Renderer::Run()
 {
 	if (!this->m_IsEnable)return;
-	this->Render(ComponentManager::GetComponent<Transform>(this->m_OwnerId).lock()->WorldMatrix());
+	this->Render(this->transform().lock()->WorldMatrix());
 }
-
 
 void DirectX::Renderer::OnComponent()
 {
-};
+
+}
+void DirectX::Renderer::AddComponentIndex(std::weak_ptr<Renderer> instance)
+{
+	ComponentIndex.emplace(instance.lock()->GetOwnerID(),std::weak_ptr<Renderer>(instance));
+}
