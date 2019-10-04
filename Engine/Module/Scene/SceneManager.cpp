@@ -153,7 +153,6 @@ GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 void DirectX::Scene::RemoveSceneObject(EntityID id)
 {
 	EntityManager::RemoveEntity(id);
-	ComponentManager::DestroyComponents(id);
 }
 
 //

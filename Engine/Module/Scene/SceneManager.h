@@ -38,7 +38,6 @@ namespace DirectX
 	public:
 		static void ChangeScene();
 		static void DebugGUI_ActiveScene();
-		static void Render(){};
 	private:
 		static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 		static void AttachActiveScene(std::weak_ptr<Scene> scene);
