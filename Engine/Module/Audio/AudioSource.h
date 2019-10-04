@@ -10,7 +10,7 @@ namespace DirectX
 		std::weak_ptr<Audio>audio;
 		bool IsLoop = true;
 	public:
-		AudioSource();
+		AudioSource(EntityID OwnerID);
 		~AudioSource();
 	public:
 		void GetAsset(std::string name);

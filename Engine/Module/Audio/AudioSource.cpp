@@ -13,9 +13,11 @@
 #include"AudioManager.h"
 #include"AudioSource.h"
 
-DirectX::AudioSource::AudioSource()
+std::map<DirectX::EntityID, std::weak_ptr<DirectX::AudioSource>> DirectX::AudioSource::ComponentIndex;
+
+DirectX::AudioSource::AudioSource(EntityID OwnerID)
 :
-	Component("AudioSource")
+	Component(OwnerID,"AudioSource")
 {
 
 }
