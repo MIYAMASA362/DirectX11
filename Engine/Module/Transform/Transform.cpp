@@ -22,24 +22,19 @@
 
 using namespace DirectX;
 
+std::map<EntityID, std::weak_ptr<Transform>>  Transform::ComponentIndex;
+
 //--- Constrcutor -------------------------------------------------------------
 
-//Constrcutor
-Transform::Transform(Vector3 position, Quaternion rotation, Vector3 scale)
-:
-	Component("Transform"),
-	m_Position(position),
-	m_Rotation(rotation),
-	m_Scale(scale)
-{
-
-}
-
 //other
-Transform::Transform(Vector3 position,Vector3 rotation,Vector3 scale)
-	:Transform(position,Quaternion::Euler(rotation),scale){}
-Transform::Transform()
-	:Transform(Vector3::zero(), Vector3::zero(), Vector3::one()){}
+Transform::Transform(EntityID OwnerID)
+:
+	Component(OwnerID,"Transform"),
+	m_Position(Vector3::zero()),
+	m_Rotation(Quaternion::Identity()),
+	m_Scale(Vector3::one())
+{
+}
 
 //--- 親子関係　---------------------------------------------------------------
 
@@ -54,7 +49,7 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 	//親設定
 	pParent = parent;
 	//親の子に設定
-	//parent.lock().get()->pChildren.push_back(this->transform);
+	parent.lock().get()->pChildren.push_back(this->transform().lock());
 	
 	//向きなどを保持したまま子になる
 	XMMATRIX matrix = this->m_WorldMatrix * XMMatrixInverse(nullptr, parent.lock()->WorldMatrix());
@@ -65,7 +60,7 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 
 void Transform::SetParent(GameObject* parent)
 {
-	//this->SetParent(parent->transform);
+	this->SetParent(parent->transform());
 }
 
 void Transform::detachParent() {
@@ -120,14 +115,15 @@ void DirectX::Transform::SendComponentMessageChildren()
 
 void DirectX::Transform::DebugImGui()
 {
-	if(ImGui::TreeNode("Transform")){
+	if(ImGui::TreeNode((std::string("Transform:") + std::to_string(m_OwnerId)).c_str())){
 		Vector3 position = this->position();
 		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
 		Vector3 scale = this->scale();
 		
 		ImGui::InputFloat3("Position",&position.x);
 		ImGui::InputFloat3("Rotation",&rotation.x);
-		ImGui::InputFloat3("Scale",&scale.x);
+		ImGui::InputFloat3("Scale", &scale.x);
+
 		ImGui::TreePop();
 	}
 }
@@ -231,6 +227,11 @@ void Transform::LookAt(std::weak_ptr<Transform> target) {
 	this->m_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos, Vector3::up());
 	if (!pParent.expired())
 		this->m_Rotation = pParent.lock()->rotation().conjugate() * this->m_Rotation;
+}
+
+void DirectX::Transform::OnDestroy()
+{
+
 }
 
 //--- 行列処理 ----------------------------------------------------------------

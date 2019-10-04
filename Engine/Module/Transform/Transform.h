@@ -16,9 +16,7 @@ namespace DirectX
 
 		XMMATRIX	m_WorldMatrix;	//ワールド行列
 	public:
-		Transform(Vector3 position, Quaternion rotation, Vector3 scale);
-		Transform(Vector3 position, Vector3 rotation, Vector3 scale);
-		Transform();
+		Transform(EntityID OwnerID);
 		~Transform() = default;
 	public:
 		Vector3		position();								//ワールド位置
@@ -64,5 +62,6 @@ namespace DirectX
 		XMMATRIX WorldMatrix();				//ワールド行列
 	public:
 		void LookAt(std::weak_ptr<Transform> target);	//その方向を見る
+		void OnDestroy() override;
 	};
 }
