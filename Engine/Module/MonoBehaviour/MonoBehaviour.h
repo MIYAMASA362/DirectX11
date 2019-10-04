@@ -8,7 +8,7 @@ namespace DirectX
 	class MonoBehaviour:public Behaviour<Type>
 	{
 	public:
-		MonoBehaviour(std::string name) :Behaviour(name) {};
+		MonoBehaviour(EntityID OwnerID,std::string name) :Behaviour(OwnerID,name) {};
 		virtual ~MonoBehaviour() = default;
 	public:
 		virtual void Initialize(){};
