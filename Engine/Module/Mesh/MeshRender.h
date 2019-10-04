@@ -4,18 +4,20 @@ namespace DirectX
 {
 	class Mesh;
 	//=== MeshRender ==========================================================
-	class MeshRender final :public Component<MeshRender>
+	class MeshRender :public Renderer
 	{
 	private:
 		std::shared_ptr<Mesh> mesh;
 	public:
-		MeshRender();
+		MeshRender(EntityID OwnerID);
 		virtual ~MeshRender();
 	public:
 		void OnComponent() override;
-		void Render();
+		void Render(XMMATRIX& worldMatrix) override;
 		template<typename Type> Type* SetMesh();
 		Mesh* GetMesh();
+	public:
+		void DebugImGui() override;
 	};
 
 	//-------------------------------------------------------------------------

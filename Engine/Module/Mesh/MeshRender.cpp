@@ -9,10 +9,13 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\Object\Object.h"
-#include"Module\Component\IComponent.h"
-#include"Module\Component\ComponentManager.h"
-#include"Module\Component\Component.h"
+#include"Module\IMGUI\GUI_ImGui.h"
+
+//ECS
+#include"Module\ECSEngine.h"
+
+//Module
+#include"Module\Renderer\Renderer.h"
 #include"Module\Mesh\Mesh.h"
 #include"MeshRender.h"
 
@@ -20,9 +23,9 @@
 
 using namespace DirectX;
 
-DirectX::MeshRender::MeshRender()
+DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	:
-	Component("MeshRender")
+	Renderer(OwnerID,"MeshRender")
 {
 
 }
@@ -37,8 +40,14 @@ void DirectX::MeshRender::OnComponent()
 
 }
 
-void DirectX::MeshRender::Render()
+void DirectX::MeshRender::Render(XMMATRIX& worldMatrix)
 {
-	if (!this->m_IsEnable)return;
-	mesh->Render(ComponentManager::GetComponent<Transform>(m_OwnerId).lock()->WorldMatrix());
+	mesh->Render(worldMatrix);
+}
+
+void MeshRender::DebugImGui()
+{
+	if (ImGui::TreeNode("MeshRender")) {
+		ImGui::TreePop();
+	}
 }
