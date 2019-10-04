@@ -21,6 +21,8 @@
 
 using namespace DirectX;
 
+std::map<EntityID, std::weak_ptr<Collider>> Collider::ComponentIndex;
+
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {
 	this->m_center = center;
@@ -30,9 +32,9 @@ DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 //--- Collider --------------------------------------------
 
 //Constrcutor
-DirectX::Collider::Collider()
+DirectX::Collider::Collider(EntityID OwnerID)
 :
-	Component("Collider"),
+	Component(OwnerID,"Collider"),
 	bound(Vector3::zero(),Vector3::one())
 {
 
@@ -180,7 +182,9 @@ VERTEX_3D* SphereCollider::m_pVertex = nullptr;
 int SphereCollider::m_IndexNum = 0;
 Texture* SphereCollider::m_Texture = nullptr;
 
-SphereCollider::SphereCollider()
+SphereCollider::SphereCollider(EntityID OwnerID)
+:
+	Collider(OwnerID)
 {
 	this->SetRadius(0.25f);
 }
@@ -412,6 +416,12 @@ void DirectX::BoxCollider::ReleaseRenderBuffer()
 	if (m_VertexBuffer)
 		m_VertexBuffer->Release();
 	delete[] m_pVertex;
+}
+
+DirectX::BoxCollider::BoxCollider(EntityID OwnerID)
+:
+	Collider(OwnerID)
+{
 }
 
 void DirectX::BoxCollider::SetSize(Vector3 size)

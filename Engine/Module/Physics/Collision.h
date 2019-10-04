@@ -64,7 +64,7 @@ namespace DirectX
 		bool IsHit = false;			//Õ“Ë‚µ‚Ä‚¢‚é
 		bool IsTrigger = false;		//•¨—‹““®‚·‚é‚©
 	public:
-		Collider();
+		Collider(EntityID OwnerID);
 		virtual ~Collider() = default;
 		virtual ShapeType GetShapeType() = 0;	//Type
 	public:
@@ -89,7 +89,7 @@ namespace DirectX
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
 	public:
-		SphereCollider();
+		SphereCollider(EntityID OwnerID);
 		virtual ~SphereCollider() = default;
 		virtual ShapeType GetShapeType() override { return ShapeType::Sphere; };
 		void SetRadius(float radius);
@@ -111,7 +111,7 @@ namespace DirectX
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
 	public:
-		BoxCollider() = default;
+		BoxCollider(EntityID OwnerID);
 		virtual ~BoxCollider() = default;
 		virtual ShapeType GetShapeType() override { return ShapeType::Box; };
 		void SetSize(Vector3 size);
