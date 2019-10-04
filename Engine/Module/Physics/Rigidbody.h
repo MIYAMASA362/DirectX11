@@ -10,7 +10,7 @@ namespace DirectX
 		Vector3 m_velocity;
 		float m_mass;
 	public:
-		Rigidbody();
+		Rigidbody(EntityID OwnerID);
 		virtual ~Rigidbody();
 	public:
 		void IsUseGravity(bool enable);
