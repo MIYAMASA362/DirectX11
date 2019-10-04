@@ -20,7 +20,19 @@ public:
 
 		for (int i = 0; i < 100; i++) {
 			GameObject* pObject = this->AddSceneObject("test"+std::to_string(i), TagName::Default);
+			auto transform = pObject->AddComponent<Transform>();
+			transform = transform;
+			if(i != 0)
+				transform->SetParent(GameObject::GetEntity(i-1).lock().get());
 		}
+		auto object = GameObject::GetEntity(50);
+		object.lock()->AddComponent<Camera>();
+		object.lock()->AddComponent<CameraMouse>();
+
+		object = GameObject::GetEntity(49);
+		object.lock()->transform().lock()->localScale(Vector3::one()*10.0f);
+		auto mesh = object.lock()->AddComponent<MeshRender>()->SetMesh<SkySphere>();
+		mesh->m_Texture = TextureManager::GetTexture("sky");
 
 		////pCamera
 		//GameObject* pCamera = this->AddSceneObject("MainCamera", TagName::MainCamera);

@@ -3,7 +3,7 @@
 class Player:public MonoBehaviour<Player>
 {
 public:
-	Player() :MonoBehaviour("Player") {};
+	Player(EntityID OwnerID) :MonoBehaviour(OwnerID,"Player") {};
 
 	void Update()
 	{
@@ -29,7 +29,7 @@ public:
 	GameObject* player;
 	const float speed = 0.001f;
 public:
-	PlayerCamera() :MonoBehaviour("PlayerCamera") {};
+	PlayerCamera(EntityID OwnerID) :MonoBehaviour(OwnerID,"PlayerCamera") {};
 
 	void Update() override
 	{
@@ -65,7 +65,7 @@ private:
 public:
 	Camera* camera;
 public:
-	PlayerMove() :MonoBehaviour("PlayerMove") {};
+	PlayerMove(EntityID OwnerID) :MonoBehaviour(OwnerID,"PlayerMove") {};
 	void Update() override
 	{
 		//Vector3 vec = Vector3::zero();
@@ -108,7 +108,7 @@ class PivotBehaviour:public MonoBehaviour<PivotBehaviour>
 {
 public:
 	GameObject* target;
-	PivotBehaviour() :MonoBehaviour("PivotBehaviour") {};
+	PivotBehaviour(EntityID OwnerID) :MonoBehaviour(OwnerID,"PivotBehaviour") {};
 public:
 	void Update(){
 		/*this->transform.lock()->position(target->transform->position());*/

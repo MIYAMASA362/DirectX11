@@ -5,7 +5,7 @@ class Bullet:public MonoBehaviour<Bullet>
 public:
 	const float speed = 0.5f;
 public:
-	Bullet():MonoBehaviour("Bullet")
+	Bullet(EntityID OwnerID):MonoBehaviour(OwnerID,"Bullet")
 	{
 		
 	};
@@ -19,7 +19,7 @@ public:
 class Shot:public MonoBehaviour<Shot>
 {
 public:
-	Shot() :MonoBehaviour("Shot") {};
+	Shot(EntityID OwnerID) :MonoBehaviour(OwnerID,"Shot") {};
 public:
 	void Initialize()override
 	{
