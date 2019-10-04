@@ -40,7 +40,6 @@ namespace DirectX
 	template<typename Type>
 	inline Type* ComponentManager::AddComponent(EntityID id)
 	{
-		auto add = new Type();
 		//id‚ÌComponentsƒŠƒXƒg‚ª‘¶İ‚·‚é‚Ì‚©
 		try {
 			EntityComponentIndex.at(id);
@@ -49,12 +48,11 @@ namespace DirectX
 		catch (const std::out_of_range&) {
 			EntityComponentIndex.emplace(id, std::shared_ptr<Components>(new Components()));
 		}
-		//Component‚ğİ’è
-		auto component = std::shared_ptr<Type>(add);
-		Component<Type>::AddComponent(id,component);
-		EntityComponentIndex.at(id)->emplace(component->GetComponentID(),component);
-		component->OnComponent();
-		return add;
+		//Componentİ’è
+		auto add = std::shared_ptr<Type>(new Type(id));
+		EntityComponentIndex.at(id)->emplace(Component<Type>::GetID(),add);
+		Component<Type>::AddComponent(add);
+		return add.get();
 	}
 	template<typename Type>
 	inline std::weak_ptr<Type> ComponentManager::GetComponent(EntityID id)

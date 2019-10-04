@@ -18,6 +18,13 @@
 
 using namespace DirectX;
 
+DirectX::IComponent::IComponent(EntityID OwnerID)
+:
+	m_OwnerId(OwnerID)
+{
+
+}
+
 void IComponent::SetEnable(bool enable)
 {
 	this->m_IsEnable = enable;
@@ -28,7 +35,7 @@ bool IComponent::GetEnable()
 	return this->m_IsEnable;
 }
 
-EntityID IComponent::GetOwnerID()
+EntityID DirectX::IComponent::GetOwnerID()
 {
 	return this->m_OwnerId;
 }

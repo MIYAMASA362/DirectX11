@@ -2,65 +2,6 @@
 
 namespace DirectX
 {
-	/*
-	@override
-	+ Destroy()
-	+ OnDestroy()
-	+ OnComponent()
-	+ SendBehaviourMessage(Message message)
-	+ GetComponentName()
-	+ GetType()
-	
-	class Component:public Object
-	{
-		friend GameObject;
-	//--- Attribute -------------------------------------------------
-	public:
-		//BehaviourMessage
-		enum Message{
-			Initialize,
-			Update,
-			FixedUpdate,
-			Render,
-			Finalize,
-		};
-	private:
-		const std::string name;					//Component名
-	protected:
-		bool IsEnable = true;					//Componentの有効・無効
-	public:
-		std::weak_ptr<GameObject> gameObject;	//アタッチされているGameObjectへの参照
-		std::weak_ptr<Transform> transform;		//アタッチされているGameObjectのTransformへの参照
-	//--- Constrcutor/Destrcutor ------------------------------------
-	public:
-		Component(std::string name):name(name){};
-		virtual ~Component() {};
-	//--- Method ----------------------------------------------------
-	public:
-		void SetEnable(bool isEnable);
-		bool GetEnable() { return IsEnable; };
-	public:
-		//Componentを走らせる
-		void Run(std::weak_ptr<GameObject> gameObject,std::weak_ptr<Transform> transform,Component::Message message);
-		//Messageを送る
-		virtual void SendBehaviourMessage(Message message) {};
-		//Componentがアタッチされたら呼ばれる
-		virtual void OnComponent() {};
-		//Component名取得
-		std::string GetComponentName() { return name; };
-		virtual void OnDestroy() override {};
-		virtual const std::type_info& GetType() = 0;
-		virtual void DebugImGui();
-	//当たり判定系Message
-	public:
-		virtual void OnTriggerEnter(std::weak_ptr<Collider> other) {};
-		virtual void OnTriggerExit(std::weak_ptr<Collider> other) {};
-		virtual void OnTriggerStay(std::weak_ptr<Collider> other) {};
-		virtual void OnCollisionEnter(std::weak_ptr<Collision> collision) {};
-		virtual void OnCollisionExit(std::weak_ptr<Collision> collision) {};
-		virtual void OnCollisionStay(std::weak_ptr<Collision> collision) {};
-	};*/
-
 	using ComponentID = unsigned int;
 	using EntityID = unsigned int;
 
@@ -68,39 +9,38 @@ namespace DirectX
 	class Component:public IComponent
 	{
 	protected:
-		static ComponentID m_id;
+		static const ComponentID m_id;
 		static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
 	public:
-		static void AddComponent(EntityID id,std::weak_ptr<Type> instance);
+		static ComponentID GetID();
+		static void AddComponent(std::weak_ptr<Type> instance);
 		static std::weak_ptr<Type> GetComponent(EntityID id);
 		static void DestroyComponent(EntityID id);
-		static ComponentID GetID();
 	protected:
 		const std::string name;
 	public:
-		Component(std::string name);
+		Component(EntityID OwnerID,std::string name);
 		virtual ~Component();
 	public:
-		virtual void Run() override;
-		virtual void OnComponent();
-		virtual void OnDestroy() override;
-		virtual void DebugImGui() override;
+		virtual void Run() override {};
+		virtual void OnComponent() {};
+		virtual void OnDestroy() override {};
+		virtual void DebugImGui() override {};
+		virtual void AddComponentIndex(std::weak_ptr<Type> instance);	//ComponentIndexへの特殊変換
 	public:
 		ComponentID GetComponentID()override final;
 	};
 
 	//----------------------------------------------------------------------------
 	template<typename Type>
-	ComponentID Component<Type>::m_id = ComponentManager::CreateComponent<Type>();
+	const ComponentID Component<Type>::m_id = ComponentManager::CreateComponent<Type>();
 
 	template<typename Type>
-	inline void Component<Type>::AddComponent(EntityID id,std::weak_ptr<Type> instance)
+	inline void Component<Type>::AddComponent(std::weak_ptr<Type> instance)
 	{
-		instance.lock()->m_OwnerId = id;
-		ComponentIndex.emplace(id, instance);
-		return;
+		instance.lock()->AddComponentIndex(instance);
+		instance.lock()->OnComponent();
 	}
-
 	template<typename Type>
 	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID id)
 	{
@@ -120,14 +60,20 @@ namespace DirectX
 		return m_id;
 	}
 	template<typename Type>
+	inline void Component<Type>::AddComponentIndex(std::weak_ptr<Type> instance)
+	{
+		ComponentIndex.emplace(instance.lock()->GetOwnerID(), instance);
+	}
+	template<typename Type>
 	inline ComponentID Component<Type>::GetComponentID()
 	{
-		return this->m_id;
+		return GetID();
 	}
 
 	template<typename Type>
-	inline Component<Type>::Component(std::string name)
+	inline Component<Type>::Component(EntityID OwnerID, std::string name)
 	:
+		IComponent(OwnerID),
 		name(name)
 	{
 
@@ -137,27 +83,5 @@ namespace DirectX
 	inline Component<Type>::~Component()
 	{
 		ComponentIndex.erase(m_OwnerId);
-	}
-
-	template<typename Type>
-	inline void Component<Type>::Run()
-	{
-	
-	}
-
-	template<typename Type>
-	inline void Component<Type>::DebugImGui()
-	{
-		
-	}
-
-	template<typename Type>
-	inline void Component<Type>::OnComponent()
-	{
-		
-	}
-	template<typename Type>
-	inline void Component<Type>::OnDestroy()
-	{
 	}
 }
