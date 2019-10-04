@@ -30,12 +30,14 @@
 //Component
 #include"Tag\Tag.h"
 #include"GameObject\GameObject.h"
-#include"Mesh\Mesh.h"
+#include"Transform\Transform.h"
 
 #include"Audio\AudioSource.h"
 
 //Component Module
 #include"Renderer\Renderer.h"
+#include"Mesh\Mesh.h"
+#include"Mesh\MeshRender.h"
 #include"Field\field.h"
 #include"Billboard\Billboard.h"
 #include"Model\model.h"
