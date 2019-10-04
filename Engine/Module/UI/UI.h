@@ -15,14 +15,14 @@ namespace DirectX
 	private:
 		std::list<std::weak_ptr<UI>> UIIndex;
 	public:
-		Canvas():Component("Canvas"){};
+		Canvas(EntityID OwnerID):Component(OwnerID,"Canvas"){};
 	};
 
 	//UI
 	class UI:public Component<UI>
 	{
 	public:
-		UI(std::string name):Component(name){};
+		UI(EntityID OwnerID,std::string name):Component(OwnerID,name){};
 		virtual ~UI() = default;
 	public:
 		virtual void OnComponent() override;
@@ -36,7 +36,7 @@ namespace DirectX
 		BaseTexture* texture = nullptr;
 		ID3D11Buffer* vertexBuffer = nullptr;
 	public:
-		Image();
+		Image(EntityID OwnerID);
 		virtual ~Image();
 		virtual void Render(XMMATRIX world) override;
 	};
@@ -51,7 +51,7 @@ namespace DirectX
 	public:
 		Texture* texture;
 	public:
-		Button();
+		Button(EntityID OwnerID);
 		virtual ~Button();
 		void Update();
 		void Render(XMMATRIX world) override;
@@ -68,7 +68,7 @@ namespace DirectX
 		ID3D11ShaderResourceView* m_srv;
 		Font* m_font;
 	public:
-		Text():UI("Text"){};
+		Text(EntityID OwnerID):UI(OwnerID,"Text"){};
 		void Render(XMMATRIX world)override {};
 		void SetText(std::string text);
 		void SetFont(Font* font);

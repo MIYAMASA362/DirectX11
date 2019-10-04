@@ -22,6 +22,7 @@
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
+std::map<EntityID, std::weak_ptr<UI>> UI::ComponentIndex;
 
 //--- Canvas --------------------------------------------------------
 
@@ -44,9 +45,9 @@ void DirectX::UI::OnComponent()
 
 //--- Image ---------------------------------------------------------
 
-DirectX::Image::Image()
+DirectX::Image::Image(EntityID OwnerID)
 :
-	UI("Image")
+	UI(OwnerID,"Image")
 {
 	VERTEX_3D vertex[4] = {
 		{ XMFLOAT3(-5.0f, -5.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
@@ -98,9 +99,9 @@ void DirectX::Image::Render(XMMATRIX world)
 
 //--- Button --------------------------------------------------------
 
-DirectX::Button::Button()
+DirectX::Button::Button(EntityID OwnerID)
 :
-	UI("Button"),
+	UI(OwnerID,"Button"),
 	m_scale(5.0f),
 	m_isHover(false)
 {
