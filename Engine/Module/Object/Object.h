@@ -8,23 +8,17 @@ namespace DirectX
 		Object();
 		virtual ~Object();
 	public:
-		virtual void OnDestroy();
-		virtual void Destroy();
+		virtual void OnDestroy() {};
+		virtual void Destroy() {};
 	};
 
 	//----------------------------------------------------------------
-	inline Object::Object(){
+	inline Object::Object()
+	{
 		
 	}
-	inline Object::~Object(){
-		OnDestroy();
-	};
-	inline void Object::OnDestroy()
-	{
-	
-	}
-	inline void Object::Destroy() 
+	inline Object::~Object()
 	{
 
-	}
+	};
 }
