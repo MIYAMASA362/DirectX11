@@ -35,6 +35,16 @@ DirectX::Renderer::Renderer(EntityID OwnerID,std::string name)
 
 }
 
+void DirectX::Renderer::SetEnable(bool enable)
+{
+	this->m_IsEnable = enable;
+}
+
+bool DirectX::Renderer::GetEnable()
+{
+	return this->m_IsEnable;
+}
+
 void DirectX::Renderer::Run()
 {
 	if (!this->m_IsEnable)return;
