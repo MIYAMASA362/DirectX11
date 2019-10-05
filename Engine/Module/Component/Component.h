@@ -8,7 +8,7 @@ namespace DirectX
 	template<typename Type>
 	class Component:public IComponent
 	{
-		friend ComponentManager;
+		friend class ComponentManager;
 	protected:
 		static const ComponentID m_id;
 		static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
