@@ -51,7 +51,8 @@ namespace DirectX
 		//Componentİ’è
 		auto add = std::shared_ptr<Type>(new Type(id));
 		EntityComponentIndex.at(id)->emplace(Component<Type>::GetID(),add);
-		Component<Type>::AddComponent(add);
+		add->AddComponentIndex(add);
+		add->OnComponent();
 		return add.get();
 	}
 	template<typename Type>
