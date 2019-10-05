@@ -50,6 +50,7 @@ std::weak_ptr<GameObject> DirectX::IComponent::gameObject()
 	return Entity<GameObject>::GetEntity(this->m_OwnerId);
 }
 
+
 void IComponent::OnDestroy()
 {
 

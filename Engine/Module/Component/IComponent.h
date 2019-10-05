@@ -9,7 +9,6 @@ namespace DirectX
 	//Component Interface
 	class IComponent:public Object
 	{
-		friend class ComponentManager;
 	protected:
 		const EntityID m_OwnerId;
 		bool m_IsEnable = true;
