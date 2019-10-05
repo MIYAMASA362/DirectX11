@@ -9,10 +9,14 @@ namespace DirectX
 	{
 	public:
 		static void BeginRender();
+	private:
+		bool m_IsEnable = true;
 	public:
 		Renderer(EntityID OwnerID,std::string name);
 		virtual ~Renderer() = default;
 	public:
+		void SetEnable(bool enable);
+		bool GetEnable();
 		void Run();
 		virtual void Render(XMMATRIX& worldMatrix)=0;
 		virtual void OnComponent() override;
