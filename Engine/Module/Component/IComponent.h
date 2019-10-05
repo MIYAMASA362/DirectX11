@@ -11,13 +11,10 @@ namespace DirectX
 	{
 	protected:
 		const EntityID m_OwnerId;
-		bool m_IsEnable = true;
 	public:
 		IComponent(EntityID OwnerID);
 		virtual ~IComponent() = default;
 	public:
-		void SetEnable(bool enable);
-		bool GetEnable();
 		EntityID GetOwnerID();
 	public:
 		std::weak_ptr<Transform> transform();

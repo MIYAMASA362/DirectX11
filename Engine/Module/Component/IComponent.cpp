@@ -25,16 +25,6 @@ DirectX::IComponent::IComponent(EntityID OwnerID)
 
 }
 
-void IComponent::SetEnable(bool enable)
-{
-	this->m_IsEnable = enable;
-}
-
-bool IComponent::GetEnable()
-{
-	return this->m_IsEnable;
-}
-
 EntityID DirectX::IComponent::GetOwnerID()
 {
 	return this->m_OwnerId;
