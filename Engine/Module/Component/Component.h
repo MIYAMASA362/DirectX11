@@ -24,10 +24,10 @@ namespace DirectX
 	protected:
 		virtual void AddComponentIndex(std::weak_ptr<Type> instance);	//ComponentIndex‚Ö‚Ì“ÁŽê•ÏŠ·
 	public:
-		virtual void Run() override {};
 		virtual void OnComponent() {};
 		virtual void OnDestroy() override {};
 		virtual void DebugImGui() override {};
+		virtual void SendComponentMessage(std::string message) override {};
 	public:
 		ComponentID GetComponentID()override final;
 	};

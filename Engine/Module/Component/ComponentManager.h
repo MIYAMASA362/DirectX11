@@ -24,6 +24,8 @@ namespace DirectX
 		static void DestroyComponents(EntityID id);
 		template<typename Type> static void DestroyComponent(EntityID id);
 		template<typename Type> static ComponentID CreateComponent();
+	public:
+		static void SendComponentMessage(std::string message);
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -35,6 +37,8 @@ namespace DirectX
 	}
 	inline std::weak_ptr<Components> ComponentManager::GetComponents(EntityID id)
 	{
+		if (EntityComponentIndex.size() == 0)
+			return std::weak_ptr<Components>();
 		return EntityComponentIndex.at(id);
 	}
 	template<typename Type>
@@ -53,6 +57,7 @@ namespace DirectX
 		EntityComponentIndex.at(id)->emplace(Component<Type>::GetID(),add);
 		add->AddComponentIndex(add);
 		add->OnComponent();
+		add->SendComponentMessage("Start");
 		return add.get();
 	}
 	template<typename Type>

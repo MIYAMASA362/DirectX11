@@ -21,9 +21,9 @@ namespace DirectX
 		std::weak_ptr<GameObject> gameObject();
 	public:
 		virtual ComponentID GetComponentID() = 0;
-		virtual void Run() = 0;
 		virtual void OnDestroy() =0;
 		virtual void DebugImGui() = 0;
+		virtual void SendComponentMessage(std::string message)=0;
 	};
 
 	//-------------------------------------------------------------------------

@@ -15,11 +15,17 @@ namespace DirectX
 		void SetEnable(bool enable);
 		bool GetEnable();
 	public:
-		virtual void Run()			override {};
 		virtual void OnComponent()	override {};
+		virtual void AddComponentIndex(std::weak_ptr<Type> instance) override;
 		virtual void OnDestroy()	override {};
 		virtual void DebugImGui()	override {};
+		virtual void SendComponentMessage(std::string message) {};
 	};
+	template<typename Type>
+	inline void Behaviour<Type>::AddComponentIndex(std::weak_ptr<Type> instance)
+	{
+		Component<Type>::AddComponentIndex(instance);
+	}
 	template<typename Type>
 	inline void Behaviour<Type>::SetEnable(bool enable)
 	{
