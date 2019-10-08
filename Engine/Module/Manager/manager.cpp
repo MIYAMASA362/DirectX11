@@ -117,12 +117,14 @@ void CManager::Update()
 {
 	SystemManager::Update();
 
-	CameraMouse::OnUpdate();
+	ComponentManager::SendComponentMessage("Update");
 }
 
 void CManager::FixedUpdate()
 {
 	SystemManager::FixedUpdate();
+
+	ComponentManager::SendComponentMessage("FixedUpdate");
 }
 
 void CManager::Render()
