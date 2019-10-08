@@ -60,6 +60,7 @@ void DirectX::GameObject::DebugGUI()
 		ImGui::Text(object.lock()->name.c_str());
 		//Component•\¦
 		auto components = ComponentManager::GetComponents(id);
+		if (components.expired()) continue;
 		auto itr = components.lock()->begin();
 		auto end = components.lock()->end();
 		while (itr != end) {
