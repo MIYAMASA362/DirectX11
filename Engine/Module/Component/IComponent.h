@@ -1,8 +1,6 @@
 #pragma once
 namespace DirectX
 {
-	using ComponentID = unsigned int;
-	using EntityID = unsigned int;
 	class Transform;
 	class GameObject;
 

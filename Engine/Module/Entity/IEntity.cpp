@@ -1,8 +1,4 @@
-#include<string>
-#include<map>
-#include<memory>
-#include<list>
-#include<vector>
+#include"Common.h"
 
 #include"Module\ECSEngine.h"
 

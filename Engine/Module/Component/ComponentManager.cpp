@@ -1,16 +1,11 @@
-#include<string>
-#include<memory>
-#include<map>
+#include"Common.h"
+#include<random>
 
-#include"Module\Object\Object.h"
-#include"IComponent.h"
-#include"Component.h"
-#include"ComponentManager.h"
+#include"Module\ECSEngine.h"
 
 using namespace DirectX;
 
-//ComponentIDのカウント
-DirectX::ComponentID DirectX::ComponentManager::m_id;
+std::vector<ComponentID> ComponentManager::IdIndex;
 //EntityにアタッチされたComponentのリスト
 DirectX::EntityComponents DirectX::ComponentManager::EntityComponentIndex;
 
@@ -45,4 +40,18 @@ void DirectX::ComponentManager::SendComponentMessage(std::string message)
 		}
 		itr++;
 	}
+}
+
+ComponentID ComponentManager::CreateComponent()
+{
+	std::random_device rand;
+	ComponentID id;
+	while (true) {
+		id = rand();
+		auto itr = std::find(IdIndex.begin(), IdIndex.end(),id);
+		if (itr == IdIndex.end())
+			break;
+	}
+	IdIndex.push_back(id);
+	return id;
 }

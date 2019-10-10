@@ -2,17 +2,11 @@
 
 namespace DirectX
 {
-	using ComponentID = unsigned int;
-	using EntityID = unsigned int;
-
-	using Components = std::map<ComponentID, std::shared_ptr<IComponent>>;
-	using EntityComponents = std::map<EntityID, std::shared_ptr<Components>>;
-
 	//--- ComponentManager -----------------------------------------------------------------
 	class ComponentManager
 	{
 	private:
-		static ComponentID m_id;
+		static std::vector<ComponentID> IdIndex;
 		static EntityComponents EntityComponentIndex;
 	public:
 		static void Create();
@@ -23,7 +17,7 @@ namespace DirectX
 		static std::weak_ptr<Components> GetComponents(EntityID id);
 		static void DestroyComponents(EntityID id);
 		template<typename Type> static void DestroyComponent(EntityID id);
-		template<typename Type> static ComponentID CreateComponent();
+		static ComponentID CreateComponent();
 	public:
 		static void SendComponentMessage(std::string message);
 	};
@@ -71,12 +65,5 @@ namespace DirectX
 		Component<Type>::DestroyComponent(id);
 		EntityComponentIndex.at(id)->erase(Component<Type>::GetID());
 		return;
-	}
-	template<typename Type>
-	inline ComponentID ComponentManager::CreateComponent()
-	{
-		ComponentID n = m_id;
-		m_id++;
-		return n;
 	}
 }

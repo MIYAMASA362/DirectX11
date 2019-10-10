@@ -1,10 +1,6 @@
-#include<memory>
-#include<typeinfo>
-#include<string>
-#include<map>
+#include"Common.h"
 
-#include"../Object/Object.h"
-#include"Component.h"
+#include"Module\ECSEngine.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"
 

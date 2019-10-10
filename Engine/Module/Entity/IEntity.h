@@ -2,8 +2,6 @@
 
 namespace DirectX
 {
-	using EntityID = unsigned int;
-
 	//Entity Interface
 	class IEntity :public Object
 	{

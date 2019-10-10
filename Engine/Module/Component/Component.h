@@ -2,16 +2,13 @@
 
 namespace DirectX
 {
-	using ComponentID = unsigned int;
-	using EntityID = unsigned int;
-
 	template<typename Type>
 	class Component:public IComponent
 	{
 		friend class ComponentManager;
 	protected:
 		static const ComponentID m_id;
-		static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
+		static std::unordered_map<EntityID, std::weak_ptr<Type>> ComponentIndex;
 	public:
 		static ComponentID GetID();
 		static std::weak_ptr<Type> GetComponent(EntityID id);
@@ -34,7 +31,7 @@ namespace DirectX
 
 	//----------------------------------------------------------------------------
 	template<typename Type>
-	const ComponentID Component<Type>::m_id = ComponentManager::CreateComponent<Type>();
+	const ComponentID Component<Type>::m_id = ComponentManager::CreateComponent();
 
 	template<typename Type>
 	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID id)

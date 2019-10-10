@@ -2,16 +2,12 @@
 
 namespace DirectX
 {
-	using EntityID = unsigned int;
-	class IEntity;
-
 	//=== EntityManager ==========================================================
 	class EntityManager
 	{
 		friend IEntity;
-	private:
-		static EntityID m_EntityID;
-		static std::map<EntityID, std::shared_ptr<IEntity>> EntityIndex;
+	public:
+		static EntityIndex m_EntityIndex;
 		static EntityID AttachEntityID();
 	public:
 		static void Create();
@@ -29,7 +25,7 @@ namespace DirectX
 	inline std::weak_ptr<Type> EntityManager::CreateEntity(Type* instance)
 	{
 		auto add = std::shared_ptr<Type>(instance);
-		EntityIndex.emplace(add->GetEntityID(),add);
+		m_EntityIndex.emplace(add->GetEntityID(),add);
 		return add;
 	}
 }

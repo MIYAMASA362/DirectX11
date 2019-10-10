@@ -1,33 +1,37 @@
-#include<map>
-#include<memory>
-#include"Module\Object\Object.h"
-#include"IEntity.h"
-#include"EntityManager.h"
+#include"Common.h"
+#include<random>
+
+#include"Module\ECSEngine.h"
 
 using namespace DirectX;
-EntityID EntityManager::m_EntityID;
-std::map<EntityID, std::shared_ptr<IEntity>> EntityManager::EntityIndex;
+
+EntityIndex EntityManager::m_EntityIndex;
 
 EntityID EntityManager::AttachEntityID()
 {
-	EntityID id = m_EntityID;
-	m_EntityID++;
+	std::random_device rand;
+	EntityID id;
+	while(true){
+		id = rand();
+		if (m_EntityIndex.find(id) == m_EntityIndex.end())
+			break;
+	}
+
 	return id;
 }
 void EntityManager::Create()
 {
-	EntityIndex.clear();
-	m_EntityID = 0;
+	m_EntityIndex.clear();
 }
 void EntityManager::Release()
 {
-	EntityIndex.clear();
+	m_EntityIndex.clear();
 }
 void EntityManager::RemoveEntity(EntityID id)
 {
-	EntityIndex.erase(id);
+	m_EntityIndex.erase(id);
 }
 std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 {
-	return EntityIndex.at(id);
+	return m_EntityIndex.at(id);
 }

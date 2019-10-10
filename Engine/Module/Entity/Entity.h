@@ -2,15 +2,12 @@
 
 namespace DirectX
 {
-	using EntityID = unsigned int;
-	class IEntity;
-
 	//=== Entity ==============================================================
 	template<typename Type>
 	class Entity:public IEntity
 	{
 	protected:
-		static std::list<EntityID> m_EntityIndex;
+		static EntityList m_EntityIndex;
 	public:
 		static std::weak_ptr<Type> CreateEntity(Type* instance);
 		static std::weak_ptr<Type> GetEntity(EntityID id);
@@ -26,7 +23,7 @@ namespace DirectX
 	template<typename Type>
 	inline std::weak_ptr<Type> Entity<Type>::CreateEntity(Type* instance)
 	{
-		auto add = EntityManager::CreateEntity<Type>(instance)->;
+		auto add = EntityManager::CreateEntity<Type>(instance);
 		m_EntityIndex.push_back(add->GetEntityID());
 		return add;
 	}
