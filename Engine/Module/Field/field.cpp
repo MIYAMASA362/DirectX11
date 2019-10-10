@@ -1,10 +1,5 @@
 #include<Windows.h>
-#include<memory>
-#include<string>
-#include<list>
-#include<vector>
-#include<DirectXMath.h>
-#include<d3d11.h>
+#include"Common.h"
 
 #include"Module\AssetData\AssetData.h"
 

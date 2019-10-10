@@ -1,19 +1,14 @@
-#include<memory>
-#include<Windows.h>
-#include<string>
-#include<map>
-
-#include"Module\Object\Object.h"
-#include"Module\Component\IComponent.h"
-#include"Module\Component\ComponentManager.h"
-#include"Module\Component\Component.h"
+#include"Common.h"
+#include"Module\ECSEngine.h"
 
 #include"Module\AssetData\AssetData.h"
 #include"Audio.h"
 #include"AudioManager.h"
 #include"AudioSource.h"
 
-std::map<DirectX::EntityID, std::weak_ptr<DirectX::AudioSource>> DirectX::AudioSource::ComponentIndex;
+using namespace DirectX;
+
+std::unordered_map<EntityID, std::weak_ptr<AudioSource>> AudioSource::ComponentIndex;
 
 DirectX::AudioSource::AudioSource(EntityID OwnerID)
 :

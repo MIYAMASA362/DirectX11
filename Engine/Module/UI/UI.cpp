@@ -1,9 +1,4 @@
-#include<list>
-#include<memory>
-#include<string>
-#include<map>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -22,7 +17,7 @@
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
-std::map<EntityID, std::weak_ptr<UI>> UI::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<UI>> UI::ComponentIndex;
 
 //--- Canvas --------------------------------------------------------
 

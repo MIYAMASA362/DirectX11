@@ -1,11 +1,4 @@
-#include<List>
-#include<map>
-#include<typeinfo>
-#include<string>
-#include<memory>
-#include<vector>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -146,6 +139,7 @@ GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
 	this->Index.push_back(instance->GetEntityID());
+	instance->AddComponent<Transform>();
 	return instance;
 }
 

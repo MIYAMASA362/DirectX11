@@ -1,9 +1,4 @@
 #pragma once
-#include<typeinfo>
-#include<memory>
-#include<map>
-#include<list>
-#include<string>
 
 //DirectX
 #include<d3d11.h>

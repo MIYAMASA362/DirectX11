@@ -1,11 +1,4 @@
-#include<list>
-#include<vector>
-#include<memory>
-#include<map>
-#include<string>
-#include<Windows.h>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -29,7 +22,7 @@ using namespace DirectX;
 //--- Camera ------------------------------------------------------------------
 Camera* Camera::pActiveCamera = nullptr;
 std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
-std::map<EntityID, std::weak_ptr<Camera>> Camera::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Camera>> Camera::ComponentIndex;
 
 //--- static method -------------------------------------------------
 void Camera::Render(void(*Draw)(void), void(*Begin)(void))

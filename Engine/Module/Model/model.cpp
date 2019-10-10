@@ -1,13 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<assert.h>
-#include<map>
-#include<string>
-#include<vector>
-#include<list>
-#include<memory>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"

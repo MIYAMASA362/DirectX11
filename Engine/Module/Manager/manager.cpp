@@ -1,11 +1,4 @@
-#include<list>
-#include<map>
-#include<memory>
-#include<string>
-#include<Windows.h>
-#include<vector>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //--- Module ------------------------------------
 #include"Module\Module.h"
@@ -39,6 +32,7 @@
 #include"../Project/GameMain.h"
 
 //------------------------------------------------
+std::unordered_map<EntityID, std::weak_ptr<CameraMouse>> CameraMouse::ComponentIndex;
 
 using namespace DirectX;
 

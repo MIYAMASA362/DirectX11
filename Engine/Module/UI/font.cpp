@@ -2,10 +2,8 @@
 #include<stdio.h>
 #include<Shlwapi.h>
 #include<assert.h>
-#include<string>
 
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"

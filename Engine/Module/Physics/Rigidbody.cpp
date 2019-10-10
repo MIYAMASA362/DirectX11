@@ -1,9 +1,4 @@
-#include<list>
-#include<map>
-#include<memory>
-
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -14,7 +9,7 @@
 #include"Physics.h"
 #include"Rigidbody.h"
 
-std::map<DirectX::EntityID, std::weak_ptr<DirectX::Rigidbody>> DirectX::Rigidbody::ComponentIndex;
+std::unordered_map<DirectX::EntityID, std::weak_ptr<DirectX::Rigidbody>> DirectX::Rigidbody::ComponentIndex;
 
 DirectX::Rigidbody::Rigidbody(EntityID OwnerID)
 :

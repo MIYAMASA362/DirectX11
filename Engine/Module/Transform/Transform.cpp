@@ -1,10 +1,4 @@
-#include<memory>
-#include<list>
-#include<string>
-#include<map>
-#include<vector>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -22,7 +16,7 @@
 
 using namespace DirectX;
 
-std::map<EntityID, std::weak_ptr<Transform>>  Transform::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Transform>>  Transform::ComponentIndex;
 
 //--- Constrcutor -------------------------------------------------------------
 

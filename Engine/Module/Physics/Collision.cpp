@@ -1,8 +1,4 @@
-#include<string>
-#include<memory>
-#include<list>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -21,7 +17,7 @@
 
 using namespace DirectX;
 
-std::map<EntityID, std::weak_ptr<Collider>> Collider::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Collider>> Collider::ComponentIndex;
 
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {

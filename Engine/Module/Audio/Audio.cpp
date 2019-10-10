@@ -1,11 +1,5 @@
+#include"Common.h"
 #include<assert.h>
-#include<string>
-#include<memory>
-#include<list>
-#include<map>
-#include<Windows.h>
-#include<d3d11.h>
-#include<DirectXMath.h>
 #include<xaudio2.h>
 
 #include"Module\AssetData\AssetData.h"

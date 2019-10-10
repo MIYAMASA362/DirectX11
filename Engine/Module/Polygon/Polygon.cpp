@@ -1,10 +1,4 @@
-#include<string>
-#include<memory>
-#include<vector>
-#include<list>
-#include<map>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -19,7 +13,7 @@
 
 using namespace DirectX;
 
-void CPolygon::Initialize()
+void CPolygon::Start()
 {
 	//’¸“_î•ñ
 	VERTEX_3D vertex[4] = {
@@ -44,7 +38,7 @@ void CPolygon::Initialize()
 	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 }
 
-void CPolygon::Finalize()
+void CPolygon::OnDestroy()
 {
 	if (m_Texture)
 		delete m_Texture;

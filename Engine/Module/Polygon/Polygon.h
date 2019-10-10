@@ -11,9 +11,9 @@ namespace DirectX
 		ID3D11Buffer* m_VertexBuffer = nullptr;
 		Texture** m_Texture = nullptr;
 	public:
-		void Initialize() override;
+		void Start() override;
 		void Update() override;
 		void Render();
-		void Finalize() override;
+		void OnDestroy() override;
 	};
 }

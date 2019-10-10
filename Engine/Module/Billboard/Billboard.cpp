@@ -1,8 +1,4 @@
-#include<List>
-#include<map>
-#include<memory>
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"

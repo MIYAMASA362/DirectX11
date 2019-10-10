@@ -1,9 +1,4 @@
-#include<list>
-#include<memory>
-#include<map>
-
-#include<d3d11.h>
-#include<DirectXMath.h>
+#include"Common.h"
 
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -15,7 +10,7 @@
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
-std::map<EntityID, std::weak_ptr<Renderer>> Renderer::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Renderer>> Renderer::ComponentIndex;
 
 void DirectX::Renderer::BeginRender()
 {
@@ -23,8 +18,9 @@ void DirectX::Renderer::BeginRender()
 	auto end = ComponentIndex.end();
 	while (itr != end) {
 		auto renderer = itr->second.lock();
-		renderer->Run();
 		itr++;
+		if (!renderer->m_IsEnable) continue;
+		renderer->Render(renderer->transform().lock()->WorldMatrix());
 	}
 }
 
@@ -43,12 +39,6 @@ void DirectX::Renderer::SetEnable(bool enable)
 bool DirectX::Renderer::GetEnable()
 {
 	return this->m_IsEnable;
-}
-
-void DirectX::Renderer::Run()
-{
-	if (!this->m_IsEnable)return;
-	this->Render(this->transform().lock()->WorldMatrix());
 }
 
 void DirectX::Renderer::OnComponent()

@@ -1,12 +1,5 @@
 #include<typeinfo>
-#include<memory>
-#include<map>
-#include<vector>
-#include<list>
-
-#include<d3d11.h>
-#include<DirectXMath.h>
-
+#include"Common.h"
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
