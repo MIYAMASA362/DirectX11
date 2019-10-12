@@ -15,8 +15,9 @@ namespace DirectX
 	public:
 		template<typename Type>
 		static std::weak_ptr<Type> CreateEntity(Type* instance);
-		static void RemoveEntity(EntityID id);
 		static std::weak_ptr<IEntity> GetEntity(EntityID id);
+		static void RemoveEntity(EntityID id);
+		static void IndexClearnUp();
 	};
 
 	//----------------------------------------------------------------------------
