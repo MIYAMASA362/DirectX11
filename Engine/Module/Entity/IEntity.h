@@ -10,14 +10,13 @@ namespace DirectX
 		bool m_IsEnable;
 	public:
 		IEntity();
-		~IEntity();
+		virtual ~IEntity();
 		const EntityID GetEntityID();
 		bool GetIsEnable();
 	public:
 		template<typename Type> Type* AddComponent();
 		template<typename Type> std::weak_ptr<Type> GetComponent();
 		template<typename Type> void DestroyComponent();
-		void DestroyComponents();
 	};
 
 	template<typename Type> Type* IEntity::AddComponent()
