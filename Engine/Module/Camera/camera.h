@@ -24,7 +24,7 @@ namespace DirectX
 		XMMATRIX GetViewMatrix();
 	//--- Inherited Members -----------------------------------------
 	public:
-		void Run() override;
+		void Run();
 		void OnComponent() override;
 		void OnDestroy() override;
 		void DebugImGui() override;
