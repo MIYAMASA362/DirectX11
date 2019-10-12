@@ -6,7 +6,7 @@ namespace DirectX
 	class IEntity :public Object
 	{
 	protected:
-		const EntityID m_EntityID;
+		EntityID m_EntityID;
 		bool m_IsEnable;
 	public:
 		IEntity();

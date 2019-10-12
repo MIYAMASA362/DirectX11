@@ -13,7 +13,7 @@ IEntity::IEntity()
 
 DirectX::IEntity::~IEntity()
 {
-	this->DestroyComponents();
+	ComponentManager::DestroyComponents(this->m_EntityID);
 }
 
 const EntityID IEntity::GetEntityID()
@@ -24,9 +24,4 @@ const EntityID IEntity::GetEntityID()
 bool DirectX::IEntity::GetIsEnable()
 {
 	return this->m_IsEnable;
-}
-
-void DirectX::IEntity::DestroyComponents()
-{
-	ComponentManager::DestroyComponents(this->m_EntityID);
 }

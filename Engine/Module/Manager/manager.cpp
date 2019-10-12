@@ -104,6 +104,8 @@ void CManager::Run()
 
 	if (IsUpdate) CManager::Render();
 
+	EntityManager::IndexClearnUp();
+
 	if (IsUpdate || IsFixedUpdate) SceneManager::ChangeScene();
 }
 

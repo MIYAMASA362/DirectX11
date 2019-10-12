@@ -42,7 +42,7 @@ namespace DirectX
 	template<typename Type>
 	inline Entity<Type>::~Entity()
 	{
-		m_EntityIndex.remove(m_EntityID);
+		m_EntityIndex.remove(this->m_EntityID);
 	}
 
 	template<typename Type>
