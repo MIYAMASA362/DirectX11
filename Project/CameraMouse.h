@@ -8,14 +8,6 @@ public:
 	const float MouseSpeed = 0.001f;
 	std::shared_ptr<Transform>looktarget;
 public:
-	static void OnUpdate() {
-		auto itr = ComponentIndex.begin();
-		auto end = ComponentIndex.end();
-		while (itr != end) {
-			itr->second.lock()->Update();
-			itr++;
-		}
-	}
 	void Update() override
 	{
 		float horizontal = 0.0f, vertical = 0.0f;
