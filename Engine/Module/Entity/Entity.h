@@ -11,7 +11,6 @@ namespace DirectX
 	public:
 		static std::weak_ptr<Type> CreateEntity(Type* instance);
 		static std::weak_ptr<Type> GetEntity(EntityID id);
-		static void RemoveEntity(EntityID id);
 	public:
 		Entity();
 		virtual ~Entity();
@@ -35,22 +34,17 @@ namespace DirectX
 	}
 
 	template<typename Type>
-	inline void Entity<Type>::RemoveEntity(EntityID id)
-	{
-		m_EntityIndex.erase(id);
-		EntityManager::RemoveEntity(id);
-	}
-	
-	template<typename Type>
 	inline Entity<Type>::Entity()
 	{
 		
 	}
+
 	template<typename Type>
 	inline Entity<Type>::~Entity()
 	{
-		
+		m_EntityIndex.remove(m_EntityID);
 	}
+
 	template<typename Type>
 	inline void Entity<Type>::AddIndex(Type* instance)
 	{
