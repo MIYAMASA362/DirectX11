@@ -21,7 +21,7 @@ class Shot:public MonoBehaviour<Shot>
 public:
 	Shot(EntityID OwnerID) :MonoBehaviour(OwnerID,"Shot") {};
 public:
-	void Initialize()override
+	void Start()override
 	{
 		
 	}
