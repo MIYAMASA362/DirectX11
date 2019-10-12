@@ -11,17 +11,14 @@ DirectX::EntityComponents DirectX::ComponentManager::EntityComponentIndex;
 
 void ComponentManager::DestroyComponents(EntityID id)
 {
-	try {
-		EntityComponentIndex.at(id);
-	}
-	catch (const std::out_of_range&) {
-		return;
-	}
+	if (EntityComponentIndex.find(id) == EntityComponentIndex.end()) return;
+	//iterator
 	auto itr = EntityComponentIndex.at(id)->begin();
 	auto end = EntityComponentIndex.at(id)->end();
 	
 	while (itr != end) {
 		itr->second->OnDestroy();
+		itr->second->Destroy();
 		itr = EntityComponentIndex.at(id)->erase(itr);
 	}
 }
