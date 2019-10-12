@@ -17,7 +17,6 @@ namespace DirectX
 	public:
 		void SetEnable(bool enable);
 		bool GetEnable();
-		void Run();
 		virtual void Render(XMMATRIX& worldMatrix)=0;
 		virtual void OnComponent() override;
 		void AddComponentIndex(std::weak_ptr<Renderer> instance) override;
