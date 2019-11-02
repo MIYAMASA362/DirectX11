@@ -8,7 +8,7 @@ private:
 public:
 	GameObject* hpBoard;
 public:
-	Enemy(EntityID OwnerID) :MonoBehaviour(OwnerID,"Enemy") {};
+	Enemy(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 
 	void Update()
 	{

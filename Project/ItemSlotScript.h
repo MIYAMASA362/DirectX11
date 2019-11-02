@@ -9,7 +9,7 @@ public:
 class ItemSlotScript:public MonoBehaviour<ItemSlotScript>
 {
 public:
-	ItemSlotScript(EntityID OwnerID) :MonoBehaviour(OwnerID,"ItemSlotScript"){};
+	ItemSlotScript(EntityID OwnerID) :MonoBehaviour(OwnerID){};
 public:
 	void Update()
 	{

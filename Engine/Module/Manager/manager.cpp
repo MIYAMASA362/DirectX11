@@ -32,7 +32,7 @@
 #include"../Project/GameMain.h"
 
 //------------------------------------------------
-std::unordered_map<EntityID, std::weak_ptr<CameraMouse>> CameraMouse::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<CameraMouse>> CameraMouse::Index;
 
 using namespace DirectX;
 
@@ -83,7 +83,7 @@ void CManager::Initialize()
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
 
-	SceneManager::LoadScene(SceneManager::GetSceneByName("TitleScene"));
+	SceneManager::LoadScene(SceneManager::GetSceneByName("TestScene"));
 
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
@@ -104,7 +104,7 @@ void CManager::Run()
 
 	if (IsUpdate) CManager::Render();
 
-	EntityManager::IndexClearnUp();
+	ObjectManager::ClearnUp();
 
 	if (IsUpdate || IsFixedUpdate) SceneManager::ChangeScene();
 }
@@ -160,6 +160,8 @@ void CManager::Finalize()
 	TimeManager::Destroy();
 	GUI::guiImGui::Destroy();
 
-	EntityManager::Release();
+	ObjectManager::Release();
+
 	ComponentManager::Release();
+	EntityManager::Release();
 }

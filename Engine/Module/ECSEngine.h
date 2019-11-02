@@ -1,20 +1,29 @@
 #pragma once
-
 namespace DirectX
 {
-	using EntityID = unsigned int;
-	using ComponentID = unsigned int;
+	using InstanceID = unsigned int;
 
+	using EntityID = InstanceID;
+	using ComponentID = InstanceID;
+	using ComponentTypeID = unsigned int;
+
+	class Object;
 	class IEntity;
 	class IComponent;
 
-	using EntityIndex = std::unordered_map<EntityID, std::shared_ptr<IEntity>>;
-	using EntityList = std::list<EntityID>;
+	using ObjectIndex = std::unordered_map<InstanceID, std::shared_ptr<Object>>;
+	using DestroyIndex = std::vector<InstanceID>;
 
-	using Components = std::unordered_map<ComponentID, std::shared_ptr<IComponent>>;
+	using EntityIndex = std::unordered_map<EntityID,std::weak_ptr<IEntity>>;
+	
+	using ComponentList = std::list<InstanceID>;
+	using ComponentIndex = std::unordered_map<EntityID, std::weak_ptr<IComponent>>;
+
+	using Components = std::unordered_map<ComponentTypeID, std::weak_ptr<IComponent>>;
 	using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<Components>>;
 }
 
+#include"Object\ObjectManager.h"
 #include"Object\Object.h"
 #include"Entity\IEntity.h"
 #include"Entity\EntityManager.h"

@@ -26,7 +26,7 @@
 using namespace DirectX;
 
 const std::string GameObject::TypeName = "GameObject";
-std::list<EntityID> GameObject::m_EntityIndex;
+EntityIndex GameObject::m_EntityIndex;
 
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 :
@@ -36,7 +36,7 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	IsDestroy(false),
 	IsActive(true)
 {
-	this->AddIndex(this);
+
 }
 
 GameObject::~GameObject() 
@@ -46,25 +46,35 @@ GameObject::~GameObject()
 
 void DirectX::GameObject::DebugGUI() 
 {
-	for(auto id : m_EntityIndex)
+	for (auto obj : m_EntityIndex)
 	{
-		//Object表示
-		auto object = Entity<GameObject>::GetEntity(id);
-		ImGui::Text(object.lock()->name.c_str());
-		//Component表示
-		auto components = ComponentManager::GetComponents(id);
-		if (components.expired()) continue;
-		auto itr = components.lock()->begin();
-		auto end = components.lock()->end();
-		while (itr != end) {
-			itr->second->DebugImGui();
-			itr++;
-		}
+		auto sptr = std::dynamic_pointer_cast<GameObject>(obj.second.lock());
+		ImGui::Text(sptr->name.c_str());
 	}
+
+	//EntityManagerのインデックスから削除されているから参照できない
+	//for(auto id : m_EntityIndex)
+	//{
+	//	//Object表示
+	//	auto object = GameObject::GetEntity(id);
+	//	ImGui::Text(object.lock()->name.c_str());
+	//	//Component表示
+	//	auto components = ComponentManager::GetComponents(id);
+	//	if (components.expired()) continue;
+	//	auto itr = components.lock()->begin();
+	//	auto end = components.lock()->end();
+	//	while (itr != end) {
+	//		itr->second->DebugImGui();
+	//		itr++;
+	//	}
+	//}
 }
 
-std::weak_ptr<Transform> DirectX::GameObject::transform()
+Transform* DirectX::GameObject::transform()
 {
-	return ComponentManager::GetComponent<Transform>(this->m_EntityID);
+	return Transform::GetComponent(this->GetEntityID()).lock().get();
 }
 
+void DirectX::GameObject::OnDebugGUI()
+{
+}

@@ -12,13 +12,11 @@ namespace DirectX
 	private:
 		bool m_IsEnable = true;
 	public:
-		Renderer(EntityID OwnerID,std::string name);
+		Renderer(EntityID OwnerID);
 		virtual ~Renderer() = default;
 	public:
 		void SetEnable(bool enable);
 		bool GetEnable();
 		virtual void Render(XMMATRIX& worldMatrix)=0;
-		virtual void OnComponent() override;
-		void AddComponentIndex(std::weak_ptr<Renderer> instance) override;
 	};
 }

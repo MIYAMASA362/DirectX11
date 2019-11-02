@@ -6,74 +6,79 @@ namespace DirectX
 	class Component:public IComponent
 	{
 		friend class ComponentManager;
-	protected:
-		static const ComponentID m_id;
-		static std::unordered_map<EntityID, std::weak_ptr<Type>> ComponentIndex;
 	public:
-		static ComponentID GetID();
-		static std::weak_ptr<Type> GetComponent(EntityID id);
-		static void DestroyComponent(EntityID id);
+		static const ComponentTypeID TypeID;
+
 	protected:
-		const std::string name;
+		static std::unordered_map<EntityID,std::weak_ptr<Type>> Index;
+
+	private:
+		void AddComponent();
+
 	public:
-		Component(EntityID OwnerID,std::string name);
+		Component(EntityID OwnerID);
 		virtual ~Component();
-	protected:
-		virtual void AddComponentIndex(std::weak_ptr<Type> instance);	//ComponentIndex‚Ö‚Ì“ÁŽê•ÏŠ·
-	public:
-		virtual void OnComponent() {};
-		virtual void OnDestroy() override {};
-		virtual void DebugImGui() override {};
-		virtual void SendComponentMessage(std::string message) override {};
-	public:
-		ComponentID GetComponentID()override final;
+
+		static std::weak_ptr<Type> GetComponent(EntityID entityID);
+
+		virtual const ComponentTypeID GetComponentTypeID() const override final;
+
+		virtual void OnDestroy() override;
+		virtual void DebugImGui() override;
+		virtual void SendComponentMessage(std::string message) override;
 	};
 
 	//----------------------------------------------------------------------------
 	template<typename Type>
-	const ComponentID Component<Type>::m_id = ComponentManager::CreateComponent();
+	const ComponentTypeID Component<Type>::TypeID = ComponentManager::AttachComponentTypeID();
 
 	template<typename Type>
-	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID id)
+	inline void Component<Type>::AddComponent()
 	{
-		return ComponentIndex.at(id);
-	}
-
-	template<typename Type> 
-	inline void Component<Type>::DestroyComponent(EntityID id)
-	{
-		ComponentIndex.at(id).lock()->OnDestroy();
-		ComponentIndex.erase(id);
+		auto object = ObjectManager::GetInstance(this->GetInstanceID()).lock();
+		Index.emplace(this->GetOwnerID(), std::dynamic_pointer_cast<Type>(object));
 	}
 
 	template<typename Type>
-	inline ComponentID Component<Type>::GetID()
+	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
 	{
-		return m_id;
-	}
-	template<typename Type>
-	inline void Component<Type>::AddComponentIndex(std::weak_ptr<Type> instance)
-	{
-		ComponentIndex.emplace(instance.lock()->GetOwnerID(), instance);
-	}
-	template<typename Type>
-	inline ComponentID Component<Type>::GetComponentID()
-	{
-		return GetID();
+		return Index.at(entityID);
 	}
 
 	template<typename Type>
-	inline Component<Type>::Component(EntityID OwnerID, std::string name)
+	inline Component<Type>::Component(EntityID OwnerID)
 	:
-		IComponent(OwnerID),
-		name(name)
+		IComponent(OwnerID)
 	{
-
+		
 	}
 
 	template<typename Type>
 	inline Component<Type>::~Component()
 	{
-		ComponentIndex.erase(this->m_OwnerId);
+		Index.erase(this->GetOwnerID());
+	}
+
+	template<typename Type>
+	inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
+	{
+		return TypeID;
+	}
+
+	template<typename Type>
+	inline void Component<Type>::OnDestroy()
+	{
+
+	}
+
+	template<typename Type>
+	inline void Component<Type>::DebugImGui()
+	{
+
+	}
+
+	template<typename Type>
+	inline void Component<Type>::SendComponentMessage(std::string message)
+	{
 	}
 }

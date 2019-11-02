@@ -12,7 +12,6 @@ namespace DirectX
 		MeshRender(EntityID OwnerID);
 		virtual ~MeshRender();
 	public:
-		void OnComponent() override;
 		void Render(XMMATRIX& worldMatrix) override;
 		template<typename Type> Type* SetMesh();
 		Mesh* GetMesh();

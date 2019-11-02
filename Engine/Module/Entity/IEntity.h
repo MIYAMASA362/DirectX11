@@ -2,34 +2,33 @@
 
 namespace DirectX
 {
-	//Entity Interface
 	class IEntity :public Object
 	{
-	protected:
-		EntityID m_EntityID;
-		bool m_IsEnable;
 	public:
 		IEntity();
 		virtual ~IEntity();
-		const EntityID GetEntityID();
-		bool GetIsEnable();
-	public:
+
+		EntityID GetEntityID();
+
 		template<typename Type> Type* AddComponent();
-		template<typename Type> std::weak_ptr<Type> GetComponent();
+		template<typename Type> Type* GetComponent();
 		template<typename Type> void DestroyComponent();
+		void DestroyComponents();
 	};
 
 	template<typename Type> Type* IEntity::AddComponent()
 	{
-		return ComponentManager::AddComponent<Type>(this->m_EntityID);
+		return ComponentManager::AddComponent<Type>(GetEntityID());
 	}
-	template<typename Type> std::weak_ptr<Type> IEntity::GetComponent()
+
+	template<typename Type> Type* IEntity::GetComponent()
 	{
-		return ComponentManager::GetComponent<Type>(this->m_EntityID);
+		return ComponentManager::GetComponent<Type>(GetEntityID());
 	}
-	template<typename Type>
-	inline void IEntity::DestroyComponent()
+
+	template<typename Type> void IEntity::DestroyComponent()
 	{
-		ComponentManager::DestroyComponent<Type>(this->m_EntityID);
+		ComponentManager::DestroyComponent<Type>(GetEntityID());
 	}
+
 }

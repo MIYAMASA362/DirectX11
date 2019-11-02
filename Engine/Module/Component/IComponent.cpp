@@ -14,28 +14,22 @@ using namespace DirectX;
 
 DirectX::IComponent::IComponent(EntityID OwnerID)
 :
-	m_OwnerId(OwnerID)
+	m_ownerId(OwnerID)
 {
 
 }
 
-EntityID DirectX::IComponent::GetOwnerID()
+DirectX::IComponent::~IComponent()
 {
-	return this->m_OwnerId;
+	ComponentManager::ReleaseComponent<Transform>(this->GetOwnerID());
 }
 
 std::weak_ptr<Transform> IComponent::transform()
 {
-	return ComponentManager::GetComponent<Transform>(this->m_OwnerId);
+	return Transform::GetComponent(this->GetOwnerID());
 }
 
 std::weak_ptr<GameObject> DirectX::IComponent::gameObject()
 {
-	return Entity<GameObject>::GetEntity(this->m_OwnerId);
-}
-
-
-void IComponent::OnDestroy()
-{
-
+	return GameObject::GetEntity(this->GetOwnerID());
 }

@@ -19,7 +19,7 @@ using namespace DirectX;
 
 DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	:
-	Renderer(OwnerID,"MeshRender")
+	Renderer(OwnerID)
 {
 
 }
@@ -27,11 +27,6 @@ DirectX::MeshRender::MeshRender(EntityID OwnerID)
 DirectX::MeshRender::~MeshRender()
 {
 	mesh.reset();
-}
-
-void DirectX::MeshRender::OnComponent()
-{
-
 }
 
 void DirectX::MeshRender::Render(XMMATRIX& worldMatrix)

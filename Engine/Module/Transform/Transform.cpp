@@ -1,4 +1,5 @@
 #include"Common.h"
+#include<memory>
 
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
@@ -16,26 +17,28 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<Transform>>  Transform::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Transform>>  Component<Transform>::Index;
 
 //--- Constrcutor -------------------------------------------------------------
 
 //other
 Transform::Transform(EntityID OwnerID)
 :
-	Component(OwnerID,"Transform"),
+	Component(OwnerID),
 	m_Position(Vector3::zero()),
 	m_Rotation(Quaternion::Identity()),
 	m_Scale(Vector3::one())
 {
+	
 }
 
 //--- 親子関係　---------------------------------------------------------------
 
 //SetParent
-void Transform::SetParent(std::weak_ptr<Transform> parent)
+void Transform::SetParent(Transform* p)
 {
 	//既に親
+	auto parent = Transform::GetComponent(p->GetInstanceID());
 	if (pParent.lock() == parent.lock()) return;
 
 	this->WorldMatrix();
@@ -54,7 +57,7 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 
 void Transform::SetParent(GameObject* parent)
 {
-	this->SetParent(parent->transform());
+	SetParent(parent->transform());
 }
 
 void Transform::detachParent() {
@@ -109,7 +112,7 @@ void DirectX::Transform::SendComponentMessageChildren()
 
 void DirectX::Transform::DebugImGui()
 {
-	if(ImGui::TreeNode((std::string("Transform:") + std::to_string(m_OwnerId)).c_str())){
+	if(ImGui::TreeNode((std::string("Transform:") + std::to_string(this->GetOwnerID())).c_str())){
 		Vector3 position = this->position();
 		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
 		Vector3 scale = this->scale();

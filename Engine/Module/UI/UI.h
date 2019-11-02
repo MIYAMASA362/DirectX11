@@ -15,17 +15,16 @@ namespace DirectX
 	private:
 		std::list<std::weak_ptr<UI>> UIIndex;
 	public:
-		Canvas(EntityID OwnerID):Component(OwnerID,"Canvas"){};
+		Canvas(EntityID OwnerID);
 	};
 
 	//UI
 	class UI:public Component<UI>
 	{
 	public:
-		UI(EntityID OwnerID,std::string name):Component(OwnerID,name){};
+		UI(EntityID OwnerID);
 		virtual ~UI() = default;
 	public:
-		virtual void OnComponent() override;
 		virtual void Render(XMMATRIX world) = 0;
 	};
 
@@ -68,7 +67,7 @@ namespace DirectX
 		ID3D11ShaderResourceView* m_srv;
 		Font* m_font;
 	public:
-		Text(EntityID OwnerID):UI(OwnerID,"Text"){};
+		Text(EntityID OwnerID);
 		void Render(XMMATRIX world)override {};
 		void SetText(std::string text);
 		void SetFont(Font* font);

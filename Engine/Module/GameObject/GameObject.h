@@ -1,6 +1,7 @@
 #pragma once
 
 #include<typeinfo>
+#include"Module\Tag\Tag.h"
 
 namespace DirectX
 {
@@ -28,8 +29,10 @@ namespace DirectX
 		bool CompareTag(TagName tag);
 		bool GetIsDestroy();
 		bool GetActive();
-	public:
-		std::weak_ptr<Transform> transform();
+
+		Transform* transform();
+
+		void OnDebugGUI();
 	};
 
 	//----------------------------------------------------------------------------

@@ -2,53 +2,33 @@
 
 namespace DirectX
 {
-	//=== Entity ==============================================================
 	template<typename Type>
 	class Entity:public IEntity
 	{
 	protected:
-		static EntityList m_EntityIndex;
+		static EntityIndex m_EntityIndex;
 	public:
-		static std::weak_ptr<Type> CreateEntity(Type* instance);
 		static std::weak_ptr<Type> GetEntity(EntityID id);
-	public:
+
 		Entity();
 		virtual ~Entity();
-	protected:
-		void AddIndex(Type* instance);
 	};
-	//-------------------------------------------------------------------------
 
 	template<typename Type>
-	inline std::weak_ptr<Type> Entity<Type>::CreateEntity(Type* instance)
+	Entity<Type>::Entity()
 	{
-		auto add = EntityManager::CreateEntity<Type>(instance);
-		m_EntityIndex.push_back(add->GetEntityID());
-		return add;
+		m_EntityIndex.emplace(GetEntityID(), EntityManager::GetEntity(GetEntityID()));
 	}
 
 	template<typename Type>
-	inline std::weak_ptr<Type> Entity<Type>::GetEntity(EntityID id)
+	Entity<Type>::~Entity()
 	{
-		return std::static_pointer_cast<Type>(EntityManager::GetEntity(id).lock());
+		m_EntityIndex.erase(GetEntityID());
 	}
 
 	template<typename Type>
-	inline Entity<Type>::Entity()
+	std::weak_ptr<Type> Entity<Type>::GetEntity(EntityID id)
 	{
-		
-	}
-
-	template<typename Type>
-	inline Entity<Type>::~Entity()
-	{
-		m_EntityIndex.remove(this->m_EntityID);
-	}
-
-	template<typename Type>
-	inline void Entity<Type>::AddIndex(Type* instance)
-	{
-		m_EntityIndex.push_back(instance->GetEntityID());
-		EntityManager::CreateEntity<IEntity>(instance);
+		return std::dynamic_pointer_cast<Type>(EntityManager::GetEntity(id).lock());
 	}
 }

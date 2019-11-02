@@ -9,11 +9,11 @@
 #include"Physics.h"
 #include"Rigidbody.h"
 
-std::unordered_map<DirectX::EntityID, std::weak_ptr<DirectX::Rigidbody>> DirectX::Rigidbody::ComponentIndex;
+std::unordered_map<DirectX::EntityID, std::weak_ptr<DirectX::Rigidbody>> DirectX::Rigidbody::Index;
 
 DirectX::Rigidbody::Rigidbody(EntityID OwnerID)
 :
-	Component(OwnerID,"Rigidbody"),
+	Component(OwnerID),
 	m_useGravity(true),
 	m_velocity(Vector3::zero()),
 	m_mass(1.0f)

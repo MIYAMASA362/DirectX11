@@ -3,7 +3,7 @@
 class CameraMouse:public MonoBehaviour<CameraMouse>
 {
 public:
-	CameraMouse(EntityID OwnerID) :MonoBehaviour(OwnerID,"CameraMouse") {};
+	CameraMouse(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 public:
 	const float MouseSpeed = 0.001f;
 	std::shared_ptr<Transform>looktarget;

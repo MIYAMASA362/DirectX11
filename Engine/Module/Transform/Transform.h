@@ -38,14 +38,13 @@ namespace DirectX
 		void detachChildSearch(Transform* target);			//親がターゲットの子を見つけると削除する
 		void childTransformUpdate();						//子の行列に変更を加える
 	public:
-		void SetParent(std::weak_ptr<Transform> parent);	//親子を設定
+		void SetParent(Transform* pParent);	//親子を設定
 		void SetParent(GameObject* parent);
 		void DetachParent();								//親を離す
 		void DetachChildren();								//子を離す
 		std::weak_ptr<Transform> GetParent();				//親取得
 		std::list<std::weak_ptr<Transform>> GetChildren();	//子取得
 		void SendComponentMessageChildren();
-		void DebugImGui() override;
 	protected:
 		Vector3 TransformDirection(Vector3 direction);	//回転行列を使ってDirectionを変換
 	public:
@@ -63,5 +62,6 @@ namespace DirectX
 	public:
 		void LookAt(std::weak_ptr<Transform> target);	//その方向を見る
 		void OnDestroy() override;
+		void DebugImGui() override;
 	};
 }

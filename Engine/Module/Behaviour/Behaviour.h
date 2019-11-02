@@ -9,23 +9,16 @@ namespace DirectX
 	protected:
 		bool m_IsEnable = true;
 	public:
-		Behaviour(EntityID OwnerID,std::string name) :Component(OwnerID,name) {};
+		Behaviour(EntityID OwnerID) :Component(OwnerID) {};
 		virtual ~Behaviour() = default;
 	public:
 		void SetEnable(bool enable);
 		bool GetEnable();
 	public:
-		virtual void OnComponent()	override {};
-		virtual void AddComponentIndex(std::weak_ptr<Type> instance) override;
 		virtual void OnDestroy()	override {};
 		virtual void DebugImGui()	override {};
 		virtual void SendComponentMessage(std::string message) {};
 	};
-	template<typename Type>
-	inline void Behaviour<Type>::AddComponentIndex(std::weak_ptr<Type> instance)
-	{
-		Component<Type>::AddComponentIndex(instance);
-	}
 	template<typename Type>
 	inline void Behaviour<Type>::SetEnable(bool enable)
 	{

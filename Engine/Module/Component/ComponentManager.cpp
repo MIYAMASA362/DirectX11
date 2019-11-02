@@ -5,22 +5,20 @@
 
 using namespace DirectX;
 
-std::vector<ComponentID> ComponentManager::IdIndex;
 //EntityにアタッチされたComponentのリスト
 DirectX::EntityComponents DirectX::ComponentManager::EntityComponentIndex;
 
-void ComponentManager::DestroyComponents(EntityID id)
-{
-	if (EntityComponentIndex.find(id) == EntityComponentIndex.end()) return;
-	//iterator
-	auto itr = EntityComponentIndex.at(id)->begin();
-	auto end = EntityComponentIndex.at(id)->end();
-	
-	while (itr != end) {
-		itr->second->OnDestroy();
-		itr->second->Destroy();
-		itr = EntityComponentIndex.at(id)->erase(itr);
-	}
+void ComponentManager::Create(){
+	EntityComponentIndex.clear();
+}
+
+void ComponentManager::Release(){
+	EntityComponentIndex.clear();
+}
+
+ComponentTypeID ComponentManager::AttachComponentTypeID(){
+	std::random_device rand;
+	return rand();
 }
 
 void DirectX::ComponentManager::SendComponentMessage(std::string message)
@@ -32,23 +30,32 @@ void DirectX::ComponentManager::SendComponentMessage(std::string message)
 		auto citr = itr->second.get()->begin();
 		auto cend = itr->second.get()->end();
 		while (citr != cend) {
-			citr->second.get()->SendComponentMessage(message);
+			citr->second.lock()->SendComponentMessage(message);
 			citr++;
 		}
 		itr++;
 	}
 }
 
-ComponentID ComponentManager::CreateComponent()
+std::weak_ptr<Components> ComponentManager::GetComponents(EntityID id)
 {
-	std::random_device rand;
-	ComponentID id;
-	while (true) {
-		id = rand();
-		auto itr = std::find(IdIndex.begin(), IdIndex.end(),id);
-		if (itr == IdIndex.end())
-			break;
+	if (EntityComponentIndex.size() == 0)
+		return std::weak_ptr<Components>();
+	return EntityComponentIndex.at(id);
+}
+
+void DirectX::ComponentManager::DestroyComponents(EntityID id)
+{
+	auto index = EntityComponentIndex.at(id);
+	auto end = index->end();
+	auto itr = index->begin();
+	while (itr != end) {
+		itr->second.lock()->Destroy();
+		itr++;
 	}
-	IdIndex.push_back(id);
-	return id;
+}
+
+void DirectX::ComponentManager::ReleaseComponents(EntityID id)
+{
+	EntityComponentIndex.at(id)->clear();
 }

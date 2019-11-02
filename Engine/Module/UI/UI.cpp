@@ -14,21 +14,24 @@
 #include"font.h"
 #include"UI.h"
 
+#include"Module\GameObject\GameObject.h"
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
-std::unordered_map<EntityID, std::weak_ptr<UI>> UI::ComponentIndex;
+
 
 //--- Canvas --------------------------------------------------------
 
-//--- UI ------------------------------------------------------------
+std::unordered_map<EntityID, std::weak_ptr<Canvas>> Canvas::Index;
 
-void DirectX::UI::OnComponent()
+DirectX::Canvas::Canvas(EntityID OwnerID)
+	:
+	Component(OwnerID)
 {
-	////Canvas‚ªÝ’è‚³‚ê‚Ä‚È‚¯‚ê‚Î
-	//if (!gameObject.lock()->canvas)
-	//	gameObject.lock()->AddComponent<DirectX::Canvas>();
+
 }
+
+//--- UI ------------------------------------------------------------
 
 //void DirectX::UI::SendBehaviourMessage(Message message)
 //{
@@ -38,11 +41,22 @@ void DirectX::UI::OnComponent()
 //	Render(world);
 //}
 
+std::unordered_map<EntityID, std::weak_ptr<UI>> UI::Index;
+
+DirectX::UI::UI(EntityID OwnerID)
+	:
+	Component(OwnerID)
+{
+	if (!gameObject().lock()->GetComponent<Canvas>())
+		gameObject().lock()->AddComponent<Canvas>();
+}
+
+
 //--- Image ---------------------------------------------------------
 
 DirectX::Image::Image(EntityID OwnerID)
 :
-	UI(OwnerID,"Image")
+	UI(OwnerID)
 {
 	VERTEX_3D vertex[4] = {
 		{ XMFLOAT3(-5.0f, -5.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
@@ -96,7 +110,7 @@ void DirectX::Image::Render(XMMATRIX world)
 
 DirectX::Button::Button(EntityID OwnerID)
 :
-	UI(OwnerID,"Button"),
+	UI(OwnerID),
 	m_scale(5.0f),
 	m_isHover(false)
 {
@@ -189,6 +203,12 @@ bool DirectX::Button::IsHover()
 bool DirectX::Button::IsClick()
 {
 	return this->m_isHover && Input::Mouse::IsLeftDown();
+}
+
+DirectX::Text::Text(EntityID OwnerID)
+:
+	UI(OwnerID)
+{
 }
 
 void DirectX::Text::SetText(std::string text)

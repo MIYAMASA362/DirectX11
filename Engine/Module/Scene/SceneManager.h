@@ -20,29 +20,31 @@ namespace DirectX
 	private:
 		static SceneID m_SceneID;
 		static std::map<SceneID, std::shared_ptr<Scene>> pSceneDictionary;
-	private:
+
 		static std::weak_ptr<Scene> pActiveScene;
 		static std::weak_ptr<Scene> pNextScene;
 		static bool IsChangeScene;
-	public:
-		SceneManager() = delete;
-		~SceneManager() = delete;
-	public:
-		template<typename Type> static std::weak_ptr<Scene> CreateScene();
-		static void Destroy();
-	public:
-		static void LoadScene(std::weak_ptr<Scene> scene);
-		static std::weak_ptr<Scene>GetActiveScene();
-		static std::weak_ptr<Scene>GetScene(SceneID id);
-		static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
-	public:
-		static void ChangeScene();
-		static void DebugGUI_ActiveScene();
+
 	private:
 		static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 		static void AttachActiveScene(std::weak_ptr<Scene> scene);
 		static void DetachActiveScene();
 		static SceneID AttachID();
+
+	public:
+		SceneManager() = delete;
+		~SceneManager() = delete;
+
+		template<typename Type> static std::weak_ptr<Scene> CreateScene();
+		static void Destroy();
+
+		static void LoadScene(std::weak_ptr<Scene> scene);
+		static std::weak_ptr<Scene>GetActiveScene();
+		static std::weak_ptr<Scene>GetScene(SceneID id);
+		static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
+
+		static void ChangeScene();
+		static void DebugGUI_ActiveScene();
 	};
 
 	//----------------------------------------------------------------------------
@@ -61,23 +63,25 @@ namespace DirectX
 		const std::string m_name;
 		bool IsLoaded = false;
 		std::vector<EntityID> Index;
+
 	protected:
 		Scene(std::string name);
 		virtual ~Scene();
+
 	public:
 		std::string GetSceneName();
-	public:
+
 		GameObject* AddSceneObject(std::string name, TagName tag);
 		std::weak_ptr<Scene> GetSelfScene();
-		void RemoveSceneObject(EntityID id);
+		void ReleaseSceneObject(EntityID id);
 		void AttachActiveScene();
 		void DetachActiveScene();
 		void DebugGUI();
 		bool CompareName(std::string name);
 		SceneID GetSceneID();
-	public:
+
 		virtual void Load() = 0;
-		void UnLoad();	//çÌèúèàóù
+		void UnLoad();
 	};
 
 	//----------------------------------------------------------------------------

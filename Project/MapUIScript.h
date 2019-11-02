@@ -5,7 +5,7 @@ class CompassScript:public MonoBehaviour<CompassScript>
 public:
 	GameObject* dirObject;
 public:
-	CompassScript(EntityID OwnerID) :MonoBehaviour(OwnerID,"CompassScript")
+	CompassScript(EntityID OwnerID) :MonoBehaviour(OwnerID)
 	{
 	};
 

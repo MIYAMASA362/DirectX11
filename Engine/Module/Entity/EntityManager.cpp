@@ -1,24 +1,9 @@
 #include"Common.h"
-#include<random>
-
 #include"Module\ECSEngine.h"
 
 using namespace DirectX;
 
 EntityIndex EntityManager::m_EntityIndex;
-
-EntityID EntityManager::AttachEntityID()
-{
-	std::random_device rand;
-	EntityID id;
-	while (true)
-	{
-		id = rand();
-		if (m_EntityIndex.find(id) == m_EntityIndex.end())
-			break;
-	}
-	return id;
-}
 
 void EntityManager::Create()
 {
@@ -30,30 +15,21 @@ void EntityManager::Release()
 	m_EntityIndex.clear();
 }
 
-void EntityManager::RemoveEntity(EntityID id)
+std::weak_ptr<IEntity> EntityManager::CreateEntity(IEntity* instance)
 {
-	//IEntity->OnDestroy();
-	m_EntityIndex.at(id)->OnDestroy();
-	m_EntityIndex.erase(id);
-}
-
-void DirectX::EntityManager::IndexClearnUp()
-{
-	
-	auto itr = m_EntityIndex.begin();
-	auto end = m_EntityIndex.end();
-
-	while (itr != end) {
-		if (!itr->second->IsDestroy()) {
-			itr++;
-			continue;
-		}
-		itr->second->OnDestroy();
-		itr = m_EntityIndex.erase(itr);
-	}
+	InstanceID id = instance->GetInstanceID();
+	auto object = ObjectManager::GetInstance(id).lock();
+	auto wptr = std::weak_ptr<IEntity>(std::dynamic_pointer_cast<IEntity>(object));
+	m_EntityIndex.emplace(id,wptr);
+	return wptr;
 }
 
 std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 {
 	return m_EntityIndex.at(id);
+}
+
+void EntityManager::ReleaseEntity(EntityID id)
+{
+	m_EntityIndex.erase(id);
 }

@@ -5,7 +5,7 @@ class LookAt:public MonoBehaviour<LookAt>
 public:
 	GameObject* parent;
 public:
-	LookAt(EntityID OwnerID) :MonoBehaviour(OwnerID,"LookAt") {};
+	LookAt(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 	void Update()
 	{
 		//this->transform.lock()->LookAt(parent->transform);
@@ -21,7 +21,7 @@ class WASDMove:public MonoBehaviour<WASDMove>
 public:
 	const float speed = 0.5f;
 public:
-	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID,"WASDMove") {};
+	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 	void Update()
 	{
 		/*if (Input::GetKeyPress('W'))
@@ -45,7 +45,7 @@ class CameraHorizontal:public MonoBehaviour<CameraHorizontal>
 public:
 	const float speed = 0.001f;
 public:
-	CameraHorizontal(EntityID OwnerID) :MonoBehaviour(OwnerID,"CameraHorizontal") {}
+	CameraHorizontal(EntityID OwnerID) :MonoBehaviour(OwnerID) {}
 	void Update()
 	{
 		/*float horizontal = Input::Mouse::GetAccelerationX() * speed;
@@ -58,7 +58,7 @@ public:
 class Move :public MonoBehaviour<Move>
 {
 public:
-	Move(EntityID OwnerID) :MonoBehaviour(OwnerID,"Move") {};
+	Move(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 	void Update() {
 		/*if (Input::GetKeyPress(VK_UP))
 			this->transform.lock()->position(this->transform.lock()->position() + Vector3::up()*0.5f);

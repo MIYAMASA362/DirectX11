@@ -4,7 +4,7 @@
 class RemoveObjectMethod:public MonoBehaviour<RemoveObjectMethod>
 {
 public:
-	RemoveObjectMethod(EntityID OwnerID) :MonoBehaviour(OwnerID,"RemoveObjectMethod") { };
+	RemoveObjectMethod(EntityID OwnerID) :MonoBehaviour(OwnerID) { };
 public:
 	void Update() override 
 	{

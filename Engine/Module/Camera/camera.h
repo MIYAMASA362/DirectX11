@@ -25,7 +25,6 @@ namespace DirectX
 	//--- Inherited Members -----------------------------------------
 	public:
 		void Run();
-		void OnComponent() override;
 		void OnDestroy() override;
 		void DebugImGui() override;
 	};

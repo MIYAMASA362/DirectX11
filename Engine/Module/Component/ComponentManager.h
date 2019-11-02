@@ -6,64 +6,59 @@ namespace DirectX
 	class ComponentManager
 	{
 	private:
-		static std::vector<ComponentID> IdIndex;
 		static EntityComponents EntityComponentIndex;
 	public:
 		static void Create();
 		static void Release();
-	public:
-		template<typename Type> static Type* AddComponent(EntityID id);
-		template<typename Type> static std::weak_ptr<Type> GetComponent(EntityID id);
-		static std::weak_ptr<Components> GetComponents(EntityID id);
-		static void DestroyComponents(EntityID id);
-		template<typename Type> static void DestroyComponent(EntityID id);
-		static ComponentID CreateComponent();
-	public:
+
+		static ComponentTypeID AttachComponentTypeID();
+
 		static void SendComponentMessage(std::string message);
+
+		template<typename Type> static Type* AddComponent(EntityID OwnerID);
+
+		template<typename Type> static Type* GetComponent(EntityID id);
+		static std::weak_ptr<Components> GetComponents(EntityID id);
+
+		//çÌèú
+		static void DestroyComponents(EntityID id);
+
+		//âï˙
+		template<typename Type> static void ReleaseComponent(EntityID id);
+		static void ReleaseComponents(EntityID id);
 	};
 
 	//--------------------------------------------------------------------------------------
-	inline void ComponentManager::Create(){
-		EntityComponentIndex.clear();
-	}
-	inline void ComponentManager::Release(){
-		EntityComponentIndex.clear();
-	}
-	inline std::weak_ptr<Components> ComponentManager::GetComponents(EntityID id)
-	{
-		if (EntityComponentIndex.size() == 0)
-			return std::weak_ptr<Components>();
-		return EntityComponentIndex.at(id);
-	}
 	template<typename Type>
-	inline Type* ComponentManager::AddComponent(EntityID id)
+	inline Type* ComponentManager::AddComponent(EntityID OwnerID)
 	{
-		//idÇÃComponentsÉäÉXÉgÇ™ë∂ç›Ç∑ÇÈÇÃÇ©
-		try {
-			EntityComponentIndex.at(id);
-		}
-		//ë∂ç›ÇµÇƒÇ¢Ç»Ç¢
-		catch (const std::out_of_range&) {
-			EntityComponentIndex.emplace(id, std::shared_ptr<Components>(new Components()));
+		EntityComponents::iterator find = EntityComponentIndex.find(OwnerID);
+		if (find == EntityComponentIndex.end())
+		{
+			EntityComponentIndex.emplace(OwnerID, std::shared_ptr<Components>(new Components()));
+			find = EntityComponentIndex.find(OwnerID);
 		}
 		//Componentê›íË
-		auto add = std::shared_ptr<Type>(new Type(id));
-		EntityComponentIndex.at(id)->emplace(Component<Type>::GetID(),add);
-		add->AddComponentIndex(add);
-		add->OnComponent();
-		add->SendComponentMessage("Start");
-		return add.get();
+		auto instance =  new Type(OwnerID);
+		instance->AddComponent();
+		auto add = Type::GetComponent(OwnerID).lock();
+		IComponent* icomponent = add.get();
+		find->second->emplace(icomponent->GetComponentTypeID(),add);
+		icomponent->SendComponentMessage("Start");
+		return instance;
 	}
-	template<typename Type>
-	inline std::weak_ptr<Type> ComponentManager::GetComponent(EntityID id)
+
+	template<typename Type >
+	inline Type* ComponentManager::GetComponent(EntityID id)
 	{
-		return std::static_pointer_cast<Type>(EntityComponentIndex.at(id)->at(Component<Type>::GetID()));
+		auto component = EntityComponentIndex.at(id)->at(Component<Type>::TypeID);
+		auto shared = std::dynamic_pointer_cast<Type>(component.lock());
+		return shared.get();
 	}
+
 	template<typename Type>
-	inline void ComponentManager::DestroyComponent(EntityID id)
+	inline void ComponentManager::ReleaseComponent(EntityID id)
 	{
-		Component<Type>::DestroyComponent(id);
-		EntityComponentIndex.at(id)->erase(Component<Type>::GetID());
-		return;
+		EntityComponentIndex.at(id)->erase(Component<Type>::TypeID);
 	}
 }

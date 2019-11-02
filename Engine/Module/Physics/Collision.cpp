@@ -17,7 +17,7 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<Collider>> Collider::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Collider>> Collider::Index;
 
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {
@@ -30,7 +30,7 @@ DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 //Constrcutor
 DirectX::Collider::Collider(EntityID OwnerID)
 :
-	Component(OwnerID,"Collider"),
+	Component(OwnerID),
 	bound(Vector3::zero(),Vector3::one())
 {
 

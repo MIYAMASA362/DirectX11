@@ -10,12 +10,13 @@
 #include"Module\Transform\Transform.h"
 
 using namespace DirectX;
-std::unordered_map<EntityID, std::weak_ptr<Renderer>> Renderer::ComponentIndex;
+
+std::unordered_map<EntityID, std::weak_ptr<Renderer>> Renderer::Index;
 
 void DirectX::Renderer::BeginRender()
 {
-	auto itr = ComponentIndex.begin();
-	auto end = ComponentIndex.end();
+	auto itr = Index.begin();
+	auto end = Index.end();
 	while (itr != end) {
 		auto renderer = itr->second.lock();
 		itr++;
@@ -24,11 +25,11 @@ void DirectX::Renderer::BeginRender()
 	}
 }
 
-DirectX::Renderer::Renderer(EntityID OwnerID,std::string name)
-	:
-	Component(OwnerID,name)
+DirectX::Renderer::Renderer(EntityID OwnerID)
+:
+	Component(OwnerID)
 {
-
+	
 }
 
 void DirectX::Renderer::SetEnable(bool enable)
@@ -39,13 +40,4 @@ void DirectX::Renderer::SetEnable(bool enable)
 bool DirectX::Renderer::GetEnable()
 {
 	return this->m_IsEnable;
-}
-
-void DirectX::Renderer::OnComponent()
-{
-
-}
-void DirectX::Renderer::AddComponentIndex(std::weak_ptr<Renderer> instance)
-{
-	ComponentIndex.emplace(instance.lock()->GetOwnerID(),std::weak_ptr<Renderer>(instance));
 }

@@ -5,23 +5,21 @@
 using namespace DirectX;
 
 IEntity::IEntity()
-	:
-	m_EntityID(EntityManager::AttachEntityID())
 {
-
+	EntityManager::CreateEntity(this);
 }
 
 DirectX::IEntity::~IEntity()
 {
-	ComponentManager::DestroyComponents(this->m_EntityID);
+	EntityManager::ReleaseEntity(GetEntityID());
 }
 
-const EntityID IEntity::GetEntityID()
+EntityID IEntity::GetEntityID()
 {
-	return this->m_EntityID;
+	return this->GetInstanceID();
 }
 
-bool DirectX::IEntity::GetIsEnable()
+void DirectX::IEntity::DestroyComponents()
 {
-	return this->m_IsEnable;
+	ComponentManager::ReleaseComponents(GetEntityID());
 }

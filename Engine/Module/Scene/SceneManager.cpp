@@ -139,14 +139,13 @@ GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
 	this->Index.push_back(instance->GetEntityID());
-	instance->AddComponent<Transform>();
 	return instance;
 }
 
 //GameObejct�̍폜
-void DirectX::Scene::RemoveSceneObject(EntityID id)
+void DirectX::Scene::ReleaseSceneObject(EntityID id)
 {
-	EntityManager::RemoveEntity(id);
+	EntityManager::ReleaseEntity(id);
 }
 
 //

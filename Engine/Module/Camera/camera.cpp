@@ -22,7 +22,7 @@ using namespace DirectX;
 //--- Camera ------------------------------------------------------------------
 Camera* Camera::pActiveCamera = nullptr;
 std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
-std::unordered_map<EntityID, std::weak_ptr<Camera>> Camera::ComponentIndex;
+std::unordered_map<EntityID, std::weak_ptr<Camera>> Camera::Index;
 
 //--- static method -------------------------------------------------
 void Camera::Render(void(*Draw)(void), void(*Begin)(void))
@@ -56,7 +56,7 @@ Camera* Camera::GetActiveCamera()
 
 void Camera::IndexSort(Camera* target)
 {
-	std::weak_ptr<Camera> wPtr = target->gameObject().lock()->GetComponent<Camera>();
+	std::weak_ptr<Camera> wPtr = Camera::GetComponent(target->GetInstanceID());
 
 	//”z—ñ’·‚ª0
 	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
@@ -94,7 +94,7 @@ void Camera::IndexSort(Camera* target)
 
 Camera::Camera(EntityID OwnerID)
 :
-	Behaviour(OwnerID,"Camera"),
+	Behaviour(OwnerID),
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
@@ -163,11 +163,6 @@ void Camera::Run()
 	D3DApp::Renderer::SetProjectionMatrix(&m_ProjectionMatrix);
 }
 
-void Camera::OnComponent()
-{
-	Camera::IndexSort(this);
-}
-
 void Camera::OnDestroy()
 {
 	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
@@ -181,7 +176,7 @@ void Camera::OnDestroy()
 
 void DirectX::Camera::DebugImGui()
 {
-	if (ImGui::TreeNode((std::string("Camera") + std::to_string(m_OwnerId)).c_str()))
+	if (ImGui::TreeNode((std::string("Camera") + std::to_string(this->GetOwnerID())).c_str()))
 	{
 		ImGui::TreePop();
 	}

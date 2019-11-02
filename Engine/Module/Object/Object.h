@@ -4,33 +4,23 @@ namespace DirectX
 {
 	class Object
 	{
-	protected:
-		bool m_IsDestroy = false;
+	private:
+		const InstanceID m_InstanceID;
 	public:
+		static void Destroy(Object* obj);
+
 		Object();
 		virtual ~Object();
-	public:
-		virtual void OnDestroy() {};
-		virtual void Destroy();
-		bool IsDestroy();
-	};
-
-	//----------------------------------------------------------------
-	inline Object::Object()
-	{
 		
-	}
-	inline Object::~Object()
-	{
-
-	}
-	inline void Object::Destroy()
-	{
-		this->m_IsDestroy = true;
-	}
-	inline bool Object::IsDestroy()
-	{
-		return this->m_IsDestroy;
+		InstanceID GetInstanceID();
+		
+		void Destroy();
+	protected:
+		virtual void OnDestroy();
 	};
 
+	inline InstanceID DirectX::Object::GetInstanceID()
+	{
+		return m_InstanceID;
+	}
 }
