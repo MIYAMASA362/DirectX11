@@ -8,7 +8,6 @@ namespace DirectX
 	class GameObject;
 	class Scene;
 
-	//--- GameObject ----------------------------------------------------------
 	class GameObject final:public Entity<GameObject>
 	{
 		friend Scene;
@@ -34,19 +33,4 @@ namespace DirectX
 
 		void OnDebugGUI();
 	};
-
-	//----------------------------------------------------------------------------
-
-	inline bool GameObject::CompareTag(TagName tag) {
-		return this->tag.name == tag;
-	};
-	inline bool GameObject::GetIsDestroy() {
-		return this->IsDestroy;
-	}
-	inline void GameObject::SetActive(bool IsActive) {
-		this->IsActive = IsActive;
-	};
-	inline bool GameObject::GetActive() {
-		return this->IsActive;
-	}
 }

@@ -5,6 +5,7 @@ namespace DirectX
 	template<typename Type>
 	class Entity:public IEntity
 	{
+		using EntityType = Entity<Type>;
 	protected:
 		static EntityIndex m_EntityIndex;
 	public:

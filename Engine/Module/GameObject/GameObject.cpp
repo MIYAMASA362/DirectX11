@@ -26,7 +26,7 @@
 using namespace DirectX;
 
 const std::string GameObject::TypeName = "GameObject";
-EntityIndex Entity<GameObject>::m_EntityIndex;
+EntityIndex GameObject::EntityType::m_EntityIndex;
 
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 :
@@ -77,4 +77,24 @@ Transform* DirectX::GameObject::transform()
 
 void DirectX::GameObject::OnDebugGUI()
 {
+}
+
+bool GameObject::CompareTag(TagName tag)
+{
+	return this->tag.name == tag;
+}
+
+bool GameObject::GetIsDestroy()
+{
+	return this->IsDestroy;
+}
+
+void GameObject::SetActive(bool IsActive)
+{
+	this->IsActive = IsActive;
+}
+
+bool GameObject::GetActive() 
+{
+	return this->IsActive;
 }
