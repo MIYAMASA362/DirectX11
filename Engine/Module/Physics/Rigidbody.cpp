@@ -9,9 +9,11 @@
 #include"Physics.h"
 #include"Rigidbody.h"
 
-std::unordered_map<DirectX::EntityID, std::weak_ptr<DirectX::Rigidbody>> DirectX::Rigidbody::Index;
+using namespace DirectX;
 
-DirectX::Rigidbody::Rigidbody(EntityID OwnerID)
+Rigidbody::ComponentIndex Rigidbody::ComponentType::Index;
+
+Rigidbody::Rigidbody(EntityID OwnerID)
 :
 	Component(OwnerID),
 	m_useGravity(true),
@@ -21,7 +23,7 @@ DirectX::Rigidbody::Rigidbody(EntityID OwnerID)
 
 }
 
-DirectX::Rigidbody::~Rigidbody()
+Rigidbody::~Rigidbody()
 {
 
 }
@@ -47,7 +49,7 @@ DirectX::Rigidbody::~Rigidbody()
 //	}
 //}
 
-void DirectX::Rigidbody::FixedUpdate()
+void Rigidbody::FixedUpdate()
 {
 	Transform* m_transform = this->transform().lock().get();
 
@@ -60,7 +62,7 @@ void DirectX::Rigidbody::FixedUpdate()
 		//m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;
 }
 
-void DirectX::Rigidbody::ApplyRigidbody()
+void Rigidbody::ApplyRigidbody()
 {
 	Transform* m_transform = this->transform().lock().get();
 	m_transform->position(m_transform->position() + this->m_velocity);

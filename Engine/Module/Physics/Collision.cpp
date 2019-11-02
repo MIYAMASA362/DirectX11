@@ -17,7 +17,7 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<Collider>> Collider::Index;
+Collider::ComponentIndex Collider::ComponentType::Index;
 
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {

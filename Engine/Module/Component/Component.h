@@ -6,11 +6,15 @@ namespace DirectX
 	class Component:public IComponent
 	{
 		friend class ComponentManager;
+
+		using ComponentType  = Component<Type>;
+		using ComponentIndex = std::unordered_map<EntityID, std::weak_ptr<Type>>;
+
 	public:
 		static const ComponentTypeID TypeID;
 
 	protected:
-		static std::unordered_map<EntityID,std::weak_ptr<Type>> Index;
+		static ComponentIndex Index;
 
 	private:
 		void AddComponent();
@@ -23,9 +27,10 @@ namespace DirectX
 
 		virtual const ComponentTypeID GetComponentTypeID() const override final;
 
-		virtual void OnDestroy() override;
-		virtual void DebugImGui() override;
-		virtual void SendComponentMessage(std::string message) override;
+		virtual void OnDestroy() override {};
+		virtual void DebugImGui() override {};
+		virtual void SendComponentMessage(std::string message) override {};
+
 	};
 
 	//----------------------------------------------------------------------------
@@ -63,22 +68,5 @@ namespace DirectX
 	inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
 	{
 		return TypeID;
-	}
-
-	template<typename Type>
-	inline void Component<Type>::OnDestroy()
-	{
-
-	}
-
-	template<typename Type>
-	inline void Component<Type>::DebugImGui()
-	{
-
-	}
-
-	template<typename Type>
-	inline void Component<Type>::SendComponentMessage(std::string message)
-	{
 	}
 }

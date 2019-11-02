@@ -22,7 +22,7 @@ using namespace DirectX;
 //--- Camera ------------------------------------------------------------------
 Camera* Camera::pActiveCamera = nullptr;
 std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
-std::unordered_map<EntityID, std::weak_ptr<Camera>> Camera::Index;
+Camera::ComponentIndex Camera::ComponentType::Index;
 
 //--- static method -------------------------------------------------
 void Camera::Render(void(*Draw)(void), void(*Begin)(void))

@@ -19,10 +19,9 @@
 
 using namespace DirectX;
 
-
 //--- Canvas --------------------------------------------------------
 
-std::unordered_map<EntityID, std::weak_ptr<Canvas>> Canvas::Index;
+Canvas::ComponentIndex Canvas::ComponentType::Index;
 
 DirectX::Canvas::Canvas(EntityID OwnerID)
 	:
@@ -41,7 +40,7 @@ DirectX::Canvas::Canvas(EntityID OwnerID)
 //	Render(world);
 //}
 
-std::unordered_map<EntityID, std::weak_ptr<UI>> UI::Index;
+UI::ComponentIndex UI::ComponentType::Index;
 
 DirectX::UI::UI(EntityID OwnerID)
 	:

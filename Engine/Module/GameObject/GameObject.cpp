@@ -26,7 +26,7 @@
 using namespace DirectX;
 
 const std::string GameObject::TypeName = "GameObject";
-EntityIndex GameObject::m_EntityIndex;
+EntityIndex Entity<GameObject>::m_EntityIndex;
 
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 :

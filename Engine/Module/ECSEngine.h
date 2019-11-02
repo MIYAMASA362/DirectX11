@@ -17,7 +17,6 @@ namespace DirectX
 	using EntityIndex = std::unordered_map<EntityID,std::weak_ptr<IEntity>>;
 	
 	using ComponentList = std::list<InstanceID>;
-	using ComponentIndex = std::unordered_map<EntityID, std::weak_ptr<IComponent>>;
 
 	using Components = std::unordered_map<ComponentTypeID, std::weak_ptr<IComponent>>;
 	using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<Components>>;

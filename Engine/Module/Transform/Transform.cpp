@@ -17,7 +17,7 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<Transform>>  Component<Transform>::Index;
+Transform::ComponentIndex Transform::ComponentType::Index;
 
 //--- Constrcutor -------------------------------------------------------------
 

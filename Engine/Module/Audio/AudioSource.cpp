@@ -8,7 +8,7 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<AudioSource>> AudioSource::Index;
+AudioSource::ComponentIndex AudioSource::ComponentType::Index;
 
 DirectX::AudioSource::AudioSource(EntityID OwnerID)
 :

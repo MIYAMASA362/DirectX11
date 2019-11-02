@@ -32,7 +32,7 @@
 #include"../Project/GameMain.h"
 
 //------------------------------------------------
-std::unordered_map<EntityID, std::weak_ptr<CameraMouse>> CameraMouse::Index;
+CameraMouse::ComponentIndex CameraMouse::ComponentType::Index;
 
 using namespace DirectX;
 
