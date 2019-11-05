@@ -19,11 +19,13 @@ namespace DirectX
 		virtual void DebugImGui()	override {};
 		virtual void SendComponentMessage(std::string message) {};
 	};
+
 	template<typename Type>
 	inline void Behaviour<Type>::SetEnable(bool enable)
 	{
 		this->m_IsEnable = enable;
 	}
+
 	template<typename Type>
 	inline bool Behaviour<Type>::GetEnable()
 	{

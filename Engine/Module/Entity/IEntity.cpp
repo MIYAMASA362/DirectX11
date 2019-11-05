@@ -21,5 +21,11 @@ EntityID IEntity::GetEntityID()
 
 void DirectX::IEntity::DestroyComponents()
 {
-	ComponentManager::ReleaseComponents(GetEntityID());
+	ComponentManager::DestroyComponents(GetEntityID());
+}
+
+void DirectX::IEntity::Destroy()
+{
+	ComponentManager::DestroyComponents(GetEntityID());
+	Object::Destroy();
 }

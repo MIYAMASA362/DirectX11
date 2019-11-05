@@ -17,6 +17,14 @@ public:
 		this->transform().lock()->localRotation(
 			this->transform().lock()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
 		);
+
+		if (Input::GetKeyTrigger(VK_RETURN))
+			this->gameObject().lock()->Destroy();
 		//this->transform.lock()->LookAt(looktarget);
+	}
+
+	void OnDestroy()  override
+	{
+		OutputDebugStringA("Destroy this Component\n");
 	}
 };

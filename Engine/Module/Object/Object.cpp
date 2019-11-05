@@ -12,7 +12,7 @@ Object::Object()
 
 Object::~Object()
 {
-	OnDestroy();
+	
 }
 
 void Object::OnDestroy()

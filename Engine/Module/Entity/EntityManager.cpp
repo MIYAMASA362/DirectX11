@@ -32,4 +32,5 @@ std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 void EntityManager::ReleaseEntity(EntityID id)
 {
 	m_EntityIndex.erase(id);
+	ComponentManager::ReleaseComponents(id);
 }

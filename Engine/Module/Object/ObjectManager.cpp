@@ -30,6 +30,7 @@ void DirectX::ObjectManager::ClearnUp()
 	for (auto id : m_DestroyIndex) 
 	{
 		auto sptr = m_ObjectIndex.at(id);
+		sptr->OnDestroy();
 		m_ObjectIndex.erase(id);
 	}
 	m_DestroyIndex.clear();
@@ -42,6 +43,12 @@ std::weak_ptr<Object> DirectX::ObjectManager::GetInstance(InstanceID instanceID)
 
 void DirectX::ObjectManager::Release()
 {
+	for (auto obj : m_ObjectIndex)
+	{
+		obj.second->OnDestroy();
+	}
+	
+	m_DestroyIndex.clear();
 	m_ObjectIndex.clear();
 }
 

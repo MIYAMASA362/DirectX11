@@ -28,27 +28,6 @@ Rigidbody::~Rigidbody()
 
 }
 
-//
-//void DirectX::Rigidbody::SendBehaviourMessage(Component::Message message)
-//{
-//	switch (message)
-//	{
-//	case DirectX::Component::Initialize:
-//		break;
-//	case DirectX::Component::Update:
-//		break;
-//	case DirectX::Component::FixedUpdate:
-//		FixedUpdate();
-//		break;
-//	case DirectX::Component::Render:
-//		break;
-//	case DirectX::Component::Finalize:
-//		break;
-//	default:
-//		break;
-//	}
-//}
-
 void Rigidbody::FixedUpdate()
 {
 	Transform* m_transform = this->transform().lock().get();
@@ -66,4 +45,27 @@ void Rigidbody::ApplyRigidbody()
 {
 	Transform* m_transform = this->transform().lock().get();
 	m_transform->position(m_transform->position() + this->m_velocity);
+}
+
+void DirectX::Rigidbody::SendComponentMessage(std::string message)
+{
+	if (message == "FixedUpdate") 
+	{
+		FixedUpdate();
+	}
+}
+
+void Rigidbody::IsUseGravity(bool enable) 
+{
+	this->m_useGravity = enable;
+}
+
+void Rigidbody::SetMass(float mass)
+{ 
+	this->m_mass = mass;
+}
+
+void Rigidbody::AddForce(Vector3 force) 
+{ 
+	this->m_velocity = this->m_mass * force; 
 }

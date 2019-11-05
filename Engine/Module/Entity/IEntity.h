@@ -14,6 +14,8 @@ namespace DirectX
 		template<typename Type> Type* GetComponent();
 		template<typename Type> void DestroyComponent();
 		void DestroyComponents();
+
+		void Destroy() override;
 	};
 
 	template<typename Type> Type* IEntity::AddComponent()

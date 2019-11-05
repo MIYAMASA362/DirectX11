@@ -2,7 +2,6 @@
 
 namespace DirectX
 {
-	//=== EntityManager ==========================================================
 	class EntityManager
 	{
 		friend IEntity;

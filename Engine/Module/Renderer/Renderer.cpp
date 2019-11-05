@@ -11,16 +11,16 @@
 
 using namespace DirectX;
 
-std::unordered_map<EntityID, std::weak_ptr<Renderer>> Renderer::ComponentType::Index;
+Renderer::ComponentIndex Renderer::ComponentType::Index;
 
 void DirectX::Renderer::BeginRender()
 {
 	auto itr = Index.begin();
 	auto end = Index.end();
 	while (itr != end) {
-		auto renderer = Renderer::GetComponent(itr->first).lock();
+		auto renderer = itr->second.lock();
 		itr++;
-		if (!renderer->m_IsEnable) continue;
+		if (!renderer->GetEnable()) continue;
 		renderer->Render(renderer->transform().lock()->WorldMatrix());
 	}
 }

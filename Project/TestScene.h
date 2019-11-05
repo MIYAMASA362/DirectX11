@@ -10,6 +10,7 @@ public:
 	{
 		auto object = this->AddSceneObject("Object",TagName::Default);
 		auto transform =  object->AddComponent<Transform>();
+		object->AddComponent<CameraMouse>();
 		{
 			//Sky
 			/*GameObject* Sky = this->AddSceneObject("Sky", TagName::Default);

@@ -100,14 +100,14 @@ std::list<std::weak_ptr<Transform>> DirectX::Transform::GetChildren()
 	return this->pChildren;
 }
 
-void DirectX::Transform::SendComponentMessageChildren()
+void DirectX::Transform::SendComponentMessageChildren(std::string message)
 {
-	/*for(auto child:pChildren)
-	{
-		child.lock()->gameObject.lock()->RunComponent(message);
-		if (child.lock()->pChildren.size() != 0)
-			child.lock()->SendComponentMessageChildren(message);
-	}*/
+	for (auto child : pChildren) {
+		auto obj = child.lock();
+		obj->SendComponentMessage(message);
+		if (obj->pChildren.size() == 0) continue;
+		obj->SendComponentMessageChildren(message);
+	}
 }
 
 void DirectX::Transform::DebugImGui()
@@ -274,8 +274,8 @@ XMMATRIX Transform::WorldMatrix()
 	m_WorldMatrix *= XMMatrixRotationQuaternion(m_Rotation);
 	m_WorldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
 
-	/*if (!pParent.expired())
-		m_WorldMatrix *= pParent.lock()->transform.lock()->WorldMatrix();
-	*/
+	if (!pParent.expired())
+		m_WorldMatrix *= pParent.lock()->WorldMatrix();
+	
 	return m_WorldMatrix;
 }

@@ -23,7 +23,7 @@ namespace DirectX
 		std::weak_ptr<GameObject> gameObject();
 
 	protected:
-		virtual void OnDestroy()  = 0;
+		virtual void OnDestroy() override = 0;
 
 	};
 

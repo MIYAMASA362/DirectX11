@@ -20,11 +20,6 @@ namespace DirectX
 		Vector3 GetVelocity() { return m_velocity; };
 		void SetVelocity(Vector3 velocity) { m_velocity = velocity; };
 		void ApplyRigidbody();
+		void SendComponentMessage(std::string message) override;
 	};
-
-	//-----------------------------------------------------------------------------------
-	inline void Rigidbody::IsUseGravity(bool enable) { this->m_useGravity = enable; }
-	inline void Rigidbody::SetMass(float mass) { this->m_mass = mass; }
-	inline void Rigidbody::AddForce(Vector3 force) { this->m_velocity = this->m_mass * force; }
-
 }

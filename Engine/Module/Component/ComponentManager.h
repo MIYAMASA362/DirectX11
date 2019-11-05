@@ -59,6 +59,8 @@ namespace DirectX
 	template<typename Type>
 	inline void ComponentManager::ReleaseComponent(EntityID id)
 	{
-		EntityComponentIndex.at(id)->erase(Component<Type>::TypeID);
+		auto find = EntityComponentIndex.find(id);
+		if (find == EntityComponentIndex.end()) return;
+		find->second->erase(Component<Type>::TypeID);
 	}
 }

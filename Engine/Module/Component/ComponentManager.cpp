@@ -26,11 +26,14 @@ void DirectX::ComponentManager::SendComponentMessage(std::string message)
 	auto itr = EntityComponentIndex.begin();
 	auto end = EntityComponentIndex.end();
 
-	while (itr != end) {
-		auto citr = itr->second.get()->begin();
-		auto cend = itr->second.get()->end();
-		while (citr != cend) {
-			citr->second.lock()->SendComponentMessage(message);
+	while (itr != end)
+	{
+		auto citr = itr->second->begin();
+		auto cend = itr->second->end();
+		while (citr != cend)
+		{
+			auto obj = citr->second.lock();
+			obj->SendComponentMessage(message);
 			citr++;
 		}
 		itr++;
@@ -57,5 +60,5 @@ void DirectX::ComponentManager::DestroyComponents(EntityID id)
 
 void DirectX::ComponentManager::ReleaseComponents(EntityID id)
 {
-	EntityComponentIndex.at(id)->clear();
+	EntityComponentIndex.erase(id);
 }

@@ -51,23 +51,6 @@ void DirectX::GameObject::DebugGUI()
 		auto sptr = std::dynamic_pointer_cast<GameObject>(obj.second.lock());
 		ImGui::Text(sptr->name.c_str());
 	}
-
-	//EntityManagerのインデックスから削除されているから参照できない
-	//for(auto id : m_EntityIndex)
-	//{
-	//	//Object表示
-	//	auto object = GameObject::GetEntity(id);
-	//	ImGui::Text(object.lock()->name.c_str());
-	//	//Component表示
-	//	auto components = ComponentManager::GetComponents(id);
-	//	if (components.expired()) continue;
-	//	auto itr = components.lock()->begin();
-	//	auto end = components.lock()->end();
-	//	while (itr != end) {
-	//		itr->second->DebugImGui();
-	//		itr++;
-	//	}
-	//}
 }
 
 Transform* DirectX::GameObject::transform()

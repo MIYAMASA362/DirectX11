@@ -4,6 +4,7 @@ namespace DirectX
 {
 	class Object
 	{
+		friend class ObjectManager;
 	private:
 		const InstanceID m_InstanceID;
 	public:
@@ -14,7 +15,7 @@ namespace DirectX
 		
 		InstanceID GetInstanceID();
 		
-		void Destroy();
+		virtual void Destroy();
 	protected:
 		virtual void OnDestroy();
 	};
