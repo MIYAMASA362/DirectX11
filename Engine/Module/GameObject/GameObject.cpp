@@ -9,10 +9,6 @@
 //ECS
 #include"../ECSEngine.h"
 
-//Component
-#include"Module\Object\Object.h"
-#include"Module\Component\Component.h"
-
 //Component Module
 #include"Module\Transform\Transform.h"
 
@@ -49,7 +45,7 @@ void DirectX::GameObject::DebugGUI()
 	for (auto obj : m_EntityIndex)
 	{
 		auto sptr = std::dynamic_pointer_cast<GameObject>(obj.second.lock());
-		ImGui::Text(sptr->name.c_str());
+		sptr->OnDebugGUI();
 	}
 }
 
@@ -60,6 +56,14 @@ Transform* DirectX::GameObject::transform()
 
 void DirectX::GameObject::OnDebugGUI()
 {
+	if(ImGui::TreeNode((name + " ID:" + std::to_string(this->GetEntityID())).c_str()))
+	{
+		auto components = ComponentManager::GetComponents(this->GetEntityID());
+		if (components.expired()) return;
+		for (auto component : *components.lock())
+			component.second.lock()->DebugImGui();
+		ImGui::TreePop();
+	}
 }
 
 bool GameObject::CompareTag(TagName tag)

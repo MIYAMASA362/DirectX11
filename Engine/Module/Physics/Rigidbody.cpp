@@ -30,20 +30,21 @@ Rigidbody::~Rigidbody()
 
 void Rigidbody::FixedUpdate()
 {
-	Transform* m_transform = this->transform().lock().get();
+	Transform* m_transform = this->transform().get();
 
 	//d—Í
 	if(m_useGravity)
 		m_velocity += m_mass * Physics::Get_Gravity();
 
 	//y:0‚ð’n–Ê‚Æ‚µ‚½”»’è
-	//if (m_transform->position().y - (m_transform->scale().y*0.5f) + m_velocity.y < 0.0f)
-		//m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;
+	if (m_transform->position().y - (m_transform->scale().y*0.5f) + m_velocity.y < 0.0f)
+		m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;
+	this->ApplyRigidbody();
 }
 
 void Rigidbody::ApplyRigidbody()
 {
-	Transform* m_transform = this->transform().lock().get();
+	Transform* m_transform = this->transform().get();
 	m_transform->position(m_transform->position() + this->m_velocity);
 }
 

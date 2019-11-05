@@ -16,7 +16,7 @@ namespace DirectX
 		virtual void FixedUpdate(){};
 	public:
 		virtual void OnDestroy()	override {};
-		virtual void DebugImGui()	override {};
+		virtual void DebugImGui()	override;
 	};
 
 	template<typename Type>
@@ -32,5 +32,10 @@ namespace DirectX
 		if (message == "Start") { Start(); return; }
 		if (message == "Update") { Update(); return; }
 		if (message == "FixedUpdate"){ FixedUpdate(); return; }
+	}
+	template<typename Type>
+	inline void MonoBehaviour<Type>::DebugImGui()
+	{
+		Component<Type>::DebugImGui();
 	}
 }

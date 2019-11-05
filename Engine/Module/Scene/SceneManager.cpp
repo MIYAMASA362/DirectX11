@@ -78,9 +78,11 @@ void DirectX::SceneManager::ChangeScene()
 	
 	if (!IsChangeScene) return;	//遷移フラグが有効
 	//無効化
+	pNextScene = pNextScene;
 	DetachActiveScene();
 	//有効化
-	AttachActiveScene(pNextScene);
+	pNextScene = pNextScene;
+	AttachActiveScene(pNextScene.lock());
 	IsChangeScene = false;
 }
 
@@ -98,11 +100,10 @@ std::weak_ptr<Scene> DirectX::SceneManager::GetScene(SceneID id)
 //Scene名からSceneを取得
 std::weak_ptr<Scene> DirectX::SceneManager::GetSceneByName(std::string SceneName)
 {
-	auto itr = pSceneDictionary.begin();
-	auto end = pSceneDictionary.end();
-	for (; itr != end; itr++)
-		if (itr->second.get()->CompareName(SceneName))
-			return itr->second;
+	for (auto scene : pSceneDictionary) {
+		if (scene.second->CompareName(SceneName))
+			return scene.second;
+	}
 	return std::shared_ptr<Scene>(nullptr);
 }
 
@@ -139,13 +140,8 @@ GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
 	this->Index.push_back(instance->GetEntityID());
+	instance->AddComponent<Transform>();
 	return instance;
-}
-
-//GameObejctの削除
-void DirectX::Scene::ReleaseSceneObject(EntityID id)
-{
-	EntityManager::ReleaseEntity(id);
 }
 
 //
@@ -159,7 +155,7 @@ void DirectX::Scene::AttachActiveScene()
 void DirectX::Scene::DetachActiveScene()
 {
 	this->IsLoaded = false;
-	this->~Scene();
+	this->UnLoad();
 }
 
 //ImGui Debug表示

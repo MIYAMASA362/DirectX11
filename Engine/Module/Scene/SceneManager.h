@@ -73,7 +73,6 @@ namespace DirectX
 
 		GameObject* AddSceneObject(std::string name, TagName tag);
 		std::weak_ptr<Scene> GetSelfScene();
-		void ReleaseSceneObject(EntityID id);
 		void AttachActiveScene();
 		void DetachActiveScene();
 		void DebugGUI();

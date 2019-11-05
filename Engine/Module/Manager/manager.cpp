@@ -33,6 +33,11 @@
 
 //------------------------------------------------
 CameraMouse::ComponentIndex CameraMouse::ComponentType::Index;
+WASDMove::ComponentIndex WASDMove::ComponentType::Index;
+SceneChange::ComponentIndex SceneChange::ComponentType::Index;
+LookAt::ComponentIndex LookAt::ComponentType::Index;
+CameraHorizontal::ComponentIndex CameraHorizontal::ComponentType::Index;
+Shot::ComponentIndex Shot::ComponentType::Index;
 
 using namespace DirectX;
 

@@ -38,7 +38,7 @@ Transform::Transform(EntityID OwnerID)
 void Transform::SetParent(Transform* p)
 {
 	//既に親
-	auto parent = Transform::GetComponent(p->GetInstanceID());
+	auto parent = Transform::GetComponent(p->GetOwnerID());
 	if (pParent.lock() == parent.lock()) return;
 
 	this->WorldMatrix();
@@ -46,7 +46,7 @@ void Transform::SetParent(Transform* p)
 	//親設定
 	pParent = parent;
 	//親の子に設定
-	parent.lock().get()->pChildren.push_back(this->transform().lock());
+	parent.lock().get()->pChildren.push_back(this->transform());
 	
 	//向きなどを保持したまま子になる
 	XMMATRIX matrix = this->m_WorldMatrix * XMMatrixInverse(nullptr, parent.lock()->WorldMatrix());
@@ -112,14 +112,19 @@ void DirectX::Transform::SendComponentMessageChildren(std::string message)
 
 void DirectX::Transform::DebugImGui()
 {
-	if(ImGui::TreeNode((std::string("Transform:") + std::to_string(this->GetOwnerID())).c_str())){
+	if(ImGui::TreeNode("Transform")){
+		ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
 		Vector3 position = this->position();
 		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
 		Vector3 scale = this->scale();
-		
+
 		ImGui::InputFloat3("Position",&position.x);
 		ImGui::InputFloat3("Rotation",&rotation.x);
 		ImGui::InputFloat3("Scale", &scale.x);
+
+		this->position(position);
+		this->rotation(Quaternion::Euler(rotation));
+		this->localScale(scale);
 
 		ImGui::TreePop();
 	}

@@ -21,7 +21,7 @@ void DirectX::Renderer::BeginRender()
 		auto renderer = itr->second.lock();
 		itr++;
 		if (!renderer->GetEnable()) continue;
-		renderer->Render(renderer->transform().lock()->WorldMatrix());
+		renderer->Render(renderer->transform()->WorldMatrix());
 	}
 }
 

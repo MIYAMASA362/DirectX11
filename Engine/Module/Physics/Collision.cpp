@@ -58,11 +58,11 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	Vector3 pos1 = collider->transform().lock()->position() + bound1.GetCenter();
-	Vector3 pos2 = other->transform().lock()->position() + bound2.GetCenter();
+	Vector3 pos1 = collider->transform()->position() + bound1.GetCenter();
+	Vector3 pos2 = other->transform()->position() + bound2.GetCenter();
 
-	Vector3 scale1 = collider->transform().lock()->scale() * 2.0f;
-	Vector3 scale2 = other->transform().lock()->scale() * 2.0f;
+	Vector3 scale1 = collider->transform()->scale() * 2.0f;
+	Vector3 scale2 = other->transform()->scale() * 2.0f;
 
 	Vector3 pos1_max = pos1 + Vector3(bound1.GetMax() * scale1);
 	Vector3 pos1_min = pos1 + Vector3(bound1.GetMin() * scale1);
@@ -106,11 +106,11 @@ bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
 	Bounds& BoxBound = collider->bound;
 	Bounds& SphereBound = other->bound;
 
-	Vector3 BoxPos = collider->transform().lock()->position() + BoxBound.GetCenter();
-	Vector3 SphPos = other->transform().lock()->position() + SphereBound.GetCenter();
+	Vector3 BoxPos = collider->transform()->position() + BoxBound.GetCenter();
+	Vector3 SphPos = other->transform()->position() + SphereBound.GetCenter();
 
-	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform().lock()->scale());
-	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform().lock()->scale());
+	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform()->scale());
+	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform()->scale());
 
 	float radius = SphereBound.GetSize().x;
 
@@ -156,11 +156,11 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	float radius1 = bound1.GetSize().x * collider->transform().lock()->scale().MaxElement();
-	float radius2 = bound2.GetSize().x * other->transform().lock()->scale().MaxElement();
+	float radius1 = bound1.GetSize().x * collider->transform()->scale().MaxElement();
+	float radius2 = bound2.GetSize().x * other->transform()->scale().MaxElement();
 
-	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform().lock()->WorldMatrix());
-	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform().lock()->WorldMatrix());
+	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform()->WorldMatrix());
+	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform()->WorldMatrix());
 
 	Vector3 distance = pos1 - pos2;
 	//Õ“Ë
@@ -276,14 +276,14 @@ void DirectX::SphereCollider::Render()
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
-	float rad = this->transform().lock()->scale().MaxElement();
+	float rad = this->transform()->scale().MaxElement();
 	Vector3 scale = bound.GetSize() * rad;
 	Vector3 pos = bound.GetCenter();
 
 	XMMATRIX world;
 	XMMATRIX local;
 	world = XMMatrixScaling(scale.x, scale.y, scale.z) *  XMMatrixTranslation(pos.x, pos.y, pos.z);
-	world *= this->transform().lock()->MatrixQuaternion()* this->transform().lock()->MatrixTranslation();
+	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
@@ -433,11 +433,11 @@ void DirectX::BoxCollider::Render()
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 
 	Vector3 scale = bound.GetSize() * 2.0f;
-	Vector3 pos = this->transform().lock()->position() + bound.GetCenter();
+	Vector3 pos = this->transform()->position() + bound.GetCenter();
 
 	XMMATRIX world = XMMatrixIdentity();
 	world *= XMMatrixScaling(scale.x, scale.y, scale.z);
-	world *= this->transform().lock()->MatrixScaling();
+	world *= this->transform()->MatrixScaling();
 	world *= XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	D3DApp::Renderer::SetWorldMatrix(&world);

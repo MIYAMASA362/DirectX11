@@ -8,12 +8,8 @@ public:
 	SceneChange(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 	void Update()
 	{
-		/*auto button = this->gameObject.lock()->GetComponent<Button>();
-		if (!button.expired() && button.lock()->IsClick())
-			SceneManager::LoadScene(nextScene);
-
 		if (Input::GetKeyTrigger(VK_TAB))
-			SceneManager::LoadScene(nextScene);*/
+			SceneManager::LoadScene(SceneManager::GetSceneByName(nextScene));
 	}
 };
 

@@ -25,6 +25,9 @@ void GUI::guiImGui::Create(HWND hwnd,ID3D11Device* device,ID3D11DeviceContext* c
 
 void GUI::guiImGui::Destroy()
 {
+	if (pInstance)
+		delete pInstance;
+
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -42,5 +45,3 @@ void GUI::guiImGui::Render()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
-
-

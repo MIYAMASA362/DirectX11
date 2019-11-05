@@ -24,18 +24,18 @@ public:
 	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 	void Update()
 	{
-		/*if (Input::GetKeyPress('W'))
-			this->transform().lock()->position(this->transform().lock()->position() + this->transform().lock()->forward() * speed);
+		if (Input::GetKeyPress('W'))
+			this->transform()->position(this->transform()->position() + this->transform()->forward() * speed);
 		if (Input::GetKeyPress('S'))
-			this->transform().lock()->position(this->transform().lock()->position() + this->transform().lock()->back()*speed);
+			this->transform()->position(this->transform()->position() + this->transform()->back()*speed);
 		if (Input::GetKeyPress('A'))
-			this->transform().lock()->position(this->transform().lock()->position() + this->transform().lock()->left() *speed);
+			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
 		if (Input::GetKeyPress('D'))
-			this->transform().lock()->position(this->transform.lock()->position() + this->transform.lock()->right()*speed);
-		auto rigidbody = this->gameObject().lock()->GetComponent<Rigidbody>().lock().get();
+			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
+		auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
 		if (rigidbody != nullptr)
 			if (Input::GetKeyTrigger(VK_SPACE))
-				rigidbody->AddForce(Vector3::up() * 5.0f);*/
+				rigidbody->AddForce(Vector3::up() * 5.0f);
 				
 	}
 };

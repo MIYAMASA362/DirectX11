@@ -28,7 +28,7 @@ namespace DirectX
 		virtual const ComponentTypeID GetComponentTypeID() const override final;
 
 		virtual void OnDestroy() override {};
-		virtual void DebugImGui() override {};
+		virtual void DebugImGui() override;
 		virtual void SendComponentMessage(std::string message) override {};
 
 	};
@@ -68,5 +68,14 @@ namespace DirectX
 	inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
 	{
 		return TypeID;
+	}
+	template<typename Type>
+	inline void Component<Type>::DebugImGui()
+	{
+		if (ImGui::TreeNode(typeid(Type).name()))
+		{
+			ImGui::Text(("ID:"+std::to_string(this->GetInstanceID())).c_str());
+			ImGui::TreePop();
+		}
 	}
 }

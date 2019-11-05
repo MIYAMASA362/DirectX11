@@ -39,7 +39,7 @@ void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 		Camera* camera = itr->lock().get();
 		itr++;
 
-		if (!camera->gameObject().lock()->GetActive()) continue;
+		if (!camera->gameObject()->GetActive()) continue;
 		if (!camera->m_IsEnable) continue;
 		pActiveCamera = camera;
 
@@ -56,7 +56,7 @@ Camera* Camera::GetActiveCamera()
 
 void Camera::IndexSort(Camera* target)
 {
-	std::weak_ptr<Camera> wPtr = Camera::GetComponent(target->GetInstanceID());
+	std::weak_ptr<Camera> wPtr = Camera::GetComponent(target->GetOwnerID());
 
 	//配列長が0
 	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
@@ -148,12 +148,12 @@ void Camera::Run()
 	D3DApp::GetDeviceContext()->RSSetViewports(1, &dxViewport);
 
 	// ビューマトリクス設定
-	m_InvViewMatrix = this->transform().lock()->WorldMatrix();
+	m_InvViewMatrix = this->transform()->WorldMatrix();
 
 	XMVECTOR det;
 	ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
 
-	this->m_ViewMatrix = this->transform().lock()->MatrixScaling() * this->transform().lock()->MatrixQuaternion();
+	this->m_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
 
 	D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
 
@@ -176,8 +176,11 @@ void Camera::OnDestroy()
 
 void DirectX::Camera::DebugImGui()
 {
-	if (ImGui::TreeNode((std::string("Camera") + std::to_string(this->GetOwnerID())).c_str()))
+	if (ImGui::TreeNode("Camera"))
 	{
+		ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+		ImGui::Text(("Priority:"+std::to_string(this->priority)).c_str());
+
 		ImGui::TreePop();
 	}
 }

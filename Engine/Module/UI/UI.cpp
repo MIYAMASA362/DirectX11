@@ -46,8 +46,8 @@ DirectX::UI::UI(EntityID OwnerID)
 	:
 	Component(OwnerID)
 {
-	if (!gameObject().lock()->GetComponent<Canvas>())
-		gameObject().lock()->AddComponent<Canvas>();
+	if (!gameObject()->GetComponent<Canvas>())
+		gameObject()->AddComponent<Canvas>();
 }
 
 
@@ -166,8 +166,8 @@ void DirectX::Button::Update()
 	mouseX = Input::Mouse::GetMouseX();
 	mouseY = Input::Mouse::GetMouseY();
 
-	center = this->transform().lock()->position();
-	scale = this->transform().lock()->scale() * this->m_scale;
+	center = this->transform()->position();
+	scale = this->transform()->scale() * this->m_scale;
 
 	left	= center.x - scale.x;
 	right	= center.x + scale.x;

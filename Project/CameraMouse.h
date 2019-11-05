@@ -14,12 +14,9 @@ public:
 
 		vertical = Input::Mouse::GetAccelerationY() * MouseSpeed;
 
-		this->transform().lock()->localRotation(
-			this->transform().lock()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
+		this->transform()->localRotation(
+			this->transform()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
 		);
-
-		if (Input::GetKeyTrigger(VK_RETURN))
-			this->gameObject().lock()->Destroy();
 		//this->transform.lock()->LookAt(looktarget);
 	}
 

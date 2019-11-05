@@ -23,6 +23,7 @@ public:
 			MainCamera->transform()->position(Vector3(0.0f,2.0f,-10.0f));
 			MainCamera->transform()->rotation(Quaternion::Identity());
 			MainCamera->transform()->localScale(Vector3::one());
+			MainCamera->AddComponent<CameraMouse>();
 			Camera* camera = MainCamera->AddComponent<Camera>();
 			camera->SetPriority(1);
 		}

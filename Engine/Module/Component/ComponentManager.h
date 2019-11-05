@@ -11,12 +11,16 @@ namespace DirectX
 		static void Create();
 		static void Release();
 
+		//ComponentTypeID ComponentType–ˆ‚Ìƒ†ƒj[ƒN‚ÈID
 		static ComponentTypeID AttachComponentTypeID();
 
+		//Message
 		static void SendComponentMessage(std::string message);
 
+		//AddComponent
 		template<typename Type> static Type* AddComponent(EntityID OwnerID);
 
+		//GetComponent
 		template<typename Type> static Type* GetComponent(EntityID id);
 		static std::weak_ptr<Components> GetComponents(EntityID id);
 

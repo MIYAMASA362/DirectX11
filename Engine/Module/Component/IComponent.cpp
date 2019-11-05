@@ -24,12 +24,12 @@ DirectX::IComponent::~IComponent()
 	ComponentManager::ReleaseComponent<Transform>(this->GetOwnerID());
 }
 
-std::weak_ptr<Transform> IComponent::transform()
+std::shared_ptr<Transform> IComponent::transform()
 {
-	return Transform::GetComponent(this->GetOwnerID());
+	return Transform::GetComponent(this->GetOwnerID()).lock();
 }
 
-std::weak_ptr<GameObject> DirectX::IComponent::gameObject()
+std::shared_ptr<GameObject> DirectX::IComponent::gameObject()
 {
-	return GameObject::GetEntity(this->GetOwnerID());
+	return GameObject::GetEntity(this->GetOwnerID()).lock();
 }

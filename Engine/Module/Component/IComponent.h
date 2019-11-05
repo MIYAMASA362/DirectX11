@@ -19,8 +19,8 @@ namespace DirectX
 		virtual void DebugImGui() = 0;
 		virtual void SendComponentMessage(std::string message)= 0;
 
-		std::weak_ptr<Transform> transform();
-		std::weak_ptr<GameObject> gameObject();
+		std::shared_ptr<Transform> transform();
+		std::shared_ptr<GameObject> gameObject();
 
 	protected:
 		virtual void OnDestroy() override = 0;
