@@ -166,5 +166,9 @@ void DirectX::Scene::DebugGUI()
 
 void DirectX::Scene::UnLoad()
 {
-	
+	for (auto entityID : Index) {
+		auto object = EntityManager::GetEntity(entityID);
+		object.lock()->Destroy();
+	}
+	Index.clear();
 }

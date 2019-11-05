@@ -22,6 +22,8 @@ namespace DirectX
 	using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<Components>>;
 }
 
+#include"IMGUI\GUI_ImGui.h"
+
 #include"Object\ObjectManager.h"
 #include"Object\Object.h"
 #include"Entity\IEntity.h"
