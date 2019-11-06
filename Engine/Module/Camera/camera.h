@@ -26,6 +26,5 @@ namespace DirectX
 
 		void Run();
 		void OnDestroy() override;
-		void DebugImGui() override;
 	};
 }

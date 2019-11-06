@@ -15,7 +15,8 @@ namespace DirectX
 	using DestroyIndex = std::vector<InstanceID>;
 
 	using EntityIndex = std::unordered_map<EntityID,std::weak_ptr<IEntity>>;
-	
+	using ComponentIndex = std::unordered_map<EntityID, std::weak_ptr<IComponent>>;
+
 	using ComponentList = std::list<InstanceID>;
 
 	using Components = std::unordered_map<ComponentTypeID, std::weak_ptr<IComponent>>;

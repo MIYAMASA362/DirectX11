@@ -144,7 +144,7 @@ HRESULT System::ImGui_Window::Create(HINSTANCE hInstance, LPSTR lpClassName, LPS
 		return E_FAIL;
 	}
 
-	ShowWindow(this->hWnd, SW_SHOW);
+	ShowWindow(this->hWnd, SW_SHOWDEFAULT);
 	UpdateWindow(this->hWnd);
 
 	this->hInstance = hInstance;

@@ -27,7 +27,7 @@ public:
 		if (Input::GetKeyPress('W'))
 			this->transform()->position(this->transform()->position() + this->transform()->forward() * speed);
 		if (Input::GetKeyPress('S'))
-			this->transform()->position(this->transform()->position() + this->transform()->back()*speed);
+			this->transform()->position(this->transform()->position() + this->transform()->back() *speed);
 		if (Input::GetKeyPress('A'))
 			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
 		if (Input::GetKeyPress('D'))

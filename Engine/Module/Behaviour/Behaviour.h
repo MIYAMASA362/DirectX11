@@ -16,8 +16,6 @@ namespace DirectX
 		bool GetEnable();
 	public:
 		virtual void OnDestroy()	override {};
-		virtual void DebugImGui()	override {};
-		virtual void SendComponentMessage(std::string message) {};
 	};
 
 	template<typename Type>

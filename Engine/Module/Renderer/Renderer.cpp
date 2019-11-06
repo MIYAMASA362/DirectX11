@@ -11,15 +11,11 @@
 
 using namespace DirectX;
 
-Renderer::ComponentIndex Renderer::ComponentType::Index;
-
 void DirectX::Renderer::BeginRender()
 {
-	auto itr = Index.begin();
-	auto end = Index.end();
-	while (itr != end) {
-		auto renderer = itr->second.lock();
-		itr++;
+	auto Index = ComponentManager::GetOrCreateComponentIndex(Renderer::TypeID).lock();
+	for(auto object:*Index){
+		auto renderer = std::dynamic_pointer_cast<Renderer>(object.second.lock());
 		if (!renderer->GetEnable()) continue;
 		renderer->Render(renderer->transform()->WorldMatrix());
 	}

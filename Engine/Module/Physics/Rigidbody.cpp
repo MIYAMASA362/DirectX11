@@ -11,8 +11,6 @@
 
 using namespace DirectX;
 
-Rigidbody::ComponentIndex Rigidbody::ComponentType::Index;
-
 Rigidbody::Rigidbody(EntityID OwnerID)
 :
 	Component(OwnerID),
@@ -20,7 +18,12 @@ Rigidbody::Rigidbody(EntityID OwnerID)
 	m_velocity(Vector3::zero()),
 	m_mass(1.0f)
 {
-
+	this->SendComponentMessage = [this](std::string message){
+		if (message == "FixedUpdate")
+		{
+			FixedUpdate();
+		}
+	};
 }
 
 Rigidbody::~Rigidbody()
@@ -46,14 +49,6 @@ void Rigidbody::ApplyRigidbody()
 {
 	Transform* m_transform = this->transform().get();
 	m_transform->position(m_transform->position() + this->m_velocity);
-}
-
-void DirectX::Rigidbody::SendComponentMessage(std::string message)
-{
-	if (message == "FixedUpdate") 
-	{
-		FixedUpdate();
-	}
 }
 
 void Rigidbody::IsUseGravity(bool enable) 

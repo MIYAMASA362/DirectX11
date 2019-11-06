@@ -3,7 +3,6 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\SystemManager\SystemManager.h"
 #include"Module\Input\Input.h"
 
 //ECS
@@ -20,9 +19,6 @@
 using namespace DirectX;
 
 //--- Canvas --------------------------------------------------------
-
-Canvas::ComponentIndex Canvas::ComponentType::Index;
-
 DirectX::Canvas::Canvas(EntityID OwnerID)
 	:
 	Component(OwnerID)
@@ -39,8 +35,6 @@ DirectX::Canvas::Canvas(EntityID OwnerID)
 //	world = this->transform.lock()->WorldMatrix();
 //	Render(world);
 //}
-
-UI::ComponentIndex UI::ComponentType::Index;
 
 DirectX::UI::UI(EntityID OwnerID)
 	:

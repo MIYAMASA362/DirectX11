@@ -22,7 +22,6 @@ using namespace DirectX;
 //--- Camera ------------------------------------------------------------------
 Camera* Camera::pActiveCamera = nullptr;
 std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
-Camera::ComponentIndex Camera::ComponentType::Index;
 
 //--- static method -------------------------------------------------
 void Camera::Render(void(*Draw)(void), void(*Begin)(void))
@@ -98,7 +97,15 @@ Camera::Camera(EntityID OwnerID)
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
+	this->OnDebugImGui = [this]() {
+		if (ImGui::TreeNode("Camera"))
+		{
+			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+			ImGui::Text(("Priority:" + std::to_string(this->priority)).c_str());
 
+			ImGui::TreePop();
+		}
+	};
 }
 
 Camera::~Camera()
@@ -171,16 +178,5 @@ void Camera::OnDestroy()
 		if (camera != this) continue;
 		CameraIndex.erase(itr);
 		break;
-	}
-}
-
-void DirectX::Camera::DebugImGui()
-{
-	if (ImGui::TreeNode("Camera"))
-	{
-		ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-		ImGui::Text(("Priority:"+std::to_string(this->priority)).c_str());
-
-		ImGui::TreePop();
 	}
 }

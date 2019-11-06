@@ -13,23 +13,29 @@
 using namespace DirectX;
 
 DirectX::IComponent::IComponent(EntityID OwnerID)
-:
-	m_ownerId(OwnerID)
+	:
+	_ownerId(OwnerID),
+	_gameObject(GameObject::GetEntity(OwnerID))
 {
 
 }
 
 DirectX::IComponent::~IComponent()
 {
-	ComponentManager::ReleaseComponent<Transform>(this->GetOwnerID());
+	_gameObject.reset();
 }
 
 std::shared_ptr<Transform> IComponent::transform()
 {
-	return Transform::GetComponent(this->GetOwnerID()).lock();
+	return Transform::GetComponent(GetOwnerID()).lock();
 }
 
 std::shared_ptr<GameObject> DirectX::IComponent::gameObject()
 {
-	return GameObject::GetEntity(this->GetOwnerID()).lock();
+	return _gameObject.lock();
+}
+
+const InstanceID DirectX::IComponent::GetOwnerID() const
+{
+	return this->_ownerId;
 }

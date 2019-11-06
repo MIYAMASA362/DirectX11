@@ -11,8 +11,6 @@ namespace DirectX
 	class GameObject final:public Entity<GameObject>
 	{
 		friend Scene;
-	public:
-		static const std::string TypeName;
 	private:
 		const std::string name;
 		const Tag tag;

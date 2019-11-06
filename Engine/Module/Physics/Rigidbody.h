@@ -20,6 +20,5 @@ namespace DirectX
 		Vector3 GetVelocity() { return m_velocity; };
 		void SetVelocity(Vector3 velocity) { m_velocity = velocity; };
 		void ApplyRigidbody();
-		void SendComponentMessage(std::string message) override;
 	};
 }

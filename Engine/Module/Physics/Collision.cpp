@@ -17,8 +17,6 @@
 
 using namespace DirectX;
 
-Collider::ComponentIndex Collider::ComponentType::Index;
-
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {
 	this->m_center = center;

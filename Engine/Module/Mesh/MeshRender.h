@@ -15,8 +15,6 @@ namespace DirectX
 		void Render(XMMATRIX& worldMatrix) override;
 		template<typename Type> Type* SetMesh();
 		Mesh* GetMesh();
-	public:
-		void DebugImGui() override;
 	};
 
 	//-------------------------------------------------------------------------

@@ -8,8 +8,6 @@
 
 using namespace DirectX;
 
-AudioSource::ComponentIndex AudioSource::ComponentType::Index;
-
 DirectX::AudioSource::AudioSource(EntityID OwnerID)
 :
 	Component(OwnerID)

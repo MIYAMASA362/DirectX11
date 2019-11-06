@@ -6,8 +6,13 @@ namespace DirectX
 
 	class IComponent:public Object
 	{
+		friend class ComponentManager;
 	private:
-		const EntityID m_ownerId;
+		const EntityID _ownerId;
+		std::weak_ptr<GameObject> _gameObject;
+	protected:
+		std::function<void(std::string)> SendComponentMessage = {};
+		std::function<void(void)> OnDebugImGui = {};
 
 	public:
 		IComponent(EntityID OwnerID);
@@ -16,9 +21,6 @@ namespace DirectX
 		const EntityID GetOwnerID() const;
 		virtual const ComponentTypeID GetComponentTypeID () const =0;
 
-		virtual void DebugImGui() = 0;
-		virtual void SendComponentMessage(std::string message)= 0;
-
 		std::shared_ptr<Transform> transform();
 		std::shared_ptr<GameObject> gameObject();
 
@@ -26,9 +28,4 @@ namespace DirectX
 		virtual void OnDestroy() override = 0;
 
 	};
-
-	inline const InstanceID DirectX::IComponent::GetOwnerID() const
-	{
-		return this->m_ownerId;
-	}
 }

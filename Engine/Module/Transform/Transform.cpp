@@ -17,8 +17,6 @@
 
 using namespace DirectX;
 
-Transform::ComponentIndex Transform::ComponentType::Index;
-
 //--- Constrcutor -------------------------------------------------------------
 
 //other
@@ -29,7 +27,25 @@ Transform::Transform(EntityID OwnerID)
 	m_Rotation(Quaternion::Identity()),
 	m_Scale(Vector3::one())
 {
-	
+	this->OnDebugImGui =[this]()
+	{
+		if (ImGui::TreeNode("Transform")) {
+			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+			Vector3 position = this->position();
+			Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
+			Vector3 scale = this->scale();
+
+			ImGui::InputFloat3("Position", &position.x);
+			ImGui::InputFloat3("Rotation", &rotation.x);
+			ImGui::InputFloat3("Scale", &scale.x);
+
+			this->position(position);
+			this->rotation(Quaternion::Euler(rotation));
+			this->localScale(scale);
+
+			ImGui::TreePop();
+		}
+	};
 }
 
 //--- eŽqŠÖŒW@---------------------------------------------------------------
@@ -107,26 +123,6 @@ void DirectX::Transform::SendComponentMessageChildren(std::string message)
 		obj->SendComponentMessage(message);
 		if (obj->pChildren.size() == 0) continue;
 		obj->SendComponentMessageChildren(message);
-	}
-}
-
-void DirectX::Transform::DebugImGui()
-{
-	if(ImGui::TreeNode("Transform")){
-		ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-		Vector3 position = this->position();
-		Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
-		Vector3 scale = this->scale();
-
-		ImGui::InputFloat3("Position",&position.x);
-		ImGui::InputFloat3("Rotation",&rotation.x);
-		ImGui::InputFloat3("Scale", &scale.x);
-
-		this->position(position);
-		this->rotation(Quaternion::Euler(rotation));
-		this->localScale(scale);
-
-		ImGui::TreePop();
 	}
 }
 
@@ -209,6 +205,7 @@ void Transform::rotation(Quaternion rotation) {
 	if (!pParent.expired())
 		rotation = pParent.lock()->rotation().conjugate() * rotation;
 	this->m_Rotation = rotation;
+	Quaternion::Normalize(this->m_Rotation);
 }
 
 void Transform::localPosition(Vector3 position) {

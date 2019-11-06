@@ -6,19 +6,11 @@ namespace DirectX
 	class Component:public IComponent
 	{
 		friend class ComponentManager;
-
-		using ComponentType  = Component<Type>;
-		using ComponentIndex = std::unordered_map<EntityID, std::weak_ptr<Type>>;
-
 	public:
 		static const ComponentTypeID TypeID;
 
 	protected:
-		static ComponentIndex Index;
-
-	private:
-		void AddComponent();
-
+		const std::shared_ptr<ComponentIndex> _Index;
 	public:
 		Component(EntityID OwnerID);
 		virtual ~Component();
@@ -28,54 +20,47 @@ namespace DirectX
 		virtual const ComponentTypeID GetComponentTypeID() const override final;
 
 		virtual void OnDestroy() override {};
-		virtual void DebugImGui() override;
-		virtual void SendComponentMessage(std::string message) override {};
-
 	};
 
-	//----------------------------------------------------------------------------
 	template<typename Type>
 	const ComponentTypeID Component<Type>::TypeID = ComponentManager::AttachComponentTypeID();
 
 	template<typename Type>
-	inline void Component<Type>::AddComponent()
-	{
-		auto object = ObjectManager::GetInstance(this->GetInstanceID()).lock();
-		Index.emplace(this->GetOwnerID(), std::dynamic_pointer_cast<Type>(object));
-	}
-
-	template<typename Type>
 	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
 	{
-		return Index.at(entityID);
+		return std::dynamic_pointer_cast<Type>(ComponentManager::GetOrCreateComponentIndex(TypeID).lock()->at(entityID).lock());
 	}
 
 	template<typename Type>
 	inline Component<Type>::Component(EntityID OwnerID)
 	:
-		IComponent(OwnerID)
+		IComponent(OwnerID),
+		_Index(ComponentManager::GetOrCreateComponentIndex(TypeID))
 	{
-		
+		this->SendComponentMessage = [](std::string message)
+		{
+			
+		};
+
+		this->OnDebugImGui = [this]()
+		{
+			if (ImGui::TreeNode(typeid(*this).name()))
+			{
+				ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+				ImGui::TreePop();
+			}
+		};
 	}
 
 	template<typename Type>
 	inline Component<Type>::~Component()
 	{
-		Index.erase(this->GetOwnerID());
+		_Index->erase(this->GetOwnerID());
 	}
 
 	template<typename Type>
 	inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
 	{
 		return TypeID;
-	}
-	template<typename Type>
-	inline void Component<Type>::DebugImGui()
-	{
-		if (ImGui::TreeNode(typeid(Type).name()))
-		{
-			ImGui::Text(("ID:"+std::to_string(this->GetInstanceID())).c_str());
-			ImGui::TreePop();
-		}
 	}
 }

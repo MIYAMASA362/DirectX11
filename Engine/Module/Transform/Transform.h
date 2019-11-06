@@ -62,6 +62,5 @@ namespace DirectX
 
 		void LookAt(std::weak_ptr<Transform> target);	//‚»‚Ì•ûŒü‚ðŒ©‚é
 		void OnDestroy() override;
-		void DebugImGui() override;
 	};
 }

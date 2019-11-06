@@ -21,7 +21,11 @@ DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	:
 	Renderer(OwnerID)
 {
-
+	this->OnDebugImGui = []() {
+		if (ImGui::TreeNode("MeshRender")) {
+			ImGui::TreePop();
+		}
+	};
 }
 
 DirectX::MeshRender::~MeshRender()
@@ -32,11 +36,4 @@ DirectX::MeshRender::~MeshRender()
 void DirectX::MeshRender::Render(XMMATRIX& worldMatrix)
 {
 	mesh->Render(worldMatrix);
-}
-
-void MeshRender::DebugImGui()
-{
-	if (ImGui::TreeNode("MeshRender")) {
-		ImGui::TreePop();
-	}
 }

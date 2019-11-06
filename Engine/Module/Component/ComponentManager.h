@@ -7,12 +7,17 @@ namespace DirectX
 	{
 	private:
 		static EntityComponents EntityComponentIndex;
+		static std::unordered_map<ComponentTypeID, std::shared_ptr<ComponentIndex>> _ComponentTypeIndex;
 	public:
 		static void Create();
 		static void Release();
 
 		//ComponentTypeID ComponentTypeñàÇÃÉÜÉjÅ[ÉNÇ»ID
 		static ComponentTypeID AttachComponentTypeID();
+
+		//ComponentñàÇÃIndex
+		static std::weak_ptr<ComponentIndex> GetOrCreateComponentIndex(ComponentTypeID componentTypeID);
+		static void ReleaseComponentIndex(ComponentTypeID componentTypeID);
 
 		//Message
 		static void SendComponentMessage(std::string message);
@@ -30,25 +35,27 @@ namespace DirectX
 		//âï˙
 		template<typename Type> static void ReleaseComponent(EntityID id);
 		static void ReleaseComponents(EntityID id);
+
+		//
+		static void ImGui_ComponentView(EntityID id);
 	};
 
-	//--------------------------------------------------------------------------------------
 	template<typename Type>
 	inline Type* ComponentManager::AddComponent(EntityID OwnerID)
 	{
 		EntityComponents::iterator find = EntityComponentIndex.find(OwnerID);
 		if (find == EntityComponentIndex.end())
-		{
-			EntityComponentIndex.emplace(OwnerID, std::shared_ptr<Components>(new Components()));
-			find = EntityComponentIndex.find(OwnerID);
-		}
-		//Componentê›íË
-		auto instance =  new Type(OwnerID);
-		instance->AddComponent();
-		auto add = Type::GetComponent(OwnerID).lock();
-		IComponent* icomponent = add.get();
-		find->second->emplace(icomponent->GetComponentTypeID(),add);
-		icomponent->SendComponentMessage("Start");
+			find = EntityComponentIndex.emplace(OwnerID, std::shared_ptr<Components>(new Components())).first;
+
+		auto instance = new Type(OwnerID);
+		ComponentTypeID id = instance->GetComponentTypeID();
+		auto object = ObjectManager::GetInstance(instance->GetInstanceID()).lock();
+		auto sptr = std::dynamic_pointer_cast<IComponent>(object);
+
+		_ComponentTypeIndex.at(id)->emplace(OwnerID, sptr);
+		find->second->emplace(id,sptr);
+
+		instance->SendComponentMessage("Start");
 		return instance;
 	}
 
