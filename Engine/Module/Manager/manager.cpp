@@ -109,9 +109,9 @@ void CManager::Run()
 
 	if (IsUpdate) CManager::Render();
 
-	ObjectManager::ClearnUp();
-
 	if (IsUpdate || IsFixedUpdate) SceneManager::ChangeScene();
+
+	ObjectManager::ClearnUp();
 }
 
 void CManager::Update()

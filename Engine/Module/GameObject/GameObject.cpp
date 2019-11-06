@@ -40,15 +40,6 @@ GameObject::~GameObject()
 
 }
 
-void DirectX::GameObject::DebugGUI() 
-{
-	for (auto obj : m_EntityIndex)
-	{
-		auto sptr = std::dynamic_pointer_cast<GameObject>(obj.second.lock());
-		sptr->OnDebugGUI();
-	}
-}
-
 Transform* DirectX::GameObject::transform()
 {
 	return Transform::GetComponent(this->GetEntityID()).lock().get();

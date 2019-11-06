@@ -13,7 +13,6 @@ namespace DirectX
 		friend Scene;
 	public:
 		static const std::string TypeName;
-		static void DebugGUI();
 	private:
 		const std::string name;
 		const Tag tag;

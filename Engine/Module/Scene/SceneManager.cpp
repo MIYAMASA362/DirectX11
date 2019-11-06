@@ -161,7 +161,11 @@ void DirectX::Scene::DetachActiveScene()
 //ImGui Debug•\Ž¦
 void DirectX::Scene::DebugGUI()
 {
-	GameObject::DebugGUI();
+	for (auto id : Index) 
+	{
+		auto object = GameObject::GetEntity(id);
+		object.lock()->OnDebugGUI();
+	}
 }
 
 void DirectX::Scene::UnLoad()
