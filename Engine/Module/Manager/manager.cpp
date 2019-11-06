@@ -19,6 +19,8 @@
 #include"../Project/ItemSlotScript.h"
 #include"../Project/MapUIScript.h"
 
+#include"../Project/BallScript.h"
+
 //--- Scene -------------------------------------
 
 //Test
@@ -26,18 +28,14 @@
 #include"../Project/TestScene.h"
 #include"../Project/TestScene2.h"
 #include"../Project/TestScene3.h"
+#include"../Project/BallTest.h"
 
 //Main
 #include"../Project/Title.h"
 #include"../Project/GameMain.h"
 
 //------------------------------------------------
-CameraMouse::ComponentIndex CameraMouse::ComponentType::Index;
-WASDMove::ComponentIndex WASDMove::ComponentType::Index;
-SceneChange::ComponentIndex SceneChange::ComponentType::Index;
-LookAt::ComponentIndex LookAt::ComponentType::Index;
-CameraHorizontal::ComponentIndex CameraHorizontal::ComponentType::Index;
-Shot::ComponentIndex Shot::ComponentType::Index;
+//ProjectÇ≈ì∆é©Ç…íËã`Ç≥ÇÍÇΩÇ‡ÇÃ(ìÆìIèàóùÇ…ÇµÇΩÇ¢ÅB)
 
 using namespace DirectX;
 
@@ -53,10 +51,7 @@ void CManager::Initialize()
 	//Time
 	TimeManager::Create(D3DApp::GetFps());
 
-	//System
-	SystemManager::CreateManager<Input>();
-
-	SystemManager::Initialize();
+	Input::Initialize();
 
 	//Texture
 	TextureManager::LoadAsset("field004","field004.tga");
@@ -75,6 +70,8 @@ void CManager::Initialize()
 	ModelManager::LoadAsset(ModelAsset("Miku02","Miku02","miku_02.obj"));
 	ModelManager::LoadAsset(ModelAsset("Monster","Monster","monster.obj"));
 	ModelManager::LoadAsset(ModelAsset("Rock","Rock","rock.obj"));
+	ModelManager::LoadAsset(ModelAsset("Cube", "Cube", "cube.obj"));
+	ModelManager::LoadAsset(ModelAsset("Ball", "Ball", "ball.obj"));
 
 	//Audio
 	AudioManager::CreateDevice();
@@ -84,11 +81,12 @@ void CManager::Initialize()
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();
+	SceneManager::CreateScene<BallText>();
 
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
 
-	SceneManager::LoadScene(SceneManager::GetSceneByName("TestScene"));
+	SceneManager::LoadScene(SceneManager::GetSceneByName("BallTest"));
 
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
@@ -116,15 +114,13 @@ void CManager::Run()
 
 void CManager::Update()
 {
-	SystemManager::Update();
+	Input::Update();
 
 	ComponentManager::SendComponentMessage("Update");
 }
 
 void CManager::FixedUpdate()
 {
-	SystemManager::FixedUpdate();
-
 	ComponentManager::SendComponentMessage("FixedUpdate");
 }
 
@@ -159,14 +155,11 @@ void CManager::Finalize()
 	ModelManager::Release();
 	TextureManager::Release();
 
-	SystemManager::Finalize();
-	SystemManager::Release();
-
 	TimeManager::Destroy();
 	GUI::guiImGui::Destroy();
 
-	ObjectManager::Release();
-
 	ComponentManager::Release();
 	EntityManager::Release();
+
+	ObjectManager::Release();
 }

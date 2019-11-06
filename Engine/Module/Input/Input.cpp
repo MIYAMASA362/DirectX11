@@ -9,7 +9,6 @@
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\SystemManager\SystemManager.h"
 #include "input.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"
@@ -58,7 +57,7 @@ void DirectX::Input::DebugGUI()
 	ImGui::End();
 }
 
-void DirectX::Input::initialize()
+void DirectX::Input::Initialize()
 {
 	//キーボード設定
 	memset(m_OldKeyState, 0, 256);
@@ -91,7 +90,7 @@ void DirectX::Input::initialize()
 	Mouse::SetScreenLoop(true);
 }
 
-void DirectX::Input::update()
+void DirectX::Input::Update()
 {
 	//キー処理
 	{
@@ -131,7 +130,7 @@ void DirectX::Input::update()
 	}
 }
 
-void DirectX::Input::finalize()
+void DirectX::Input::Finalize()
 {
 	if (m_pDevMouse != nullptr)
 	{
