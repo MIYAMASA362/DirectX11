@@ -23,6 +23,15 @@ DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 	this->m_size = size;
 }
 
+void Bounds::DebugImGui()
+{
+	if (ImGui::TreeNode("Bounds")) {
+		ImGui::InputFloat3("Center",&m_center.x);
+		ImGui::InputFloat3("Size",&m_size.x);
+		ImGui::TreePop();
+	}
+}
+
 //--- Collider --------------------------------------------
 
 //Constrcutor
@@ -31,24 +40,21 @@ DirectX::Collider::Collider(EntityID OwnerID)
 	Component(OwnerID),
 	bound(Vector3::zero(),Vector3::one())
 {
-
+	this->SendComponentMessage = [this](std::string message){
+		if (message == "Render") { Render(); return; }
+	};
 }
-
-//void DirectX::Collider::SendBehaviourMessage(Message message)
-//{
-//	if (message != Message::Render) return;
-//	Render();
-//}
-
-void DirectX::Collider::Hitjudgment(GameObject * gameObject, GameObject * otherObject)
+void DirectX::Collider::Hitjudgment()
 {
-	//for(auto collider:gameObject->colliders) {
-	//	if (collider->IsEnable) continue;	//Enable
-	//	for (auto othercollider : otherObject->colliders) {
-	//		if (othercollider->IsEnable) continue;	//Enable
-	//		collider->Judgment(othercollider.get());	//”»’è
-	//	}
-	//}
+	auto components = ComponentManager::GetOrCreateComponentIndex(TypeID).lock();
+	for(auto self:*components){
+		auto collider = std::dynamic_pointer_cast<Collider>(self.second.lock());
+		for (auto other : *components) {
+			if (self.second.lock() == other.second.lock()) continue;
+			auto otherCollider = std::dynamic_pointer_cast<Collider>(other.second.lock());
+			collider->Judgment(otherCollider.get());
+		}
+	}
 }
 
 bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
@@ -74,26 +80,30 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 		(pos2_min.z <= pos1_min.z && pos1_min.z <= pos2_max.z || pos2_min.z <= pos1_max.z && pos1_max.z <= pos2_max.z)
 		)
 	{
-		//Rigidbody‚ðŠŽ
-		//if(collider->gameObject.lock()->rigidbody)
-		//{
-		//	Rigidbody& rigidbody = *collider->gameObject.lock()->rigidbody.get();
+		//IsTrigger
+		if (!collider->IsTrigger || !other->IsTrigger) {
+			//Rigidbody‚ðŠŽ
+			auto rigidbody = collider->gameObject()->GetComponent<Rigidbody>();
+			if (rigidbody)
+			{
+				Vector3 Intrusion;
+				Vector3 velocity = rigidbody->GetVelocity();
+				Vector3 direction = Vector3::Normalize(pos1 - pos2);
+				if (direction.y < 0.0f)
+				{
+					Intrusion.y = pos1_max.y - pos2_min.y;
+					velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
+				}
+				else
+				{
+					Intrusion.y = pos1_min.y - pos2_max.y;
+					velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
+				}
 
-		//	Vector3 Intrusion;
-		//	Vector3 velocity = rigidbody.GetVelocity();
-		//	Vector3 direction = (pos1 - pos2).normalize();
-
-		//	if (direction.y < 0.0f) {
-		//		Intrusion.y = pos1_max.y - pos2_min.y;
-		//		velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
-		//	}
-		//	else{
-		//		Intrusion.y = pos1_min.y - pos2_max.y;
-		//		velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
-		//	}
-		//	rigidbody.SetVelocity(velocity);
-		//	collider->transform().lock()->position(collider->transform().lock()->position() - Intrusion);
-		//}
+				rigidbody->SetVelocity(velocity);
+				collider->transform()->position(collider->transform()->position() - Intrusion);
+			}
+		}
 		return true;
 	}
 	return false;
@@ -416,6 +426,14 @@ DirectX::BoxCollider::BoxCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
+	this->OnDebugImGui = [this]() {
+		if (ImGui::TreeNode("BoxCollider")) {
+			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
+			ImGui::Checkbox("IsHit",&this->IsHit);
+			this->bound.DebugImGui();
+			ImGui::TreePop();
+		}
+	};
 }
 
 void DirectX::BoxCollider::SetSize(Vector3 size)
@@ -449,7 +467,7 @@ bool DirectX::BoxCollider::Judgment(Collider * other)
 	switch (other->GetShapeType())
 	{
 	case ShapeType::Box:
-		IsHit = BoxVsShpere(this,other);
+		IsHit = BoxVsBox(this,other);
 		break;
 	case ShapeType::Sphere:
 		IsHit = SphereVsSphere(this,other);

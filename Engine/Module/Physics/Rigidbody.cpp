@@ -24,6 +24,15 @@ Rigidbody::Rigidbody(EntityID OwnerID)
 			FixedUpdate();
 		}
 	};
+	this->OnDebugImGui = [this]() {
+		if (ImGui::TreeNode("Rigidbody")) 
+		{
+			ImGui::Checkbox("UseGravity:",&this->m_useGravity);
+			ImGui::InputFloat("Mass:",&this->m_mass);
+			ImGui::InputFloat3("Velocity:",&this->m_velocity.x);
+			ImGui::TreePop();
+		}
+	};
 }
 
 Rigidbody::~Rigidbody()
@@ -36,12 +45,14 @@ void Rigidbody::FixedUpdate()
 	Transform* m_transform = this->transform().get();
 
 	//d—Í
-	if(m_useGravity)
+	if (m_useGravity)
 		m_velocity += m_mass * Physics::Get_Gravity();
+	else
+		m_velocity = Vector3::zero();
 
 	//y:0‚ð’n–Ê‚Æ‚µ‚½”»’è
-	if (m_transform->position().y - (m_transform->scale().y*0.5f) + m_velocity.y < 0.0f)
-		m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;
+	/*if (m_transform->position().y - (m_transform->scale().y*0.5f) + m_velocity.y < 0.0f)
+		m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;*/
 	this->ApplyRigidbody();
 }
 

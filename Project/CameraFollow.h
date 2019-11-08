@@ -32,10 +32,14 @@ public:
 			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
 		if (Input::GetKeyPress('D'))
 			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
-		auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
+		if (Input::GetKeyPress('Q'))
+			this->transform()->position(this->transform()->position() + this->transform()->down()*speed);
+		if (Input::GetKeyPress('E'))
+			this->transform()->position(this->transform()->position() + this->transform()->up()*speed);
+		/*auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
 		if (rigidbody != nullptr)
 			if (Input::GetKeyTrigger(VK_SPACE))
-				rigidbody->AddForce(Vector3::up() * 5.0f);
+				rigidbody->AddForce(Vector3::up() * 5.0f);*/
 				
 	}
 };

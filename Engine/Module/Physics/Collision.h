@@ -21,6 +21,8 @@ namespace DirectX
 		Vector3 GetSize();
 		void SetCenter(Vector3 center);
 		void SetSize(Vector3 size);
+	public:
+		void DebugImGui();
 	};
 
 	//-----------------------------------------------------------------------------------
@@ -54,7 +56,7 @@ namespace DirectX
 			Sphere
 		};
 	public:
-		static void Hitjudgment(GameObject* gameObject,GameObject* otherObject);
+		static void Hitjudgment();
 	protected:
 		static bool BoxVsBox(Collider* collider,Collider* other);
 		static bool BoxVsShpere(Collider* collider,Collider* other);
