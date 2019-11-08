@@ -81,7 +81,7 @@ void CManager::Initialize()
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();
-	SceneManager::CreateScene<BallText>();
+	SceneManager::CreateScene<BallTest>();
 
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
@@ -121,6 +121,7 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
+	Collider::Hitjudgment();
 	ComponentManager::SendComponentMessage("FixedUpdate");
 }
 
