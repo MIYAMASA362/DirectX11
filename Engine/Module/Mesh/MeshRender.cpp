@@ -21,9 +21,15 @@ DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	:
 	Renderer(OwnerID)
 {
-	this->OnDebugImGui = []() {
-		if (ImGui::TreeNode("MeshRender")) {
+	this->OnDebugImGui = [this]() {
+		if (ImGui::TreeNode("MeshRender")) 
+		{
+			bool enable = this->GetEnable();
+			ImGui::Checkbox("IsEnable",&enable);
 			ImGui::TreePop();
+
+
+			this->SetEnable(enable);
 		}
 	};
 }
