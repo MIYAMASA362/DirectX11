@@ -141,7 +141,6 @@ void Camera::Run()
 {
 	XMMATRIX	ViewMatrix;
 	XMMATRIX	m_InvViewMatrix;
-	XMMATRIX	m_ProjectionMatrix;
 
 	// ビューポート設定
 	D3D11_VIEWPORT dxViewport;
@@ -165,9 +164,9 @@ void Camera::Run()
 	D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
 
 	// プロジェクションマトリクス設定
-	m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
+	this->m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
 
-	D3DApp::Renderer::SetProjectionMatrix(&m_ProjectionMatrix);
+	D3DApp::Renderer::SetProjectionMatrix(&this->m_ProjectionMatrix);
 }
 
 void Camera::OnDestroy()
@@ -179,4 +178,24 @@ void Camera::OnDestroy()
 		CameraIndex.erase(itr);
 		break;
 	}
+}
+
+//視錐台カリング
+bool DirectX::Camera::GetVisibility(Vector3 position)
+{
+	XMVECTOR viewPos,projPos;
+	XMFLOAT3 projPosF;
+
+	viewPos = XMVector3TransformCoord(position,m_ViewMatrix);
+	projPos = XMVector3TransformCoord(viewPos,m_ProjectionMatrix);
+	XMStoreFloat3(&projPosF,projPos);
+
+	//画面内か
+	if (-1.0f < projPosF.x && projPosF.x < 1.0f &&
+		-1.0f < projPosF.y && projPosF.y < 1.0f &&
+		 0.0f < projPosF.z && projPosF.z < 1.0f)
+	{
+		return true;
+	}
+	return false;
 }

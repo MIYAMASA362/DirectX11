@@ -10,6 +10,7 @@ namespace DirectX
 
 		RECT viewport;
 		XMMATRIX m_ViewMatrix;
+		XMMATRIX m_ProjectionMatrix;
 		int priority;
 	private:
 		static void IndexSort(Camera* camera);
@@ -26,5 +27,7 @@ namespace DirectX
 
 		void Run();
 		void OnDestroy() override;
+
+		bool GetVisibility(Vector3 position);
 	};
 }
