@@ -17,6 +17,8 @@
 
 #include"Module\IMGUI\GUI_ImGui.h"
 
+#include"Module\Input\Input.h"
+
 using namespace DirectX;
 
 //--- Camera ------------------------------------------------------------------
@@ -51,6 +53,39 @@ void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 Camera* Camera::GetActiveCamera()
 {
 	return pActiveCamera;
+}
+
+Vector3 DirectX::Camera::ScreenToWorldPosition(Vector3 position)
+{
+	XMFLOAT2 MousePos;
+	MousePos.x = Input::Mouse::GetMouseX();
+	MousePos.y = Input::Mouse::GetMouseY();
+
+	RECT rect;
+	GetWindowRect(D3DApp::GetWindow(),&rect);
+	
+	const XMMATRIX projection = pActiveCamera->GetProjectionMatrix();
+	const XMMATRIX ViewMatrix = pActiveCamera->GetViewMatrix();
+	const XMMATRIX WorldMatrix = pActiveCamera->transform()->WorldMatrix();
+
+	Vector3 screenRay;
+	//2.0f‚Í‰æ–Ê’†S‚ÉˆÚ“®‚³‚¹‚é‚½‚ß
+	screenRay.x = ((2.0f * MousePos.x / (rect.right - rect.left)) - 1.0f) / projection.r[0].m128_f32[0];
+	screenRay.y = -((2.0f * MousePos.y / (rect.bottom - rect.top)) - 1.0f) / projection.r[1].m128_f32[1];
+	screenRay.z = 1.0f;
+
+	XMMATRIX worldView = WorldMatrix * ViewMatrix;
+	XMMATRIX InvWorldView = XMMatrixInverse(NULL, worldView);
+
+	Vector3 rayDirection;
+	rayDirection.x = screenRay.x * InvWorldView.r[0].m128_f32[0] + screenRay.y * InvWorldView.r[1].m128_f32[0] + screenRay.z * InvWorldView.r[2].m128_f32[0];
+	rayDirection.y = screenRay.x * InvWorldView.r[0].m128_f32[1] + screenRay.y * InvWorldView.r[1].m128_f32[1] + screenRay.z * InvWorldView.r[2].m128_f32[1];
+	rayDirection.z = screenRay.x * InvWorldView.r[0].m128_f32[2] + screenRay.y * InvWorldView.r[1].m128_f32[2] + screenRay.z * InvWorldView.r[2].m128_f32[2];
+	rayDirection = rayDirection.normalize();
+
+	screenRay = XMVector3TransformCoord(screenRay,pActiveCamera->transform()->MatrixQuaternion());
+
+	return pActiveCamera->transform()->position() + screenRay*10.0f;
 }
 
 void Camera::IndexSort(Camera* target)
@@ -97,6 +132,12 @@ Camera::Camera(EntityID OwnerID)
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
+	this->m_ProjectionMatrix = XMMatrixIdentity();
+	this->m_ViewMatrix = XMMatrixIdentity();
+
+	if (pActiveCamera == nullptr)
+		pActiveCamera = this;
+
 	this->OnDebugImGui = [this]() {
 		if (ImGui::TreeNode("Camera"))
 		{
@@ -134,6 +175,11 @@ void Camera::SetPriority(int priority)
 XMMATRIX Camera::GetViewMatrix()
 {
 	return this->m_ViewMatrix;
+}
+
+XMMATRIX DirectX::Camera::GetProjectionMatrix()
+{
+	return this->m_ProjectionMatrix;
 }
 
 //•`‰æ
