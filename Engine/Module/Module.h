@@ -15,7 +15,6 @@
 #include"Audio\Audio.h"
 #include"Texture\texture.h"
 
-#include"Physics\Physics.h"
 
 //ECS
 #include"ECSEngine.h"
@@ -28,6 +27,7 @@
 #include"Audio\AudioSource.h"
 
 //Component Module
+#include"Physics\Physics.h"
 #include"Renderer\Renderer.h"
 #include"Mesh\Mesh.h"
 #include"Mesh\MeshRender.h"

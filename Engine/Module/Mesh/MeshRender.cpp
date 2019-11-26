@@ -19,15 +19,15 @@ using namespace DirectX;
 
 DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	:
-	Renderer(OwnerID)
+	Renderer3D(OwnerID)
 {
 	this->OnDebugImGui = [this]() {
 		if (ImGui::TreeNode("MeshRender")) 
 		{
 			bool enable = this->GetEnable();
+
 			ImGui::Checkbox("IsEnable",&enable);
 			ImGui::TreePop();
-
 
 			this->SetEnable(enable);
 		}

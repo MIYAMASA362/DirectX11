@@ -35,7 +35,10 @@
 #include"../Project/GameMain.h"
 
 //------------------------------------------------
-//ProjectÇ≈ì∆é©Ç…íËã`Ç≥ÇÍÇΩÇ‡ÇÃ(ìÆìIèàóùÇ…ÇµÇΩÇ¢ÅB)
+
+#include"cereal\cereal.hpp"
+#include"cereal\archives\json.hpp"
+#include<fstream>
 
 using namespace DirectX;
 
@@ -52,6 +55,7 @@ void CManager::Initialize()
 	TimeManager::Create(D3DApp::GetFps());
 
 	Input::Initialize();
+	Input::Mouse::SetScreenLoop(false);
 
 	//Texture
 	TextureManager::LoadAsset("field004","field004.tga");
@@ -86,10 +90,15 @@ void CManager::Initialize()
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
 
-	SceneManager::LoadScene(SceneManager::GetSceneByName("BallTest"));
+	Renderer::Create();
+
 
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
+
+	SceneManager::LoadScene(SceneManager::GetSceneByName("TestScene"));
+
+	ComponentManager::SendComponentMessage("Start");
 }
 
 void CManager::Run()
@@ -121,15 +130,18 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
-	Collider::Hitjudgment();
 	ComponentManager::SendComponentMessage("FixedUpdate");
+	Rigidbody::ApplyRigidbody();
+	Rigidbody::CollisionRigidbody();
 }
 
 void CManager::Render()
 {
 	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
 
-	Camera::Render(Renderer::BeginRender, D3DApp::Renderer::Begin);
+	Camera::Render(Renderer3D::BeginRender, D3DApp::Renderer::Begin);
+
+	Renderer2D::BeginRender();
 
 	CManager::DebugRender();
 
@@ -144,6 +156,13 @@ void CManager::DebugRender()
 	SceneManager::DebugGUI_ActiveScene();
 	TimeManager::DebugGUI_Time();
 
+	ImGui::Begin("ScreenToWorld");
+	Vector3 vec = Camera::ScreenToWorldPosition(Vector3::one());
+	ImGui::Text("X:%f",vec.x);
+	ImGui::Text("Y:%f",vec.y);
+	ImGui::Text("Z:%f",vec.z);
+	ImGui::End();
+
 	GUI::guiImGui::Render();
 }
 
@@ -151,6 +170,8 @@ void CManager::Finalize()
 {
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
+
+	Renderer::Destroy();
 
 	AudioManager::Release();
 	ModelManager::Release();

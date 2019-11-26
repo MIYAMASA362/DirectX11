@@ -10,6 +10,8 @@
 
 #include"Module\Texture\texture.h"
 
+#include"Module\Renderer\Renderer.h"
+
 #include"font.h"
 #include"UI.h"
 
@@ -28,20 +30,19 @@ DirectX::Canvas::Canvas(EntityID OwnerID)
 
 //--- UI ------------------------------------------------------------
 
-//void DirectX::UI::SendBehaviourMessage(Message message)
-//{
-//	if (message != Component::Render) return;
-//	XMMATRIX world;
-//	world = this->transform.lock()->WorldMatrix();
-//	Render(world);
-//}
-
 DirectX::UI::UI(EntityID OwnerID)
 	:
 	Component(OwnerID)
 {
-	if (!gameObject()->GetComponent<Canvas>())
+	if (!gameObject()->GetComponent<Canvas>().lock())
 		gameObject()->AddComponent<Canvas>();
+
+	this->SendComponentMessage = [this](std::string message) 
+	{
+		if (message == "Render") {
+			this->Render(this->transform()->WorldMatrix());
+		}
+	};
 }
 
 
@@ -49,7 +50,7 @@ DirectX::UI::UI(EntityID OwnerID)
 
 DirectX::Image::Image(EntityID OwnerID)
 :
-	UI(OwnerID)
+	Renderer2D(OwnerID)
 {
 	VERTEX_3D vertex[4] = {
 		{ XMFLOAT3(-5.0f, -5.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
@@ -80,12 +81,11 @@ DirectX::Image::~Image()
 	vertexBuffer->Release();
 }
 
-void DirectX::Image::Render(XMMATRIX world)
+void DirectX::Image::Render(XMMATRIX& world)
 {
 	D3DApp::Renderer::SetDepthEnable(false);
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-
 	//頂点バッファ設定
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&this->vertexBuffer,&stride,&offset);
 	//テクスチャ設定
@@ -258,4 +258,9 @@ void DirectX::Text::SetText(std::string text)
 
 		n += (len == 2 ? 2 : 1);
 	}
+}
+
+void DirectX::Text::SetFont(Font * font)
+{
+	m_font = font;
 }

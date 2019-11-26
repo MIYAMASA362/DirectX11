@@ -8,79 +8,86 @@ public:
 	TestScene():Scene("TestScene"){};
 	void Load() override
 	{
-		/*GameObject* Sky = this->AddSceneObject("Sky", TagName::Default);
+		//Sky
+		GameObject* Sky = this->AddSceneObject("Sky", TagName::Default);
 		{
-			Sky->transform()->localScale(Vector3::one()*50.0f);
-			Sky->AddComponent<MeshRender>()->SetMesh<SkySphere>()
+			Sky->transform().lock()->localScale(Vector3::one()*80.0f);
+			Sky->AddComponent<MeshRender>().lock()->SetMesh<SkySphere>()
 				->m_Texture = TextureManager::GetTexture("sky");
-		}*/
-
+		}
+		
 		//Field
+		FieldCollider* fieldCollider;
 		GameObject* Field = this->AddSceneObject("Field",TagName::Default);
 		{
-			Field->transform()->position(Vector3::up() * 3.0f);
-			Field->transform()->localScale(Vector3(1.0f,0.1f,1.0f)*50.0f);
-			Field->AddComponent<MeshRender>()->SetMesh<MeshField>()
-				->m_Texture = TextureManager::GetTexture("field004");
-			auto boxCollider = Field->AddComponent<BoxCollider>();
-			boxCollider->Center(Vector3::zero()-Vector3::down());
-			boxCollider->SetSize(Vector3(1.0f,0.1f,1.0f));
+			Field->transform().lock()->position(Vector3::up() * 3.0f);
+			Field->transform().lock()->localScale(Vector3(1.0f,0.1f,1.0f) * 50.0f);
+			auto mesh = Field->AddComponent<MeshRender>().lock()->SetMesh<MeshField>();
+			mesh->m_Texture = TextureManager::GetTexture("field004");
+			fieldCollider = Field->AddComponent<FieldCollider>().lock().get();
+			fieldCollider->SetMesh(mesh);
 		}
-
-		////Field2
-		//GameObject* Field2 = this->AddSceneObject("Field2", TagName::Default);
-		//{
-		//	Field2->transform()->position(Vector3::down()*10.0f);
-		//	Field2->transform()->localScale(Vector3::one()*50.0f);
-		//	Field2->AddComponent<MeshRender>()->SetMesh<MeshField>()
-		//		->m_Texture = TextureManager::GetTexture("field004");
-		//	auto boxCollider = Field2->AddComponent<BoxCollider>();
-		//	boxCollider->Center(Vector3::zero());
-		//	boxCollider->SetSize(Vector3(1.0f, 0.1f, 1.0f));
-		//}
-
-		////block
-		//GameObject* block = this->AddSceneObject("Block", TagName::Default);
-		//{
-		//	block->transform()->position(Vector3::up() * 10.0f);
-		//	block->transform()->localScale(Vector3(1.0f,0.0f,1.0f) * 10.0f + Vector3::up());
-		//	block->AddComponent<MeshRender>()->SetMesh<MeshField>()
-		//		->m_Texture = TextureManager::GetTexture("field004");
-		//	auto boxCollider = block->AddComponent<BoxCollider>();
-		//}
 
 		//pModel
 		GameObject* pModel = this->AddSceneObject("Miku", TagName::ChildMiku);
 		{
-			pModel->transform()->position(Vector3::up()*4.0f);
-			pModel->transform()->localScale(Vector3::one());
-			pModel->AddComponent<WASDMove>();
-			pModel->AddComponent<CameraHorizontal>();
-			pModel->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Miku");
-			auto rigidbody = pModel->AddComponent<Rigidbody>();
-			rigidbody->SetMass(0.5f);
-			pModel->AddComponent<Shot>();
-			//auto sphereCollider = pModel->AddComponent<SphereCollider>();
-			//sphereCollider->SetRadius(2.0f);
-			auto boxCollider = pModel->AddComponent<BoxCollider>();
-			boxCollider->Center(Vector3::zero());
-			boxCollider->SetSize(Vector3::one()*0.5f);
+			pModel->transform().lock()->position(Vector3::up()*10.0f);
+			pModel->transform().lock()->localScale(Vector3::one());
+			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
+			pModel->AddComponent<Rigidbody>();
+			pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
+			auto player = pModel->AddComponent<Player>().lock();
+			player->_fieldCollider = fieldCollider;
+
+			/*for(int i = 0; i < 10; i++)
+			{
+				GameObject* child = this->AddSceneObject("Child" + std::to_string(i),TagName::Default);
+				{
+					child->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
+					child->AddComponent<BoxCollider>();
+					child->transform().lock()->SetParent(pModel->gameObject());
+					child->transform().lock()->localPosition(pModel->transform().lock()->right() * (i+1));
+				}
+			}*/
 		}
 
 		//MikuCamera
 		GameObject* MikuCamera = this->AddSceneObject("MikuCamera", TagName::Default);
 		{
-			MikuCamera->AddComponent<Camera>()->SetPriority(0);
-			MikuCamera->transform()->SetParent(pModel);
-			MikuCamera->transform()->localPosition(Vector3::back()*3.0f + Vector3::up()*2.0f);
-			MikuCamera->transform()->rotation(Quaternion::Euler({ 30.0f,0.0f,0.0f }));
+			MikuCamera->AddComponent<Camera>().lock()->SetPriority(0);
+			MikuCamera->transform().lock()->SetParent(pModel->gameObject());
+			MikuCamera->transform().lock()->localPosition(Vector3::up() + Vector3::back() * 4.0f);
+			MikuCamera->transform().lock()->rotation(Quaternion::Euler({ 0.0f,0.0f,0.0f }));
 			MikuCamera->AddComponent<CameraMouse>();
 		}
+
 		//SceneChange
 		GameObject* SceneChanger = this->AddSceneObject("SceneChanger", TagName::Default);
 		{
 			auto sceneChange = SceneChanger->AddComponent<SceneChange>();
-			sceneChange->nextScene = "TestScene";
+			sceneChange.lock()->nextScene = "TestScene";
 		}
+
+		GameObject* sphere = this->AddSceneObject("Sphere",TagName::Default);
+		{
+			sphere->transform().lock()->position({0.0f,0.0f,10.0f});
+			sphere->transform().lock()->localScale(Vector3::one()*2.0f);
+
+			//auto rigidbody = sphere->AddComponent<Rigidbody>().lock();
+			//rigidbody->IsUseGravity(false);
+
+			auto collider = sphere->AddComponent<SphereCollider>().lock();
+			collider->SetRadius(2.0f);
+		}
+
+		//Canvas
+		GameObject* canvas = this->AddSceneObject("Canvas",TagName::Default);
+		{
+			canvas->transform().lock()->localPosition(Vector3(100.0f,50.0f,0.0f));
+			canvas->transform().lock()->localScale(Vector3::one()*10.0f);
+			auto image = canvas->AddComponent<Image>();
+			image.lock()->texture = TextureManager::GetTexture("field004");
+		}
+
 	}
 };

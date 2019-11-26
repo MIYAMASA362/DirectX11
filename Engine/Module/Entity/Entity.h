@@ -6,13 +6,13 @@ namespace DirectX
 	class Entity:public IEntity
 	{
 		using EntityType = Entity<Type>;
-	protected:
-		static EntityIndex m_EntityIndex;
 	public:
 		static std::weak_ptr<Type> GetEntity(EntityID id);
 
 		Entity();
 		virtual ~Entity();
+	protected:
+		static EntityIndex m_EntityIndex;
 	};
 
 	template<typename Type>

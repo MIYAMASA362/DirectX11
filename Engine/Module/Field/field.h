@@ -50,11 +50,16 @@ namespace DirectX
 
 	class MeshField final :public Mesh
 	{
+		friend class FieldCollider;
 	private:
 		ID3D11Buffer* m_VertexBuffer = nullptr;
 		ID3D11Buffer* m_IndexBuffer = nullptr;
 		VERTEX_3D* m_VertexIndex = nullptr;
 		unsigned int m_IndexNum = 0;
+		unsigned int m_WidthNum = 0;
+		unsigned int m_DepthNum = 0;
+		float m_Width = 0.0f;
+		float m_Depth = 0.0f;
 	public:
 		Texture* m_Texture = nullptr;
 	public:

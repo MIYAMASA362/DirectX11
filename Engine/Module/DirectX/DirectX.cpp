@@ -15,8 +15,6 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 
-#include"Module\Manager\manager.h"
-
 using namespace DirectX;
 
 //--- D3DApp ------------------------------------------------------------------
@@ -138,6 +136,9 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 	pInstance->D3DDevice->CreateBlendState(&blendDesc, &blendState);
 	pInstance->ImmediateContext->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
+
+
+
 	// 深度ステンシルステート設定
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
@@ -146,11 +147,12 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	depthStencilDesc.StencilEnable = FALSE;
 
-	pInstance->D3DDevice->CreateDepthStencilState(&depthStencilDesc, &pInstance->DepthStateEnable);//深度有効ステート
+	//深度有効ステート
+	pInstance->D3DDevice->CreateDepthStencilState(&depthStencilDesc, &pInstance->DepthStateEnable);
 
-																				 //depthStencilDesc.DepthEnable = FALSE;
+	//depthStencilDesc.DepthEnable = FALSE; //深度無効ステート
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	pInstance->D3DDevice->CreateDepthStencilState(&depthStencilDesc, &pInstance->DepthStateDisable);//深度無効ステート
+	pInstance->D3DDevice->CreateDepthStencilState(&depthStencilDesc, &pInstance->DepthStateDisable);
 
 	pInstance->ImmediateContext->OMSetDepthStencilState(pInstance->DepthStateEnable, NULL);
 
@@ -322,7 +324,7 @@ HWND D3DApp::GetWindow()
 	return pInstance->hWnd;
 }
 
-HINSTANCE DirectX::D3DApp::GethInstance()
+HINSTANCE D3DApp::GethInstance()
 {
 	return pInstance->hInstance;
 }
@@ -337,40 +339,10 @@ unsigned int D3DApp::GetScreenHeight()
 	return pInstance->ScreenHeight;
 }
 
-unsigned int DirectX::D3DApp::GetFps()
+unsigned int D3DApp::GetFps()
 {
 	return pInstance->fps;
 }
-
-
-int D3DApp::Run()
-{
-	MSG msg;
-
-	CManager::Initialize();
-
-	while (1)
-	{
-		//Message
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
-			if (msg.message == WM_QUIT){
-				break;	// PostQuitMessage()が呼ばれたらループ終了
-			}else{
-				// メッセージの翻訳とディスパッチ
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			continue;
-		}
-		CManager::Run();
-	}
-	CManager::Finalize();
-
-	D3DApp::Destroy();
-	
-	return (int)msg.wParam;
-}
-
 
 //--- D3DApp::Renderer --------------------------------------------------------
 
@@ -384,7 +356,7 @@ void D3DApp::Renderer::End()
 	pInstance->SwapChain->Present(1, 0);
 }
 
-void DirectX::D3DApp::Renderer::ClearRenderTargetView(Color clearColor)
+void D3DApp::Renderer::ClearRenderTargetView(Color clearColor)
 {
 	pInstance->ImmediateContext->ClearRenderTargetView(pInstance->RenderTargetView, clearColor);
 }
@@ -397,7 +369,7 @@ void D3DApp::Renderer::SetDepthEnable(bool Enable)
 		pInstance->ImmediateContext->OMSetDepthStencilState(pInstance->DepthStateDisable, NULL);
 }
 
-void DirectX::D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode)
+void D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode)
 {
 	// ラスタライザステート設定
 	D3D11_RASTERIZER_DESC rd;
@@ -449,7 +421,7 @@ void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
 	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 
-void DirectX::D3DApp::Renderer::SetProjectionMatrix2D()
+void D3DApp::Renderer::SetProjectionMatrix2D()
 {
 	SetViewMatrix(&XMMatrixIdentity());
 	XMMATRIX projection;
@@ -480,7 +452,7 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void DirectX::D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
+void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
 {
 	ID3D11ShaderResourceView* srv[1] = { texture };
 	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);

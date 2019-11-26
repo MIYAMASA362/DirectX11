@@ -29,7 +29,7 @@ namespace DirectX
 	};
 
 	//UI Image
-	class Image:public UI
+	class Image:public Renderer2D
 	{
 	public:
 		BaseTexture* texture = nullptr;
@@ -37,7 +37,7 @@ namespace DirectX
 	public:
 		Image(EntityID OwnerID);
 		virtual ~Image();
-		virtual void Render(XMMATRIX world) override;
+		virtual void Render(XMMATRIX& world) override;
 	};
 
 	//UI Button

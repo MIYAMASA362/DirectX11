@@ -8,7 +8,7 @@ public:
 public:
 	void Update() override 
 	{
-		/*if (Input::GetKeyPress(VK_SPACE))
-			this->gameObject.lock()->Destroy();*/
+		if (Input::GetKeyPress(VK_SPACE))
+			this->gameObject()->Destroy();
 	};
 };

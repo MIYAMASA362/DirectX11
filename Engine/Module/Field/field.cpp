@@ -323,21 +323,43 @@ MeshField::MeshField()
 {
 	HRESULT hr;
 
-	const unsigned int cWidthSurface = 10;
-	const unsigned int cDepthSurface = 10;
+	const unsigned int cWidthSurface = 40;
+	const unsigned int cDepthSurface = 40;
+
+	this->m_WidthNum = cWidthSurface;
+	this->m_DepthNum = cDepthSurface;
 
 	const unsigned int cWidthGrid = cWidthSurface + 1;
 	const unsigned int cDepthGrid = cDepthSurface + 1;
+
+	
 
 	//’¸“_Ý’è
 	{
 		const float cWidth = 2.2f/cWidthGrid;
 		const float cDepth = 2.2f/cDepthGrid;
 
+		this->m_Width = cWidth;
+		this->m_Depth = cDepth;
+
 		const unsigned int cIndexNum = cWidthGrid * cDepthGrid;
 		this->m_VertexIndex = new VERTEX_3D[cIndexNum];
 
+		float* yIndex = new float[cIndexNum];
+
 		int nCount = 0;
+		for(int z = 0; z < cDepthGrid; z++){
+			for (int x = 0; x < cWidthGrid; x++) {
+				yIndex[nCount] = 0.0f;
+				if (z < 10 || cDepthGrid - 10 < z)
+					yIndex[nCount] = 0.2f;
+
+				nCount++;
+			}
+		}
+
+
+		nCount = 0;
 		const float y = 0.0f;
 		const float sX = cWidth * (cWidthSurface * 0.5f);
 		const float sZ = -cDepth * (cDepthSurface * 0.5f);
@@ -348,7 +370,7 @@ MeshField::MeshField()
 				vertex.Position =
 					XMFLOAT3(
 						sX - (float)x * cWidth,
-						y,
+						yIndex[nCount],
 						sZ + (float)z * cDepth
 					);
 				vertex.Normal	= XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -357,6 +379,21 @@ MeshField::MeshField()
 				nCount++;
 			}
 		}
+
+		//–@üÝ’è
+		for (int z = 1; z < cDepthGrid-1; z++) {
+			for (int x = 1; x < cWidthGrid-1; x++)
+			{
+				Vector3 vecA = (Vector3)this->m_VertexIndex[(z - 1)*cDepthGrid + x].Position - (Vector3)this->m_VertexIndex[(z + 1)*cWidthGrid + x].Position;
+				Vector3 vecB = (Vector3)this->m_VertexIndex[z*cDepthGrid + (x-1)].Position - (Vector3)this->m_VertexIndex[z*cWidthGrid + (x+1)].Position;
+
+				Vector3 normal = Vector3::Cross(vecB,vecA);
+				this->m_VertexIndex[z * cWidthGrid + x].Normal = normal.normalize();
+			}
+
+		}
+
+		delete[] yIndex;
 
 		nCount = nCount;
 

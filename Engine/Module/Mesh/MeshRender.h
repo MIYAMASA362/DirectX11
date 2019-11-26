@@ -4,7 +4,7 @@ namespace DirectX
 {
 	class Mesh;
 	//=== MeshRender ==========================================================
-	class MeshRender :public Renderer
+	class MeshRender :public Renderer3D
 	{
 	private:
 		std::shared_ptr<Mesh> mesh;
@@ -18,9 +18,11 @@ namespace DirectX
 	};
 
 	//-------------------------------------------------------------------------
-	inline Mesh* MeshRender::GetMesh() {
+	inline Mesh* MeshRender::GetMesh()
+	{
 		return mesh.get();
 	}
+
 	template<typename Type> Type* MeshRender::SetMesh() {
 		mesh = std::shared_ptr<Mesh>(new Type());
 		return static_cast<Type*>(mesh.get());

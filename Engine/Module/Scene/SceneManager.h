@@ -10,6 +10,7 @@ namespace DirectX
 {
 	class Scene;
 	class GameObject;
+	class HierarchyUtility;
 
 	using SceneID = unsigned int;
 
@@ -62,8 +63,8 @@ namespace DirectX
 		const SceneID m_id;
 		const std::string m_name;
 		bool IsLoaded = false;
-		std::vector<EntityID> Index;
 
+		HierarchyUtility* const _hierarchyUtility;
 	protected:
 		Scene(std::string name);
 		virtual ~Scene();
@@ -72,6 +73,8 @@ namespace DirectX
 		std::string GetSceneName();
 
 		GameObject* AddSceneObject(std::string name, TagName tag);
+		void RemoveSceneObject(EntityID id);
+
 		std::weak_ptr<Scene> GetSelfScene();
 		void AttachActiveScene();
 		void DetachActiveScene();
@@ -81,20 +84,11 @@ namespace DirectX
 
 		virtual void Load() = 0;
 		void UnLoad();
+
+		Hierarchy* GetHierarchy(EntityID id);
 	};
 
 	//----------------------------------------------------------------------------
-	inline Scene::Scene(std::string name)
-	:
-		m_name(name),
-		m_id(SceneManager::AttachID())
-	{
-
-	};
-	inline Scene::~Scene()
-	{
-	
-	};
 	inline bool Scene::CompareName(std::string name)
 	{
 		return this->m_name == name;

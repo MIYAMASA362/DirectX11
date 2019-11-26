@@ -7,8 +7,10 @@ namespace DirectX
 	class Transform;
 	class Collider;
 
-	//=== Bounds ========================================================================
-	class Bounds {
+	class MeshField;
+
+	class Bounds
+	{
 	private:
 		Vector3 m_center;
 		Vector3 m_size;
@@ -25,60 +27,47 @@ namespace DirectX
 		void DebugImGui();
 	};
 
-	//-----------------------------------------------------------------------------------
-	inline Vector3 Bounds::GetCenter()		{ return this->m_center; }
-	inline Vector3 Bounds::GetExtents()	{ return this->m_size * 0.5f; }
-	inline Vector3 Bounds::GetMax()		{ return this->m_center + this->GetExtents(); }
-	inline Vector3 Bounds::GetMin()		{ return this->m_center - this->GetExtents(); }
-	inline Vector3 Bounds::GetSize()		{ return this->m_size; }
-	inline void Bounds::SetCenter(Vector3 center)	{ this->m_center = center; }
-	inline void Bounds::SetSize(Vector3 size)		{ this->m_size = size; }
-
-	//=== Collision =====================================================================
-	class Collision
-	{
-	public:
-		Collider* collider;
-		Rigidbody* rigidbody;
-		GameObject* gameObject;
-		Transform* transform;
-	};
-
-	//=== Collider ======================================================================
 	class Collider:public Component<Collider>
 	{
-		friend class SceneManager;
 	public:
-		//Collider‚ÌŽí—Þ
-		enum ShapeType 
+		enum ShapeType
 		{
 			Box,
-			Sphere
+			Sphere,
+			Field
 		};
 	public:
 		static void Hitjudgment();
+		static void Hitjudgment(std::list<std::weak_ptr<Collider>>& collider);
+		static void Hitjudgment(std::list<std::weak_ptr<Collider>>& collider,std::list<std::weak_ptr<Collider>>& other);
+
+	public:
+		std::weak_ptr<Rigidbody> _rigidbody;
+
+		Bounds bound;
+		bool IsHit = false;				//Õ“Ë‚µ‚Ä‚¢‚é
+		bool IsTrigger = false;			//•¨—‹““®‚·‚é‚©
+
+		Collider(EntityID OwnerID);
+		virtual ~Collider();
+
+		virtual ShapeType GetShapeType() = 0;	//Type
+		
+		void Start();
+		virtual void Render() = 0;
+
+		void Center(Vector3 center);
+
 	protected:
 		static bool BoxVsBox(Collider* collider,Collider* other);
 		static bool BoxVsShpere(Collider* collider,Collider* other);
 		static bool SphereVsSphere(Collider* collider, Collider* other);
-	public:
-		Bounds bound;
-		bool IsHit = false;			//Õ“Ë‚µ‚Ä‚¢‚é
-		bool IsTrigger = false;		//•¨—‹““®‚·‚é‚©
-	public:
-		Collider(EntityID OwnerID);
-		virtual ~Collider() = default;
-		virtual ShapeType GetShapeType() = 0;	//Type
-	public:
-		virtual void Render()=0;
-		void Center(Vector3 center);
-	protected:
+
 		virtual bool Judgment(Collider* other) = 0;
 	};
-	//-----------------------------------------------------------------------------------
+
 	inline void Collider::Center(Vector3 center) { this->bound.SetCenter(center); }
 
-	//=== SphereCollider ================================================================
 	class SphereCollider final:public Collider
 	{
 	private:
@@ -87,20 +76,25 @@ namespace DirectX
 		static VERTEX_3D* m_pVertex;
 		static int m_IndexNum;
 		static Texture* m_Texture;
+
 	public:
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
+
 	public:
 		SphereCollider(EntityID OwnerID);
-		virtual ~SphereCollider() = default;
-		virtual ShapeType GetShapeType() override { return ShapeType::Sphere; };
-		void SetRadius(float radius);
+		virtual ~SphereCollider();
+
+		ShapeType GetShapeType() override { return ShapeType::Sphere; };
 		void Render() override;
+		
+		void SetRadius(float radius);
+
 	protected:
 		bool Judgment(Collider* other) override;
+
 	};
 
-	//=== BoxCollider ===================================================================
 	class BoxCollider final:public Collider
 	{
 	private:
@@ -109,6 +103,7 @@ namespace DirectX
 		static VERTEX_3D* m_pVertex;
 		static int m_IndexNum;
 		static Texture* m_Texture;
+
 	public:
 		static void SetRenderBuffer();
 		static void ReleaseRenderBuffer();
@@ -120,5 +115,20 @@ namespace DirectX
 		void Render() override;
 	protected:
 		bool Judgment(Collider* other) override;
+	};
+
+	class FieldCollider final:public Collider
+	{
+	private:
+		MeshField* _field;
+	public:
+		FieldCollider(EntityID OwnerID);
+		ShapeType GetShapeType() override { return ShapeType::Field; };
+		void SetMesh(MeshField* field);
+		bool IsOnGround(Vector3 Position);
+		float GetHeight(Vector3 Position);
+		Vector3 GetNormal(Vector3 Position);
+		void Render() override {};
+		bool Judgment(Collider* other) override { return false; };
 	};
 }

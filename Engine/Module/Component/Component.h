@@ -9,17 +9,19 @@ namespace DirectX
 	public:
 		static const ComponentTypeID TypeID;
 
-	protected:
-		const std::shared_ptr<ComponentIndex> _Index;
-	public:
 		Component(EntityID OwnerID);
 		virtual ~Component();
 
+		//Entityに付属されているComponentを取得
 		static std::weak_ptr<Type> GetComponent(EntityID entityID);
 
-		virtual const ComponentTypeID GetComponentTypeID() const override final;
+		const ComponentTypeID GetComponentTypeID() const override final;
 
 		virtual void OnDestroy() override {};
+
+	protected:
+		//このComponentの全インスタンス
+		const std::weak_ptr<Components> _Index;
 	};
 
 	template<typename Type>
@@ -28,7 +30,12 @@ namespace DirectX
 	template<typename Type>
 	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
 	{
-		return std::dynamic_pointer_cast<Type>(ComponentManager::GetOrCreateComponentIndex(TypeID).lock()->at(entityID).lock());
+		auto index = ComponentManager::GetComponentIndex(TypeID);
+		for (auto component : *index.lock()) {
+			if (component.lock()->GetOwnerID() == entityID)
+				return std::dynamic_pointer_cast<Type>(component.lock());
+		}
+		return std::weak_ptr<Type>();
 	}
 
 	template<typename Type>
@@ -55,7 +62,11 @@ namespace DirectX
 	template<typename Type>
 	inline Component<Type>::~Component()
 	{
-		_Index->erase(this->GetOwnerID());
+		if (!_Index.expired()){
+			_Index.lock()->remove_if([](std::weak_ptr<IComponent> obj) {
+				return obj.expired();
+			});
+		}
 	}
 
 	template<typename Type>

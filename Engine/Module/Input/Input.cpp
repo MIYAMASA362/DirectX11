@@ -52,6 +52,8 @@ bool Input::GetKeyUp(BYTE KeyCode)
 void DirectX::Input::DebugGUI()
 {
 	ImGui::Begin("Input");
+	ImGui::Text("Screen Width:%d", D3DApp::GetScreenWidth());
+	ImGui::Text("Screen Height:%d", D3DApp::GetScreenHeight());
 	ImGui::Text("Mouse X:%f",Input::Mouse::GetMouseX());
 	ImGui::Text("Mouse Y:%f",Input::Mouse::GetMouseY());
 	ImGui::End();

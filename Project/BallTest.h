@@ -12,22 +12,22 @@ public:
 		//Camera
 		{
 			GameObject* camera = this->AddSceneObject("MainCamera",TagName::Default);
-			camera->transform()->position(Vector3::up()*2.0f);
-			camera->AddComponent<Camera>()->SetPriority(1);
+			camera->transform().lock()->position(Vector3::up()*2.0f);
+			camera->AddComponent<Camera>().lock()->SetPriority(1);
 		}
 		//Ball
 		{
 			GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
-			ball->transform()->position(Vector3::up() + Vector3::forward()*6.0f);
-			ball->AddComponent<MeshRender>()->SetMesh<Model>()->GetAsset("Ball");
+			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
+			ball->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Ball");
 			ball->AddComponent<BallScript>();
-			ball->AddComponent<SceneChange>()->nextScene = "BallTest";
+			ball->AddComponent<SceneChange>().lock()->nextScene = "BallTest";
 		}
 		//Field
 		{
 			GameObject* field = this->AddSceneObject("Field",TagName::Default);
-			field->transform()->localScale({50.0f,50.0f,50.0f});
-			field->AddComponent<MeshRender>()->SetMesh<MeshField>()->m_Texture 
+			field->transform().lock()->localScale({50.0f,50.0f,50.0f});
+			field->AddComponent<MeshRender>().lock()->SetMesh<MeshField>()->m_Texture 
 				= TextureManager::GetTexture("field004");
 		}
 	}

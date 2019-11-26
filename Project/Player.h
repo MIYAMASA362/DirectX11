@@ -3,21 +3,39 @@
 class Player:public MonoBehaviour<Player>
 {
 public:
+	const float speed = 0.5f;
+	FieldCollider* _fieldCollider;
+public:
 	Player(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 
 	void Update()
 	{
-		
 	}
 
-	/*void OnTriggerEnter(std::weak_ptr<Collider> other) override
+	void FixedUpdate()
 	{
-		if(other.lock()->gameObject.lock()->CompareTag(TagName::Enemy))
+		float horizontal = Input::Mouse::GetAccelerationX();
+		this->transform()->localRotation(
+			this->transform()->localRotation() * Quaternion::AngleAxisToEuler(horizontal,this->transform()->up())
+		);
+
+		if (Input::GetKeyPress('W'))
+			this->transform()->position(this->transform()->position() + this->transform()->forward() * speed);
+		if (Input::GetKeyPress('S'))
+			this->transform()->position(this->transform()->position() + this->transform()->back() *speed);
+		if (Input::GetKeyPress('A'))
+			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
+		if (Input::GetKeyPress('D'))
+			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
+		
+		if (_fieldCollider->IsOnGround(this->transform()->position()))
 		{
-			if (Input::Mouse::IsLeftTrigger())
-				other.lock()->gameObject.lock()->GetComponent<Enemy>().lock()->Damage();
+			Vector3 pos = this->transform()->position();
+			pos.y = _fieldCollider->GetHeight(pos) + 4.0f;
+			this->transform()->position(pos);
+			this->gameObject()->GetComponent<Rigidbody>().lock()->SetVelocity(Vector3::zero());
 		}
-	}*/
+	}
 };
 
 class PlayerCamera:public MonoBehaviour<PlayerCamera>

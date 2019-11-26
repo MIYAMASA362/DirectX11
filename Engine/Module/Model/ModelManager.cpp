@@ -81,7 +81,6 @@ void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 				data->SubsetArray[i].Material.Texture = TextureManager::LoadTexture(model.SubsetArray[i].Material.TextureName);
 		}
 	}
-
 	//ƒƒ‚ƒŠíœ
 	{
 		delete[] model.VertexArray;

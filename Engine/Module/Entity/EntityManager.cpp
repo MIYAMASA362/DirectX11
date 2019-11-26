@@ -26,7 +26,10 @@ std::weak_ptr<IEntity> EntityManager::CreateEntity(IEntity* instance)
 
 std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 {
-	return m_EntityIndex.at(id);
+	auto find = m_EntityIndex.find(id);
+	if (find == m_EntityIndex.end()) 
+		return std::weak_ptr<IEntity>();
+	return find->second;
 }
 
 void EntityManager::ReleaseEntity(EntityID id)

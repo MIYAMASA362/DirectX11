@@ -1,12 +1,11 @@
 #include"Common.h"
 
 #include"Module\ECSEngine.h"
-
 using namespace DirectX;
 
 IEntity::IEntity()
 {
-	EntityManager::CreateEntity(this);
+	_self = EntityManager::CreateEntity(this);
 }
 
 DirectX::IEntity::~IEntity()
@@ -17,6 +16,11 @@ DirectX::IEntity::~IEntity()
 EntityID IEntity::GetEntityID()
 {
 	return this->GetInstanceID();
+}
+
+std::weak_ptr<IEntity> DirectX::IEntity::GetEntity()
+{
+	return this->_self;
 }
 
 void DirectX::IEntity::DestroyComponents()

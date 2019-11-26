@@ -22,6 +22,8 @@
 #include"SceneManager.h"
 #include"Module\Physics\Collision.h"
 
+#include"Module\Hierarchy\Hierarchy.h"
+
 #include"../IMGUI/GUI_ImGui.h"
 
 using namespace DirectX;
@@ -82,6 +84,11 @@ void DirectX::SceneManager::ChangeScene()
 	//—LŒø‰»
 	pNextScene = pNextScene;
 	AttachActiveScene(pNextScene.lock());
+
+	ObjectManager::ClearnUp();
+	
+	ComponentManager::SendComponentMessage("Start");
+
 	IsChangeScene = false;
 }
 
@@ -134,13 +141,36 @@ SceneID DirectX::SceneManager::AttachID()
 	return id;
 }
 
+Scene::Scene(std::string name)
+	:
+	m_id(SceneManager::AttachID()),
+	m_name(name),
+	_hierarchyUtility(new HierarchyUtility())
+{
+
+};
+
+inline Scene::~Scene()
+{
+	delete _hierarchyUtility;
+};
+
 //GameObject‚ðTagŽw’è‚Å’Ç‰Á
 GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
-	this->Index.push_back(instance->GetEntityID());
+
+	//ŠK‘w’Ç‰Á
+	_hierarchyUtility->AttachHierarchy(instance->GetEntityID());
+
+	//Transform
 	instance->AddComponent<Transform>();
 	return instance;
+}
+
+void DirectX::Scene::RemoveSceneObject(EntityID id)
+{
+	_hierarchyUtility->DetachHierarchy(id);
 }
 
 //
@@ -160,18 +190,18 @@ void DirectX::Scene::DetachActiveScene()
 //ImGui Debug•\Ž¦
 void DirectX::Scene::DebugGUI()
 {
-	for (auto id : Index) 
-	{
-		auto object = GameObject::GetEntity(id);
-		object.lock()->OnDebugGUI();
-	}
+	for (auto obj : _hierarchyUtility->GetHierarchyMap()) 
+		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->OnDebugGUI();
 }
 
 void DirectX::Scene::UnLoad()
 {
-	for (auto entityID : Index) {
-		auto object = EntityManager::GetEntity(entityID);
-		object.lock()->Destroy();
-	}
-	Index.clear();
+	for (auto obj : _hierarchyUtility->GetHierarchyMap())
+		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->Destroy();
+	_hierarchyUtility->ClearnHierarchy();
+}
+
+Hierarchy* DirectX::Scene::GetHierarchy(EntityID id)
+{
+	return _hierarchyUtility->GetHierarchy(id);
 }

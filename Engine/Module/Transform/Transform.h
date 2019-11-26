@@ -2,19 +2,17 @@
 namespace DirectX
 {
 	class GameObject;
+	class Hierarchy;
 
 	//変換Component
 	class Transform :public Component<Transform>
 	{
+	private:
+		Hierarchy*  _hierarchy;		//親子
 	protected:
-		std::weak_ptr<Transform> pParent;					//親
-		std::list<std::weak_ptr<Transform>> pChildren;		//子
-
 		Vector3		m_Position;		//位置
 		Quaternion	m_Rotation;		//回転
 		Vector3		m_Scale;		//サイズ
-
-		XMMATRIX	m_WorldMatrix;	//ワールド行列
 	public:
 		Transform(EntityID OwnerID);
 		~Transform() = default;
@@ -35,16 +33,20 @@ namespace DirectX
 		void localScale(Vector3 scale);						//ローカル大きさ
 	protected:
 		void detachParent();								//親を離す
-		void detachChildSearch(Transform* target);			//親がターゲットの子を見つけると削除する
+		void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する
 		void childTransformUpdate();						//子の行列に変更を加える
 	public:
-		void SetParent(Transform* pParent);	//親子を設定
-		void SetParent(GameObject* parent);
+		void SetParent(std::weak_ptr<Transform> pParent);	//親子を設定
+		void SetParent(std::weak_ptr<GameObject> parent);
 		void DetachParent();								//親を離す
 		void DetachChildren();								//子を離す
 		std::weak_ptr<Transform> GetParent();				//親取得
 		std::list<std::weak_ptr<Transform>> GetChildren();	//子取得
-		void SendComponentMessageChildren(std::string message);
+
+		void SendComponentMessageChildren(std::string message);	//自身と子のComponentsにmessageを送る
+		std::weak_ptr<IComponent> GetComponentInParent(ComponentTypeID componentTypeID);
+		std::weak_ptr<IComponent> GetComponentInChildren(ComponentTypeID componentTypeID);
+		Components GetComponentsInChildren(ComponentTypeID componentTypeID);
 	protected:
 		Vector3 TransformDirection(Vector3 direction);	//回転行列を使ってDirectionを変換
 	public:

@@ -88,6 +88,7 @@ namespace DirectX
 		tagVector3() :x(0.0f), y(0.0f), z(0.0f) {};
 		tagVector3(float _x, float _y, float _z) :x(_x),y(_y),z(_z) {};
 		tagVector3(XMVECTOR vec):x(vec.m128_f32[0]),y(vec.m128_f32[1]),z(vec.m128_f32[2]) { };
+		tagVector3(XMFLOAT3 vec) :x(vec.x), y(vec.y), z(vec.z) {};
 
 		//	tagVector3(0.0f,0.0f,0.0f)
 		static tagVector3 zero()	{ 
@@ -254,11 +255,14 @@ namespace DirectX
 
 		operator const float*() { return &x; }
 		operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
+		operator const XMFLOAT3() { return{ x,y,z }; }
 		tagVector3 operator= (const XMVECTOR& vec) { x = vec.m128_f32[0]; y = vec.m128_f32[1]; z = vec.m128_f32[2]; return *this; };
+		tagVector3 operator= (const XMFLOAT3& vec) { x = vec.x; y = vec.y; z = vec.z; return *this; };
 		tagVector3 operator+ (const tagVector3& vec) {  return { x + vec.x,y + vec.y,z + vec.z }; };
 		tagVector3 operator- (const tagVector3& vec) {  return { x - vec.x,y - vec.y,z - vec.z }; };
 		tagVector3 operator/ (const float& scalar) { return {x / scalar, y / scalar,z / scalar}; };
 		tagVector3 operator* (const float& scalar) { return {x * scalar, y * scalar,z * scalar}; };
+		tagVector3 operator* (const XMFLOAT3& vec) { return{ x * vec.x,y * vec.y,z * vec.z }; };
 		tagVector3 operator+= (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
 		tagVector3 operator-= (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
 		tagVector3 operator*= (const tagVector3& vec) { x *= vec.x; y *= vec.y; z *= vec.z; return *this; };

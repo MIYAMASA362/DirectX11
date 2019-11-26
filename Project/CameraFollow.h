@@ -20,8 +20,15 @@ class WASDMove:public MonoBehaviour<WASDMove>
 {
 public:
 	const float speed = 0.5f;
+	FieldCollider* _fieldCollider;
+	bool IsGround = false;
 public:
-	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
+	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) 
+	{
+		this->OnDebugImGui = [this]() {
+			ImGui::Checkbox("IsGround",&this->IsGround);
+		};
+	};
 	void Update()
 	{
 		if (Input::GetKeyPress('W'))
@@ -36,11 +43,26 @@ public:
 			this->transform()->position(this->transform()->position() + this->transform()->down()*speed);
 		if (Input::GetKeyPress('E'))
 			this->transform()->position(this->transform()->position() + this->transform()->up()*speed);
+
+		//this->transform()->position(Camera::ScreenToWorldPosition(Vector3::zero()));
+
+		
 		/*auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
 		if (rigidbody != nullptr)
 			if (Input::GetKeyTrigger(VK_SPACE))
-				rigidbody->AddForce(Vector3::up() * 5.0f);*/
-				
+				rigidbody->AddForce(Vector3::up() * 5.0f);*/		
+	}
+
+	void FixedUpdate()
+	{
+		IsGround = _fieldCollider->IsOnGround(this->transform()->position());
+		if (IsGround)
+		{
+			Vector3 pos = this->transform()->position();
+			pos.y = _fieldCollider->GetHeight(pos) + 4.0f;
+			this->transform()->position(pos);
+			this->gameObject()->GetComponent<Rigidbody>().lock()->SetVelocity(Vector3::zero());
+		}
 	}
 };
 

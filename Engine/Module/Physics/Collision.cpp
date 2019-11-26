@@ -12,6 +12,9 @@
 #include"Module\GameObject\GameObject.h"
 #include"Module\Transform\Transform.h"
 
+#include"Module\Mesh\Mesh.h"
+#include"Module\Field\field.h"
+
 #include"Rigidbody.h"
 #include"Collision.h"
 
@@ -20,6 +23,41 @@ using namespace DirectX;
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
 {
 	this->m_center = center;
+	this->m_size = size;
+}
+
+Vector3 DirectX::Bounds::GetCenter()
+{
+	return this->m_center;
+}
+
+Vector3 DirectX::Bounds::GetExtents()
+{
+	return this->m_size * 0.5f;
+}
+
+Vector3 DirectX::Bounds::GetMax()
+{
+	return this->m_center + this->GetExtents();
+}
+
+Vector3 DirectX::Bounds::GetMin()
+{
+	return this->m_center - this->GetExtents();
+}
+
+Vector3 DirectX::Bounds::GetSize()
+{
+	return this->m_size;
+}
+
+void DirectX::Bounds::SetCenter(Vector3 center)
+{
+	this->m_center = center;
+}
+
+void DirectX::Bounds::SetSize(Vector3 size)
+{
 	this->m_size = size;
 }
 
@@ -41,18 +79,65 @@ DirectX::Collider::Collider(EntityID OwnerID)
 	bound(Vector3::zero(),Vector3::one())
 {
 	this->SendComponentMessage = [this](std::string message){
+		if (message == "Start")	 { Start(); return; }
 		if (message == "Render") { Render(); return; }
 	};
 }
+
+DirectX::Collider::~Collider()
+{
+
+}
+
+void DirectX::Collider::Start()
+{
+	//RigidbodyÇíTÇ∑
+	auto rigidbody = ComponentManager::GetComponent<Rigidbody>(this->GetOwnerID());
+	if (rigidbody.expired())
+	{
+		auto component = this->transform()->GetComponentInParent(Rigidbody::TypeID);
+		if (component.expired()) return;
+		rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
+	}
+	_rigidbody = rigidbody.lock();
+	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(this->_self.lock()));
+}
+
 void DirectX::Collider::Hitjudgment()
 {
-	auto components = ComponentManager::GetOrCreateComponentIndex(TypeID).lock();
+	auto components = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
+	auto rigidbodys = ComponentManager::GetOrCreateComponentIndex(Rigidbody::TypeID).lock();
+
 	for(auto self:*components){
-		auto collider = std::dynamic_pointer_cast<Collider>(self.second.lock());
+		auto collider = std::dynamic_pointer_cast<Collider>(self.lock());
 		for (auto other : *components) {
-			if (self.second.lock() == other.second.lock()) continue;
-			auto otherCollider = std::dynamic_pointer_cast<Collider>(other.second.lock());
+			if (self.lock() == other.lock()) continue;
+			auto otherCollider = std::dynamic_pointer_cast<Collider>(other.lock());
+
 			collider->Judgment(otherCollider.get());
+		}
+	}
+}
+
+void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist)
+{
+	auto components = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
+	std::list<std::weak_ptr<Collider>> colliders;
+
+	for (auto self : *components)
+		colliders.push_back(std::dynamic_pointer_cast<Collider>(self.lock()));
+
+	for(auto collider:colliderlist)
+		for (auto other : colliders)
+			collider.lock()->Judgment(other.lock().get());
+}
+
+void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist, std::list<std::weak_ptr<Collider>>& otherlist)
+{
+	for(auto collider: colliderlist)
+	{
+		for (auto other : otherlist) {
+			collider.lock()->Judgment(other.lock().get());
 		}
 	}
 }
@@ -80,30 +165,30 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 		(pos2_min.z <= pos1_min.z && pos1_min.z <= pos2_max.z || pos2_min.z <= pos1_max.z && pos1_max.z <= pos2_max.z)
 		)
 	{
-		//IsTrigger
-		if (!collider->IsTrigger || !other->IsTrigger) {
-			//RigidbodyÇèäéù
-			auto rigidbody = collider->gameObject()->GetComponent<Rigidbody>();
-			if (rigidbody)
-			{
-				Vector3 Intrusion;
-				Vector3 velocity = rigidbody->GetVelocity();
-				Vector3 direction = Vector3::Normalize(pos1 - pos2);
-				if (direction.y < 0.0f)
-				{
-					Intrusion.y = pos1_max.y - pos2_min.y;
-					velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
-				}
-				else
-				{
-					Intrusion.y = pos1_min.y - pos2_max.y;
-					velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
-				}
+		////IsTrigger
+		//if (!collider->IsTrigger || !other->IsTrigger) {
+		//	//RigidbodyÇèäéù
+		//	auto rigidbody = collider->gameObject()->GetComponent<Rigidbody>();
+		//	if (rigidbody)
+		//	{
+		//		Vector3 Intrusion;
+		//		Vector3 velocity = rigidbody->GetVelocity();
+		//		Vector3 direction = Vector3::Normalize(pos1 - pos2);
+		//		if (direction.y < 0.0f)
+		//		{
+		//			Intrusion.y = pos1_max.y - pos2_min.y;
+		//			velocity.y = velocity.y > 0.0f ? 0.0f : velocity.y;
+		//		}
+		//		else
+		//		{
+		//			Intrusion.y = pos1_min.y - pos2_max.y;
+		//			velocity.y = velocity.y < 0.0f ? 0.0f : velocity.y;
+		//		}
 
-				rigidbody->SetVelocity(velocity);
-				collider->transform()->position(collider->transform()->position() - Intrusion);
-			}
-		}
+		//		rigidbody->SetVelocity(velocity);
+		//		collider->transform()->position(collider->transform()->position() - Intrusion);
+		//	}
+		//}
 		return true;
 	}
 	return false;
@@ -172,9 +257,17 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 
 	Vector3 distance = pos1 - pos2;
 	//è’ìÀ
-	if (distance.lengthSq() < (radius1 + radius2) * (radius1 + radius2))
+	if (distance.lengthSq() < (radius1 + radius2) * (radius1 + radius2)) 
+	{
+		if(!collider->_rigidbody.expired())
+		{
+			auto rigidbody = collider->_rigidbody.lock();
+			float length = (radius1 + radius2) - distance.length();
+			Vector3 vec = distance.normalize() * length;
+			rigidbody->transform()->position(rigidbody->transform()->position() + vec);
+		}
 		return true;
-
+	}
 	return false;
 }
 
@@ -186,11 +279,15 @@ VERTEX_3D* SphereCollider::m_pVertex = nullptr;
 int SphereCollider::m_IndexNum = 0;
 Texture* SphereCollider::m_Texture = nullptr;
 
-SphereCollider::SphereCollider(EntityID OwnerID)
+DirectX::SphereCollider::SphereCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
 	this->SetRadius(0.25f);
+}
+
+DirectX::SphereCollider::~SphereCollider()
+{
 }
 
 void DirectX::SphereCollider::SetRenderBuffer()
@@ -319,6 +416,8 @@ bool DirectX::SphereCollider::Judgment(Collider * other)
 	case ShapeType::Sphere:
 		IsHit = SphereVsSphere(this,other);
 		break;
+	default:
+		break;
 	}
 
 	return IsHit;
@@ -430,6 +529,8 @@ DirectX::BoxCollider::BoxCollider(EntityID OwnerID)
 		if (ImGui::TreeNode("BoxCollider")) {
 			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
 			ImGui::Checkbox("IsHit",&this->IsHit);
+			if(!_rigidbody.expired())
+				ImGui::Text(("RigidbodyName:"+_rigidbody.lock()->gameObject()->GetName()).c_str());
 			this->bound.DebugImGui();
 			ImGui::TreePop();
 		}
@@ -472,11 +573,135 @@ bool DirectX::BoxCollider::Judgment(Collider * other)
 	case ShapeType::Sphere:
 		IsHit = SphereVsSphere(this,other);
 	default:
+		IsHit = false;
 		break;
 	}
 	return IsHit;
 }
 
+DirectX::FieldCollider::FieldCollider(EntityID OwnerID)
+	:
+	Collider(OwnerID)
+{
 
+}
 
+void DirectX::FieldCollider::SetMesh(MeshField * field)
+{
+	this->_field = field;
+}
 
+bool DirectX::FieldCollider::IsOnGround(Vector3 Position)
+{
+	float width = this->_field->m_Width * this->transform()->scale().x;
+	float depth = this->_field->m_Depth * this->transform()->scale().z;
+	float x = ( Position.x + (width * this->_field->m_WidthNum * 0.5f)) / width;
+	float z = (-Position.z + (depth * this->_field->m_DepthNum * 0.5f)) / depth;
+	return 0.0 < x && x < (float)this->_field->m_WidthNum && 0.0f < z && z < (float)this->_field->m_DepthNum;
+}
+
+float DirectX::FieldCollider::GetHeight(Vector3 Position)
+{
+	Transform* trans = this->transform().get();
+	Vector3 scale = trans->scale();
+	auto VertexIndex = this->_field->m_VertexIndex;
+
+	unsigned int widthNum = this->_field->m_WidthNum;
+	unsigned int depthNum = this->_field->m_DepthNum;
+
+	float width = this->_field->m_Width * scale.x;
+	float depth = this->_field->m_Depth * scale.z;
+
+	int x = ( Position.x + (width * widthNum * 0.5f)) / width;
+	int z = (-Position.z + (depth * depthNum * 0.5f)) / depth;
+
+	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
+	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);
+
+	Vector3 va = PosA - PosV;
+	Vector3 vp = Position - PosV;
+	
+	Vector3 p0, p1, p2;
+	if(Vector3::Cross(va,vp).y > 0.0f)
+	{
+		p0 = VertexIndex[(z + 1) * (widthNum + 1) +  x		].Position;
+		p1 = VertexIndex[ z		 * (widthNum + 1) +  x		].Position;
+		p2 = VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)	].Position;
+	}
+	else
+	{
+		p0 = VertexIndex[ z		 * (widthNum + 1) + (x + 1) ].Position;
+		p1 = VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)	].Position;
+		p2 = VertexIndex[ z		 * (widthNum + 1) +  x		].Position;
+	}
+
+	p0 *= scale;
+	p1 *= scale;
+	p2 *= scale;
+
+	Vector3 normal = Vector3::Cross((p1 - p0),(p2 - p0));	//ñ ÇÃñ@ê¸
+
+	Vector3 v(0.0f,-10.0f,0.0f);	//ÉvÉåÉCÉÑÅ[Ç©ÇÁÇÃêÇê¸
+
+	float dvn  = Vector3::Dot(v,normal);
+	float dp0n = Vector3::Dot(p0,normal);
+	normal.z *= -1.0;	//dpnÇ™ãtÇ…Ç»ÇÈÇÃÇñhÇÆ
+	float dpn = Vector3::Dot(Position,normal);
+
+	float t;
+	if (dvn == 0.0f || (dp0n - dpn) == 0.0f)
+		t = 0.0f;
+	else
+		t = (dp0n - dpn) / dvn;
+
+	Vector3 hp = Position + v*t;
+
+	if (isnan(hp.y))
+		return 0.0f;
+
+	return hp.y;
+}
+
+Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
+{
+	Transform* trans = this->transform().get();
+	Vector3 scale = trans->scale();
+	auto VertexIndex = this->_field->m_VertexIndex;
+
+	unsigned int widthNum = this->_field->m_WidthNum;
+	unsigned int depthNum = this->_field->m_DepthNum;
+
+	float width = this->_field->m_Width * scale.x;
+	float depth = this->_field->m_Depth * scale.z;
+
+	int x = (Position.x + (width * widthNum * 0.5f)) / width;
+	int z = (-Position.z + (depth * depthNum * 0.5f)) / depth;
+
+	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
+	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);
+
+	Vector3 va = PosA - PosV;
+	Vector3 vp = Position - PosV;
+
+	Vector3 p0, p1, p2;
+	if (Vector3::Cross(va, vp).y > 0.0f)
+	{
+		p0 = VertexIndex[(z + 1) * (widthNum + 1) + x].Position;
+		p1 = VertexIndex[z		 * (widthNum + 1) + x].Position;
+		p2 = VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position;
+	}
+	else
+	{
+		p0 = VertexIndex[z		 * (widthNum + 1) + (x + 1)].Position;
+		p1 = VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position;
+		p2 = VertexIndex[z		 * (widthNum + 1) + x].Position;
+	}
+
+	p0 *= scale;
+	p1 *= scale;
+	p2 *= scale;
+
+	Vector3 normal = Vector3::Cross((p1 - p0), (p2 - p0));	//ñ ÇÃñ@ê¸
+
+	return normal.normalize();
+}

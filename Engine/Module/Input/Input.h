@@ -23,7 +23,7 @@ namespace DirectX
 		static bool GetKeyCodePress(BYTE keyCode);
 		static bool GetKeyTrigger(BYTE KeyCode);
 		static bool GetKeyUp(BYTE KeyCode);
-	public:
+
 		static void DebugGUI();
 		static void Initialize();
 		static void Update();

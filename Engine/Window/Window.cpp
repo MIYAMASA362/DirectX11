@@ -161,6 +161,11 @@ LRESULT CALLBACK exImGui_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	switch (uMsg)
 	{
+	case WM_CREATE: 
+	{
+
+	}
+	break;
 	case WM_KEYDOWN: {
 		switch (wParam)
 		{

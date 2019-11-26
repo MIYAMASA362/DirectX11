@@ -2,14 +2,12 @@
 
 namespace DirectX
 {
+	class Rigidbody;
 	class Physics
 	{
 	public:
 		static const float m_Gravity;
-	public:
-		Physics() = delete;
-		~Physics() = delete;
-	public:
 		static Vector3 Get_Gravity();
+		static bool RayCast(Vector3 origin,Vector3 direction,float distance);
 	};
 }
