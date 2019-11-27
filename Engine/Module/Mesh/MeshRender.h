@@ -6,6 +6,7 @@ namespace DirectX
 	//=== MeshRender ==========================================================
 	class MeshRender :public Renderer3D
 	{
+		friend class Physics;
 	private:
 		std::shared_ptr<Mesh> mesh;
 	public:

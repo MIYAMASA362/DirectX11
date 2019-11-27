@@ -10,6 +10,7 @@ public:
 
 	void Update()
 	{
+		
 	}
 
 	void FixedUpdate()
@@ -28,12 +29,20 @@ public:
 		if (Input::GetKeyPress('D'))
 			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
 		
-		if (_fieldCollider->IsOnGround(this->transform()->position()))
+		/*if (_fieldCollider->IsOnGround(this->transform()->position()))
 		{
 			Vector3 pos = this->transform()->position();
 			pos.y = _fieldCollider->GetHeight(pos) + 4.0f;
 			this->transform()->position(pos);
 			this->gameObject()->GetComponent<Rigidbody>().lock()->SetVelocity(Vector3::zero());
+		}
+*/
+		RayCastHit info;
+		if (Physics::RayCast(this->transform()->position() + Vector3::up()*2.0f, Vector3::down(), info, 10.0f))
+		{
+			Vector3 pos = this->transform()->position();
+			pos.y = info.hitPosition.y + this->transform()->scale().y;
+			this->transform()->position(pos);
 		}
 	}
 };

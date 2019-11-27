@@ -25,25 +25,26 @@
 
 CField::CField()
 {
-	VERTEX_3D vertex[4] =
+	this->_VertexArray = new VERTEX_3D[4]
 	{
 		{ XMFLOAT3(50.0f, 0.0f, 50.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
 		{ XMFLOAT3(-50.0f, 0.0f, 50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
 		{ XMFLOAT3(50.0f, 0.0f, -50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
 		{ XMFLOAT3(-50.0f, 0.0f, -50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
 	};
+	_VertexNum = 4;
 
 	//頂点バッファの生成
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(vertex) / sizeof(VERTEX_3D));
+	bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(_VertexArray) / sizeof(VERTEX_3D));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA subResourceData;
 	ZeroMemory(&subResourceData, sizeof(subResourceData));
-	subResourceData.pSysMem = vertex;
+	subResourceData.pSysMem = _VertexArray;
 
 	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 }
@@ -92,23 +93,24 @@ WallField::WallField()
 		D3D11_BUFFER_DESC bufferDesc;
 		D3D11_SUBRESOURCE_DATA subResourceData;
 
-		VERTEX_3D field[4] =
+		_VertexArray = new VERTEX_3D[4]
 		{
 			{ XMFLOAT3(1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
 			{ XMFLOAT3(-1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
 			{ XMFLOAT3(1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
 			{ XMFLOAT3(-1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
 		};
+		_VertexNum = 4;
 
 		//頂点バッファの生成
 		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(field) / sizeof(VERTEX_3D));
+		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(_VertexArray) / sizeof(VERTEX_3D));
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bufferDesc.CPUAccessFlags = 0;
 
 		ZeroMemory(&subResourceData, sizeof(subResourceData));
-		subResourceData.pSysMem = field;
+		subResourceData.pSysMem = _VertexArray;
 
 		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
 
@@ -208,7 +210,8 @@ SkySphere::SkySphere()
 		const float cTexWidth = (1.0f / cWidthGrid);
 		const float cTexHeight = (1.0f / cHeightGrid);
 
-		this->m_pVertexIndex = new VERTEX_3D[cIndexNum];
+		this->_VertexArray = new VERTEX_3D[cIndexNum];
+		this->_VertexNum = cIndexNum;
 
 		int nCount = 0;
 		float x, y, z,radius;
@@ -222,7 +225,7 @@ SkySphere::SkySphere()
 				x = radius * sinf(WidthAngle * w);
 				z = radius * cosf(WidthAngle * w);
 
-				VERTEX_3D& vertex = this->m_pVertexIndex[nCount];
+				VERTEX_3D& vertex = this->_VertexArray[nCount];
 				vertex.Position = XMFLOAT3(x, y, z);
 				vertex.Normal	= XMFLOAT3(0.0f, 1.0f, 0.0f);
 				vertex.Diffuse	= XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -244,7 +247,7 @@ SkySphere::SkySphere()
 
 		D3D11_SUBRESOURCE_DATA sd;
 		ZeroMemory(&sd,sizeof(sd));
-		sd.pSysMem = this->m_pVertexIndex;
+		sd.pSysMem = this->_VertexArray;
 
 		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
@@ -299,7 +302,6 @@ SkySphere::~SkySphere()
 		this->m_IndexBuffer->Release();
 	if (this->m_VertexBuffer != nullptr)
 		this->m_VertexBuffer->Release();
-	delete[] this->m_pVertexIndex;
 }
 
 void SkySphere::Render(XMMATRIX& worldMatrix)
@@ -343,7 +345,8 @@ MeshField::MeshField()
 		this->m_Depth = cDepth;
 
 		const unsigned int cIndexNum = cWidthGrid * cDepthGrid;
-		this->m_VertexIndex = new VERTEX_3D[cIndexNum];
+		_VertexArray = new VERTEX_3D[cIndexNum];
+		_VertexNum = cIndexNum;
 
 		float* yIndex = new float[cIndexNum];
 
@@ -352,7 +355,7 @@ MeshField::MeshField()
 			for (int x = 0; x < cWidthGrid; x++) {
 				yIndex[nCount] = 0.0f;
 				if (z < 10 || cDepthGrid - 10 < z)
-					yIndex[nCount] = 0.2f;
+					yIndex[nCount] = 1.0f;
 
 				nCount++;
 			}
@@ -366,7 +369,7 @@ MeshField::MeshField()
 
 		for (int z = 0; z < cDepthGrid; z++) {
 			for (int x = 0; x < cWidthGrid; x++) {
-				VERTEX_3D& vertex = this->m_VertexIndex[nCount];
+				VERTEX_3D& vertex = _VertexArray[nCount];
 				vertex.Position =
 					XMFLOAT3(
 						sX - (float)x * cWidth,
@@ -384,11 +387,11 @@ MeshField::MeshField()
 		for (int z = 1; z < cDepthGrid-1; z++) {
 			for (int x = 1; x < cWidthGrid-1; x++)
 			{
-				Vector3 vecA = (Vector3)this->m_VertexIndex[(z - 1)*cDepthGrid + x].Position - (Vector3)this->m_VertexIndex[(z + 1)*cWidthGrid + x].Position;
-				Vector3 vecB = (Vector3)this->m_VertexIndex[z*cDepthGrid + (x-1)].Position - (Vector3)this->m_VertexIndex[z*cWidthGrid + (x+1)].Position;
+				Vector3 vecA = (Vector3)_VertexArray[(z - 1)*cDepthGrid + x].Position - (Vector3)_VertexArray[(z + 1)*cWidthGrid + x].Position;
+				Vector3 vecB = (Vector3)_VertexArray[z*cDepthGrid + (x-1)].Position - (Vector3)_VertexArray[z*cWidthGrid + (x+1)].Position;
 
 				Vector3 normal = Vector3::Cross(vecB,vecA);
-				this->m_VertexIndex[z * cWidthGrid + x].Normal = normal.normalize();
+				_VertexArray[z * cWidthGrid + x].Normal = normal.normalize();
 			}
 
 		}
@@ -408,7 +411,7 @@ MeshField::MeshField()
 
 		D3D11_SUBRESOURCE_DATA sd;
 		ZeroMemory(&sd,sizeof(sd));
-		sd.pSysMem = this->m_VertexIndex;
+		sd.pSysMem = _VertexArray;
 
 		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
@@ -451,6 +454,17 @@ MeshField::MeshField()
 		if (FAILED(hr))
 			MessageBox(NULL,"インデックスバッファの生成に失敗しました。","MeshField",MB_OK);
 
+		//Surface設定
+		{
+			_SurfaceNum = this->m_IndexNum - 2;
+			_Surface = new Surface[_SurfaceNum];
+			for(int i = 0 ; i < _SurfaceNum; i++)
+			{
+				_Surface[i]._p1 = _VertexArray[pIndex[i+0]].Position;
+				_Surface[i]._p2 = _VertexArray[pIndex[i+1]].Position;
+				_Surface[i]._p3 = _VertexArray[pIndex[i+2]].Position;
+			}
+		}
 		delete[] pIndex;
 	}
 }
@@ -461,7 +475,6 @@ MeshField::~MeshField()
 		this->m_IndexBuffer->Release();
 	if (this->m_VertexBuffer != nullptr)
 		this->m_VertexBuffer->Release();
-	delete[] this->m_VertexIndex;
 }
 
 void MeshField::Render(XMMATRIX& worldMatrix)
@@ -505,12 +518,13 @@ DirectX::MeshWall::MeshWall()
 		const float sY = -this->m_Scale * 0.5f;
 
 		const unsigned int cIndexNum = cWidthGrid * cHeightGrid;
-		this->m_pVertexIndex = new VERTEX_3D[cIndexNum];
+		_VertexArray = new VERTEX_3D[cIndexNum];
+		_VertexNum = cIndexNum;
 
 		int nCount = 0;
 		for (int y = 0; y < cHeightGrid; y++) {
 			for (int x = 0; x < cWidthGrid; x++) {
-				VERTEX_3D& vertex = this->m_pVertexIndex[nCount];
+				VERTEX_3D& vertex = _VertexArray[nCount];
 				vertex.Position =
 					XMFLOAT3(
 						sX + cWidth * x,
@@ -532,7 +546,7 @@ DirectX::MeshWall::MeshWall()
 
 		D3D11_SUBRESOURCE_DATA sd;
 		ZeroMemory(&sd,sizeof(sd));
-		sd.pSysMem = this->m_pVertexIndex;
+		sd.pSysMem = _VertexArray;
 
 		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
@@ -586,7 +600,6 @@ DirectX::MeshWall::~MeshWall()
 		this->m_VertexBuffer->Release();
 	if (this->m_IndexBuffer)
 		this->m_IndexBuffer->Release();
-	delete[] this->m_pVertexIndex;
 }
 
 void DirectX::MeshWall::Render(XMMATRIX& worldMatrix)
@@ -626,12 +639,13 @@ DirectX::MeshCircle::MeshCircle()
 		const float cAngle = Mathf::PI2 / (cGrid-1);
 		const float cTexWidth = 1.0f / cGrid;
 
-		this->m_pVertexIndex = new VERTEX_3D[cIndexNum];
+		_VertexArray = new VERTEX_3D[cIndexNum];
+		_VertexNum = cIndexNum;
 
 		int nCount = 0;
 		for(int y = 0; y < 2; y++){
 			for(int x = 0; x < cGrid; x++){
-				VERTEX_3D& vertex = this->m_pVertexIndex[nCount];
+				VERTEX_3D& vertex = _VertexArray[nCount];
 				vertex.Position =
 					XMFLOAT3(
 						cRadian * sinf(cAngle * x),
@@ -653,7 +667,7 @@ DirectX::MeshCircle::MeshCircle()
 
 		D3D11_SUBRESOURCE_DATA sd;
 		ZeroMemory(&sd,sizeof(sd));
-		sd.pSysMem = this->m_pVertexIndex;
+		sd.pSysMem = _VertexArray;
 
 		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
@@ -695,7 +709,6 @@ DirectX::MeshCircle::~MeshCircle()
 		this->m_IndexBuffer->Release();
 	if (this->m_VertexBuffer)
 		this->m_VertexBuffer->Release();
-	delete[] this->m_pVertexIndex;
 }
 
 void DirectX::MeshCircle::Render(XMMATRIX& worldMatrix)

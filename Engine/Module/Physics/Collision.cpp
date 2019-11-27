@@ -604,7 +604,7 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 {
 	Transform* trans = this->transform().get();
 	Vector3 scale = trans->scale();
-	auto VertexIndex = this->_field->m_VertexIndex;
+	auto VertexIndex = this->_field->_VertexArray;
 
 	unsigned int widthNum = this->_field->m_WidthNum;
 	unsigned int depthNum = this->_field->m_DepthNum;
@@ -666,7 +666,7 @@ Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
 {
 	Transform* trans = this->transform().get();
 	Vector3 scale = trans->scale();
-	auto VertexIndex = this->_field->m_VertexIndex;
+	auto VertexIndex = this->_field->_VertexArray;
 
 	unsigned int widthNum = this->_field->m_WidthNum;
 	unsigned int depthNum = this->_field->m_DepthNum;

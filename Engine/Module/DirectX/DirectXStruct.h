@@ -651,6 +651,13 @@ namespace DirectX
 			return q;
 		}
 
+		static tagQuaternion FromToRotation(Vector3 from,Vector3 to)
+		{
+			float dot = Vector3::Dot(from, to);
+			Vector3 cross = Vector3::Cross(from,to);
+			return tagQuaternion::AngleAxisToRadian(dot,cross);
+		}
+
 		float length() {
 			return Length(*this);
 		};

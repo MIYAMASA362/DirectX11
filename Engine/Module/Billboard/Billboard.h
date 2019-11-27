@@ -18,7 +18,6 @@ namespace DirectX
 	private:
 		ID3D11Buffer* m_VertexBuffer = nullptr;
 		ID3D11Buffer* m_IndexBuffer = nullptr;
-		VERTEX_3D* m_VertexIndex = nullptr;
 		unsigned int m_IndexNum = 0;
 		float m_scale;
 	public:

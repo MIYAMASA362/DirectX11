@@ -21,7 +21,7 @@ DirectX::Billboard::Billboard()
 	{
 		this->m_scale = 1.0f;
 
-		this->m_VertexIndex = new VERTEX_3D[4]
+		this->_VertexArray = new VERTEX_3D[4]
 		{
 			{ XMFLOAT3(-this->m_scale, this->m_scale,0.0f),XMFLOAT3(0.0f,1.0f,0.0f),XMFLOAT4(1.0f,1.0f,1.0f,1.0f),XMFLOAT2(0.0f,0.0f) },
 			{ XMFLOAT3( this->m_scale, this->m_scale,0.0f),XMFLOAT3(0.0f,1.0f,0.0f),XMFLOAT4(1.0f,1.0f,1.0f,1.0f),XMFLOAT2(1.0f,0.0f) },
@@ -40,7 +40,7 @@ DirectX::Billboard::Billboard()
 
 		D3D11_SUBRESOURCE_DATA sd;
 		ZeroMemory(&sd, sizeof(sd));
-		sd.pSysMem = this->m_VertexIndex;
+		sd.pSysMem = this->_VertexArray;
 
 		hr = D3DApp::GetDevice()->CreateBuffer(&bd, &sd, &this->m_VertexBuffer);
 		if (FAILED(hr))
@@ -79,7 +79,6 @@ DirectX::Billboard::~Billboard()
 		this->m_IndexBuffer->Release();
 	if (this->m_VertexBuffer != nullptr)
 		this->m_VertexBuffer->Release();
-	delete[] this->m_VertexIndex;
 }
 
 void DirectX::Billboard::Render(XMMATRIX& worldMatrix)

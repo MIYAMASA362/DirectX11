@@ -20,12 +20,14 @@ public:
 		FieldCollider* fieldCollider;
 		GameObject* Field = this->AddSceneObject("Field",TagName::Default);
 		{
-			Field->transform().lock()->position(Vector3::up() * 3.0f);
 			Field->transform().lock()->localScale(Vector3(1.0f,0.1f,1.0f) * 50.0f);
 			auto mesh = Field->AddComponent<MeshRender>().lock()->SetMesh<MeshField>();
 			mesh->m_Texture = TextureManager::GetTexture("field004");
 			fieldCollider = Field->AddComponent<FieldCollider>().lock().get();
 			fieldCollider->SetMesh(mesh);
+
+			auto render = Field->GetComponent<Renderer>();
+			Physics::AddRayCastTarget(std::dynamic_pointer_cast<MeshRender>(render.lock()));
 		}
 
 		//pModel
@@ -34,7 +36,7 @@ public:
 			pModel->transform().lock()->position(Vector3::up()*10.0f);
 			pModel->transform().lock()->localScale(Vector3::one());
 			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
-			pModel->AddComponent<Rigidbody>();
+			pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
 			pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
 			auto player = pModel->AddComponent<Player>().lock();
 			player->_fieldCollider = fieldCollider;
