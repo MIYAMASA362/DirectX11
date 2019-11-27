@@ -90,6 +90,18 @@ namespace DirectX
 		tagVector3(XMVECTOR vec):x(vec.m128_f32[0]),y(vec.m128_f32[1]),z(vec.m128_f32[2]) { };
 		tagVector3(XMFLOAT3 vec) :x(vec.x), y(vec.y), z(vec.z) {};
 
+		static tagVector3 XAxis() {
+			return tagVector3(1.0f,0.0f,0.0f);
+		};
+
+		static tagVector3 YAxis() {
+			return tagVector3(0.0f,1.0f,0.0f);
+		}
+
+		static tagVector3 ZAxis(){
+			return tagVector3(0.0f,0.0f,1.0f);
+		}
+
 		//	tagVector3(0.0f,0.0f,0.0f)
 		static tagVector3 zero()	{ 
 			return tagVector3( 0.0f,  0.0f,  0.0f);

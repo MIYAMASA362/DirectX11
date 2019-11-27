@@ -1,6 +1,9 @@
 #pragma once
+
 struct MODEL_MATERIAL;
 struct MODEL;
+
+struct aiScene;
 
 namespace DirectX
 {
@@ -23,6 +26,7 @@ namespace DirectX
 	class ModelManager:public AssetManager
 	{
 	private:
+		static const aiScene* _aiScene;
 		static const std::string AssetDataBase;								//AssetƒtƒHƒ‹ƒ_‚Ü‚Å‚ÌPath
 		static std::map<std::string, std::shared_ptr<Model>> ModelIndex;	//Model•ÛŠÇ
 	private:
@@ -30,6 +34,7 @@ namespace DirectX
 		~ModelManager() = default;
 	public:
 		static void LoadAsset(ModelAsset asset);
+		static void LoadAssetForAssimp(ModelAsset asset);
 		static void Release();
 		static std::weak_ptr<Model> GetModel(std::string name);	
 	private:

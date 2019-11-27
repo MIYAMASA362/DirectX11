@@ -80,6 +80,7 @@ public:
 
 			auto collider = sphere->AddComponent<SphereCollider>().lock();
 			collider->SetRadius(2.0f);
+			collider->IsTrigger = true;
 		}
 
 		//Canvas

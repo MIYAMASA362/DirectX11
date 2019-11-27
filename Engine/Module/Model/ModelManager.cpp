@@ -1,6 +1,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include"Common.h"
 
+#include<assimp\cimport.h>
+#include<assimp\scene.h>
+#include<assimp\postprocess.h>
+#include<assimp\matrix4x4.h>
+
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -18,12 +23,15 @@
 #include"Module\Renderer\Renderer.h"
 
 #include"Module\Texture\TextureManager.h"
+
 //Model
 #include"model.h"
 #include"ModelManager.h"
 
 const std::string ModelManager::AssetDataBase = DirectX::AssetManager::AssetPath+ "Model/";
 std::map<std::string, std::shared_ptr<Model>> ModelManager::ModelIndex;
+
+const aiScene* ModelManager::_aiScene;
 
 void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 {
@@ -89,6 +97,15 @@ void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 	}
 
 	ModelIndex.emplace(asset.name,std::shared_ptr<Model>(data));
+}
+
+void DirectX::ModelManager::LoadAssetForAssimp(ModelAsset asset)
+{
+	Model* model = new Model();
+
+	std::string FileName = AssetDataBase + asset.folderPath + "/" + asset.modelPath;
+
+	delete model;
 }
 
 

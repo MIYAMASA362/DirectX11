@@ -60,6 +60,7 @@ namespace DirectX
 
 	protected:
 		static bool BoxVsBox(Collider* collider,Collider* other);
+		static bool OBBVsOBB(Collider* collider, Collider* other);
 		static bool BoxVsShpere(Collider* collider,Collider* other);
 		static bool SphereVsSphere(Collider* collider, Collider* other);
 

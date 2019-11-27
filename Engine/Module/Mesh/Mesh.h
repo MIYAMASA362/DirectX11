@@ -45,6 +45,7 @@ namespace DirectX
 
 	inline Mesh::~Mesh()
 	{
+		delete[] this->_Surface;
 		delete[] this->_VertexArray;
 	}
 
