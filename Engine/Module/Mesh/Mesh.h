@@ -18,6 +18,7 @@ namespace DirectX
 		Vector3 _p3;
 	};
 
+	//ƒƒbƒVƒ…
 	class Mesh
 	{
 		friend class MeshCollider;
