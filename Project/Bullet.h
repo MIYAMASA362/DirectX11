@@ -31,3 +31,21 @@ public:
 
 	}
 };
+
+class RotationBox:public MonoBehaviour<RotationBox>
+{
+public :
+	RotationBox(EntityID OwnerID) :MonoBehaviour(OwnerID) { };
+public:
+	void Start() override
+	{
+	
+	}
+
+	void Update() override
+	{
+		Quaternion q = this->transform()->rotation();
+		q *= Quaternion::AngleAxisToEuler(0.1f,Vector3::up());
+		this->transform()->rotation(q);
+	}
+};

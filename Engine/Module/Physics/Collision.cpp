@@ -51,6 +51,11 @@ Vector3 DirectX::Bounds::GetSize()
 	return this->m_size;
 }
 
+float DirectX::Bounds::GetRadius()
+{
+	return m_size.x;
+}
+
 void DirectX::Bounds::SetCenter(Vector3 center)
 {
 	this->m_center = center;
@@ -103,6 +108,13 @@ void DirectX::Collider::Start()
 	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(this->_self.lock()));
 }
 
+void DirectX::Collider::IsHitReset()
+{
+	auto index = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
+	for(auto col : *index)
+		std::dynamic_pointer_cast<Collider>(col.lock())->IsHit = false;
+}
+
 void DirectX::Collider::Hitjudgment()
 {
 	auto components = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
@@ -129,14 +141,17 @@ void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& collider
 
 	for(auto collider:colliderlist)
 		for (auto other : colliders)
-			collider.lock()->Judgment(other.lock().get());
+			if(collider.lock() != other.lock())
+				collider.lock()->Judgment(other.lock().get());
 }
 
 void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist, std::list<std::weak_ptr<Collider>>& otherlist)
 {
 	for(auto collider: colliderlist)
 	{
-		for (auto other : otherlist) {
+		for (auto other : otherlist) 
+		{
+			if (collider.lock() == other.lock()) continue;
 			collider.lock()->Judgment(other.lock().get());
 		}
 	}
@@ -200,31 +215,49 @@ bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
 	//分離軸
 	Vector3 SepAxis;
 
-	float rA, rB,L;
-	Vector3 right, up, forward;
+	//分離軸上の長さ
+	float rA;	//ColAの長さ
+	float rB;	//ColBの長さ
+	float L;	//ColAとColB間の長さ
 
+	//Axis
+	Vector3 colA_Right	 = colA->transform()->right();
+	Vector3 colA_Forward = colA->transform()->forward();
+	Vector3 colA_Up		 = colA->transform()->up();
+
+	Vector3 colB_Right	 = colB->transform()->right();
+	Vector3 colB_Forward = colB->transform()->forward();
+	Vector3 colB_Up		 = colB->transform()->up();
+
+	//AxisLength
+	Vector3 colA_RightLen	= colA_Right * sizeA.x;
+	Vector3 colA_ForwardLen = colA_Forward * sizeA.z;
+	Vector3 colA_UpLen		= colA_Up * sizeA.y;
+
+	Vector3 colB_RightLen	= colB_Right * sizeB.x;
+	Vector3 colB_ForwardLen = colB_Forward * sizeB.z;
+	Vector3 colB_UpLen		= colB_Up * sizeB.y;
+
+	//ColA
 	{
-		right	= colB->transform()->right()	* sizeB.x;
-		up		= colB->transform()->up()		* sizeB.y;
-		forward = colB->transform()->forward()	* sizeB.z;
-
 		//ColA Right
 		{
-			SepAxis = colA->transform()->right();
+			SepAxis = colA_Right;
 
-			rA = centerA.x + Vector3::Length(SepAxis * sizeA.x);
-			rB = centerB.x + DotSepAxis(&SepAxis, &right, &forward,&up);
+			rA = Vector3::Length(SepAxis * sizeA.x);
+			rB = DotSepAxis(&SepAxis, &colB_RightLen, &colB_ForwardLen,&colB_UpLen);
 
 			L = fabsf(Vector3::Dot(distance, SepAxis));
 			if (L > rA + rB) return false;
+			
 		}
 
 		//ColA Forward
 		{
-			SepAxis = colA->transform()->forward();
+			SepAxis = colA_Forward;
 
-			rA = centerA.z + Vector3::Length(SepAxis * sizeA.z);
-			rB = centerB.z + DotSepAxis(&SepAxis, &right, &forward, &up);
+			rA = Vector3::Length(SepAxis * sizeA.z);
+			rB = DotSepAxis(&SepAxis, &colB_RightLen, &colB_ForwardLen, &colB_UpLen);
 
 			L = fabsf(Vector3::Dot(distance, SepAxis));
 			if (L > rA + rB) return false;
@@ -232,38 +265,35 @@ bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
 
 		//ColA Up
 		{
-			SepAxis = colA->transform()->up();
+			SepAxis = colA_Up;
 
-			rA = centerA.y + Vector3::Length(SepAxis * sizeA.y);
-			rB = centerB.y + DotSepAxis(&SepAxis, &right, &forward, &up);
+			rA = Vector3::Length(SepAxis * sizeA.y);
+			rB = DotSepAxis(&SepAxis, &colB_RightLen, &colB_ForwardLen, &colB_UpLen);
 
 			L = fabsf(Vector3::Dot(distance, SepAxis));
 			if (L > rA + rB) return false;
 		}
 	}
 	
+	//ColB
 	{
-		right	= colA->transform()->right()	* sizeA.x;
-		up		= colA->transform()->up()		* sizeA.y;
-		forward = colA->transform()->forward()	* sizeA.z;
-
 		//ColB right
 		{
-			SepAxis = colB->transform()->right();
+			SepAxis = colB_Right;
 
-			rA = centerB.x + Vector3::Length(SepAxis * sizeB.x);
-			rB = centerA.x + DotSepAxis(&SepAxis,&right,&forward,&up);
+			rA = Vector3::Length(SepAxis * sizeB.x);
+			rB = DotSepAxis(&SepAxis,&colA_RightLen,&colA_ForwardLen,&colA_UpLen);
 
 			L = fabsf(Vector3::Dot(distance,SepAxis));
-			if (L > rA + rB) return false;
+			if (L > rA + rB) return false;	
 		}
 
 		//ColB forward
 		{
 			SepAxis = colB->transform()->forward();
 
-			rA = centerB.z + Vector3::Length(SepAxis * sizeB.z);
-			rB = centerA.z + DotSepAxis(&SepAxis,&right,&forward,&up);
+			rA = Vector3::Length(SepAxis * sizeB.z);
+			rB = DotSepAxis(&SepAxis, &colA_RightLen, &colA_ForwardLen, &colA_UpLen);
 
 			L = fabsf(Vector3::Dot(distance,SepAxis));
 			if (L > rA + rB) return false;
@@ -271,30 +301,189 @@ bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
 
 		//ColB up
 		{
-			SepAxis = colB->transform()->up();
+			SepAxis = colB_Up;
 
-			rA = centerB.y + Vector3::Length(SepAxis * sizeB.y);
-			rB = centerA.y + DotSepAxis(&SepAxis,&right,&forward,&up);
+			rA = Vector3::Length(SepAxis * sizeB.y);
+			rB = DotSepAxis(&SepAxis, &colA_RightLen, &colA_ForwardLen, &colA_UpLen);
 
 			L = fabsf(Vector3::Dot(distance,SepAxis));
 			if (L > rA + rB) return false;
 		}
 	}
 
+	//外積
 	Vector3 Cross;
 
 	{
+		//Forward vs Forward
 		{
-			right = colA->transform()->right() * sizeA.x;
-			up = colA->transform()->up() * sizeA.y;
+			Cross = Vector3::Cross(colA_Forward, colB_Forward);
+			rA = DotSepAxis(&Cross,&colA_RightLen,&colA_UpLen);
+			rB = DotSepAxis(&Cross,&colB_RightLen,&colB_UpLen);
 
-			Cross = Vector3::Cross(colA->transform()->forward(), colB->transform()->forward());
-			rA = centerA.z + DotSepAxis(&Cross,&right,&up);
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Forward vs Right
+		{
+			Cross = Vector3::Cross(colA_Forward,colB_Right);
+			rA = DotSepAxis(&Cross,&colA_RightLen,&colA_UpLen);
+			rB = DotSepAxis(&Cross,&colB_ForwardLen,&colB_UpLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+		
+		//Forward vs Up
+		{
+			Cross = Vector3::Cross(colA_Forward,colB_Up);
+			rA = DotSepAxis(&Cross,&colA_RightLen,&colA_UpLen);
+			rB = DotSepAxis(&Cross,&colB_RightLen,&colB_ForwardLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Right vs Forward
+		{
+			Cross = Vector3::Cross(colA_Right,colB_Forward);
+			rA = DotSepAxis(&Cross,&colA_ForwardLen,&colA_UpLen);
+			rB = DotSepAxis(&Cross,&colA_RightLen,&colB_UpLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Right vs Right
+		{
+			Cross = Vector3::Cross(colA_Right,colB_Right);
+			rA = DotSepAxis(&Cross, &colA_ForwardLen, &colA_UpLen);
+			rB = DotSepAxis(&Cross, &colB_ForwardLen, &colB_UpLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if(L > rA + rB) return false;
+		}
+
+		//Right vs Up
+		{
+			Cross = Vector3::Cross(colA_Right,colB_Up);
+			rA = DotSepAxis(&Cross, &colA_ForwardLen, &colA_UpLen);
+			rB = DotSepAxis(&Cross, &colB_ForwardLen, &colB_RightLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Up vs Forward
+		{
+			Cross = Vector3::Cross(colA_Up,colB_Forward);
+			rA = DotSepAxis(&Cross,&colA_RightLen,&colA_ForwardLen);
+			rB = DotSepAxis(&Cross,&colB_RightLen,&colB_UpLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Up vs Right
+		{
+			Cross = Vector3::Cross(colA_Up,colB_Right);
+			rA = DotSepAxis(&Cross, &colA_RightLen, &colA_ForwardLen);
+			rB = DotSepAxis(&Cross, &colB_ForwardLen,&colB_UpLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
+		}
+
+		//Up vs Up
+		{
+			Cross = Vector3::Cross(colA_Up, colB_Up);
+			rA = DotSepAxis(&Cross, &colA_RightLen, &colA_ForwardLen);
+			rB = DotSepAxis(&Cross, &colB_ForwardLen,&colB_RightLen);
+
+			L = fabsf(Vector3::Dot(distance,Cross));
+			if (L > rA + rB) return false;
 		}
 	}
 
-	return false;
+	//物理判定
+	if (!colA->IsTrigger || !colB->IsTrigger)
+	{
+		if(!colA->_rigidbody.expired())
+		{
+			//向き
+			Vector3 dir = distance.normalize();
+			Vector3 Rep;
+
+			auto rigidbody = colA->_rigidbody.lock();
+			rigidbody->transform()->position(rigidbody->transform()->position() + Rep);
+		}
+	}
+
+	return true;
 }
+
+bool DirectX::Collider::OBBVsShpere(Collider * box, Collider * sphere)
+{
+	Bounds& BoxB = box->bound;
+	Bounds& SphB = sphere->bound;
+
+	//空間行列
+	XMMATRIX BoxWorld = box->transform()->WorldMatrix();
+	XMMATRIX SphWorld = sphere->transform()->WorldMatrix();
+
+	//中心
+	Vector3 BoxC = XMVector3TransformCoord(BoxB.GetCenter(), BoxWorld);
+	Vector3 SphC = XMVector3TransformCoord(SphB.GetCenter(), SphWorld);
+
+	//Boxのサイズ
+	Vector3 boxSize = BoxB.GetSize() * box->transform()->scale();
+	float radius = SphB.GetRadius();
+
+	Vector3 distance = BoxC - SphC;
+
+	Vector3 Box_Right = box->transform()->right();
+	Vector3 Box_Forward = box->transform()->forward();
+	Vector3 Box_Up = box->transform()->up();
+	
+	Vector3 Box_RightLen = Box_Right * boxSize.x;
+	Vector3 Box_ForwardLen = Box_Forward * boxSize.z;
+	Vector3 Box_UpLen = Box_Up * boxSize.y;
+
+	float rA,rB,L;
+	
+	{
+		rA = Vector3::Length(Box_RightLen);
+		rB = radius;
+
+		L = fabsf(Vector3::Dot(distance, Box_Right));
+
+		if (L > rA + rB)
+			return false;
+	}
+
+	{
+		rA = Vector3::Length(Box_ForwardLen);
+		rB = radius;
+	
+		L = fabsf(Vector3::Dot(distance,Box_Forward));
+		if (L > rA + rB)
+			return false;
+	}
+
+	{
+		rA = Vector3::Length(Box_UpLen);
+		rB = radius;
+
+		L = fabsf(Vector3::Dot(distance,Box_Up));
+		if (L > rA + rB)
+			return false;
+	}
+
+	return true;
+}
+
+
 
 bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
 {
@@ -376,6 +565,45 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 		}
 		return true;
 	}
+	return false;
+}
+
+bool DirectX::Collider::SphereVsMesh(Collider * sphCol, MeshCollider * meshCol)
+{
+	Bounds& sphB = sphCol->bound;
+	
+	float radius = sphB.GetRadius();
+
+	Vector3 sphC = XMVector3TransformCoord(sphB.GetCenter(),sphCol->transform()->WorldMatrix());
+
+	auto Meshworld = meshCol->transform()->WorldMatrix();
+
+	for(int i = 0; i < meshCol->_mesh->_SurfaceNum; i++)
+	{
+		auto surface = meshCol->_mesh->_Surface[i];
+		
+		Vector3 p1;
+		p1 = surface._p1;
+		p1 = XMVector3TransformCoord(XMVectorSet(p1.x,p1.y,p1.z,1.0f),Meshworld);
+		Vector3 p2;
+		p2 = surface._p2;
+		p2 = XMVector3TransformCoord(XMVectorSet(p2.x,p2.y,p2.z,1.0f),Meshworld);
+		Vector3 p3;
+		p3 = surface._p3;
+		p3 = XMVector3TransformCoord(XMVectorSet(p3.x,p3.y,p3.z,1.0f),Meshworld);
+
+		Vector3 normal = Vector3::Cross((p2 - p1),(p3 - p1));
+		normal = normal.normalize();
+
+		if (normal == Vector3::zero()) continue;
+
+		Vector3 direction = p1 - sphC;
+		float dnd = Vector3::Dot(direction,normal);
+		float t = Vector3::Dot(normal,(p1 - sphC) /dnd);
+
+		Vector3 pos = sphC + direction * t;
+	}
+
 	return false;
 }
 
@@ -489,7 +717,7 @@ void DirectX::SphereCollider::ReleaseRenderBuffer()
 
 void DirectX::SphereCollider::SetRadius(float radius)
 {
-	this->bound.SetSize(Vector3::one() * radius * 2.0f);
+	this->bound.SetSize(Vector3::one() * radius);
 }
 
 void DirectX::SphereCollider::Render()
@@ -499,12 +727,14 @@ void DirectX::SphereCollider::Render()
 
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 	float rad = this->transform()->scale().MaxElement();
+	float radius = bound.GetRadius();
 	Vector3 scale = bound.GetSize() * rad;
 	Vector3 pos = bound.GetCenter();
 
 	XMMATRIX world;
 	XMMATRIX local;
-	world = XMMatrixScaling(scale.x, scale.y, scale.z) *  XMMatrixTranslation(pos.x, pos.y, pos.z);
+	world = XMMatrixScaling(radius,radius,radius);
+	world *= XMMatrixTranslation(pos.x,pos.y,pos.z);
 	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
@@ -524,14 +754,13 @@ void DirectX::SphereCollider::Render()
 
 bool DirectX::SphereCollider::Judgment(Collider * other)
 {
-	IsHit = false;
 	switch (other->GetShapeType())
 	{
 	case ShapeType::Box:
-		IsHit = BoxVsShpere(this,other);
+		IsHit = BoxVsShpere(this,other) || IsHit;
 		break;
 	case ShapeType::Sphere:
-		IsHit = SphereVsSphere(this,other);
+		IsHit = SphereVsSphere(this,other) || IsHit;
 		break;
 	default:
 		break;
@@ -667,12 +896,13 @@ void DirectX::BoxCollider::Render()
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
 
 	Vector3 scale = bound.GetSize() * 2.0f;
-	Vector3 pos = this->transform()->position() + bound.GetCenter();
+	Vector3 pos = bound.GetCenter();
 
 	XMMATRIX world = XMMatrixIdentity();
 	world *= XMMatrixScaling(scale.x, scale.y, scale.z);
-	world *= this->transform()->MatrixScaling();
 	world *= XMMatrixTranslation(pos.x, pos.y, pos.z);
+	world *= this->transform()->WorldMatrix();
+	
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
 
@@ -685,13 +915,10 @@ bool DirectX::BoxCollider::Judgment(Collider * other)
 	switch (other->GetShapeType())
 	{
 	case ShapeType::Box:
-		IsHit = BoxVsBox(this,other);
+		IsHit = OBBVsOBB(this,other) || IsHit;
 		break;
 	case ShapeType::Sphere:
-		IsHit = SphereVsSphere(this,other);
-	default:
-		IsHit = false;
-		break;
+		IsHit = OBBVsShpere(this,other) || IsHit;
 	}
 	return IsHit;
 }
@@ -822,3 +1049,16 @@ Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
 
 	return normal.normalize();
 }
+
+DirectX::MeshCollider::MeshCollider(EntityID OwnerID)
+:
+	Collider(OwnerID)
+{
+
+}
+
+void DirectX::MeshCollider::SetMesh(DirectX::Mesh * mesh)
+{
+	_mesh = mesh;
+}
+

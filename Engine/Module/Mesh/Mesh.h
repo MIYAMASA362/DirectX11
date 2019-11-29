@@ -23,6 +23,7 @@ namespace DirectX
 	{
 		friend class MeshCollider;
 		friend class Physics;
+		friend class Collider;
 	protected:
 		MeshLayer _Layer;
 		VERTEX_3D* _VertexArray;	//’¸“_î•ñ

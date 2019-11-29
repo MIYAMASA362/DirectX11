@@ -8,6 +8,7 @@ namespace DirectX
 	class Collider;
 
 	class MeshField;
+	class Mesh;
 
 	class Bounds
 	{
@@ -21,6 +22,7 @@ namespace DirectX
 		Vector3 GetMax();
 		Vector3 GetMin();
 		Vector3 GetSize();
+		float GetRadius();
 		void SetCenter(Vector3 center);
 		void SetSize(Vector3 size);
 	public:
@@ -34,9 +36,11 @@ namespace DirectX
 		{
 			Box,
 			Sphere,
-			Field
+			Field,
+			Mesh
 		};
 	public:
+		static void IsHitReset();
 		static void Hitjudgment();
 		static void Hitjudgment(std::list<std::weak_ptr<Collider>>& collider);
 		static void Hitjudgment(std::list<std::weak_ptr<Collider>>& collider,std::list<std::weak_ptr<Collider>>& other);
@@ -61,8 +65,10 @@ namespace DirectX
 	protected:
 		static bool BoxVsBox(Collider* collider,Collider* other);
 		static bool OBBVsOBB(Collider* collider, Collider* other);
+		static bool OBBVsShpere(Collider* collider, Collider* other);
 		static bool BoxVsShpere(Collider* collider,Collider* other);
 		static bool SphereVsSphere(Collider* collider, Collider* other);
+		static bool SphereVsMesh(Collider* collider,MeshCollider* mesh);
 
 		virtual bool Judgment(Collider* other) = 0;
 	};
@@ -131,5 +137,16 @@ namespace DirectX
 		Vector3 GetNormal(Vector3 Position);
 		void Render() override {};
 		bool Judgment(Collider* other) override { return false; };
+	};
+
+	class MeshCollider final : public Collider
+	{
+		friend class Collider;
+	private:
+		DirectX::Mesh* _mesh;
+	public:
+		MeshCollider(EntityID OwnerID);
+		ShapeType GetShapeType() override { return ShapeType::Mesh; };
+		void SetMesh(DirectX::Mesh* mesh);
 	};
 }

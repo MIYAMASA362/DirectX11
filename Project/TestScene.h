@@ -37,7 +37,9 @@ public:
 			pModel->transform().lock()->localScale(Vector3::one());
 			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
 			pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
-			pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
+			//pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
+			auto box = pModel->AddComponent<BoxCollider>().lock();
+			box->SetSize({1.0f,1.0f,1.0f});
 			auto player = pModel->AddComponent<Player>().lock();
 			player->_fieldCollider = fieldCollider;
 
@@ -81,6 +83,18 @@ public:
 			auto collider = sphere->AddComponent<SphereCollider>().lock();
 			collider->SetRadius(2.0f);
 			collider->IsTrigger = true;
+		}
+
+		GameObject* box = this->AddSceneObject("Box",TagName::Default);
+		{
+			box->transform().lock()->position({10.0f,0.0f,10.0f});
+			box->transform().lock()->localScale(Vector3::one() *2.0f);
+
+			auto collider = box->AddComponent<BoxCollider>().lock();
+			collider->SetSize({1.0f,1.0f,1.0f});
+			collider->IsTrigger = true;
+
+			box->AddComponent<RotationBox>();
 		}
 
 		//Canvas

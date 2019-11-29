@@ -67,8 +67,8 @@ bool DirectX::Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& inf
 
 			if (normal == Vector3::zero()) continue;
 
+			//ñ≥å¿ïΩñ è„åvéZ
 			float dnd = Vector3::Dot(direction, normal);
-			float dno = Vector3::Dot(origin, normal);
 
 			float t = Vector3::Dot(normal, (p1 - origin)) / dnd;
 

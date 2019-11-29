@@ -130,6 +130,7 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
+	Collider::IsHitReset();
 	ComponentManager::SendComponentMessage("FixedUpdate");
 	Rigidbody::ApplyRigidbody();
 	Rigidbody::CollisionRigidbody();
