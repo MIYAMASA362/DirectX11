@@ -411,9 +411,13 @@ bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
 	{
 		if(!colA->_rigidbody.expired())
 		{
-			//å¸Ç´
-			Vector3 dir = distance.normalize();
-			Vector3 Rep;
+			//å¸Ç´Çï™ó£é≤Ç…ê›íË
+			SepAxis = distance.normalize();
+
+			rA = DotSepAxis(&SepAxis,&colA_RightLen,&colA_ForwardLen,&colA_UpLen);
+			rB = DotSepAxis(&SepAxis,&colB_RightLen,&colB_ForwardLen,&colB_UpLen);
+
+			Vector3 Rep = SepAxis * ((rA + rB) - distance.length());
 
 			auto rigidbody = colA->_rigidbody.lock();
 			rigidbody->transform()->position(rigidbody->transform()->position() + Rep);
@@ -568,7 +572,7 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 	return false;
 }
 
-bool DirectX::Collider::SphereVsMesh(Collider * sphCol, MeshCollider * meshCol)
+bool DirectX::Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 {
 	Bounds& sphB = sphCol->bound;
 	
@@ -578,10 +582,24 @@ bool DirectX::Collider::SphereVsMesh(Collider * sphCol, MeshCollider * meshCol)
 
 	auto Meshworld = meshCol->transform()->WorldMatrix();
 
+	//ï®óùèàóù
+	auto Extrusion = [sphCol](Vector3 sub)->bool
+	{
+		if (!sphCol->_rigidbody.expired())
+		{
+			auto rigidbody = sphCol->_rigidbody.lock();
+			rigidbody->transform()->position(rigidbody->transform()->position() + sub);
+		}
+		return true;
+	};
+
 	for(int i = 0; i < meshCol->_mesh->_SurfaceNum; i++)
 	{
+		//ñ îªíË
+
 		auto surface = meshCol->_mesh->_Surface[i];
-		
+
+		//éOäpñ 
 		Vector3 p1;
 		p1 = surface._p1;
 		p1 = XMVector3TransformCoord(XMVectorSet(p1.x,p1.y,p1.z,1.0f),Meshworld);
@@ -592,16 +610,43 @@ bool DirectX::Collider::SphereVsMesh(Collider * sphCol, MeshCollider * meshCol)
 		p3 = surface._p3;
 		p3 = XMVector3TransformCoord(XMVectorSet(p3.x,p3.y,p3.z,1.0f),Meshworld);
 
+		//ñ@ê¸
 		Vector3 normal = Vector3::Cross((p2 - p1),(p3 - p1));
 		normal = normal.normalize();
 
 		if (normal == Vector3::zero()) continue;
 
-		Vector3 direction = p1 - sphC;
-		float dnd = Vector3::Dot(direction,normal);
-		float t = Vector3::Dot(normal,(p1 - sphC) /dnd);
+		Vector3 dir = p1 - sphC;
+		float length = fabsf(Vector3::Dot(dir,normal));
 
-		Vector3 pos = sphC + direction * t;
+		if(length < radius) return Extrusion(normal *(radius - length));
+
+		//ï”îªíË
+
+		float t; //î‰ó¶
+		Vector3 vsphC; //í∏ì_Ç©ÇÁÇÃãóó£
+
+		Vector3 vp12 = p2 - p1;
+		vsphC = sphC - p1;
+		t = Vector3::Dot(vp12.normalize(), vsphC) / vp12.length();
+
+		length = (vp12 * t - vsphC).length();
+
+		if (length < radius) return Extrusion(normal * length);
+
+		Vector3 vp23 = p3 - p2;
+		vsphC = sphC - p2;
+
+		length = (vp23 * t - sphC).length();
+
+		if (length < radius) return Extrusion(normal * length);
+
+		Vector3 vp31 = p1 - p3;
+		vsphC = sphC - p3;
+
+		length = (vp31 * t- sphC).length();
+
+		if (length < radius) return Extrusion(normal * length);
 	}
 
 	return false;
@@ -762,6 +807,9 @@ bool DirectX::SphereCollider::Judgment(Collider * other)
 	case ShapeType::Sphere:
 		IsHit = SphereVsSphere(this,other) || IsHit;
 		break;
+	case ShapeType::Mesh:
+		IsHit = SphereVsMesh(this,other) || IsHit;
+		break;
 	default:
 		break;
 	}
@@ -918,7 +966,9 @@ bool DirectX::BoxCollider::Judgment(Collider * other)
 		IsHit = OBBVsOBB(this,other) || IsHit;
 		break;
 	case ShapeType::Sphere:
-		IsHit = OBBVsShpere(this,other) || IsHit;
+		IsHit = OBBVsShpere(this, other) || IsHit;
+	default:
+		break;
 	}
 	return IsHit;
 }

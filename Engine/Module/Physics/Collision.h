@@ -9,6 +9,7 @@ namespace DirectX
 
 	class MeshField;
 	class Mesh;
+	class MeshCollider;
 
 	class Bounds
 	{
@@ -51,6 +52,7 @@ namespace DirectX
 		Bounds bound;
 		bool IsHit = false;				//è’ìÀÇµÇƒÇ¢ÇÈ
 		bool IsTrigger = false;			//ï®óùãììÆÇ∑ÇÈÇ©
+		DirectX::Mesh* _mesh;
 
 		Collider(EntityID OwnerID);
 		virtual ~Collider();
@@ -68,7 +70,7 @@ namespace DirectX
 		static bool OBBVsShpere(Collider* collider, Collider* other);
 		static bool BoxVsShpere(Collider* collider,Collider* other);
 		static bool SphereVsSphere(Collider* collider, Collider* other);
-		static bool SphereVsMesh(Collider* collider,MeshCollider* mesh);
+		static bool SphereVsMesh(Collider* collider,Collider* mesh);
 
 		virtual bool Judgment(Collider* other) = 0;
 	};
@@ -142,11 +144,11 @@ namespace DirectX
 	class MeshCollider final : public Collider
 	{
 		friend class Collider;
-	private:
-		DirectX::Mesh* _mesh;
 	public:
 		MeshCollider(EntityID OwnerID);
 		ShapeType GetShapeType() override { return ShapeType::Mesh; };
 		void SetMesh(DirectX::Mesh* mesh);
+		void Render() override {};
+		bool Judgment(Collider* other) override { return false; };
 	};
 }
