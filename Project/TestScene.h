@@ -17,14 +17,13 @@ public:
 		}
 		
 		//Field
-		FieldCollider* fieldCollider;
 		GameObject* Field = this->AddSceneObject("Field",TagName::Default);
 		{
 			Field->transform().lock()->localScale(Vector3(1.0f,0.1f,1.0f) * 50.0f);
 			auto mesh = Field->AddComponent<MeshRender>().lock()->SetMesh<MeshField>();
 			mesh->m_Texture = TextureManager::GetTexture("field004");
-			fieldCollider = Field->AddComponent<FieldCollider>().lock().get();
-			fieldCollider->SetMesh(mesh);
+			auto meshCol = Field->AddComponent<MeshCollider>().lock();
+			meshCol->SetMesh(mesh);
 
 			auto render = Field->GetComponent<Renderer>();
 			Physics::AddRayCastTarget(std::dynamic_pointer_cast<MeshRender>(render.lock()));
@@ -38,10 +37,11 @@ public:
 			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
 			pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
 			//pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
-			auto box = pModel->AddComponent<BoxCollider>().lock();
-			box->SetSize({1.0f,1.0f,1.0f});
+			/*auto box = pModel->AddComponent<BoxCollider>().lock();
+			box->SetSize({1.0f,1.0f,1.0f});*/
+			auto sphere = pModel->AddComponent<SphereCollider>().lock();
+			sphere->SetRadius(1.0f);
 			auto player = pModel->AddComponent<Player>().lock();
-			player->_fieldCollider = fieldCollider;
 
 			/*for(int i = 0; i < 10; i++)
 			{
@@ -92,9 +92,9 @@ public:
 
 			auto collider = box->AddComponent<BoxCollider>().lock();
 			collider->SetSize({1.0f,1.0f,1.0f});
-			collider->IsTrigger = true;
+			collider->IsTrigger = false;
 
-			box->AddComponent<RotationBox>();
+			//box->AddComponent<RotationBox>();
 		}
 
 		//Canvas
