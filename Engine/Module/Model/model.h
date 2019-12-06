@@ -5,7 +5,7 @@ using namespace DirectX;
 struct MODEL_MATERIAL
 {
 	char						Name[256];
-	MATERIAL					Material;
+	Material					Material;
 	char						TextureName[256];
 };
 

@@ -19,12 +19,15 @@
 //ECS
 #include"ECSEngine.h"
 
+#include"Module\Material\Material.h"
+
 //Component
 #include"Tag\Tag.h"
 #include"GameObject\GameObject.h"
 #include"Transform\Transform.h"
 
 #include"Audio\AudioSource.h"
+
 
 //Component Module
 #include"Physics\Physics.h"

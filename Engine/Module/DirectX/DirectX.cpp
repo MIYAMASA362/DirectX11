@@ -15,6 +15,8 @@
 #include"DirectXStruct.h"
 #include"DirectX.h"
 
+#include"Module\Shader\Shader.h"
+
 using namespace DirectX;
 
 //--- D3DApp ------------------------------------------------------------------
@@ -178,113 +180,12 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 	pInstance->ImmediateContext->PSSetSamplers(0, 1, &samplerState);
 
 
+	pInstance->_Shader = new Shader();
+	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso");
+	pInstance->_Shader->SetShader();
 
 
-	// 頂点シェーダ生成
-	{
-		FILE* file;
-		long int fsize;
-
-		file = fopen("Asset/Shader/vertexShader.cso", "rb");
-		fsize = _filelength(_fileno(file));
-		unsigned char* buffer = new unsigned char[fsize];
-		fread(buffer, fsize, 1, file);
-		fclose(file);
-
-		pInstance->D3DDevice->CreateVertexShader(buffer, fsize, NULL, &pInstance->VertexShader);
-
-
-		// 入力レイアウト生成
-		D3D11_INPUT_ELEMENT_DESC layout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 4 * 6, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 10, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-		};
-		UINT numElements = ARRAYSIZE(layout);
-
-		pInstance->D3DDevice->CreateInputLayout(layout,
-			numElements,
-			buffer,
-			fsize,
-			&pInstance->VertexLayout);
-
-		delete[] buffer;
-	}
-
-
-
-	// ピクセルシェーダ生成
-	{
-		FILE* file;
-		long int fsize;
-
-		file = fopen("Asset/Shader/pixelShader.cso", "rb");
-		fsize = _filelength(_fileno(file));
-		unsigned char* buffer = new unsigned char[fsize];
-		fread(buffer, fsize, 1, file);
-		fclose(file);
-
-		pInstance->D3DDevice->CreatePixelShader(buffer, fsize, NULL, &pInstance->PixelShader);
-
-		delete[] buffer;
-	}
-
-	// 入力レイアウト設定
-	pInstance->ImmediateContext->IASetInputLayout(pInstance->VertexLayout);
-
-	// シェーダ設定
-	pInstance->ImmediateContext->VSSetShader(pInstance->VertexShader, NULL, 0);
-	pInstance->ImmediateContext->PSSetShader(pInstance->PixelShader, NULL, 0);
-
-
-
-	// 定数バッファ生成
-	D3D11_BUFFER_DESC hBufferDesc;
-	hBufferDesc.ByteWidth = sizeof(XMMATRIX);
-	hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	hBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hBufferDesc.CPUAccessFlags = 0;
-	hBufferDesc.MiscFlags = 0;
-	hBufferDesc.StructureByteStride = sizeof(float);
-
-	pInstance->D3DDevice->CreateBuffer(&hBufferDesc, NULL, &pInstance->WorldBuffer);
-	pInstance->ImmediateContext->VSSetConstantBuffers(0, 1, &pInstance->WorldBuffer);
-
-	pInstance->D3DDevice->CreateBuffer(&hBufferDesc, NULL, &pInstance->ViewBuffer);
-	pInstance->ImmediateContext->VSSetConstantBuffers(1, 1, &pInstance->ViewBuffer);
-
-	pInstance->D3DDevice->CreateBuffer(&hBufferDesc, NULL, &pInstance->ProjectionBuffer);
-	pInstance->ImmediateContext->VSSetConstantBuffers(2, 1, &pInstance->ProjectionBuffer);
-
-
-	hBufferDesc.ByteWidth = sizeof(MATERIAL);
-
-	pInstance->D3DDevice->CreateBuffer(&hBufferDesc, NULL, &pInstance->MaterialBuffer);
-	pInstance->ImmediateContext->VSSetConstantBuffers(3, 1, &pInstance->MaterialBuffer);
-
-
-	hBufferDesc.ByteWidth = sizeof(LIGHT);
-
-	pInstance->D3DDevice->CreateBuffer(&hBufferDesc, NULL, &pInstance->LightBuffer);
-	pInstance->ImmediateContext->VSSetConstantBuffers(4, 1, &pInstance->LightBuffer);
-
-
-	// ライト初期化
-	LIGHT light;
-	light.Direction = Vector4(0.0f, -1.0f, 0.0f, 0.0f);
-	light.Diffuse = COLOR(0.9f, 0.9f, 0.9f, 1.0f);
-	light.Ambient = COLOR(0.1f, 0.1f, 0.1f, 1.0f);
-	Renderer::SetLight(light);
-
-
-	// マテリアル初期化
-	MATERIAL material;
-	ZeroMemory(&material, sizeof(material));
-	material.Diffuse = COLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	material.Ambient = COLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	Renderer::SetMaterial(material);
+	pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
 
 	return S_OK;
 }
@@ -292,15 +193,7 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 void D3DApp::Destroy()
 {
 	if (!pInstance) return;
-
-	if (pInstance->WorldBuffer) pInstance->WorldBuffer->Release();
-	if (pInstance->ViewBuffer) pInstance->ViewBuffer->Release();
-	if (pInstance->ProjectionBuffer) pInstance->ProjectionBuffer->Release();
-
-	if (pInstance->MaterialBuffer) pInstance->MaterialBuffer->Release();
-	if (pInstance->VertexLayout) pInstance->VertexLayout->Release();
-	if (pInstance->VertexShader) pInstance->VertexShader->Release();
-	if (pInstance->PixelShader) pInstance->PixelShader->Release();
+	if (pInstance->_Shader) delete pInstance->_Shader;
 
 	if (pInstance->ImmediateContext)	pInstance->ImmediateContext->ClearState();
 	if (pInstance->RenderTargetView)	pInstance->RenderTargetView->Release();
@@ -389,36 +282,42 @@ void D3DApp::Renderer::SetWorldViewProjection2D()
 {
 	XMMATRIX world;
 	world = XMMatrixIdentity();
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
+	pInstance->_Shader->SetWorldMatrix(&world);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
 
 	XMMATRIX view;
 	view = XMMatrixIdentity();
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
+	pInstance->_Shader->SetViewMatrix(&view);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
 
 	XMMATRIX projection;
 	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
+	pInstance->_Shader->SetProjectionMatrix(&projection);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 
 void D3DApp::Renderer::SetWorldMatrix(XMMATRIX* WorldMatrix)
 {
 	XMMATRIX world;
 	world = *WorldMatrix;
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
+	pInstance->_Shader->SetWorldMatrix(&world);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
 }
 
 void D3DApp::Renderer::SetViewMatrix(XMMATRIX* ViewMatrix)
 {
 	XMMATRIX view;
 	view = *ViewMatrix;
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
+	pInstance->_Shader->SetViewMatrix(&view);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
 }
 
 void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
 {
 	XMMATRIX projection;
 	projection = *ProjectionMatrix;
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
+	pInstance->_Shader->SetProjectionMatrix(&projection);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 
 void D3DApp::Renderer::SetProjectionMatrix2D()
@@ -426,25 +325,15 @@ void D3DApp::Renderer::SetProjectionMatrix2D()
 	SetViewMatrix(&XMMatrixIdentity());
 	XMMATRIX projection;
 	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
-}
-
-void D3DApp::Renderer::SetMaterial(MATERIAL Material)
-{
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->MaterialBuffer, 0, NULL, &Material, 0, 0);
-}
-
-void D3DApp::Renderer::SetLight(LIGHT Light)
-{
-	pInstance->ImmediateContext->UpdateSubresource(pInstance->LightBuffer, 0, NULL, &Light, 0, 0);
+	pInstance->_Shader->SetProjectionMatrix(&projection);
+	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
 }
 
 void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer* VertexBuffer)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-	ID3D11Buffer* vb[1] = { VertexBuffer };
-	pInstance->ImmediateContext->IASetVertexBuffers(0, 1, vb, &stride, &offset);
+	pInstance->ImmediateContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
 }
 
 void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)

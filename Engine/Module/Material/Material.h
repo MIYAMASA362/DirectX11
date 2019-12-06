@@ -1,20 +1,32 @@
 #pragma once
 
-namespace DirectX
-{
-	class Texture;
+#include"Module\DirectX\DirectXStruct.h"
 
-	typedef struct tagMaterial
+class Material
+{
+public:
+	struct Constant
 	{
 		Color Ambient;
 		Color Diffuse;
 		Color Specular;
 		Color Emission;
 		float Shininess;
-		float Dummy[3];	//16bit
+		float Dummy[3];	//16bitサイズに合わせる
+	};
+public:
+	Material::Constant _constant;
+	ID3D11Buffer* _MaterialBuffer;
 
-		tagMaterial() = default;
-	}Material,MATERIAL;
+	Material();
+	virtual ~Material();
+
+	void SetResource();
+};
+
+namespace DirectX
+{
+	class Texture;
 
 	//Model用のマテリアル
 	typedef struct tagDX11_MODEL_MATERIAL
@@ -30,5 +42,4 @@ namespace DirectX
 		unsigned short	IndexNum;
 		DX11_MODEL_MATERIAL	Material;
 	}DX11_SUBSET;
-
 }

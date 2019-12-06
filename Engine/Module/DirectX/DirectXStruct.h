@@ -14,7 +14,7 @@ namespace DirectX
 		XMFLOAT4 Diffuse;
 		XMFLOAT2 TexCoord;
 	};
-	
+
 	//Mathf
 	struct Mathf {
 
@@ -28,7 +28,7 @@ namespace DirectX
 		static const float Rad2Deg;			//1.0f / Deg2Rad
 
 		//valueをmin < value < maxの範囲にClamp
-		static float Clamp(float value,const float min, const float max) {
+		static float Clamp(float value, const float min, const float max) {
 			value = max < value ? max : value;
 			value = min > value ? min : value;
 			return value;
@@ -46,13 +46,13 @@ namespace DirectX
 			return (1 - time)*start + time*end;
 		};
 		//球面線形補間
-		static float Slerp(const float start,const float end,float time)
+		static float Slerp(const float start, const float end, float time)
 		{
 			time = Clamp01(time);
 			return sinf((1.0f - time) * Mathf::PI_2) * start + sinf(time * Mathf::PI_2) * end;
 		}
 		//ラジアン角へ変更
-		static float ToRadian(float euler) 
+		static float ToRadian(float euler)
 		{
 			return euler * ((float)XM_PI / 180.0f);
 		};
@@ -69,12 +69,12 @@ namespace DirectX
 			return asinf(angle);
 		};
 		//逆Cosf
-		static float aCosf(float angle){
+		static float aCosf(float angle) {
 			return acosf(angle);
 		};
 		//逆Tanf
-		static float aTan2f(float y,float x){
-			return atan2f(y,x);
+		static float aTan2f(float y, float x) {
+			return atan2f(y, x);
 		}
 	};
 
@@ -86,73 +86,73 @@ namespace DirectX
 		float z;
 
 		tagVector3() :x(0.0f), y(0.0f), z(0.0f) {};
-		tagVector3(float _x, float _y, float _z) :x(_x),y(_y),z(_z) {};
-		tagVector3(XMVECTOR vec):x(vec.m128_f32[0]),y(vec.m128_f32[1]),z(vec.m128_f32[2]) { };
+		tagVector3(float _x, float _y, float _z) :x(_x), y(_y), z(_z) {};
+		tagVector3(XMVECTOR vec) :x(vec.m128_f32[0]), y(vec.m128_f32[1]), z(vec.m128_f32[2]) { };
 		tagVector3(XMFLOAT3 vec) :x(vec.x), y(vec.y), z(vec.z) {};
 
 		static tagVector3 XAxis() {
-			return tagVector3(1.0f,0.0f,0.0f);
+			return tagVector3(1.0f, 0.0f, 0.0f);
 		};
 
 		static tagVector3 YAxis() {
-			return tagVector3(0.0f,1.0f,0.0f);
+			return tagVector3(0.0f, 1.0f, 0.0f);
 		}
 
-		static tagVector3 ZAxis(){
-			return tagVector3(0.0f,0.0f,1.0f);
+		static tagVector3 ZAxis() {
+			return tagVector3(0.0f, 0.0f, 1.0f);
 		}
 
 		//	tagVector3(0.0f,0.0f,0.0f)
-		static tagVector3 zero()	{ 
-			return tagVector3( 0.0f,  0.0f,  0.0f);
+		static tagVector3 zero() {
+			return tagVector3(0.0f, 0.0f, 0.0f);
 		};
 		//	tagVector3(1.0f,1.0f,1.0f)
-		static tagVector3 one()		{ 
-			return tagVector3( 1.0f,  1.0f,  1.0f);
+		static tagVector3 one() {
+			return tagVector3(1.0f, 1.0f, 1.0f);
 		};
 		// tagVector3(0.0f,1.0f,0.0f)
-		static tagVector3 up(){
-			return tagVector3( 0.0f,  1.0f,  0.0f);
+		static tagVector3 up() {
+			return tagVector3(0.0f, 1.0f, 0.0f);
 		};
 		// tagVector3(0.0f,-1.0f,0.0f)
-		static tagVector3 down(){ 
-			return tagVector3( 0.0f, -1.0f,  0.0f); 
+		static tagVector3 down() {
+			return tagVector3(0.0f, -1.0f, 0.0f);
 		};
 		// tagVector3(1.0f,0.0f,0.0f)
-		static tagVector3 right(){
-			return tagVector3( 1.0f,  0.0f,  0.0f);
+		static tagVector3 right() {
+			return tagVector3(1.0f, 0.0f, 0.0f);
 		};
 		// tagVector3(-1.0f,0.0f,0.0f)
-		static tagVector3 left(){ 
-			return tagVector3(-1.0f,  0.0f,  0.0f); 
+		static tagVector3 left() {
+			return tagVector3(-1.0f, 0.0f, 0.0f);
 		};
 		// tagVector3(0.0f,0.0f,1.0f)
-		static tagVector3 forward(){
-			return tagVector3( 0.0f,  0.0f,  1.0f);
+		static tagVector3 forward() {
+			return tagVector3(0.0f, 0.0f, 1.0f);
 		};
 		// tagVector3(0.0f,0.0f,-1.0f)
-		static tagVector3 back(){ 
-			return tagVector3( 0.0f,  0.0f, -1.0f);
+		static tagVector3 back() {
+			return tagVector3(0.0f, 0.0f, -1.0f);
 		};
 
 		//2つのベクトルで各成分の一番大きな値を使用してベクトルを作成
-		static tagVector3 Max(const tagVector3 vec1, const tagVector3 vec2){ 
+		static tagVector3 Max(const tagVector3 vec1, const tagVector3 vec2) {
 			return{
 				vec1.x > vec2.x ? vec1.x : vec2.x,
 				vec1.y > vec2.y ? vec1.y : vec2.y,
 				vec1.z > vec2.z ? vec1.z : vec2.z
-			}; 
+			};
 		};
 		//2つのベクトルで各成分の一番小さな値を使用してベクトルを作成
-		static tagVector3 Min(const tagVector3 vec1, const tagVector3 vec2) { 
-			return{ 
+		static tagVector3 Min(const tagVector3 vec1, const tagVector3 vec2) {
+			return{
 				vec1.x < vec2.x ? vec1.x : vec2.x,
 				vec1.y < vec2.y ? vec1.y : vec2.y,
 				vec1.z < vec2.z ? vec1.z : vec2.z
-			}; 
+			};
 		};
 		//最大要素を返す
-		float MaxElement(){
+		float MaxElement() {
 			float e;
 			e = x < y ? y : x;
 			e = e < z ? z : e;
@@ -167,18 +167,18 @@ namespace DirectX
 		}
 		//2つのベクトルの内積
 		static float Dot(const tagVector3 vec1, const tagVector3 vec2) {
-			return 
-				vec1.x * vec2.x + 
-				vec1.y * vec2.y + 
+			return
+				vec1.x * vec2.x +
+				vec1.y * vec2.y +
 				vec1.z * vec2.z;
 		};
 		//2つのベクトルの外積
-		static tagVector3 Cross(const tagVector3 vec1, const tagVector3 vec2) { 
+		static tagVector3 Cross(const tagVector3 vec1, const tagVector3 vec2) {
 			return{
 				vec1.y * vec2.z - vec1.z * vec2.y,
 				vec1.z * vec2.x - vec1.x * vec2.z,
 				vec1.x * vec2.y - vec1.y * vec2.x
-			}; 
+			};
 		};
 		//tagVector3(vec1 + vec2)
 		static tagVector3 Add(const tagVector3 vec1, const tagVector3 vec2) {
@@ -189,7 +189,7 @@ namespace DirectX
 			};
 		};
 		//tagVector3(vec1 - vec2)
-		static tagVector3 Subtract(const tagVector3 vec1,const tagVector3 vec2){
+		static tagVector3 Subtract(const tagVector3 vec1, const tagVector3 vec2) {
 			return{
 				vec1.x - vec2.x,
 				vec1.y - vec2.y,
@@ -206,7 +206,7 @@ namespace DirectX
 		};
 		//tagVector3 Lerp(time:0.0f～1.0f)
 		static tagVector3 Lerp(const tagVector3 vec1, const tagVector3 vec2, const float time) {
-			float t = Mathf::Clamp(0.0f,1.0f,time);
+			float t = Mathf::Clamp(0.0f, 1.0f, time);
 			return{
 				(1 - t)*vec1.x + t*vec2.x,
 				(1 - t)*vec1.y + t*vec2.y,
@@ -215,7 +215,7 @@ namespace DirectX
 		};
 		//tagVector3 SLerp(0.0f～1.0f)未完成
 		static tagVector3 Slerp(const tagVector3 vec1, const tagVector3 vec2, const float time) {
-			float t = Mathf::Clamp(0.0f,1.0f,time);
+			float t = Mathf::Clamp(0.0f, 1.0f, time);
 			return tagVector3::one();
 		};
 
@@ -250,14 +250,14 @@ namespace DirectX
 			}
 			return r;
 		};
-		
+
 		//ベクトルの長さ
-		float length()	 { 
-			return sqrtf(x*x + y*y + z*z); 
+		float length() {
+			return sqrtf(x*x + y*y + z*z);
 		};
 		//ベクトル長の2乗
 		float lengthSq() {
-			return x*x + y*y + z*z; 
+			return x*x + y*y + z*z;
 		};
 		//単位化
 		tagVector3 normalize()
@@ -270,10 +270,10 @@ namespace DirectX
 		operator const XMFLOAT3() { return{ x,y,z }; }
 		tagVector3 operator= (const XMVECTOR& vec) { x = vec.m128_f32[0]; y = vec.m128_f32[1]; z = vec.m128_f32[2]; return *this; };
 		tagVector3 operator= (const XMFLOAT3& vec) { x = vec.x; y = vec.y; z = vec.z; return *this; };
-		tagVector3 operator+ (const tagVector3& vec) {  return { x + vec.x,y + vec.y,z + vec.z }; };
-		tagVector3 operator- (const tagVector3& vec) {  return { x - vec.x,y - vec.y,z - vec.z }; };
-		tagVector3 operator/ (const float& scalar) { return {x / scalar, y / scalar,z / scalar}; };
-		tagVector3 operator* (const float& scalar) { return {x * scalar, y * scalar,z * scalar}; };
+		tagVector3 operator+ (const tagVector3& vec) { return{ x + vec.x,y + vec.y,z + vec.z }; };
+		tagVector3 operator- (const tagVector3& vec) { return{ x - vec.x,y - vec.y,z - vec.z }; };
+		tagVector3 operator/ (const float& scalar) { return{ x / scalar, y / scalar,z / scalar }; };
+		tagVector3 operator* (const float& scalar) { return{ x * scalar, y * scalar,z * scalar }; };
 		tagVector3 operator* (const XMFLOAT3& vec) { return{ x * vec.x,y * vec.y,z * vec.z }; };
 		tagVector3 operator+= (const tagVector3& vec) { x += vec.x; y += vec.y; z += vec.z; return *this; };
 		tagVector3 operator-= (const tagVector3& vec) { x -= vec.x; y -= vec.y; z -= vec.z; return *this; };
@@ -291,14 +291,14 @@ namespace DirectX
 		float z;
 		float w;
 
-		tagVector4():x(0.0f), y(0.0f), z(0.0f), w(0.0f){};
-		tagVector4(float _x, float _y, float _z, float _w) :x(_x),y(_y),z(_z),w(_w) {};
+		tagVector4() :x(0.0f), y(0.0f), z(0.0f), w(0.0f) {};
+		tagVector4(float _x, float _y, float _z, float _w) :x(_x), y(_y), z(_z), w(_w) {};
 
 		static tagVector4 zero() { return tagVector4(0.0f, 0.0f, 0.0f, 0.0f); };
 		static tagVector4 one() { return tagVector4(1.0f, 1.0f, 1.0f, 1.0f); };
 
 		operator const float*() { return &x; };
-		
+
 	}Vector4;
 
 	//tagMatrix
@@ -309,18 +309,18 @@ namespace DirectX
 		{
 			float _0, _1, _2, _3;
 			Element(float _0, float _1, float _2, float _3) :_0(_0), _1(_1), _2(_2), _3(_3) {};
-			Element(tagVector4 vec) :Element(vec.x,vec.y,vec.z,vec.w) {};
+			Element(tagVector4 vec) :Element(vec.x, vec.y, vec.z, vec.w) {};
 			Element(XMVECTOR vec) :Element(vec.m128_f32[0], vec.m128_f32[1], vec.m128_f32[2], vec.m128_f32[3]) {};
-			Element():Element(0.0f,0.0f,0.0f,0.0f) {};
+			Element() :Element(0.0f, 0.0f, 0.0f, 0.0f) {};
 		};
 
-		Element m0,m1,m2,m3;
+		Element m0, m1, m2, m3;
 
 		tagMatrix(tagVector4 m0, tagVector4 m1, tagVector4 m2, tagVector4 m3)
-			:m0(m0), m1(m1), m2(m2),m3(m3) {};
+			:m0(m0), m1(m1), m2(m2), m3(m3) {};
 		tagMatrix(XMMATRIX matrix)
 			:m0(matrix.r[0]), m1(matrix.r[1]), m2(matrix.r[2]), m3(matrix.r[3]) {};
-		tagMatrix(){};
+		tagMatrix() {};
 	}Matrix;
 
 	//tagQuaternion
@@ -331,14 +331,14 @@ namespace DirectX
 		float z;
 		float w;
 
-		tagQuaternion():x(0.0f),y(0.0f),z(0.0f),w(1.0f){};
-		tagQuaternion(float _x, float _y, float _z, float _w):x(_x),y(_y),z(_z),w(_w){};
-		tagQuaternion(tagVector3 rotation) 
+		tagQuaternion() :x(0.0f), y(0.0f), z(0.0f), w(1.0f) {};
+		tagQuaternion(float _x, float _y, float _z, float _w) :x(_x), y(_y), z(_z), w(_w) {};
+		tagQuaternion(tagVector3 rotation)
 		{
 			FXMVECTOR q = XMQuaternionRotationRollPitchYawFromVector(rotation);
 			*this = q;
 		};
-		tagQuaternion(XMVECTOR vec) 
+		tagQuaternion(XMVECTOR vec)
 		{
 			x = vec.m128_f32[0];
 			y = vec.m128_f32[1];
@@ -360,8 +360,8 @@ namespace DirectX
 		};
 		//Quaternion Angle
 		static float Angle(tagQuaternion q1, tagQuaternion q2) {
-			float dot = tagQuaternion::Dot(q1,q2);
-			return Mathf::IsEqualUsingDot(dot) ? 0.0f : Mathf::aCosf(min(fabsf(dot),1.0f)) * 2.0f * Mathf::Rad2Deg;
+			float dot = tagQuaternion::Dot(q1, q2);
+			return Mathf::IsEqualUsingDot(dot) ? 0.0f : Mathf::aCosf(min(fabsf(dot), 1.0f)) * 2.0f * Mathf::Rad2Deg;
 		};
 		//Quaternion ToEulerAngle
 		static tagVector3 ToEulerAngles(tagQuaternion q) {
@@ -386,20 +386,20 @@ namespace DirectX
 			float m22 = 1.0f - (2.0f * xx) - (2.0f * yy);
 
 			tagVector3 euler;
-			if (1.0f  - Mathf::kEpsilon < m10 && m10 <1.0f + Mathf::kEpsilon) {
+			if (1.0f - Mathf::kEpsilon < m10 && m10 < 1.0f + Mathf::kEpsilon) {
 				euler.x = -Mathf::PI_2;
 				euler.y = 0.0f;
-				euler.z = Mathf::aTan2f(m10,m00);
+				euler.z = Mathf::aTan2f(m10, m00);
 			}
 			else if (-1.0f - Mathf::kEpsilon < m21 && m21 < -1.0f - Mathf::kEpsilon) {
 				euler.x = -Mathf::PI_2;
 				euler.y = 0.0f;
-				euler.z = Mathf::aTan2f(m10,m00);
+				euler.z = Mathf::aTan2f(m10, m00);
 			}
-			else{
+			else {
 				euler.x = Mathf::aSinf(-m21);
-				euler.y = Mathf::aTan2f(m20,m22);
-				euler.z = Mathf::aTan2f(m01,m11);
+				euler.y = Mathf::aTan2f(m20, m22);
+				euler.z = Mathf::aTan2f(m01, m11);
 			}
 
 			euler.x *= Mathf::Rad2Deg;
@@ -409,7 +409,7 @@ namespace DirectX
 		};
 		//Quaternion Identity
 		static tagQuaternion Identity() {
-			return tagQuaternion(0.0f,0.0f,0.0f,1.0f);
+			return tagQuaternion(0.0f, 0.0f, 0.0f, 1.0f);
 		};
 		//Quaternion IsIdentity
 		static bool IsIdentity(tagQuaternion q1) {
@@ -417,18 +417,18 @@ namespace DirectX
 		};
 		//Quaternion Normalize
 		static tagQuaternion Normalize(tagQuaternion q) {
-			float mag = sqrtf(Dot(q,q));
+			float mag = sqrtf(Dot(q, q));
 			if (mag < 1.17549435E-38f)
 				return tagQuaternion::Identity();
 			return tagQuaternion(q.x / mag, q.y / mag, q.z / mag, q.w / mag);
 		};
 		//Quaternion Conjugate 共役なクォータニオン
 		static tagQuaternion Conjugate(tagQuaternion q1) {
-			return tagQuaternion(-q1.x,-q1.y,-q1.z,q1.w);
+			return tagQuaternion(-q1.x, -q1.y, -q1.z, q1.w);
 		};
 		//Quaternion オイラー角を使った回転 
 		static tagQuaternion Euler(tagVector3 vec) {
-			float x	= Mathf::ToRadian(vec.x);
+			float x = Mathf::ToRadian(vec.x);
 			float y = Mathf::ToRadian(vec.y);
 			float z = Mathf::ToRadian(vec.z);
 
@@ -466,7 +466,7 @@ namespace DirectX
 			);
 		}
 		//Quaternion Axisを中心にAngle角回転します
-		static tagQuaternion AngleAxisToEuler(const float angle,tagVector3 axis){
+		static tagQuaternion AngleAxisToEuler(const float angle, tagVector3 axis) {
 			float RadAngle = Mathf::ToRadian(angle) * 0.5f;
 			return tagQuaternion(
 				axis.x * sinf(RadAngle),
@@ -475,7 +475,7 @@ namespace DirectX
 				cosf(RadAngle)
 			);
 		};
-		static tagQuaternion AngleAxisToRadian(const float angle,tagVector3 axis){
+		static tagQuaternion AngleAxisToRadian(const float angle, tagVector3 axis) {
 			float RadAngle = angle*0.5f;
 			return tagQuaternion(
 				axis.x * sinf(RadAngle),
@@ -485,7 +485,7 @@ namespace DirectX
 			);
 		}
 		//Quaternion Quaternionを行列に変換します
-		static XMMATRIX ToMatrix(tagQuaternion q){
+		static XMMATRIX ToMatrix(tagQuaternion q) {
 			float xx = q.x * q.x * 2.0f;
 			float yy = q.y * q.y * 2.0f;
 			float zz = q.z * q.z * 2.0f;
@@ -523,7 +523,7 @@ namespace DirectX
 			return matrix;
 		};
 		//Quaternion 行列から変換します
-		static tagQuaternion AtMatrix(XMMATRIX matrix){
+		static tagQuaternion AtMatrix(XMMATRIX matrix) {
 			/*
 			tagQuaternion q;
 
@@ -563,17 +563,17 @@ namespace DirectX
 			return tagQuaternion(XMQuaternionRotationMatrix(matrix));
 		}
 		//Quaternion Multiply 合成
-		static tagQuaternion Multiply(tagQuaternion q1,tagQuaternion q2)
+		static tagQuaternion Multiply(tagQuaternion q1, tagQuaternion q2)
 		{
 			tagQuaternion q;
-			q.x = q1.x * q2.w + ( q1.w * q2.x) + (-q1.z * q2.y) + ( q1.y  * q2.z);
-			q.y = q1.y * q2.w + ( q1.z * q2.x) + ( q1.w * q2.y) + (-q1.x  * q2.z);
-			q.z = q1.z * q2.w + (-q1.y * q2.x) + ( q1.x * q2.y) + ( q1.w  * q2.z);
+			q.x = q1.x * q2.w + (q1.w * q2.x) + (-q1.z * q2.y) + (q1.y  * q2.z);
+			q.y = q1.y * q2.w + (q1.z * q2.x) + (q1.w * q2.y) + (-q1.x  * q2.z);
+			q.z = q1.z * q2.w + (-q1.y * q2.x) + (q1.x * q2.y) + (q1.w  * q2.z);
 			q.w = q1.w * q2.w + (-q1.x * q2.x) + (-q1.y * q2.y) + (-q1.z  * q2.z);
 			return q;
 		}
 		//Quaternion Lerp
-		static tagQuaternion Lerp(tagQuaternion start,tagQuaternion end,float time)
+		static tagQuaternion Lerp(tagQuaternion start, tagQuaternion end, float time)
 		{
 			time = Mathf::Clamp01(time);
 			return tagQuaternion(
@@ -584,10 +584,10 @@ namespace DirectX
 			);
 		}
 		//Quaternion Slerp　球面線形補間
-		static tagQuaternion Slerp(tagQuaternion start,tagQuaternion end,float time)
+		static tagQuaternion Slerp(tagQuaternion start, tagQuaternion end, float time)
 		{
 			time = Mathf::Clamp01(time);
-			float dot = tagQuaternion::Dot(start,end);
+			float dot = tagQuaternion::Dot(start, end);
 			float sinDot = sinf(dot);
 			float value1 = sinf((1.0f - time)*dot) / sinDot;
 			float value2 = sinf(time * dot) / sinDot;
@@ -598,17 +598,17 @@ namespace DirectX
 				value1*start.w + value2*end.w
 			);
 		}
-		static tagQuaternion LookRotation(tagVector3 lookAt,tagVector3 up)
+		static tagQuaternion LookRotation(tagVector3 lookAt, tagVector3 up)
 		{
 			float angle = Mathf::aTan2f(lookAt.x, lookAt.z);
-			return Quaternion::AngleAxisToRadian(angle,up);
+			return Quaternion::AngleAxisToRadian(angle, up);
 		}
-		static tagQuaternion QuaternionLookRotation(tagVector3 forward,tagVector3 up)
+		static tagQuaternion QuaternionLookRotation(tagVector3 forward, tagVector3 up)
 		{
-			tagVector3 vector  = tagVector3::Normalize(forward);
-			tagVector3 vector2 = tagVector3::Normalize(tagVector3::Cross(up,vector));
+			tagVector3 vector = tagVector3::Normalize(forward);
+			tagVector3 vector2 = tagVector3::Normalize(tagVector3::Cross(up, vector));
 			tagVector3 vector3 = tagVector3::Cross(vector, vector2);
-			
+
 			float m00 = vector2.x;
 			float m01 = vector2.y;
 			float m02 = vector2.z;
@@ -632,8 +632,8 @@ namespace DirectX
 				q.z = (m01 - m10)*num;
 				return q;
 			}
-			if((m00 >= m11) && (m00 >= m22)){
-				float num7 = sqrtf((1.0f+m00) - m11-m22);
+			if ((m00 >= m11) && (m00 >= m22)) {
+				float num7 = sqrtf((1.0f + m00) - m11 - m22);
 				float num4 = 0.5f / num7;
 				q.x = 0.5f * num7;
 				q.y = (m01 + m10) * num4;
@@ -641,8 +641,8 @@ namespace DirectX
 				q.w = (m11 - m21) * num4;
 				return q;
 			}
-			if(m11 > m22){
-				float num6 = sqrtf((1.0f + m11) - m00-m22);
+			if (m11 > m22) {
+				float num6 = sqrtf((1.0f + m11) - m00 - m22);
 				float num3 = 0.5f / num6;
 				q.x = (m10 + m01) * num3;
 				q.y = 0.5f * num6;
@@ -663,26 +663,26 @@ namespace DirectX
 			return q;
 		}
 
-		static tagQuaternion FromToRotation(Vector3 from,Vector3 to)
+		static tagQuaternion FromToRotation(Vector3 from, Vector3 to)
 		{
 			float dot = Vector3::Dot(from, to);
-			Vector3 cross = Vector3::Cross(from,to);
-			return tagQuaternion::AngleAxisToRadian(dot,cross);
+			Vector3 cross = Vector3::Cross(from, to);
+			return tagQuaternion::AngleAxisToRadian(dot, cross);
 		}
 
 		float length() {
 			return Length(*this);
 		};
-		float lengthSq(){
+		float lengthSq() {
 			return LengthSq(*this);
 		}
 		float dot(const tagQuaternion& q) {
-			return Dot(*this,q);
+			return Dot(*this, q);
 		};
 		bool isIdentity() {
 			return IsIdentity(*this);
 		};
-		tagQuaternion conjugate(){
+		tagQuaternion conjugate() {
 			return Conjugate(*this);
 		}
 		XMMATRIX toMatrix()
@@ -691,25 +691,25 @@ namespace DirectX
 		}
 
 		//Casting
-		operator const XMVECTOR()  { return XMVectorSet(x, y, z, w); };
+		operator const XMVECTOR() { return XMVectorSet(x, y, z, w); };
 
 		//assigment 
-		tagQuaternion& operator =  (const FXMVECTOR& vec) 
-		{ 
+		tagQuaternion& operator =  (const FXMVECTOR& vec)
+		{
 			this->x = vec.m128_f32[0];
 			this->y = vec.m128_f32[1];
 			this->z = vec.m128_f32[2];
 			this->w = vec.m128_f32[3];
 			return *this;
 		};
-		tagQuaternion& operator += (const tagQuaternion& q){
+		tagQuaternion& operator += (const tagQuaternion& q) {
 			x += q.x;
 			y += q.y;
 			z += q.z;
 			w += q.w;
 			return *this;
 		}
-		tagQuaternion& operator -= (const tagQuaternion& q) { 
+		tagQuaternion& operator -= (const tagQuaternion& q) {
 			x -= q.x;
 			y -= q.y;
 			z -= q.z;
@@ -717,7 +717,7 @@ namespace DirectX
 			return *this;
 		};
 		tagQuaternion& operator *= (const tagQuaternion& q) {
-			return *this = Multiply(*this,q);
+			return *this = Multiply(*this, q);
 		};
 
 		tagQuaternion& operator *= (const float& scalar) {
@@ -737,23 +737,23 @@ namespace DirectX
 		};
 
 		tagQuaternion& operator +	(const tagQuaternion& q) {
-			return tagQuaternion(x + q.x,y + q.y,z + q.z,w + q.w);
+			return tagQuaternion(x + q.x, y + q.y, z + q.z, w + q.w);
 		};
 		tagQuaternion& operator -	(const tagQuaternion& q) {
-			return tagQuaternion(x-q.x,y-q.y,z-q.z,w-q.w);
+			return tagQuaternion(x - q.x, y - q.y, z - q.z, w - q.w);
 		};
 		tagQuaternion& operator *	(const tagQuaternion& q) {
-			return Multiply(*this,q);
+			return Multiply(*this, q);
 		};
-		tagQuaternion& operator *	(const float& scalar){
-			return tagQuaternion( x * scalar, y * scalar, z * scalar, w * scalar);
+		tagQuaternion& operator *	(const float& scalar) {
+			return tagQuaternion(x * scalar, y * scalar, z * scalar, w * scalar);
 		};
 		tagQuaternion& operator /	(const float& scalar) {
 			float fInv = 1.0f / scalar;
 			return tagQuaternion(w*fInv, y*fInv, z*fInv, w*fInv);
 		};
 
-		tagQuaternion operator - (tagQuaternion q){
+		tagQuaternion operator - (tagQuaternion q) {
 			return tagQuaternion::Conjugate(q);
 		};
 
@@ -779,28 +779,19 @@ namespace DirectX
 		tagColor(float _r, float _g, float _b, float _a) :r(_r), g(_g), b(_b), a(_a) {}
 
 		//共通処理
-		static tagColor clear()		{ return tagColor( 0.0f,  0.0f,  0.0f,  0.0f); };
-		static tagColor black()		{ return tagColor( 0.0f,  0.0f,  0.0f,  1.0f); };
-		static tagColor white()		{ return tagColor( 1.0f,  1.0f,  1.0f,  1.0f); };
-		static tagColor red()		{ return tagColor( 1.0f,  0.0f,  0.0f,  1.0f); };
-		static tagColor green()		{ return tagColor( 0.0f,  0.0f,  1.0f,  1.0f); };
-		static tagColor blue()		{ return tagColor( 0.0f,  0.0f,  1.0f,  1.0f); };
-		static tagColor cyan()		{ return tagColor( 0.0f,  1.0f,  1.0f,  1.0f); };
-		static tagColor gray()		{ return tagColor( 0.5f,  0.5f,  0.5f,  1.0f); };
-		static tagColor magenta()	{ return tagColor( 1.0f,  0.0f,  1.0f,  1.0f); };
-		static tagColor yellow()	{ return tagColor( 1.0f, 0.92f, 0.016f, 1.0f); };
+		static tagColor clear() { return tagColor(0.0f, 0.0f, 0.0f, 0.0f); };
+		static tagColor black() { return tagColor(0.0f, 0.0f, 0.0f, 1.0f); };
+		static tagColor white() { return tagColor(1.0f, 1.0f, 1.0f, 1.0f); };
+		static tagColor red() { return tagColor(1.0f, 0.0f, 0.0f, 1.0f); };
+		static tagColor green() { return tagColor(0.0f, 0.0f, 1.0f, 1.0f); };
+		static tagColor blue() { return tagColor(0.0f, 0.0f, 1.0f, 1.0f); };
+		static tagColor cyan() { return tagColor(0.0f, 1.0f, 1.0f, 1.0f); };
+		static tagColor gray() { return tagColor(0.5f, 0.5f, 0.5f, 1.0f); };
+		static tagColor magenta() { return tagColor(1.0f, 0.0f, 1.0f, 1.0f); };
+		static tagColor yellow() { return tagColor(1.0f, 0.92f, 0.016f, 1.0f); };
 
 		//コンストラクタ
 		operator const float*() { return &r; }
 
 	}Color, COLOR;
-
-	//tagLight
-	typedef struct tagLight {
-		Vector4 Direction;
-		Color Diffuse;
-		Color Ambient;
-	}Light, LIGHT;
 }
-
-#include"Module\Material\Material.h"

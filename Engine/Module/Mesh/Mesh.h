@@ -16,6 +16,8 @@ namespace DirectX
 		Vector3 _p1;
 		Vector3 _p2;
 		Vector3 _p3;
+
+		Vector3 Normal() { return Vector3::Cross(_p2 - _p1, _p3 - _p1); };
 	};
 
 	//ƒƒbƒVƒ…

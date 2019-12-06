@@ -2,6 +2,8 @@
 
 namespace DirectX
 {
+	class Texture;
+
 	class Rigidbody;
 	class GameObject;
 	class Transform;

@@ -2,6 +2,8 @@
 
 using namespace DirectX;
 
+class Shader;
+
 class D3DApp
 {
 private:
@@ -23,18 +25,12 @@ private:
 	ID3D11RenderTargetView* RenderTargetView;
 	ID3D11DepthStencilView* DepthStencilView;
 
-	ID3D11VertexShader*		VertexShader;
-	ID3D11PixelShader*		PixelShader;
-	ID3D11InputLayout*		VertexLayout;
-	ID3D11Buffer*			WorldBuffer;
-	ID3D11Buffer*			ViewBuffer;
-	ID3D11Buffer*			ProjectionBuffer;
-
-	ID3D11Buffer*			MaterialBuffer;
-	ID3D11Buffer*			LightBuffer;
-
 	ID3D11DepthStencilState* DepthStateEnable;
 	ID3D11DepthStencilState* DepthStateDisable;
+
+	XMMATRIX _ProjectionMatrix;
+
+	Shader* _Shader;
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -49,6 +45,7 @@ public:
 	static unsigned int GetScreenWidth();
 	static unsigned int GetScreenHeight();
 	static unsigned int GetFps();
+	static Shader* GetShader() { return pInstance->_Shader; };
 public:
 	class Renderer
 	{
@@ -66,13 +63,27 @@ public:
 		static void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
 		static void SetProjectionMatrix2D();
 
-		static void SetMaterial(MATERIAL Material);
-		static void SetLight(LIGHT Light);
-
 		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
 		static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
 		static void SetTexture(ID3D11ShaderResourceView* Texture);
 		static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
+
+		template<typename Type>
+		static void CreateConstantBuffer(ID3D11Buffer** _buffer);
 	};
 };
+
+template<typename Type>
+inline void D3DApp::Renderer::CreateConstantBuffer(ID3D11Buffer ** _buffer)
+{
+	D3D11_BUFFER_DESC bd;
+	bd.ByteWidth = sizeof(Type);
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+	bd.StructureByteStride = sizeof(float);
+
+	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, _buffer);
+}

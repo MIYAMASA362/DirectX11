@@ -1,5 +1,8 @@
 #pragma once
 
+class Light;
+class Material;
+
 class Shader
 {
 private:
@@ -7,9 +10,10 @@ private:
 	XMMATRIX _ViewMatrix;
 	XMMATRIX _ProjectionMatrix;
 
-	MATERIAL _Material;
-	LIGHT _Light;
 private:
+	Light* _Light;
+	Material* _Material;
+
 	ID3D11VertexShader* _VertexShader;
 	ID3D11PixelShader* _PixelShader;
 	ID3D11InputLayout* _VertexLayout;
@@ -17,10 +21,6 @@ private:
 	ID3D11Buffer* _WorldBuffer;
 	ID3D11Buffer* _ViewBuffer;
 	ID3D11Buffer* _ProjectionBuffer;
-
-	ID3D11Buffer* _MaterialBuffer;
-	ID3D11Buffer* _LightBuffer;
-
 public:
 	Shader();
 	virtual~Shader();
@@ -33,6 +33,8 @@ public:
 	void SetViewMatrix(XMMATRIX* ViewMatrix);
 	void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
 
-	void SetMaterial(MATERIAL* material);
-	void SetLight(LIGHT* light);
+	//filenameのファイルをバイナリ形式で読み込み,サイズなどを返します。
+	void LoadShaderFile(const char* filename,unsigned char** buffer,long int* fsize);
+
+	Material* GetMaterial() { return _Material; };
 };

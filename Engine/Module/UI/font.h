@@ -2,6 +2,8 @@
 
 namespace DirectX
 {
+	class Texture;
+
 	class Font
 	{
 	private:

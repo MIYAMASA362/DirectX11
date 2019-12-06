@@ -27,6 +27,8 @@
 #include"model.h"
 #include"Module\Model\ModelManager.h"
 
+#include"Module\Shader\Shader.h"
+
 DirectX::Model::Model()
 {
 	offsetMatrix = XMMatrixIdentity();
@@ -47,7 +49,7 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 
 	for(unsigned short i = 0; i<SubsetNum; i++)
 	{
-		D3DApp::Renderer::SetMaterial(SubsetArray[i].Material.Material);
+		SubsetArray[i].Material.Material.SetResource();
 
 		D3DApp::Renderer::SetTexture(SubsetArray[i].Material.Texture->GetShaderResourceView());
 		

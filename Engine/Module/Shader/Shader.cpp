@@ -6,6 +6,8 @@
 #include"Module\DirectX\DirectX.h"
 
 #include "Shader.h"
+#include"Module\Light\Light.h"
+#include"Module\Material\Material.h"
 
 Shader::Shader()
 {
@@ -21,15 +23,9 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader)
 {
 	//頂点シェーダ
 	{
-		FILE* file;
 		long int fsize;
-
-		file = fopen(VertexShader,"rb");
-		fsize = _filelength(_fileno(file));
-
-		unsigned char* buffer = new unsigned char[fsize];
-		fread(buffer,fsize,1,file);
-		fclose(file);
+		unsigned char* buffer = nullptr;
+		LoadShaderFile(VertexShader,&buffer,&fsize);
 
 		D3DApp::GetDevice()->CreateVertexShader(buffer,fsize,NULL,&_VertexShader);
 
@@ -40,7 +36,7 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader)
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,	 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "NORMAL",	  0, DXGI_FORMAT_R32G32B32_FLOAT,	 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "COLOR",	  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		 0, 30, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 			};
 			
 			UINT numElements = ARRAYSIZE(InputLayout);
@@ -53,16 +49,9 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader)
 
 	//ピクセルシェーダ
 	{
-		FILE* file;
 		long int fsize;
-
-		file = fopen(PixelShader,"rb");
-		fsize = _filelength(_fileno(file));
-		
-		unsigned char* buffer = new unsigned char[fsize];
-
-		fread(buffer,fsize,1,file);
-		fclose(file);
+		unsigned char* buffer = nullptr;
+		LoadShaderFile(PixelShader,&buffer,&fsize);
 
 		D3DApp::GetDevice()->CreatePixelShader(buffer,fsize,NULL,&_PixelShader);
 
@@ -71,33 +60,19 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader)
 
 	//定数バッファ生成
 	{
-		D3D11_BUFFER_DESC hBufferDesc;
-		hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		hBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		hBufferDesc.CPUAccessFlags = 0;
-		hBufferDesc.MiscFlags = 0;
-		hBufferDesc.StructureByteStride = sizeof(float);
-
-		hBufferDesc.ByteWidth = sizeof(XMMATRIX);
-		D3DApp::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&_WorldBuffer);
-		D3DApp::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&_ViewBuffer);
-		D3DApp::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&_ProjectionBuffer);
-
-
-		hBufferDesc.ByteWidth = sizeof(MATERIAL);
-		D3DApp::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&_MaterialBuffer);
-
-
-		hBufferDesc.ByteWidth = sizeof(LIGHT);
-		D3DApp::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&_LightBuffer);
-		
+		D3DApp::Renderer::CreateConstantBuffer<XMMATRIX>(&_WorldBuffer);
+		D3DApp::Renderer::CreateConstantBuffer<XMMATRIX>(&_ViewBuffer);
+		D3DApp::Renderer::CreateConstantBuffer<XMMATRIX>(&_ProjectionBuffer);
 	}
+
+	_Light = new Light();
+	_Material = new Material();
 }
 
 void Shader::Release()
 {
-	if (_LightBuffer) _LightBuffer->Release();
-	if (_MaterialBuffer) _MaterialBuffer->Release();
+	if (_Light) delete _Light;
+	if (_Material) delete _Material;
 
 	if (_ProjectionBuffer) _ProjectionBuffer->Release();
 	if (_ViewBuffer)_ViewBuffer->Release();
@@ -110,19 +85,19 @@ void Shader::Release()
 
 void Shader::SetShader()
 {
+	D3DApp::GetDeviceContext()->IASetInputLayout(_VertexLayout);
+
 	D3DApp::GetDeviceContext()->VSSetShader(_VertexShader,NULL,0);
 	D3DApp::GetDeviceContext()->PSSetShader(_PixelShader,NULL,0);
 
-	D3DApp::GetDeviceContext()->IASetInputLayout(_VertexLayout);
-
-	//UpdateSubResource
-
 	//SetBuffer
+	//VSSetConstantBuffer:Slot番号 配列番号
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(0, 1, &_WorldBuffer);
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(1, 1, &_ViewBuffer);
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(2, 1, &_ProjectionBuffer);
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(3, 1, &_MaterialBuffer);
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(4, 1, &_LightBuffer);
+
+	_Light->SetResource();
+	_Material->SetResource();
 }
 
 void Shader::SetWorldMatrix(XMMATRIX * WorldMatrix)
@@ -143,14 +118,13 @@ void Shader::SetProjectionMatrix(XMMATRIX * ProjectionMatrix)
 	D3DApp::GetDeviceContext()->UpdateSubresource(_ProjectionBuffer, 0, NULL, &XMMatrixTranspose(_ProjectionMatrix), 0, 0);
 }
 
-void Shader::SetMaterial(MATERIAL* material)
+void Shader::LoadShaderFile(const char * filename, unsigned char** buffer, long int * fsize)
 {
-	_Material = *material;
-	D3DApp::GetDeviceContext()->UpdateSubresource(_MaterialBuffer, 0, NULL, &_Material, 0, 0);
-}
+	FILE* file;
+	file = fopen(filename,"rb");
+	*fsize = _filelength(_fileno(file));
 
-void Shader::SetLight(LIGHT* light)
-{
-	_Light = *light;
-	D3DApp::GetDeviceContext()->UpdateSubresource(_LightBuffer, 0, NULL, &_Light, 0, 0);
+	*buffer = new unsigned char[*fsize];
+	fread(*buffer,*fsize,1,file);
+	fclose(file);
 }

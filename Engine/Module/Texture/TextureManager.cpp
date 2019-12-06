@@ -104,7 +104,8 @@ Texture * DirectX::TextureManager::LoadTexture(const char* path)
 		initData.SysMemSlicePitch = size;
 
 		auto hr = D3DApp::GetDevice()->CreateTexture2D(&desc, &initData, &texture);
-		if (FAILED(hr)) {
+		if (FAILED(hr)) 
+		{
 			assert(false);
 		}
 

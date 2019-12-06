@@ -4,8 +4,19 @@ class DirectX::GameObject;
 
 class TestScene final :public Scene
 {
+private:
+	Font* font;
 public:
-	TestScene():Scene("TestScene"){};
+	TestScene():Scene("TestScene")
+	{
+		/*this->font = new Font();
+		this->font->Load("Asset/cinecaption226.ttf", "cinecaption");*/
+	};
+	~TestScene()
+	{
+		//delete font;
+	}
+
 	void Load() override
 	{
 		//Sky
@@ -32,7 +43,7 @@ public:
 		//pModel
 		GameObject* pModel = this->AddSceneObject("Miku", TagName::ChildMiku);
 		{
-			pModel->transform().lock()->position(Vector3::up()*10.0f);
+			pModel->transform().lock()->position(Vector3::up()*2.0f);
 			pModel->transform().lock()->localScale(Vector3::one());
 			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
 			pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
@@ -100,7 +111,7 @@ public:
 		//Canvas
 		GameObject* canvas = this->AddSceneObject("Canvas",TagName::Default);
 		{
-			canvas->transform().lock()->localPosition(Vector3(100.0f,50.0f,0.0f));
+			canvas->transform().lock()->localPosition(Vector3(0.0f,0.0f,0.0f));
 			canvas->transform().lock()->localScale(Vector3::one()*10.0f);
 			auto image = canvas->AddComponent<Image>();
 			image.lock()->texture = TextureManager::GetTexture("field004");
