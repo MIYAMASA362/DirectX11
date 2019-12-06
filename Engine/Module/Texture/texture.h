@@ -30,5 +30,6 @@ namespace DirectX
 	public:
 		ID3D11Texture2D* GetTexture() override { return texture; };
 		ID3D11ShaderResourceView* GetShaderResourceView() override { return srv; };
+		void SetResource();
 	};
 }

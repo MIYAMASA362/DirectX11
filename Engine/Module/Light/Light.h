@@ -14,6 +14,6 @@ private:
 public:
 	Light();
 	virtual ~Light();
-
+	
 	void SetResource();
 };

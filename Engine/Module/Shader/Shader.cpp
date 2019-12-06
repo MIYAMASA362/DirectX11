@@ -64,16 +64,14 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader)
 		D3DApp::Renderer::CreateConstantBuffer<XMMATRIX>(&_ViewBuffer);
 		D3DApp::Renderer::CreateConstantBuffer<XMMATRIX>(&_ProjectionBuffer);
 	}
+	D3DApp::GetDeviceContext()->IASetInputLayout(_VertexLayout);
 
-	_Light = new Light();
-	_Material = new Material();
+	D3DApp::GetDeviceContext()->VSSetShader(_VertexShader, NULL, 0);
+	D3DApp::GetDeviceContext()->PSSetShader(_PixelShader, NULL, 0);
 }
 
 void Shader::Release()
 {
-	if (_Light) delete _Light;
-	if (_Material) delete _Material;
-
 	if (_ProjectionBuffer) _ProjectionBuffer->Release();
 	if (_ViewBuffer)_ViewBuffer->Release();
 	if (_WorldBuffer)_WorldBuffer->Release();
@@ -85,19 +83,11 @@ void Shader::Release()
 
 void Shader::SetShader()
 {
-	D3DApp::GetDeviceContext()->IASetInputLayout(_VertexLayout);
-
-	D3DApp::GetDeviceContext()->VSSetShader(_VertexShader,NULL,0);
-	D3DApp::GetDeviceContext()->PSSetShader(_PixelShader,NULL,0);
-
 	//SetBuffer
 	//VSSetConstantBuffer:Slot”Ô† ”z—ñ”Ô†
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(0, 1, &_WorldBuffer);
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(1, 1, &_ViewBuffer);
 	D3DApp::GetDeviceContext()->VSSetConstantBuffers(2, 1, &_ProjectionBuffer);
-
-	_Light->SetResource();
-	_Material->SetResource();
 }
 
 void Shader::SetWorldMatrix(XMMATRIX * WorldMatrix)

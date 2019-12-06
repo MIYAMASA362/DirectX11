@@ -3,6 +3,8 @@
 using namespace DirectX;
 
 class Shader;
+class Light;
+class Material;
 
 class D3DApp
 {
@@ -31,6 +33,8 @@ private:
 	XMMATRIX _ProjectionMatrix;
 
 	Shader* _Shader;
+	Light* _Light;
+	Material* _Material;
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -67,7 +71,6 @@ public:
 		static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
 		static void SetTexture(ID3D11ShaderResourceView* Texture);
-		static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
 
 		template<typename Type>
 		static void CreateConstantBuffer(ID3D11Buffer** _buffer);

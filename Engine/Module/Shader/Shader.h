@@ -11,9 +11,6 @@ private:
 	XMMATRIX _ProjectionMatrix;
 
 private:
-	Light* _Light;
-	Material* _Material;
-
 	ID3D11VertexShader* _VertexShader;
 	ID3D11PixelShader* _PixelShader;
 	ID3D11InputLayout* _VertexLayout;
@@ -35,6 +32,4 @@ public:
 
 	//filenameのファイルをバイナリ形式で読み込み,サイズなどを返します。
 	void LoadShaderFile(const char* filename,unsigned char** buffer,long int* fsize);
-
-	Material* GetMaterial() { return _Material; };
 };

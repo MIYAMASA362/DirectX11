@@ -17,6 +17,9 @@
 
 #include"Module\Shader\Shader.h"
 
+#include"Module\Material\Material.h"
+#include"Module\Light\Light.h"
+
 using namespace DirectX;
 
 //--- D3DApp ------------------------------------------------------------------
@@ -184,6 +187,11 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso");
 	pInstance->_Shader->SetShader();
 
+	pInstance->_Light = new Light();
+	pInstance->_Light->SetResource();
+
+	pInstance->_Material = new Material();
+	pInstance->_Material->SetResource();
 
 	pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
 
@@ -193,6 +201,8 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 void D3DApp::Destroy()
 {
 	if (!pInstance) return;
+	if (pInstance->_Material) delete pInstance->_Material;
+	if (pInstance->_Light) delete pInstance->_Light;
 	if (pInstance->_Shader) delete pInstance->_Shader;
 
 	if (pInstance->ImmediateContext)	pInstance->ImmediateContext->ClearState();
@@ -345,10 +355,4 @@ void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
 {
 	ID3D11ShaderResourceView* srv[1] = { texture };
 	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);
-}
-
-void D3DApp::Renderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation)
-{
-	pInstance->ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	pInstance->ImmediateContext->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
 }

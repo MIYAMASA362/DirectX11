@@ -52,8 +52,9 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 		SubsetArray[i].Material.Material.SetResource();
 
 		D3DApp::Renderer::SetTexture(SubsetArray[i].Material.Texture->GetShaderResourceView());
-		
-		D3DApp::Renderer::DrawIndexed(SubsetArray[i].IndexNum, SubsetArray[i].StartIndex,0);
+
+		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		D3DApp::GetDeviceContext()->DrawIndexed((UINT)SubsetArray[i].IndexNum, (UINT)SubsetArray[i].StartIndex, 0);
 	}
 	if(IsCulling)
 		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID, D3D11_CULL_BACK);
