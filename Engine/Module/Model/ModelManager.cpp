@@ -406,36 +406,36 @@ void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* Mater
 		else if (strcmp(str, "Ka") == 0)
 		{
 			//アンビエント
-			fscanf(file, "%f", &materialArray[mc].Material.Ambient.r);
-			fscanf(file, "%f", &materialArray[mc].Material.Ambient.g);
-			fscanf(file, "%f", &materialArray[mc].Material.Ambient.b);
-			materialArray[mc].Material.Ambient.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.r);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.g);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.b);
+			materialArray[mc].Material._constant.Ambient.a = 1.0f;
 		}
 		else if (strcmp(str, "Kd") == 0)
 		{
 			//ディフューズ
-			fscanf(file, "%f", &materialArray[mc].Material.Diffuse.r);
-			fscanf(file, "%f", &materialArray[mc].Material.Diffuse.g);
-			fscanf(file, "%f", &materialArray[mc].Material.Diffuse.b);
-			materialArray[mc].Material.Diffuse.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.r);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.g);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.b);
+			materialArray[mc].Material._constant.Diffuse.a = 1.0f;
 		}
 		else if (strcmp(str, "Ks") == 0)
 		{
 			//スペキュラ
-			fscanf(file, "%f", &materialArray[mc].Material.Specular.r);
-			fscanf(file, "%f", &materialArray[mc].Material.Specular.g);
-			fscanf(file, "%f", &materialArray[mc].Material.Specular.b);
-			materialArray[mc].Material.Specular.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.r);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.g);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.b);
+			materialArray[mc].Material._constant.Specular.a = 1.0f;
 		}
 		else if (strcmp(str, "Ns") == 0)
 		{
 			//スペキュラ強度
-			fscanf(file, "%f", &materialArray[mc].Material.Shininess);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Shininess);
 		}
 		else if (strcmp(str, "d") == 0)
 		{
 			//アルファ
-			fscanf(file, "%f", &materialArray[mc].Material.Diffuse.a);
+			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.a);
 		}
 		else if (strcmp(str, "map_Kd") == 0)
 		{
