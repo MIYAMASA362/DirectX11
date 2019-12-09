@@ -2,7 +2,7 @@
 
 class Light
 {
-private:
+public:
 	struct Constant
 	{
 		Vector4 Direction;

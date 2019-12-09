@@ -3,6 +3,44 @@
 class Light;
 class Material;
 
+enum VERTEX_INPUT_LAYOUT
+{
+	VSIL_POSITION,
+	VSIL_NORMAL,
+	VSIL_COLOR,
+	VSIL_TEXCOORD
+};
+
+//コンスタントバッファ要素
+enum CONSTANT_BUFFER_ELEMENT
+{
+	CONSTANT_BUFFER_WORLD = 0,
+	CONSTANT_BUFFER_VIEW,
+	CONSTANT_BUFFER_PROJECTION,
+	CONSTANT_BUFFER_MATERIAL,
+	CONSTANT_BUFFER_LIGHT,
+	CONSTANT_BUFFER_NUM
+};
+
+//コンスタントバッファ生成
+class ConstantBuffer
+{
+private:
+	ID3D11Buffer* _ConstantBuffer[CONSTANT_BUFFER_NUM];
+public:
+	//コンスタントバッファの生成
+	void CreateBuffer();
+	//バッファの取得
+	ID3D11Buffer* GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement);
+	//バッファの更新
+	void UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement,const void* data);
+	
+	//バッファに設定
+	void SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement,UINT slot,UINT numBuffer = 1);
+	void SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement,UINT slot,UINT numBuffer = 1);
+};
+
+//シェーダ
 class Shader
 {
 private:
@@ -21,11 +59,13 @@ private:
 	ID3D11Buffer* _WorldBuffer;
 	ID3D11Buffer* _ViewBuffer;
 	ID3D11Buffer* _ProjectionBuffer;
+
+	ConstantBuffer* _ConstantBuffer;
 public:
 	Shader();
 	virtual~Shader();
 
-	void LoadShader(const char* VertexShader,const char* PixelShader);
+	void LoadShader(const char* VertexShader,const char* PixelShader,VERTEX_INPUT_LAYOUT* layout,unsigned int size);
 	void SetShader();
 	void Release();
 

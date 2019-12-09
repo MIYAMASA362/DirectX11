@@ -181,7 +181,14 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 
 
 	pInstance->_Shader = new Shader();
-	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso");
+	VERTEX_INPUT_LAYOUT layout[] =
+	{
+		VSIL_POSITION,
+		VSIL_NORMAL,
+		VSIL_COLOR,
+		VSIL_TEXCOORD
+	};
+	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso",layout,ARRAYSIZE(layout));
 	pInstance->_Shader->SetShader();
 
 
