@@ -96,7 +96,7 @@ void CManager::Initialize()
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
 
-	SceneManager::LoadScene(SceneManager::GetSceneByName("TestScene"));
+	SceneManager::LoadScene(SceneManager::GetSceneByName("BallTest"));
 
 	ComponentManager::SendComponentMessage("Start");
 }

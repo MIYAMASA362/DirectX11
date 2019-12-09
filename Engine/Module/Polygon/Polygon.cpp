@@ -13,6 +13,8 @@
 
 #include"Polygon.h"
 
+#include"Module\Shader\Shader.h"
+
 using namespace DirectX;
 
 void CPolygon::Start()
@@ -60,8 +62,11 @@ void CPolygon::Render()
 
 	//頂点バッファ設定 複数個登録もできる
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&m_VertexBuffer,&stride,&offset);
-	D3DApp::Renderer::SetTexture((*this->m_Texture)->GetShaderResourceView());
-	D3DApp::Renderer::SetWorldViewProjection2D();
+	(*this->m_Texture)->SetResource();
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD,&XMMatrixIdentity());
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixIdentity());
+	D3DApp::Renderer::SetProjectionMatrix2D();
+
 	//どうやって頂点を繋げるのか頂点の設定をトポロジという
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)　n:総数 i:どこから始めるか

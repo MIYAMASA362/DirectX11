@@ -18,6 +18,8 @@
 #include"Rigidbody.h"
 #include"Collision.h"
 
+#include"Module\Shader\Shader.h"
+
 using namespace DirectX;
 
 DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
@@ -770,7 +772,7 @@ void DirectX::SphereCollider::Render()
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
-	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
+	m_Texture->SetResource();
 	float rad = this->transform()->scale().MaxElement();
 	float radius = bound.GetRadius();
 	Vector3 scale = bound.GetSize() * rad;
@@ -782,17 +784,17 @@ void DirectX::SphereCollider::Render()
 	world *= XMMatrixTranslation(pos.x,pos.y,pos.z);
 	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
-	D3DApp::Renderer::SetWorldMatrix(&world);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD,&world);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationZ(Mathf::PI_2) * world;
-	D3DApp::Renderer::SetWorldMatrix(&local);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &local);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationX(Mathf::PI_2) * world;
-	D3DApp::Renderer::SetWorldMatrix(&local);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &local);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
@@ -941,7 +943,7 @@ void DirectX::BoxCollider::Render()
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
-	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
+	m_Texture->SetResource();
 
 	Vector3 scale = bound.GetSize() * 2.0f;
 	Vector3 pos = bound.GetCenter();
@@ -952,7 +954,7 @@ void DirectX::BoxCollider::Render()
 	world *= this->transform()->WorldMatrix();
 	
 
-	D3DApp::Renderer::SetWorldMatrix(&world);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &world);
 
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);

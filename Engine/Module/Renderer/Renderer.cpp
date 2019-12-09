@@ -13,6 +13,8 @@
 
 #include"Module\Camera\camera.h"
 
+#include"Module\Shader\Shader.h"
+
 using namespace DirectX;
 
 Renderer::RendererIndex Renderer::_RendererIndex;
@@ -37,6 +39,11 @@ DirectX::Renderer::Renderer(EntityID OwnerID)
 	{
 		if (message == "Start") Start();
 	};
+}
+
+DirectX::Renderer::~Renderer()
+{
+	if (_Shader) delete _Shader;
 }
 
 void DirectX::Renderer::SetEnable(bool enable)
@@ -93,8 +100,6 @@ DirectX::Renderer3D::~Renderer3D()
 
 void DirectX::Renderer2D::BeginRender()
 {
-	D3DApp::Renderer::SetWorldViewProjection2D();
-
 	auto index = _RendererIndex.at(RendererTarget::RenderTarget2D);
 
 	index.remove_if([](std::weak_ptr<Renderer> obj) { return obj.expired(); });
@@ -103,6 +108,8 @@ void DirectX::Renderer2D::BeginRender()
 	{
 		if (!renderer.lock()->gameObject()->GetActive()) continue;
 		if (!renderer.lock()->GetEnable()) continue;
+		D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_VIEW, &XMMatrixIdentity());
+		D3DApp::Renderer::SetProjectionMatrix2D();
 		renderer.lock()->Render(renderer.lock()->transform()->WorldMatrix());
 	}
 }

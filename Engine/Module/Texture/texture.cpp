@@ -13,9 +13,7 @@
 #include"texture.h"
 #include"TextureManager.h"
 
-using namespace DirectX;
-
-void DirectX::Texture::SetResource()
+void Texture::SetResource()
 {
 	D3DApp::GetDeviceContext()->PSSetShaderResources(0,1,&srv);
 }

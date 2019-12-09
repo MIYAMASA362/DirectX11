@@ -16,7 +16,6 @@ public:
 	};
 public:
 	Material::Constant _constant;
-	ID3D11Buffer* _MaterialBuffer;
 
 	Material();
 	virtual ~Material();
@@ -24,9 +23,10 @@ public:
 	void SetResource();
 };
 
+class Texture;
+
 namespace DirectX
 {
-	class Texture;
 
 	//Model用のマテリアル
 	typedef struct tagDX11_MODEL_MATERIAL

@@ -19,6 +19,8 @@
 
 #include"Module\Input\Input.h"
 
+#include"Module\Shader\Shader.h"
+
 using namespace DirectX;
 
 //--- Camera ------------------------------------------------------------------
@@ -200,19 +202,25 @@ void Camera::Run()
 	D3DApp::GetDeviceContext()->RSSetViewports(1, &dxViewport);
 
 	// ビューマトリクス設定
-	m_InvViewMatrix = this->transform()->WorldMatrix();
+	{
+		m_InvViewMatrix = this->transform()->WorldMatrix();
 
-	XMVECTOR det;
-	ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
+		XMVECTOR det;
+		ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
 
-	this->m_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
+		this->m_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
 
-	D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
+		D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_VIEW, &ViewMatrix);
+		D3DApp::GetConstBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW, 1);
+	}
 
 	// プロジェクションマトリクス設定
-	this->m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
+	{
+		this->m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
 
-	D3DApp::Renderer::SetProjectionMatrix(&this->m_ProjectionMatrix);
+		D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &m_ProjectionMatrix);
+		D3DApp::GetConstBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION, 2);
+	}
 }
 
 void Camera::OnDestroy()

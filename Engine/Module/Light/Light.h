@@ -2,15 +2,15 @@
 
 class Light
 {
-private:
+public:
 	struct Constant
 	{
 		Vector4 Direction;
 		Color Diffuse;
 		Color Ambient;
 	};
+private:
 	Light::Constant _constant;
-	ID3D11Buffer* _LightBuffer;
 public:
 	Light();
 	virtual ~Light();

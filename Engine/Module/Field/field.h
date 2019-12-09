@@ -3,9 +3,9 @@
 using namespace DirectX;
 struct ID3D11Buffer;
 
+class Texture;
 namespace DirectX
 {
-	class Texture;
 
 	class CField :public Mesh
 	{

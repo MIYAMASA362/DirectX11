@@ -182,18 +182,41 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 
 	pInstance->ImmediateContext->PSSetSamplers(0, 1, &samplerState);
 
-
 	pInstance->_Shader = new Shader();
-	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso");
+	
+	//頂点シェーダ設定
+	{
+		auto VS_Shader = pInstance->_Shader->GetVertexShader();
+		VERTEX_INPUT_LAYOUT InputLayout[] =
+		{
+			VERTEX_INPUT_LAYOUT::VSIL_POSITION,
+			VERTEX_INPUT_LAYOUT::VSIL_NORMAL,
+			VERTEX_INPUT_LAYOUT::VSIL_COLOR,
+			VERTEX_INPUT_LAYOUT::VSIL_TEXCOORD
+		};
+		VS_Shader->CrateVertexShader("Asset/Shader/vertexShader.cso", InputLayout, ARRAYSIZE(InputLayout));
+	}
+	//ピクセルシェーダ設定
+	{
+		auto PS_Shader = pInstance->_Shader->GetPixelShader();
+		PS_Shader->CreatePixelShader("Asset/Shader/pixelShader.cso");
+	}
 	pInstance->_Shader->SetShader();
 
+	//コンスタントバッファ作成
+	pInstance->_ConstantBuffer = new ConstantBuffer();
+	pInstance->_ConstantBuffer->CreateBuffer();
+
+	//ライト設定
 	pInstance->_Light = new Light();
 	pInstance->_Light->SetResource();
+	D3DApp::GetConstBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_LIGHT, 4);
 
+	//マテリアル設定
 	pInstance->_Material = new Material();
 	pInstance->_Material->SetResource();
-
-	pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
+	D3DApp::GetConstBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
+	D3DApp::GetConstBuffer()->SetPSConstantBuffer(CONSTANT_BUFFER_MATERIAL,1);
 
 	return S_OK;
 }
@@ -203,6 +226,7 @@ void D3DApp::Destroy()
 	if (!pInstance) return;
 	if (pInstance->_Material) delete pInstance->_Material;
 	if (pInstance->_Light) delete pInstance->_Light;
+	if (pInstance->_ConstantBuffer) delete pInstance->_ConstantBuffer;
 	if (pInstance->_Shader) delete pInstance->_Shader;
 
 	if (pInstance->ImmediateContext)	pInstance->ImmediateContext->ClearState();
@@ -288,59 +312,9 @@ void D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cu
 	pInstance->ImmediateContext->RSSetState(rs);
 }
 
-void D3DApp::Renderer::SetWorldViewProjection2D()
-{
-	XMMATRIX world;
-	world = XMMatrixIdentity();
-	pInstance->_Shader->SetWorldMatrix(&world);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
-
-	XMMATRIX view;
-	view = XMMatrixIdentity();
-	pInstance->_Shader->SetViewMatrix(&view);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
-
-	XMMATRIX projection;
-	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
-	pInstance->_Shader->SetProjectionMatrix(&projection);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
-}
-
-void D3DApp::Renderer::SetWorldMatrix(XMMATRIX* WorldMatrix)
-{
-	XMMATRIX world;
-	world = *WorldMatrix;
-	pInstance->_Shader->SetWorldMatrix(&world);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->WorldBuffer, 0, NULL, &XMMatrixTranspose(world), 0, 0);
-}
-
-void D3DApp::Renderer::SetViewMatrix(XMMATRIX* ViewMatrix)
-{
-	XMMATRIX view;
-	view = *ViewMatrix;
-	pInstance->_Shader->SetViewMatrix(&view);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ViewBuffer, 0, NULL, &XMMatrixTranspose(view), 0, 0);
-}
-
-void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
-{
-	XMMATRIX projection;
-	projection = *ProjectionMatrix;
-	pInstance->_Shader->SetProjectionMatrix(&projection);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
-}
-
-void D3DApp::Renderer::SetProjectionMatrix2D()
-{
-	SetViewMatrix(&XMMatrixIdentity());
-	XMMATRIX projection;
-	projection = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
-	pInstance->_Shader->SetProjectionMatrix(&projection);
-	//pInstance->ImmediateContext->UpdateSubresource(pInstance->ProjectionBuffer, 0, NULL, &XMMatrixTranspose(projection), 0, 0);
-}
-
 void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer* VertexBuffer)
 {
+	//各頂点情報が更新されれば、InputLayoutも変更しないといけない
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	pInstance->ImmediateContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
@@ -351,8 +325,7 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
+void D3DApp::Renderer::SetProjectionMatrix2D()
 {
-	ID3D11ShaderResourceView* srv[1] = { texture };
-	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);
+	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f));
 }

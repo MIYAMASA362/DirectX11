@@ -69,7 +69,7 @@ void DirectX::Font::Load(const char* fileName,const char* name)
 //参考:https://blogoftrueone.wordpress.com/2013/06/02/directx11%E3%81%A7%E6%96%87%E5%AD%97%E6%8F%8F%E7%94%BB%E3%81%A8%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF/
 //参考:http://marupeke296.com/DXG_No67_NewFont.html
 //参考:http://marupeke296.com/WINT_GetGlyphOutline.html
-DirectX::Texture* DirectX::Font::TransformToTexture()
+Texture* DirectX::Font::TransformToTexture()
 {
 	if (this->m_texture != nullptr)
 		delete this->m_texture;

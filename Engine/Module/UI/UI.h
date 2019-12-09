@@ -2,10 +2,9 @@
 
 struct ID3D11Buffer;
 
+class Texture;
 namespace DirectX
 {
-	class BaseTexture;
-	class Texture;
 	class UI;
 	class Font;
 
@@ -32,7 +31,7 @@ namespace DirectX
 	class Image:public Renderer2D
 	{
 	public:
-		BaseTexture* texture = nullptr;
+		Texture* texture = nullptr;
 		ID3D11Buffer* vertexBuffer = nullptr;
 	public:
 		Image(EntityID OwnerID);

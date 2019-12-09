@@ -1,8 +1,8 @@
 #pragma once
 
+class Texture;
 namespace DirectX
 {
-	class Texture;
 
 	class Font
 	{

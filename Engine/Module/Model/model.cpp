@@ -42,16 +42,16 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 	
 	worldMatrix = offsetMatrix * worldMatrix;
 
-	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &worldMatrix);
 
 	D3DApp::Renderer::SetVertexBuffer(VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(IndexBuffer);
 
 	for(unsigned short i = 0; i<SubsetNum; i++)
 	{
-		SubsetArray[i].Material.Material.SetResource();
+		//SubsetArray[i].Material.Material.SetResource();
 
-		D3DApp::Renderer::SetTexture(SubsetArray[i].Material.Texture->GetShaderResourceView());
+		SubsetArray[i].Material.Texture->SetResource();
 
 		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		D3DApp::GetDeviceContext()->DrawIndexed((UINT)SubsetArray[i].IndexNum, (UINT)SubsetArray[i].StartIndex, 0);

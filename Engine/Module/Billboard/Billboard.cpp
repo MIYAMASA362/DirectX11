@@ -13,6 +13,8 @@
 #include"Module\Mesh\Mesh.h"
 #include"Billboard.h"
 
+#include"Module\Shader\Shader.h"
+
 DirectX::Billboard::Billboard()
 {
 	HRESULT hr;
@@ -109,7 +111,7 @@ void DirectX::Billboard::Render(XMMATRIX& worldMatrix)
 
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
-	D3DApp::Renderer::SetWorldMatrix(&world);
+	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &world);
 	this->m_Texture->SetResource();
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);

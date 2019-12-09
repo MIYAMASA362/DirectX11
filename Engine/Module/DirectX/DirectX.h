@@ -6,6 +6,8 @@ class Shader;
 class Light;
 class Material;
 
+class ConstantBuffer;
+
 class D3DApp
 {
 private:
@@ -30,11 +32,11 @@ private:
 	ID3D11DepthStencilState* DepthStateEnable;
 	ID3D11DepthStencilState* DepthStateDisable;
 
-	XMMATRIX _ProjectionMatrix;
-
+	ConstantBuffer* _ConstantBuffer;	//コンスタントバッファ
 	Shader* _Shader;
-	Light* _Light;
-	Material* _Material;
+
+	Light* _Light;	//ライト
+	Material* _Material; //マテリアル
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -49,7 +51,10 @@ public:
 	static unsigned int GetScreenWidth();
 	static unsigned int GetScreenHeight();
 	static unsigned int GetFps();
+
 	static Shader* GetShader() { return pInstance->_Shader; };
+	static ConstantBuffer* GetConstBuffer() { return pInstance->_ConstantBuffer; };
+
 public:
 	class Renderer
 	{
@@ -61,32 +66,9 @@ public:
 		static void SetDepthEnable(bool Enable);
 		static void SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode);
 
-		static void SetWorldViewProjection2D();
-		static void SetWorldMatrix(XMMATRIX* WorldMatrix);
-		static void SetViewMatrix(XMMATRIX* ViewMatrix);
-		static void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
-		static void SetProjectionMatrix2D();
-
 		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
 		static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
-		static void SetTexture(ID3D11ShaderResourceView* Texture);
-
-		template<typename Type>
-		static void CreateConstantBuffer(ID3D11Buffer** _buffer);
+		static void SetProjectionMatrix2D();
 	};
 };
-
-template<typename Type>
-inline void D3DApp::Renderer::CreateConstantBuffer(ID3D11Buffer ** _buffer)
-{
-	D3D11_BUFFER_DESC bd;
-	bd.ByteWidth = sizeof(Type);
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.StructureByteStride = sizeof(float);
-
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, _buffer);
-}
