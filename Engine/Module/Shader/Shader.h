@@ -1,10 +1,5 @@
 #pragma once
 
-//前方宣言
-class Light;
-class Material;
-
-
 //コンスタントバッファ要素
 enum CONSTANT_BUFFER_ELEMENT
 {

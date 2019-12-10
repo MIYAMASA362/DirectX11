@@ -217,7 +217,7 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 		pInstance->_Material->SetResource();
 		pInstance->_Light->SetResource();
 
-		pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
+		pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &Renderer::GetProjectionMatrix2D());
 	}
 
 	return S_OK;
@@ -336,7 +336,7 @@ void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
 void D3DApp::Renderer::SetProjectionMatrix2D()
 {
 	SetViewMatrix(&XMMatrixIdentity());
-	SetProjectionMatrix(&XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f));
+	SetProjectionMatrix(&Renderer::GetProjectionMatrix2D());
 }
 
 void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer * VertexBuffer, UINT stride, UINT offset)
@@ -359,4 +359,9 @@ void D3DApp::Renderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int
 {
 	pInstance->ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pInstance->ImmediateContext->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
+}
+
+XMMATRIX D3DApp::Renderer::GetProjectionMatrix2D()
+{
+	return XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
 }

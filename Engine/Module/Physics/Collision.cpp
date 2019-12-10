@@ -1006,8 +1006,8 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = ( Position.x + (width * widthNum * 0.5f)) / width;
-	int z = (-Position.z + (depth * depthNum * 0.5f)) / depth;
+	int x = (int)( Position.x + (width * widthNum * 0.5f)) / width;
+	int z = (int)(-Position.z + (depth * depthNum * 0.5f)) / depth;
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);

@@ -76,5 +76,7 @@ public:
 
 		static void SetTexture(ID3D11ShaderResourceView* Texture, UINT slot = 0, UINT numView = 1);
 		static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
+
+		static XMMATRIX GetProjectionMatrix2D();
 	};
 };

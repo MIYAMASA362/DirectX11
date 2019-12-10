@@ -794,4 +794,6 @@ namespace DirectX
 		operator const float*() { return &r; }
 
 	}Color, COLOR;
+
+	
 }
