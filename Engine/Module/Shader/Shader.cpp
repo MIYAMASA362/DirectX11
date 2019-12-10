@@ -37,7 +37,7 @@ ID3D11Buffer* ConstantBuffer::GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferEl
 
 void ConstantBuffer::UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement,const void* data)
 {
-	D3DApp::GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement],0,NULL,&data,0,0);
+	D3DApp::GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement],0,NULL,data,0,0);
 }
 
 void ConstantBuffer::SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer)
@@ -191,14 +191,9 @@ void Shader::SetShader()
 	D3DApp::GetDeviceContext()->PSSetShader(_PixelShader,NULL,0);
 
 	//SetBuffer
-	//VSSetConstantBuffer:Slot”Ô† ”z—ñ”Ô†
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(0, 1, &_WorldBuffer);
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(1, 1, &_ViewBuffer);
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(2, 1, &_ProjectionBuffer);
-
-	/*_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD,0);
+	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD,0);
 	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW,1);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION,2);*/
+	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION,2);
 
 	_Light->SetResource();
 	_Material->SetResource();
@@ -207,22 +202,19 @@ void Shader::SetShader()
 void Shader::SetWorldMatrix(XMMATRIX * WorldMatrix)
 {
 	_WorldMatrix = *WorldMatrix;
-	//_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD,&XMMatrixTranspose(_WorldMatrix));
-	D3DApp::GetDeviceContext()->UpdateSubresource(_WorldBuffer, 0, NULL, &XMMatrixTranspose(_WorldMatrix), 0, 0);
+	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD,&XMMatrixTranspose(_WorldMatrix));
 }
 
 void Shader::SetViewMatrix(XMMATRIX * ViewMatrix)
 {
 	_ViewMatrix = *ViewMatrix;
-	//_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixTranspose(_ViewMatrix));
-	D3DApp::GetDeviceContext()->UpdateSubresource(_ViewBuffer, 0, NULL, &XMMatrixTranspose(_ViewMatrix), 0, 0);
+	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixTranspose(_ViewMatrix));
 }
 
 void Shader::SetProjectionMatrix(XMMATRIX * ProjectionMatrix)
 {
 	_ProjectionMatrix = *ProjectionMatrix;
-	//_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixTranspose(_ProjectionMatrix));
-	D3DApp::GetDeviceContext()->UpdateSubresource(_ProjectionBuffer, 0, NULL, &XMMatrixTranspose(_ProjectionMatrix), 0, 0);
+	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixTranspose(_ProjectionMatrix));
 }
 
 void Shader::LoadShaderFile(const char * filename, unsigned char** buffer, long int * fsize)
