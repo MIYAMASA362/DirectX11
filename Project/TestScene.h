@@ -41,36 +41,36 @@ public:
 		}
 
 		//pModel
-		GameObject* pModel = this->AddSceneObject("Miku", TagName::ChildMiku);
-		{
-			pModel->transform().lock()->position(Vector3::up()*2.0f);
-			pModel->transform().lock()->localScale(Vector3::one());
-			pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
-			pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
-			//pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
-			/*auto box = pModel->AddComponent<BoxCollider>().lock();
-			box->SetSize({1.0f,1.0f,1.0f});*/
-			auto sphere = pModel->AddComponent<SphereCollider>().lock();
-			sphere->SetRadius(1.0f);
-			auto player = pModel->AddComponent<Player>().lock();
+		//GameObject* pModel = this->AddSceneObject("Miku", TagName::ChildMiku);
+		//{
+		//	pModel->transform().lock()->position(Vector3::up()*2.0f);
+		//	pModel->transform().lock()->localScale(Vector3::one());
+		//	pModel->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
+		//	pModel->AddComponent<Rigidbody>().lock()->IsUseGravity(false);
+		//	//pModel->AddComponent<SphereCollider>().lock()->SetRadius(1.0f);
+		//	/*auto box = pModel->AddComponent<BoxCollider>().lock();
+		//	box->SetSize({1.0f,1.0f,1.0f});*/
+		//	auto sphere = pModel->AddComponent<SphereCollider>().lock();
+		//	sphere->SetRadius(1.0f);
+		//	auto player = pModel->AddComponent<Player>().lock();
 
-			/*for(int i = 0; i < 10; i++)
-			{
-				GameObject* child = this->AddSceneObject("Child" + std::to_string(i),TagName::Default);
-				{
-					child->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
-					child->AddComponent<BoxCollider>();
-					child->transform().lock()->SetParent(pModel->gameObject());
-					child->transform().lock()->localPosition(pModel->transform().lock()->right() * (i+1));
-				}
-			}*/
-		}
+		//	/*for(int i = 0; i < 10; i++)
+		//	{
+		//		GameObject* child = this->AddSceneObject("Child" + std::to_string(i),TagName::Default);
+		//		{
+		//			child->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Miku");
+		//			child->AddComponent<BoxCollider>();
+		//			child->transform().lock()->SetParent(pModel->gameObject());
+		//			child->transform().lock()->localPosition(pModel->transform().lock()->right() * (i+1));
+		//		}
+		//	}*/
+		//}
 
 		//MikuCamera
 		GameObject* MikuCamera = this->AddSceneObject("MikuCamera", TagName::Default);
 		{
 			MikuCamera->AddComponent<Camera>().lock()->SetPriority(0);
-			MikuCamera->transform().lock()->SetParent(pModel->gameObject());
+			//MikuCamera->transform().lock()->SetParent(pModel->gameObject());
 			MikuCamera->transform().lock()->localPosition(Vector3::up() + Vector3::back() * 4.0f);
 			MikuCamera->transform().lock()->rotation(Quaternion::Euler({ 0.0f,0.0f,0.0f }));
 			MikuCamera->AddComponent<CameraMouse>();

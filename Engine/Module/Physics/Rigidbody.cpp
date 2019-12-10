@@ -64,7 +64,7 @@ void Rigidbody::FixedUpdate()
 
 void Rigidbody::ApplyRigidbody()
 {
-	auto index = ComponentManager::GetComponentIndex(Rigidbody::TypeID);
+	auto index = ComponentManager::GetOrCreateComponentIndex(Rigidbody::TypeID);
 	for (auto component : *index.lock()) {
 		auto rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
 		auto transform = rigidbody->transform();
