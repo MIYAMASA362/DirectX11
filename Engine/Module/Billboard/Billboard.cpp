@@ -109,9 +109,9 @@ void DirectX::Billboard::Render(XMMATRIX& worldMatrix)
 		world = XMMatrixTranslation(0.0f, this->m_scale, 0.0f);
 	world *= InvView * worldMatrix;
 
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &world);
+	D3DApp::Renderer::SetWorldMatrix(&world);
 	this->m_Texture->SetResource();
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);

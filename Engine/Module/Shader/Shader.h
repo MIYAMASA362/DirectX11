@@ -1,42 +1,6 @@
 #pragma once
 
-//入力レイアウト
-enum VERTEX_INPUT_LAYOUT
-{
-	VSIL_POSITION,
-	VSIL_NORMAL,
-	VSIL_COLOR,
-	VSIL_TEXCOORD
-};
-
-//頂点シェーダデータクラス
-class VertexShaderData final
-{
-private:
-	ID3D11VertexShader* _VertexShader;
-	ID3D11InputLayout* _VertexLayout;
-public:
-	VertexShaderData();
-	~VertexShaderData();
-
-	void CrateVertexShader(const char* vertexShader, const VERTEX_INPUT_LAYOUT* InputLayout,unsigned int LayoutSize);
-	void SetVertexShader();
-};
-
-//ピクセルシェーダデータクラス
-class PixelShaderData final
-{
-private:
-	ID3D11PixelShader* _PixelShader;
-public:
-	PixelShaderData();
-	~PixelShaderData();
-
-	void CreatePixelShader(const char* pixelShader);
-	void SetPixelShader();
-};
-
-//コンストバッファ要素
+//コンスタントバッファ要素
 enum CONSTANT_BUFFER_ELEMENT
 {
 	CONSTANT_BUFFER_WORLD = 0,
@@ -47,35 +11,85 @@ enum CONSTANT_BUFFER_ELEMENT
 	CONSTANT_BUFFER_NUM
 };
 
-//コンストバッファ
+//コンスタントバッファ生成
 class ConstantBuffer
 {
 private:
 	ID3D11Buffer* _ConstantBuffer[CONSTANT_BUFFER_NUM];
 public:
+	//コンスタントバッファの生成
 	void CreateBuffer();
 	//バッファの取得
-	ID3D11Buffer** GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement);
+	ID3D11Buffer* GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement);
 	//バッファの更新
-	void UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement, const void* data);
+	void UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement,const void* data);
+	
 	//バッファに設定
-	void SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer = 1);
-	void SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer = 1);
+	void SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement,UINT slot,UINT numBuffer = 1);
+	void SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement,UINT slot,UINT numBuffer = 1);
 };
+
+
+
+//入力レイアウト
+enum VERTEX_INPUT_LAYOUT
+{
+	VSIL_POSITION,
+	VSIL_NORMAL,
+	VSIL_COLOR,
+	VSIL_TEXCOORD
+};
+
+//頂点シェーダ
+class VertexShaderData
+{
+private:
+	ID3D11VertexShader* _VertexShader;
+	ID3D11InputLayout* _InputLayout;
+public:
+	VertexShaderData();
+	virtual~VertexShaderData();
+
+	void LoadShader(const char* vertexShader,VERTEX_INPUT_LAYOUT* inputLayout,unsigned int layoutSize);
+	void SetShader();
+};
+
+
+
+//ピクセルシェーダ
+class PixelShaderData
+{
+private:
+	ID3D11PixelShader* _PixelShader;
+public:
+	PixelShaderData();
+	virtual~PixelShaderData();
+
+	void LoadShader(const char* pixelShader);
+	void SetShader();
+};
+
+
 
 //シェーダ
 class Shader
 {
 private:
-	VertexShaderData* _VertexShader;
-	PixelShaderData* _PixelShader;
+	VertexShaderData*	_VertexShader;
+	PixelShaderData*	_PixelShader;
 public:
 	Shader();
 	virtual~Shader();
+
+	void SetVertexShader(const char* VertexShader,VERTEX_INPUT_LAYOUT* layout,unsigned int size);
+	void SetPixelShader(const char* PixelShader);
+
 	void SetShader();
-
-	VertexShaderData* const GetVertexShader() { return _VertexShader; };
-	PixelShaderData* const GetPixelShader() { return _PixelShader; };
-
-	static void Shader::LoadShaderFile(const char * filename, unsigned char** buffer, long int * fsize);
+	void Release();
 };
+
+
+
+
+//filenameのファイルをバイナリ形式で読み込み,サイズなどを返します。
+void LoadShaderFile(const char* filename, unsigned char** buffer, long int* fsize);

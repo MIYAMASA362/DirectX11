@@ -769,7 +769,7 @@ void DirectX::SphereCollider::SetRadius(float radius)
 
 void DirectX::SphereCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	m_Texture->SetResource();
@@ -784,17 +784,17 @@ void DirectX::SphereCollider::Render()
 	world *= XMMatrixTranslation(pos.x,pos.y,pos.z);
 	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD,&world);
+	D3DApp::Renderer::SetWorldMatrix(&world);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationZ(Mathf::PI_2) * world;
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &local);
+	D3DApp::Renderer::SetWorldMatrix(&local);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationX(Mathf::PI_2) * world;
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &local);
+	D3DApp::Renderer::SetWorldMatrix(&local);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
@@ -940,7 +940,7 @@ void DirectX::BoxCollider::SetSize(Vector3 size)
 
 void DirectX::BoxCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	m_Texture->SetResource();
@@ -954,8 +954,7 @@ void DirectX::BoxCollider::Render()
 	world *= this->transform()->WorldMatrix();
 	
 
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &world);
-
+	D3DApp::Renderer::SetWorldMatrix(&world);
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
 }
@@ -1008,8 +1007,8 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = ( Position.x + (width * widthNum * 0.5f)) / width;
-	int z = (-Position.z + (depth * depthNum * 0.5f)) / depth;
+	int x = (int)( Position.x + (width * widthNum * 0.5f)) / width;
+	int z = (int)(-Position.z + (depth * depthNum * 0.5f)) / depth;
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);

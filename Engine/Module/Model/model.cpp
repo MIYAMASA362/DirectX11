@@ -42,9 +42,9 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 	
 	worldMatrix = offsetMatrix * worldMatrix;
 
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD, &worldMatrix);
+	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
-	D3DApp::Renderer::SetVertexBuffer(VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(IndexBuffer);
 
 	for(unsigned short i = 0; i<SubsetNum; i++)

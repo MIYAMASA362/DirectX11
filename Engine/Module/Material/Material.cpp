@@ -6,6 +6,7 @@
 #include "Material.h"
 #include"Module\Shader\Shader.h"
 
+
 Material::Material()
 {
 	_constant.Diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -17,10 +18,10 @@ Material::Material()
 
 Material::~Material()
 {
-	
+
 }
 
 void Material::SetResource()
 {
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
+	D3DApp::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }

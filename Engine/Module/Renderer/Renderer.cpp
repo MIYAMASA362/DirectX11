@@ -108,7 +108,6 @@ void DirectX::Renderer2D::BeginRender()
 	{
 		if (!renderer.lock()->gameObject()->GetActive()) continue;
 		if (!renderer.lock()->GetEnable()) continue;
-		D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_VIEW, &XMMatrixIdentity());
 		D3DApp::Renderer::SetProjectionMatrix2D();
 		renderer.lock()->Render(renderer.lock()->transform()->WorldMatrix());
 	}

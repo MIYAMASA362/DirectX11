@@ -93,7 +93,7 @@ void DirectX::Image::Render(XMMATRIX& world)
 	//テクスチャ設定
 	this->texture->SetResource();
 	//ワールド行列設定
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD,&world);
+	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//描画
@@ -183,7 +183,7 @@ void DirectX::Button::Render(XMMATRIX world)
 	//テクスチャ設定
 	this->texture->SetResource();
 	//ワールド行列設定
-	D3DApp::GetConstBuffer()->UpdateSubresource(CONSTANT_BUFFER_WORLD,&world);
+	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
 	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//描画

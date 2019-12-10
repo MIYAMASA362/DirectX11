@@ -3,10 +3,9 @@
 using namespace DirectX;
 
 class Shader;
+class ConstantBuffer;
 class Light;
 class Material;
-
-class ConstantBuffer;
 
 class D3DApp
 {
@@ -32,11 +31,12 @@ private:
 	ID3D11DepthStencilState* DepthStateEnable;
 	ID3D11DepthStencilState* DepthStateDisable;
 
-	ConstantBuffer* _ConstantBuffer;	//コンスタントバッファ
-	Shader* _Shader;
+	XMMATRIX _ProjectionMatrix;
 
-	Light* _Light;	//ライト
-	Material* _Material; //マテリアル
+	Shader* _Shader;					//シェーダ
+	ConstantBuffer* _ConstantBuffer;	//定数バッファ
+	Light* _Light;
+	Material* _Material;
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -53,8 +53,7 @@ public:
 	static unsigned int GetFps();
 
 	static Shader* GetShader() { return pInstance->_Shader; };
-	static ConstantBuffer* GetConstBuffer() { return pInstance->_ConstantBuffer; };
-
+	static ConstantBuffer* GetConstantBuffer() { return pInstance->_ConstantBuffer; };
 public:
 	class Renderer
 	{
@@ -66,9 +65,18 @@ public:
 		static void SetDepthEnable(bool Enable);
 		static void SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode);
 
-		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
+		static void SetWorldViewProjection2D();
+		static void SetWorldMatrix(XMMATRIX* WorldMatrix);
+		static void SetViewMatrix(XMMATRIX* ViewMatrix);
+		static void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
+		static void SetProjectionMatrix2D();
+
+		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer,UINT stride,UINT offset);
 		static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
-		static void SetProjectionMatrix2D();
+		static void SetTexture(ID3D11ShaderResourceView* Texture, UINT slot = 0, UINT numView = 1);
+		static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
+
+		static XMMATRIX GetProjectionMatrix2D();
 	};
 };
