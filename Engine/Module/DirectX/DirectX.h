@@ -4,6 +4,8 @@ using namespace DirectX;
 
 class Shader;
 class ConstantBuffer;
+class Light;
+class Material;
 
 class D3DApp
 {
@@ -31,8 +33,10 @@ private:
 
 	XMMATRIX _ProjectionMatrix;
 
-	Shader* _Shader;
-	ConstantBuffer* _ConstantBuffer;
+	Shader* _Shader;					//シェーダ
+	ConstantBuffer* _ConstantBuffer;	//定数バッファ
+	Light* _Light;
+	Material* _Material;
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -67,27 +71,10 @@ public:
 		static void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
 		static void SetProjectionMatrix2D();
 
-		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer);
+		static void SetVertexBuffer(ID3D11Buffer* VertexBuffer,UINT stride,UINT offset);
 		static void SetIndexBuffer(ID3D11Buffer* IndexBuffer);
 
-		static void SetTexture(ID3D11ShaderResourceView* Texture);
+		static void SetTexture(ID3D11ShaderResourceView* Texture, UINT slot = 0, UINT numView = 1);
 		static void DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation);
-
-		template<typename Type>
-		static void CreateConstantBuffer(ID3D11Buffer** _buffer);
 	};
 };
-
-template<typename Type>
-inline void D3DApp::Renderer::CreateConstantBuffer(ID3D11Buffer ** _buffer)
-{
-	D3D11_BUFFER_DESC bd;
-	bd.ByteWidth = sizeof(Type);
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.StructureByteStride = sizeof(float);
-
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, _buffer);
-}

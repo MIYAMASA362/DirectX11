@@ -44,7 +44,7 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
-	D3DApp::Renderer::SetVertexBuffer(VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(IndexBuffer);
 
 	for(unsigned short i = 0; i<SubsetNum; i++)

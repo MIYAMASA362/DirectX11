@@ -80,20 +80,17 @@ public:
 class Shader
 {
 private:
-	Light* _Light;
-	Material* _Material;
-
 	VertexShaderData*	_VertexShader;
 	PixelShaderData*	_PixelShader;
 public:
 	Shader();
 	virtual~Shader();
 
-	void LoadShader(const char* VertexShader,const char* PixelShader,VERTEX_INPUT_LAYOUT* layout,unsigned int size);
+	void SetVertexShader(const char* VertexShader,VERTEX_INPUT_LAYOUT* layout,unsigned int size);
+	void SetPixelShader(const char* PixelShader);
+
 	void SetShader();
 	void Release();
-
-	Material* GetMaterial() { return _Material; };
 };
 
 

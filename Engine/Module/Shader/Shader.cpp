@@ -57,7 +57,6 @@ void ConstantBuffer::SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, 
 
 
 
-
 //頂点シェーダ
 
 VertexShaderData::VertexShaderData()
@@ -161,6 +160,7 @@ void VertexShaderData::SetShader()
 
 PixelShaderData::PixelShaderData()
 {
+
 }
 
 PixelShaderData::~PixelShaderData()
@@ -197,30 +197,24 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-
+	if (_PixelShader) delete _PixelShader;
+	if (_VertexShader) delete _VertexShader;
 }
 
-void Shader::LoadShader(const char * VertexShader, const char * PixelShader,VERTEX_INPUT_LAYOUT* InputLayout,unsigned int LayoutSize)
+void Shader::SetVertexShader(const char * VertexShader, VERTEX_INPUT_LAYOUT * layout, unsigned int size)
 {
-	//頂点シェーダ
 	_VertexShader = new VertexShaderData();
-	_VertexShader->LoadShader(VertexShader,InputLayout,LayoutSize);
+	_VertexShader->LoadShader(VertexShader,layout,size);
+}
 
-	//ピクセルシェーダ
+void Shader::SetPixelShader(const char * PixelShader)
+{
 	_PixelShader = new PixelShaderData();
 	_PixelShader->LoadShader(PixelShader);
-
-	_Light = new Light();
-	_Material = new Material();
-
-
 }
 
 void Shader::Release()
 {
-	if (_Material) delete _Material;
-	if (_Light) delete _Light;
-
 	if (_PixelShader) delete _PixelShader;
 	if (_VertexShader) delete _VertexShader;
 }
@@ -229,10 +223,6 @@ void Shader::SetShader()
 {
 	_VertexShader->SetShader();
 	_PixelShader->SetShader();
-
-	//SetBuffer
-	_Light->SetResource();
-	_Material->SetResource();
 }
 
 

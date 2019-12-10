@@ -767,7 +767,7 @@ void DirectX::SphereCollider::SetRadius(float radius)
 
 void DirectX::SphereCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());
@@ -938,7 +938,7 @@ void DirectX::BoxCollider::SetSize(Vector3 size)
 
 void DirectX::BoxCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(m_Texture->GetShaderResourceView());

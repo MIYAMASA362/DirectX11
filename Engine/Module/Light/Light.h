@@ -10,7 +10,6 @@ public:
 		Color Ambient;
 	};
 	Light::Constant _constant;
-	ID3D11Buffer* _LightBuffer;
 public:
 	Light();
 	virtual ~Light();

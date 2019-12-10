@@ -16,7 +16,6 @@ public:
 	};
 public:
 	Material::Constant _constant;
-	ID3D11Buffer* _MaterialBuffer;
 
 	Material();
 	virtual ~Material();

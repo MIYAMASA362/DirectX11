@@ -4,12 +4,11 @@
 #include"Module\DirectX\DirectX.h"
 
 #include "Material.h"
+#include"Module\Shader\Shader.h"
 
 
 Material::Material()
 {
-	D3DApp::Renderer::CreateConstantBuffer<Material::Constant>(&_MaterialBuffer);
-
 	_constant.Diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_constant.Ambient = Color(0.6f, 0.6f, 0.6f, 1.0f);
 	_constant.Specular = Color();
@@ -19,11 +18,10 @@ Material::Material()
 
 Material::~Material()
 {
-	if (_MaterialBuffer) _MaterialBuffer->Release();
+
 }
 
 void Material::SetResource()
 {
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(3,1,&_MaterialBuffer);
-	D3DApp::GetDeviceContext()->UpdateSubresource(_MaterialBuffer,0,NULL,&_constant,0,0);
+	D3DApp::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }

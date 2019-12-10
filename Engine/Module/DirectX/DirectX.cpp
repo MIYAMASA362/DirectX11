@@ -16,6 +16,8 @@
 #include"DirectX.h"
 
 #include"Module\Shader\Shader.h"
+#include"Module\Light\Light.h"
+#include"Module\Material\Material.h"
 
 using namespace DirectX;
 
@@ -179,28 +181,44 @@ HRESULT D3DApp::Create(HWND hWnd, HINSTANCE hInstance,unsigned int fps)
 
 	pInstance->ImmediateContext->PSSetSamplers(0, 1, &samplerState);
 
-
-	//定数バッファ生成
-	pInstance->_ConstantBuffer = new ConstantBuffer();
-	pInstance->_ConstantBuffer->CreateBuffer();
-
-	//シェーダ設定
-	pInstance->_Shader = new Shader();
-	VERTEX_INPUT_LAYOUT layout[] =
+	//シェーダ
 	{
-		VSIL_POSITION,
-		VSIL_NORMAL,
-		VSIL_COLOR,
-		VSIL_TEXCOORD
-	};
-	pInstance->_Shader->LoadShader("Asset/Shader/vertexShader.cso", "Asset/Shader/pixelShader.cso",layout,ARRAYSIZE(layout));
-	
-	pInstance->_Shader->SetShader();
-	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD, 0);
-	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW, 1);
-	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION, 2);
+		//定数バッファ生成
+		pInstance->_ConstantBuffer = new ConstantBuffer();
+		pInstance->_ConstantBuffer->CreateBuffer();
 
-	pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
+		//Light
+		pInstance->_Light = new Light();
+
+		//Material
+		pInstance->_Material = new Material();
+
+		//シェーダ設定
+		pInstance->_Shader = new Shader();
+		VERTEX_INPUT_LAYOUT layout[] =
+		{
+			VSIL_POSITION,
+			VSIL_NORMAL,
+			VSIL_COLOR,
+			VSIL_TEXCOORD
+		};
+		pInstance->_Shader->SetVertexShader("Asset/Shader/vertexShader.cso", layout, ARRAYSIZE(layout));
+		pInstance->_Shader->SetPixelShader("Asset/Shader/pixelShader.cso");
+
+		pInstance->_Shader->SetShader();
+
+		//定数バッファ設定
+		pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD, 0);
+		pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW, 1);
+		pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION, 2);
+		pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL, 3);
+		pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_LIGHT, 4);
+
+		pInstance->_Material->SetResource();
+		pInstance->_Light->SetResource();
+
+		pInstance->_ProjectionMatrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f);
+	}
 
 	return S_OK;
 }
@@ -209,7 +227,7 @@ void D3DApp::Destroy()
 {
 	if (!pInstance) return;
 	if (pInstance->_ConstantBuffer) delete pInstance->_ConstantBuffer;
-	if (pInstance->_Shader) delete pInstance->_Shader;
+	if (pInstance->_Shader)	delete pInstance->_Shader;
 
 	if (pInstance->ImmediateContext)	pInstance->ImmediateContext->ClearState();
 	if (pInstance->RenderTargetView)	pInstance->RenderTargetView->Release();
@@ -302,23 +320,17 @@ void D3DApp::Renderer::SetWorldViewProjection2D()
 
 void D3DApp::Renderer::SetWorldMatrix(XMMATRIX* WorldMatrix)
 {
-	XMMATRIX world;
-	world = *WorldMatrix;
-	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD, &XMMatrixTranspose(world));
+	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD, &XMMatrixTranspose(*WorldMatrix));
 }
 
 void D3DApp::Renderer::SetViewMatrix(XMMATRIX* ViewMatrix)
 {
-	XMMATRIX view;
-	view = *ViewMatrix;
-	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixTranspose(view));
+	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixTranspose(*ViewMatrix));
 }
 
 void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
 {
-	XMMATRIX projection;
-	projection = *ProjectionMatrix;
-	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixTranspose(projection));
+	pInstance->_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixTranspose(*ProjectionMatrix));
 }
 
 void D3DApp::Renderer::SetProjectionMatrix2D()
@@ -327,11 +339,9 @@ void D3DApp::Renderer::SetProjectionMatrix2D()
 	SetProjectionMatrix(&XMMatrixOrthographicOffCenterLH(0.0f, (float)pInstance->ScreenWidth, (float)pInstance->ScreenHeight, 0.0f, 0.0f, 1.0f));
 }
 
-void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer* VertexBuffer)
+void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer * VertexBuffer, UINT stride, UINT offset)
 {
-	UINT stride = sizeof(VERTEX_3D);
-	UINT offset = 0;
-	pInstance->ImmediateContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
+	pInstance->ImmediateContext->IASetVertexBuffers(0,1,&VertexBuffer,&stride,&offset);
 }
 
 void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
@@ -339,10 +349,10 @@ void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
 	pInstance->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture)
+void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture,UINT slot,UINT numView)
 {
 	ID3D11ShaderResourceView* srv[1] = { texture };
-	pInstance->ImmediateContext->PSSetShaderResources(0, 1, srv);
+	pInstance->ImmediateContext->PSSetShaderResources(slot, numView, srv);
 }
 
 void D3DApp::Renderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation)

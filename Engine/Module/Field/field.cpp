@@ -306,7 +306,7 @@ SkySphere::~SkySphere()
 
 void SkySphere::Render(XMMATRIX& worldMatrix)
 {
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
@@ -479,7 +479,7 @@ MeshField::~MeshField()
 
 void MeshField::Render(XMMATRIX& worldMatrix)
 {
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer,sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
@@ -604,7 +604,7 @@ DirectX::MeshWall::~MeshWall()
 
 void DirectX::MeshWall::Render(XMMATRIX& worldMatrix)
 {
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
@@ -713,7 +713,7 @@ DirectX::MeshCircle::~MeshCircle()
 
 void DirectX::MeshCircle::Render(XMMATRIX& worldMatrix)
 {
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 

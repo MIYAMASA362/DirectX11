@@ -107,7 +107,7 @@ void DirectX::Billboard::Render(XMMATRIX& worldMatrix)
 		world = XMMatrixTranslation(0.0f, this->m_scale, 0.0f);
 	world *= InvView * worldMatrix;
 
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer);
+	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
