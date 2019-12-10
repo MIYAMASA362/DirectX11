@@ -83,10 +83,8 @@ private:
 	Light* _Light;
 	Material* _Material;
 
-	ConstantBuffer* _ConstantBuffer;
-
-	VertexShaderData* _VertexShader;
-	PixelShaderData* _PixelShader;
+	VertexShaderData*	_VertexShader;
+	PixelShaderData*	_PixelShader;
 public:
 	Shader();
 	virtual~Shader();
@@ -94,10 +92,6 @@ public:
 	void LoadShader(const char* VertexShader,const char* PixelShader,VERTEX_INPUT_LAYOUT* layout,unsigned int size);
 	void SetShader();
 	void Release();
-
-	void SetWorldMatrix(XMMATRIX* WorldMatrix);
-	void SetViewMatrix(XMMATRIX* ViewMatrix);
-	void SetProjectionMatrix(XMMATRIX* ProjectionMatrix);
 
 	Material* GetMaterial() { return _Material; };
 };

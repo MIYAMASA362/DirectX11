@@ -3,6 +3,7 @@
 using namespace DirectX;
 
 class Shader;
+class ConstantBuffer;
 
 class D3DApp
 {
@@ -31,6 +32,7 @@ private:
 	XMMATRIX _ProjectionMatrix;
 
 	Shader* _Shader;
+	ConstantBuffer* _ConstantBuffer;
 private:
 	D3DApp() = default;
 	~D3DApp() = default;
@@ -45,7 +47,9 @@ public:
 	static unsigned int GetScreenWidth();
 	static unsigned int GetScreenHeight();
 	static unsigned int GetFps();
+
 	static Shader* GetShader() { return pInstance->_Shader; };
+	static ConstantBuffer* GetConstantBuffer() { return pInstance->_ConstantBuffer; };
 public:
 	class Renderer
 	{

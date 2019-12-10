@@ -210,21 +210,16 @@ void Shader::LoadShader(const char * VertexShader, const char * PixelShader,VERT
 	_PixelShader = new PixelShaderData();
 	_PixelShader->LoadShader(PixelShader);
 
-	//定数バッファ生成
-
-	_ConstantBuffer = new ConstantBuffer();
-	_ConstantBuffer->CreateBuffer();
-
 	_Light = new Light();
 	_Material = new Material();
+
+
 }
 
 void Shader::Release()
 {
 	if (_Material) delete _Material;
 	if (_Light) delete _Light;
-
-	if (_ConstantBuffer) delete _ConstantBuffer;
 
 	if (_PixelShader) delete _PixelShader;
 	if (_VertexShader) delete _VertexShader;
@@ -236,27 +231,8 @@ void Shader::SetShader()
 	_PixelShader->SetShader();
 
 	//SetBuffer
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD,0);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW,1);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION,2);
-
 	_Light->SetResource();
 	_Material->SetResource();
-}
-
-void Shader::SetWorldMatrix(XMMATRIX * WorldMatrix)
-{
-	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD,&XMMatrixTranspose(*WorldMatrix));
-}
-
-void Shader::SetViewMatrix(XMMATRIX * ViewMatrix)
-{
-	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW,&XMMatrixTranspose(*ViewMatrix));
-}
-
-void Shader::SetProjectionMatrix(XMMATRIX * ProjectionMatrix)
-{
-	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION,&XMMatrixTranspose(*ProjectionMatrix));
 }
 
 
