@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include"Common.h"
+#include"Module\DirectX\DirectX.h"
 
 #include<assimp\cimport.h>
 #include<assimp\scene.h>
@@ -7,10 +8,6 @@
 #include<assimp\matrix4x4.h>
 
 #pragma comment(lib,"assimp.lib")
-
-//DirectX
-#include"Module\DirectX\DirectXStruct.h"
-#include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
@@ -207,24 +204,24 @@ void DirectX::ModelManager::LoadAssetForAssimp(const char * fileName)
 	//Material
 	if(_aiScene->HasMaterials())
 	{
-		//for(int m =0;m < _aiScene->mNumMaterials; m++)
-		//{
-		//	aiMaterial* material = _aiScene->mMaterials[m];
-		//	std::string assetPath = std::string(fileName).substr(0,std::string(fileName).find_last_of("\\/")+1);
-		//
-		//	unsigned int texNum = material->GetTextureCount(aiTextureType_DIFFUSE);
-		//	model->_TextureArray = new Texture[texNum];
+		for(int m =0;m < _aiScene->mNumMaterials; m++)
+		{
+			aiMaterial* material = _aiScene->mMaterials[m];
+			std::string assetPath = std::string(fileName).substr(0,std::string(fileName).find_last_of("\\/")+1);
+		
+			unsigned int texNum = material->GetTextureCount(aiTextureType_DIFFUSE);
+			model->_TextureArray = new Texture[texNum];
 
-		//	//Texture
-		//	for(int t = 0; t < texNum; t++)
-		//	{
-		//		aiString texturePath;
-		//		if (material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath) != AI_SUCCESS) continue;
-		//		
-		//		HRESULT hr = D3DX11CreateShaderResourceViewFromFileA(D3DApp::GetDevice(),texturePath.C_Str(),NULL,NULL,&model->_TextureArray[t].srv,NULL);
-		//		if (FAILED(hr)) assert(false);
-		//	}
-		//}
+			//Texture
+			for(int t = 0; t < texNum; t++)
+			{
+				aiString texturePath;
+				if (material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath) != AI_SUCCESS) continue;
+				
+				HRESULT hr = D3DX11CreateShaderResourceViewFromFileA(D3DApp::GetDevice(),texturePath.C_Str(),NULL,NULL,&model->_TextureArray[t].srv,NULL);
+				if (FAILED(hr)) assert(false);
+			}
+		}
 	}
 }
 
