@@ -1,11 +1,33 @@
 #pragma once
 
+#pragma warning(push)
+#pragma warning(disable : 4005) 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <d3d11shader.h>
+#pragma warning(pop)
+
+// Direct3D extension.
+#if ( _MSC_VER > 1000 ) || defined(_DEBUG)
+#pragma comment(lib, "d3dx11.lib")
+#else
+#pragma comment(lib,"d3dx11.lib")
+#endif
+
+#pragma warning(push) 
+#pragma warning(disable : 4005) 
+#include <D3DX11.h>
+#pragma warning(pop)
+#include<DirectXMath.h>
+
 using namespace DirectX;
 
 class Shader;
 class ConstantBuffer;
 class Light;
 class Material;
+
+#include"Module\DirectX\DirectXStruct.h"
 
 class D3DApp
 {
