@@ -6,10 +6,11 @@ struct ID3D11ShaderResourceView;
 //Texture
 class Texture
 {
-protected:
+public:
 	ID3D11Texture2D* texture = nullptr;
 	ID3D11ShaderResourceView* srv = nullptr;
 public:
+	Texture() = default;
 	Texture(ID3D11Texture2D* texture, ID3D11ShaderResourceView* srv)
 		:texture(texture),srv(srv){};
 	~Texture() 

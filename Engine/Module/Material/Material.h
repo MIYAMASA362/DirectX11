@@ -2,6 +2,9 @@
 
 #include"Module\DirectX\DirectXStruct.h"
 
+class Texture;
+
+//基準マテリアル
 class Material
 {
 public:
@@ -23,7 +26,13 @@ public:
 	void SetResource();
 };
 
-class Texture;
+//モデル用マテリアル
+struct ModelMaterial
+{
+	char _Name[256];
+	Material _Material;
+	char _TextureName[256];
+};
 
 namespace DirectX
 {
@@ -41,5 +50,6 @@ namespace DirectX
 		unsigned short	StartIndex;
 		unsigned short	IndexNum;
 		DX11_MODEL_MATERIAL	Material;
-	}DX11_SUBSET;
+	}DX11_SUBSET; 
+
 }

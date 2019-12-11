@@ -2,11 +2,7 @@
 #include<list>
 #include<memory>
 #include<string>
-#include<d3d11.h>
-#include<DirectXMath.h>
 
-//DirectX
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include "input.h"

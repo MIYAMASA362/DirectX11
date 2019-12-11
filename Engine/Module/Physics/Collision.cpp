@@ -1,6 +1,5 @@
 #include"Common.h"
 
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"
@@ -595,7 +594,7 @@ bool DirectX::Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 		return true;
 	};
 
-	for(int i = 0; i < meshCol->_mesh->_SurfaceNum; i++)
+	for(unsigned int i = 0; i < meshCol->_mesh->_SurfaceNum; i++)
 	{
 		//–Ê”»’è
 
@@ -1007,8 +1006,8 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = (int)( Position.x + (width * widthNum * 0.5f)) / width;
-	int z = (int)(-Position.z + (depth * depthNum * 0.5f)) / depth;
+	int x = (int)( Position.x + (width * widthNum * 0.5)) / width;
+	int z = (int)(-Position.z + (depth * depthNum * 0.5)) / depth;
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);
@@ -1069,8 +1068,8 @@ Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = (Position.x + (width * widthNum * 0.5f)) / width;
-	int z = (-Position.z + (depth * depthNum * 0.5f)) / depth;
+	int x = (Position.x + (width * widthNum * 0.5)) / width;
+	int z = (-Position.z + (depth * depthNum * 0.5)) / depth;
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);

@@ -1,6 +1,4 @@
 #include"Common.h"
-
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"

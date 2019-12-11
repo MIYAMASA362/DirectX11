@@ -3,10 +3,7 @@
 #include<assert.h>
 #include<string>
 #include<memory>
-#include<d3d11.h>
-#include<DirectXMath.h>
 
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\AssetData\AssetData.h"

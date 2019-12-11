@@ -2,7 +2,6 @@
 #include<io.h>
 
 #include"Common.h"
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include "Shader.h"
@@ -83,7 +82,7 @@ void VertexShaderData::LoadShader(const char * vertexShader, VERTEX_INPUT_LAYOUT
 	{
 		D3D11_INPUT_ELEMENT_DESC* layout = new D3D11_INPUT_ELEMENT_DESC[layoutSize];
 
-		for (int i = 0; i < layoutSize; i++)
+		for (unsigned int i = 0; i < layoutSize; i++)
 		{
 			D3D11_INPUT_ELEMENT_DESC* target = &layout[i];
 			switch (inputLayout[i])

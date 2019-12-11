@@ -1,4 +1,7 @@
 #include"Common.h"
+
+#include"Module\DirectX\DirectX.h"
+
 #include"../ECSEngine.h"
 
 #include "Hierarchy.h"

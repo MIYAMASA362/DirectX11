@@ -6,6 +6,8 @@
 #include<assimp\postprocess.h>
 #include<assimp\matrix4x4.h>
 
+#pragma comment(lib,"assimp.lib")
+
 //DirectX
 #include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
@@ -22,6 +24,7 @@
 #include"Module\Mesh\Mesh.h"
 #include"Module\Renderer\Renderer.h"
 
+#include"Module\Texture\texture.h"
 #include"Module\Texture\TextureManager.h"
 
 //Model
@@ -82,13 +85,14 @@ void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 			data->SubsetArray[i].StartIndex = model.SubsetArray[i].StartIndex;
 			data->SubsetArray[i].IndexNum = model.SubsetArray[i].IndexNum;
 
-			data->SubsetArray[i].Material.Material = model.SubsetArray[i].Material.Material;
-			if (strlen(model.SubsetArray[i].Material.TextureName) == 0) 
+			data->SubsetArray[i].Material.Material = model.SubsetArray[i].Material._Material;
+			if (strlen(model.SubsetArray[i].Material._TextureName) == 0) 
 				data->SubsetArray[i].Material.Texture = TextureManager::GetTexture("sky");
 			else
-				data->SubsetArray[i].Material.Texture = TextureManager::LoadTexture(model.SubsetArray[i].Material.TextureName);
+				data->SubsetArray[i].Material.Texture = TextureManager::LoadTexture(model.SubsetArray[i].Material._TextureName);
 		}
 	}
+
 	//メモリ削除
 	{
 		delete[] model.VertexArray;
@@ -99,13 +103,129 @@ void DirectX::ModelManager::LoadAsset(ModelAsset asset)
 	ModelIndex.emplace(asset.name,std::shared_ptr<Model>(data));
 }
 
-void DirectX::ModelManager::LoadAssetForAssimp(ModelAsset asset)
+void DirectX::ModelManager::LoadAssetForAssimp(const char * fileName)
 {
-	Model* model = new Model();
+	_aiScene = aiImportFile(fileName,aiProcessPreset_TargetRealtime_MaxQuality);
 
-	std::string FileName = AssetDataBase + asset.folderPath + "/" + asset.modelPath;
+	//モデル
+	AssimpModel* model = new AssimpModel();
 
-	delete model;
+	//メッシュ数
+	model->_MeshNum = _aiScene->mNumMeshes;
+	//メッシュ配列
+	model->_MeshArray = new ModelMesh[model->_MeshNum];
+
+	//メッシュ取得
+	for (int m = 0; m < model->_MeshNum; m++)
+	{
+		aiMesh* mesh = _aiScene->mMeshes[m];	//AssimpMesh
+		ModelMesh& modelMesh = model->_MeshArray[m];
+
+		//マテリアル取得
+		aiMaterial& material = *_aiScene->mMaterials[mesh->mMaterialIndex];
+
+		//頂点バッファ生成
+		{
+			//頂点配列
+			modelMesh._VertexArray = new VERTEX_3D[mesh->mNumVertices];
+
+			//頂点取得
+			for (int v = 0; v < mesh->mNumVertices; v++)
+			{
+				VERTEX_3D& vertex = modelMesh._VertexArray[v];
+
+				//Position
+				aiVector3D aiPosition(0.0f,0.0f,0.0f);
+				if(mesh->HasPositions())
+					aiPosition = mesh->mVertices[v];
+
+				//Normal
+				aiVector3D aiNormal(0.0f,1.0f,0.0f);
+				if (mesh->HasNormals())
+					aiNormal = mesh->mNormals[v];
+
+				//TexCoord
+				aiVector3D aiTexCoord(1.0f,1.0f,0.0f);
+				if(mesh->HasTextureCoords(0))
+					aiTexCoord = mesh->mTextureCoords[0][v];
+
+				//Color Diffuse
+				aiColor4D aiDiffuse(1.0f, 1.0f, 1.0f, 1.0f);
+				if (mesh->HasVertexColors(0))
+					aiDiffuse = mesh->mColors[0][v];
+
+				//頂点設定
+				vertex.Position = XMFLOAT3(aiPosition.x, aiPosition.y, aiPosition.z);
+				vertex.Normal	= XMFLOAT3(aiNormal.x, aiNormal.y, aiNormal.z);
+				vertex.TexCoord = XMFLOAT2(aiTexCoord.x, aiTexCoord.y);
+				vertex.Diffuse	= XMFLOAT4(aiDiffuse.r, aiDiffuse.g, aiDiffuse.b, aiDiffuse.a);
+			}
+
+			//バッファ生成
+			D3D11_BUFFER_DESC bd;
+			ZeroMemory(&bd, sizeof(bd));
+			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			bd.ByteWidth = sizeof(VERTEX_3D) * mesh->mNumVertices;
+			bd.Usage = D3D11_USAGE_DEFAULT;
+
+			//リソース生成
+			D3D11_SUBRESOURCE_DATA sd;
+			sd.pSysMem = modelMesh._VertexArray;
+
+			//頂点バッファ作成
+			D3DApp::GetDevice()->CreateBuffer(&bd, &sd, &modelMesh._VertexBuffer);
+		}
+
+		//インデックスバッファ作成
+		{
+			//三角化
+			modelMesh._IndexNum = mesh->mNumFaces * 3;
+			//インデックス
+			modelMesh._IndexArray = new unsigned short[modelMesh._IndexNum];
+
+			//インデックス登録
+			for (int f = 0; f < mesh->mNumFaces; f++)
+				for (int n = 0; n < 3; n++)
+					modelMesh._IndexArray[f * 3 + n] = mesh->mFaces[f].mIndices[n];
+
+			//バッファ生成
+			D3D11_BUFFER_DESC bd;
+			ZeroMemory(&bd, sizeof(bd));
+			bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+			bd.ByteWidth = sizeof(unsigned short) * modelMesh._IndexNum;
+			bd.Usage = D3D11_USAGE_DEFAULT;
+
+			//リソース生成
+			D3D11_SUBRESOURCE_DATA sd;
+			ZeroMemory(&sd, sizeof(sd));
+			sd.pSysMem = modelMesh._IndexArray;
+
+			D3DApp::GetDevice()->CreateBuffer(&bd, &sd, &modelMesh._IndexBuffer);
+		}
+	}
+	
+	//Material
+	if(_aiScene->HasMaterials())
+	{
+		//for(int m =0;m < _aiScene->mNumMaterials; m++)
+		//{
+		//	aiMaterial* material = _aiScene->mMaterials[m];
+		//	std::string assetPath = std::string(fileName).substr(0,std::string(fileName).find_last_of("\\/")+1);
+		//
+		//	unsigned int texNum = material->GetTextureCount(aiTextureType_DIFFUSE);
+		//	model->_TextureArray = new Texture[texNum];
+
+		//	//Texture
+		//	for(int t = 0; t < texNum; t++)
+		//	{
+		//		aiString texturePath;
+		//		if (material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath) != AI_SUCCESS) continue;
+		//		
+		//		HRESULT hr = D3DX11CreateShaderResourceViewFromFileA(D3DApp::GetDevice(),texturePath.C_Str(),NULL,NULL,&model->_TextureArray[t].srv,NULL);
+		//		if (FAILED(hr)) assert(false);
+		//	}
+		//}
+	}
 }
 
 
@@ -125,7 +245,7 @@ void DirectX::ModelManager::LoadObj(ModelAsset asset, MODEL * Model)
 	unsigned short	in = 0;
 	unsigned short	subsetNum = 0;
 
-	MODEL_MATERIAL	*materialArray = nullptr;
+	ModelMaterial	*materialArray = nullptr;
 	unsigned short	materialNum = 0;
 
 	char str[256];
@@ -279,11 +399,11 @@ void DirectX::ModelManager::LoadObj(ModelAsset asset, MODEL * Model)
 
 			for (unsigned short i = 0; i < materialNum; i++)
 			{
-				if (strcmp(str, materialArray[i].Name) == 0)
+				if (strcmp(str, materialArray[i]._Name) == 0)
 				{
-					Model->SubsetArray[sc].Material.Material = materialArray[i].Material;
-					strcpy(Model->SubsetArray[sc].Material.TextureName, materialArray[i].TextureName);
-					strcpy(Model->SubsetArray[sc].Material.Name, materialArray[i].Name);
+					Model->SubsetArray[sc].Material._Material = materialArray[i]._Material;
+					strcpy(Model->SubsetArray[sc].Material._TextureName, materialArray[i]._TextureName);
+					strcpy(Model->SubsetArray[sc].Material._Name, materialArray[i]._Name);
 
 					break;
 				}
@@ -344,7 +464,7 @@ void DirectX::ModelManager::LoadObj(ModelAsset asset, MODEL * Model)
 	delete[] materialArray;
 }
 
-void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* MaterialName, MODEL_MATERIAL ** MaterialArray, unsigned short * MaterialNum)
+void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* MaterialName, ModelMaterial ** MaterialArray, unsigned short * MaterialNum)
 {
 	char str[256];
 	char MaterialPath[256];
@@ -360,7 +480,7 @@ void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* Mater
 		return;
 	}
 
-	MODEL_MATERIAL *materialArray;
+	ModelMaterial *materialArray;
 	unsigned short materialNum = 0;
 
 	//要素数カウント
@@ -380,7 +500,7 @@ void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* Mater
 
 
 	//メモリ確保
-	materialArray = new MODEL_MATERIAL[materialNum];
+	materialArray = new ModelMaterial[materialNum];
 
 
 	//要素読込
@@ -400,42 +520,42 @@ void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* Mater
 		{
 			//マテリアル名
 			mc++;
-			fscanf(file, "%s", materialArray[mc].Name);
-			strcpy(materialArray[mc].TextureName, "");
+			fscanf(file, "%s", materialArray[mc]._Name);
+			strcpy(materialArray[mc]._TextureName, "");
 		}
 		else if (strcmp(str, "Ka") == 0)
 		{
 			//アンビエント
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.r);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.g);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Ambient.b);
-			materialArray[mc].Material._constant.Ambient.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Ambient.r);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Ambient.g);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Ambient.b);
+			materialArray[mc]._Material._constant.Ambient.a = 1.0f;
 		}
 		else if (strcmp(str, "Kd") == 0)
 		{
 			//ディフューズ
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.r);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.g);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.b);
-			materialArray[mc].Material._constant.Diffuse.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Diffuse.r);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Diffuse.g);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Diffuse.b);
+			materialArray[mc]._Material._constant.Diffuse.a = 1.0f;
 		}
 		else if (strcmp(str, "Ks") == 0)
 		{
 			//スペキュラ
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.r);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.g);
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Specular.b);
-			materialArray[mc].Material._constant.Specular.a = 1.0f;
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Specular.r);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Specular.g);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Specular.b);
+			materialArray[mc]._Material._constant.Specular.a = 1.0f;
 		}
 		else if (strcmp(str, "Ns") == 0)
 		{
 			//スペキュラ強度
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Shininess);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Shininess);
 		}
 		else if (strcmp(str, "d") == 0)
 		{
 			//アルファ
-			fscanf(file, "%f", &materialArray[mc].Material._constant.Diffuse.a);
+			fscanf(file, "%f", &materialArray[mc]._Material._constant.Diffuse.a);
 		}
 		else if (strcmp(str, "map_Kd") == 0)
 		{
@@ -446,7 +566,7 @@ void DirectX::ModelManager::LoadMaterial(const char * FileName,const char* Mater
 			strcpy(path, FileName);
 			strcat(path, str);
 
-			strcat(materialArray[mc].TextureName, path);
+			strcat(materialArray[mc]._TextureName, path);
 		}
 	}
 
@@ -463,4 +583,19 @@ std::weak_ptr<Model> DirectX::ModelManager::GetModel(std::string name)
 void DirectX::ModelManager::Release()
 {
 	ModelIndex.clear();
+}
+
+ModelMesh::~ModelMesh()
+{
+	if (_VertexArray) delete[] _VertexArray;
+	if (_IndexArray) delete[] _IndexArray;
+
+	if (_VertexBuffer) _VertexBuffer->Release();
+	if (_IndexBuffer) _IndexBuffer->Release();
+}
+
+AssimpModel::~AssimpModel()
+{
+	delete[] _MeshArray;
+	delete[] _TextureArray;
 }

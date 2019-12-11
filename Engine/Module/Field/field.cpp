@@ -1,5 +1,5 @@
-#include<Windows.h>
 #include"Common.h"
+#include"Module\DirectX\DirectX.h"
 
 #include"Module\AssetData\AssetData.h"
 
@@ -7,8 +7,6 @@
 #include"Module\Texture\TextureManager.h"
 
 //DirectX
-#include"Module\DirectX\DirectXStruct.h"
-#include"Module\DirectX\DirectX.h"
 
 #include"Module\ECSEngine.h"
 

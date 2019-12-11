@@ -27,7 +27,7 @@ namespace DirectX
 		friend class Physics;
 		friend class Collider;
 	protected:
-		MeshLayer _Layer;
+		MeshLayer _Layer;			//レイヤー
 		VERTEX_3D* _VertexArray;	//頂点情報
 		unsigned int _VertexNum;	//頂点数
 
@@ -38,7 +38,7 @@ namespace DirectX
 		virtual ~Mesh();
 	public:
 		virtual void Render(XMMATRIX& worldMatrix) = 0;
-		void SetLayer(MeshLayer layer);
+		void SetLayer(MeshLayer layer) { _Layer = layer; };
 	};
 
 	inline Mesh::Mesh()
@@ -50,10 +50,5 @@ namespace DirectX
 	{
 		delete[] this->_Surface;
 		delete[] this->_VertexArray;
-	}
-
-	inline void Mesh::SetLayer(MeshLayer layer)
-	{
-		_Layer = layer;
 	}
 }

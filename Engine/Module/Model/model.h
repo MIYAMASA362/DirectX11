@@ -1,20 +1,14 @@
 #pragma once
 using namespace DirectX;
 
-// マテリアル構造体
-struct MODEL_MATERIAL
-{
-	char						Name[256];
-	Material					Material;
-	char						TextureName[256];
-};
+#include"Module\Material\Material.h"
 
 // 描画サブセット構造体
 struct SUBSET
 {
 	unsigned short	StartIndex;
 	unsigned short	IndexNum;
-	MODEL_MATERIAL	Material;
+	ModelMaterial	Material;
 };
 
 // モデル構造体

@@ -1,10 +1,7 @@
 #pragma once
 
 //DirectX
-#include<d3d11.h>
-#include<DirectXMath.h>
-#include"DirectX\DirectXStruct.h"
-#include"DirectX\DirectX.h"
+#include"Module\DirectX\DirectX.h"
 
 //Device
 #include"Input\Input.h"

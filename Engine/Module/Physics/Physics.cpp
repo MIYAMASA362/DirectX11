@@ -2,7 +2,6 @@
 #include<memory>
 #include<algorithm>
 
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include"../ECSEngine.h"
@@ -46,7 +45,7 @@ bool DirectX::Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& inf
 
 
 		bool hit = false;
-		for (int i = 0; i < mesh->_SurfaceNum; i++)
+		for (unsigned int i = 0; i < mesh->_SurfaceNum; i++)
 		{
 			auto surface = mesh->_Surface[i];
 

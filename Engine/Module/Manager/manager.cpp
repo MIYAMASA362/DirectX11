@@ -1,4 +1,5 @@
 #include"Common.h"
+#include"Module\DirectX\DirectX.h"
 
 //--- Module ------------------------------------
 #include"Module\Module.h"
@@ -76,6 +77,9 @@ void CManager::Initialize()
 	ModelManager::LoadAsset(ModelAsset("Rock","Rock","rock.obj"));
 	ModelManager::LoadAsset(ModelAsset("Cube", "Cube", "cube.obj"));
 	ModelManager::LoadAsset(ModelAsset("Ball", "Ball", "ball.obj"));
+
+
+	ModelManager::LoadAssetForAssimp("Chest.fbx");
 
 	//Audio
 	AudioManager::CreateDevice();

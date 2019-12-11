@@ -1,7 +1,7 @@
 #include<typeinfo>
 #include"Common.h"
+
 //DirectX
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"

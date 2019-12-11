@@ -1,11 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include<stdio.h>
-#include<Shlwapi.h>
-#include<assert.h>
 
 #include"Common.h"
-
-#include"Module\DirectX\DirectXStruct.h"
 #include"Module\DirectX\DirectX.h"
 
 #include "font.h"
