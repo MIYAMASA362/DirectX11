@@ -12,7 +12,6 @@
 #pragma comment (lib, "winmm.lib")
 
 //DirectX
-#include"DirectXStruct.h"
 #include"DirectX.h"
 
 #include"Module\Shader\Shader.h"

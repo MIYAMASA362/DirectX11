@@ -1,10 +1,8 @@
+
 #include"Common.h"
+#include"Module\DirectX\DirectX.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"
-
-//DirectX
-#include"Module\DirectX\DirectXStruct.h"
-#include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"
 

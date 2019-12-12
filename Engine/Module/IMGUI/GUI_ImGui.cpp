@@ -1,5 +1,5 @@
-#include<Windows.h>
-#include<d3d11.h>
+#include<String>
+#include"Module\DirectX\DirectX.h"
 
 #include"GUI_ImGui.h"
 using namespace GUI;

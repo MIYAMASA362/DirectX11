@@ -1,4 +1,6 @@
 #include<Windows.h>
+#include<String>
+#include"Module\DirectX\DirectX.h"
 #include "Time.h"
 
 #include"Module\IMGUI\GUI_ImGui.h"

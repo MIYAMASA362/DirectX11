@@ -1,7 +1,7 @@
 #pragma once
 #define GUI_ImGui_H
 
-#include<d3d11.h>
+#include<Windows.h>
 #include<list>
 #include<functional>
 
