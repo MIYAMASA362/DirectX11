@@ -8,32 +8,53 @@ struct aiScene;
 
 class Texture;
 
-struct ModelMesh final
-{
-	//バッファ
-	ID3D11Buffer* _VertexBuffer;
-	ID3D11Buffer* _IndexBuffer;
-
-	//頂点
-	VERTEX_3D* _VertexArray;
-	unsigned int _VertexNum;
-
-	//インデックス
-	unsigned short* _IndexArray;
-	unsigned int _IndexNum;
-
-	~ModelMesh();
-};
-
+//Assimp読み込み用のモデルデータ
 struct AssimpModel final
 {
-	ModelMesh* _MeshArray;	//メッシュ配列
-	unsigned int _MeshNum;	//メッシュ数
+	using VERTEX_TYPE = VERTEX_3D;
+	using INDEX_TYPE = unsigned int;
 
-	Texture* _TextureArray;		//テクスチャ
+	//サブセット
+	struct Subset
+	{
+		unsigned short _StartIndex;
+		unsigned short _IndexNum;
+		Material _Material;
+		Texture* _Texture;		//テクスチャ
+		unsigned int _TexNum;	//テクスチャ数
+	};
+
+	//ノードメッシュ
+	struct NodeMesh
+	{
+		//行列
+		XMMATRIX _OffsetMatrix;
+
+		//バッファ
+		ID3D11Buffer *_VertexBuffer;	//頂点バッファ
+		ID3D11Buffer *_IndexBuffer;		//インデックスバッファ
+
+		//頂点
+		VERTEX_TYPE *_VertexArray;
+		unsigned int _VertexNum = 0;
+
+		//インデックス
+		INDEX_TYPE *_IndexArray;
+		unsigned int _IndexNum = 0;
+
+		//サブセット
+		Subset *_SubsetArray;
+		unsigned short _SubsetNum = 0;
+
+	};
+	std::vector<NodeMesh*> _NodeMeshArray;
+	unsigned int _NodeNum =0;	//ノード数
 
 	~AssimpModel();
+
+	void Render(Vector3 Position);
 };
+
 
 namespace DirectX
 {
@@ -56,7 +77,6 @@ namespace DirectX
 	class ModelManager:public AssetManager
 	{
 	private:
-		static const aiScene* _aiScene;
 		static const std::string AssetDataBase;								//AssetフォルダまでのPath
 		static std::map<std::string, std::shared_ptr<Model>> ModelIndex;	//Model保管
 	private:
@@ -64,7 +84,7 @@ namespace DirectX
 		~ModelManager() = default;
 	public:
 		static void LoadAsset(ModelAsset asset);
-		static void LoadAssetForAssimp(const char* fileName);
+		static AssimpModel* LoadAssetForAssimp(std::string fileName);
 		static void Release();
 		static std::weak_ptr<Model> GetModel(std::string name);	
 	private:

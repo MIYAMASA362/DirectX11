@@ -35,6 +35,8 @@
 #include"../Project/Title.h"
 #include"../Project/GameMain.h"
 
+#include"Module\Shader\Shader.h"
+
 //------------------------------------------------
 
 #include"cereal\cereal.hpp"
@@ -42,6 +44,8 @@
 #include<fstream>
 
 using namespace DirectX;
+
+AssimpModel* model;
 
 void CManager::Initialize()
 {
@@ -79,7 +83,7 @@ void CManager::Initialize()
 	ModelManager::LoadAsset(ModelAsset("Ball", "Ball", "ball.obj"));
 
 
-	ModelManager::LoadAssetForAssimp("Chest.fbx");
+	model = ModelManager::LoadAssetForAssimp("Asset/Model/Miku/miku_01.obj");
 
 	//Audio
 	AudioManager::CreateDevice();
@@ -146,6 +150,8 @@ void CManager::Render()
 
 	Camera::Render(Renderer3D::BeginRender, D3DApp::Renderer::Begin);
 
+	model->Render({ 0.0f,0.0f,2.0f });
+
 	Renderer2D::BeginRender();
 
 	CManager::DebugRender();
@@ -173,6 +179,8 @@ void CManager::DebugRender()
 
 void CManager::Finalize()
 {
+	delete model;
+
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 

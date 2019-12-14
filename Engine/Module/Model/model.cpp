@@ -48,7 +48,7 @@ void DirectX::Model::Render(XMMATRIX& worldMatrix)
 
 	for(unsigned short i = 0; i<SubsetNum; i++)
 	{
-		//SubsetArray[i].Material.Material.SetResource();
+		SubsetArray[i].Material.Material.SetResource();
 
 		SubsetArray[i].Material.Texture->SetResource();
 
