@@ -273,6 +273,8 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 					aiColor4D diffuse(1.0f, 1.0f, 1.0f, 1.0f);
 					if (mesh->HasVertexColors(0)) diffuse = mesh->mColors[0][v];
 					vertex->Diffuse = XMFLOAT4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+
+					vertex = vertex;
 				}
 #pragma endregion
 
@@ -288,7 +290,8 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 					aiFace* face = &mesh->mFaces[f];
 					for (unsigned int i = 0; i < face->mNumIndices; i++)
 					{
-						NodeMesh->_IndexArray[iCount] = face->mIndices[i];
+						unsigned int n = face->mIndices[i];
+						NodeMesh->_IndexArray[iCount] = n;
 						iCount++;
 					}
 				}
@@ -744,11 +747,17 @@ AssimpModel::~AssimpModel()
 	}
 }
 
+float rot = 0.0f;
+
 void AssimpModel::Render(Vector3 Position)
 {
-	XMMATRIX worldMtx = XMMatrixTranslation(Position.x,Position.y,Position.z);
+	XMMATRIX worldMtx;
+	worldMtx = XMMatrixRotationY(rot);
+	worldMtx *= XMMatrixTranslation(Position.x,Position.y,Position.z);
 	worldMtx *= XMMatrixScaling(1.0f,1.0f,1.0f);
-	
+	rot += 0.01f;
+
+	D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
 
 	for(auto nodeMesh : this->_NodeMeshArray)
 	{
@@ -769,7 +778,7 @@ void AssimpModel::Render(Vector3 Position)
 			D3DApp::GetConstantBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
 			subset._Texture[0].SetResource();
 
-			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 			D3DApp::GetDeviceContext()->DrawIndexed(subset._IndexNum,subset._StartIndex,0);
 		}
 	}
