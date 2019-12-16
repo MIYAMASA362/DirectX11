@@ -132,7 +132,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 
 		//配列設定
 		NodeMesh->_VertexArray = new AssimpModel::VERTEX_TYPE[NodeMesh->_VertexNum];	//頂点配列
-		NodeMesh->_IndexArray = new AssimpModel::INDEX_TYPE[NodeMesh->_IndexNum];	//インデックス配列
+		NodeMesh->_IndexArray = new unsigned short[NodeMesh->_IndexNum];	//インデックス配列
 		NodeMesh->_SubsetArray = new AssimpModel::Subset[NodeMesh->_SubsetNum];		//サブセット配列
 
 		//インデックスカウント
@@ -273,8 +273,6 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 					aiColor4D diffuse(1.0f, 1.0f, 1.0f, 1.0f);
 					if (mesh->HasVertexColors(0)) diffuse = mesh->mColors[0][v];
 					vertex->Diffuse = XMFLOAT4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-
-					vertex = vertex;
 				}
 #pragma endregion
 
@@ -290,11 +288,11 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 					aiFace* face = &mesh->mFaces[f];
 					for (unsigned int i = 0; i < face->mNumIndices; i++)
 					{
-						unsigned int n = face->mIndices[i];
-						NodeMesh->_IndexArray[iCount] = n;
+						NodeMesh->_IndexArray[iCount] = face->mIndices[i];
 						iCount++;
 					}
 				}
+
 				//インデックス数
 				subset->_IndexNum = iCount - subset->_StartIndex;
 
@@ -323,7 +321,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 			D3D11_BUFFER_DESC bd;
 			ZeroMemory(&bd, sizeof(bd));
 			bd.Usage = D3D11_USAGE_DEFAULT;
-			bd.ByteWidth = sizeof(AssimpModel::INDEX_TYPE) * NodeMesh->_IndexNum;
+			bd.ByteWidth = sizeof(unsigned short) * NodeMesh->_IndexNum;
 			bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			bd.CPUAccessFlags = 0;
 
@@ -778,7 +776,7 @@ void AssimpModel::Render(Vector3 Position)
 			D3DApp::GetConstantBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
 			subset._Texture[0].SetResource();
 
-			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			D3DApp::GetDeviceContext()->DrawIndexed(subset._IndexNum,subset._StartIndex,0);
 		}
 	}

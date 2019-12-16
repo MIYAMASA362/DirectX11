@@ -12,7 +12,6 @@ class Texture;
 struct AssimpModel final
 {
 	using VERTEX_TYPE = VERTEX_3D;
-	using INDEX_TYPE = unsigned int;
 
 	//サブセット
 	struct Subset
@@ -39,7 +38,7 @@ struct AssimpModel final
 		unsigned int _VertexNum = 0;
 
 		//インデックス
-		INDEX_TYPE *_IndexArray;
+		unsigned short *_IndexArray;
 		unsigned int _IndexNum = 0;
 
 		//サブセット
