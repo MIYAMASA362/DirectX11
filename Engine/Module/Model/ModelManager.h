@@ -11,7 +11,7 @@ class Texture;
 //Assimp読み込み用のモデルデータ
 struct AssimpModel final
 {
-	using VERTEX_TYPE = VERTEX_3D;
+	using MeshType = Mesh<VERTEX_3D>;
 
 	//サブセット
 	struct Subset
@@ -24,27 +24,19 @@ struct AssimpModel final
 	};
 
 	//ノードメッシュ
-	struct NodeMesh
+	struct NodeMesh final
 	{
 		//行列
 		XMMATRIX _OffsetMatrix;
 
-		//バッファ
-		ID3D11Buffer *_VertexBuffer;	//頂点バッファ
-		ID3D11Buffer *_IndexBuffer;		//インデックスバッファ
-
-		//頂点
-		VERTEX_TYPE *_VertexArray;
-		unsigned int _VertexNum = 0;
-
-		//インデックス
-		unsigned short *_IndexArray;
-		unsigned int _IndexNum = 0;
+		//メッシュ
+		MeshType* _Mesh;
 
 		//サブセット
 		Subset *_SubsetArray;
 		unsigned short _SubsetNum = 0;
 
+		~NodeMesh();
 	};
 	std::vector<NodeMesh*> _NodeMeshArray;
 
