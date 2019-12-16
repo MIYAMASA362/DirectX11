@@ -34,3 +34,4 @@ struct TextureMaterial
 
 	virtual ~TextureMaterial();
 };
+

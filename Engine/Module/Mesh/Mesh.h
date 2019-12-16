@@ -47,8 +47,10 @@ public:
 	Mesh();
 	virtual ~Mesh();
 
+public:
 	void SetVertexBuffer();
 	void SetIndexBuffer();
+
 };
 
 template<typename Type>

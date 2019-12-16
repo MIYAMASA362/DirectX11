@@ -35,8 +35,7 @@
 #include"model.h"
 #include"ModelManager.h"
 
-const std::string ModelManager::AssetDataBase = DirectX::AssetManager::AssetPath+ "Model/";
-std::map<std::string, std::shared_ptr<Model>> ModelManager::ModelIndex;
+ModelManager::ModelIndex ModelManager::modelIndex;
 
 void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
 {
@@ -258,7 +257,7 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		GetNodeMesh(node->mChildren[child], model,scene,folderPath,rootMtx);
 }
 
-Model* DirectX::ModelManager::LoadAssetForAssimp(std::string fileName)
+Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 {
 	//シーン
 	const aiScene* scene;
@@ -287,23 +286,25 @@ Model* DirectX::ModelManager::LoadAssetForAssimp(std::string fileName)
 	Model* model = new Model();
 
 	aiMatrix4x4 mtx;
+
 	//ノードの取得
 	GetNodeMesh(scene->mRootNode,model,scene,folderPath,mtx);
+
+	//追加
+	modelIndex.emplace(fileName.substr(pos,fileName.find_last_of(".")),std::shared_ptr<Model>(model));
 
 	return model;
 }
 
-std::weak_ptr<Model> DirectX::ModelManager::GetModel(std::string name)
+std::weak_ptr<Model> ModelManager::GetModel(std::string name)
 {
-	return ModelIndex[name];
+	return modelIndex[name];
 }
 
-void DirectX::ModelManager::Release()
+void ModelManager::Release()
 {
-	ModelIndex.clear();
+	modelIndex.clear();
 }
-
-float rot = 0.0f;
 
 //
 //void AssimpModel::Render(Vector3 Position)
