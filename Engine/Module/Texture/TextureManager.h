@@ -5,21 +5,21 @@
 struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
 
-namespace DirectX
+//Texture管理
+class TextureManager final:public AssetManager
 {
-	//Texture管理
-	class TextureManager final:public AssetManager
-	{
-	private:
-		static const std::string AssetDataBase;			//Assetフォルダパス
-		static std::map<std::string,std::shared_ptr<Texture>> TextureIndex;
-	private:
-		TextureManager() = delete;
-		~TextureManager() = delete;
-	public:
-		static Texture* LoadTexture(const char* path);
-		static void LoadAsset(std::string name,std::string path);
-		static void Release();
-		static Texture* GetTexture(std::string name);
-	};
-}
+	using TextureIndex = std::map<std::string, std::shared_ptr<Texture>>;
+private:
+	//テクスチャ保管
+	static TextureIndex textureIndex;
+
+	TextureManager() = delete;
+	~TextureManager() = delete;
+public:
+	//テクスチャ読み込み aaa.xxxのaaawをテクスチャ名とする
+	static std::weak_ptr<Texture> LoadTexture(std::string filePath);
+	//解放
+	static void Release();
+	//テクスチャ取得
+	static std::weak_ptr<Texture> GetTexture(std::string name);
+};
