@@ -112,7 +112,6 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 		//ノードメッシュ
 		AssimpModel::NodeMesh* NodeMesh = new AssimpModel::NodeMesh();
 		model->_NodeMeshArray.push_back(NodeMesh);
-		model->_NodeNum++;
 
 		//行列設定
 		aiMatrix4x4 matrix = node->mTransformation;

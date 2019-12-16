@@ -47,7 +47,6 @@ struct AssimpModel final
 
 	};
 	std::vector<NodeMesh*> _NodeMeshArray;
-	unsigned int _NodeNum =0;	//ƒm[ƒh”
 
 	~AssimpModel();
 
