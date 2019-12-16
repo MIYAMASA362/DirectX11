@@ -26,30 +26,11 @@ public:
 	void SetResource();
 };
 
-//モデル用マテリアル
-struct ModelMaterial
+//テクスチャマテリアル
+struct TextureMaterial
 {
-	char _Name[256];
 	Material _Material;
-	char _TextureName[256];
+	Texture* _Texture;
+
+	virtual ~TextureMaterial();
 };
-
-namespace DirectX
-{
-
-	//Model用のマテリアル
-	typedef struct tagDX11_MODEL_MATERIAL
-	{
-		Material Material;
-		Texture* Texture;
-	}DX11_MODEL_MATERIAL;
-
-	//SubSet
-	typedef struct tagDX11_SUBSET
-	{
-		unsigned short	StartIndex;
-		unsigned short	IndexNum;
-		DX11_MODEL_MATERIAL	Material;
-	}DX11_SUBSET; 
-
-}

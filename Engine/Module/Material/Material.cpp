@@ -24,3 +24,8 @@ void Material::SetResource()
 {
 	D3DApp::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }
+
+TextureMaterial::~TextureMaterial()
+{
+	delete _Texture;
+}
