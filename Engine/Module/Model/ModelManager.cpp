@@ -38,38 +38,38 @@
 const std::string ModelManager::AssetDataBase = DirectX::AssetManager::AssetPath+ "Model/";
 std::map<std::string, std::shared_ptr<Model>> ModelManager::ModelIndex;
 
-void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
+void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
 {
 	aiMatrix4x4 rootMtx = nodeMtx * node->mTransformation;
 
 	if (node->mNumMeshes > 0)
 	{
 		//ノードメッシュ
-		AssimpModel::NodeMesh* NodeMesh = new AssimpModel::NodeMesh();
-		model->_NodeMeshArray.push_back(NodeMesh);
+		NodeMesh* nodeMesh = new NodeMesh();
+		model->_NodeMeshArray.push_back(nodeMesh);
 
-		NodeMesh->_Mesh = new AssimpModel::MeshType();
+		nodeMesh->_Mesh = new NodeMesh::MeshType();
 
 		//行列設定
 		aiMatrix4x4 matrix = node->mTransformation;
-		NodeMesh->_OffsetMatrix.r[0] = XMVectorSet(matrix.a1,matrix.a2,matrix.a3,matrix.a4);
-		NodeMesh->_OffsetMatrix.r[1] = XMVectorSet(matrix.b1,matrix.b2,matrix.b3,matrix.b4);
-		NodeMesh->_OffsetMatrix.r[2] = XMVectorSet(matrix.c1,matrix.c2,matrix.c3,matrix.c4);
-		NodeMesh->_OffsetMatrix.r[3] = XMVectorSet(matrix.d1,matrix.d2,matrix.d3,matrix.d4);
+		nodeMesh->_offsetMatrix.r[0] = XMVectorSet(matrix.a1,matrix.a2,matrix.a3,matrix.a4);
+		nodeMesh->_offsetMatrix.r[1] = XMVectorSet(matrix.b1,matrix.b2,matrix.b3,matrix.b4);
+		nodeMesh->_offsetMatrix.r[2] = XMVectorSet(matrix.c1,matrix.c2,matrix.c3,matrix.c4);
+		nodeMesh->_offsetMatrix.r[3] = XMVectorSet(matrix.d1,matrix.d2,matrix.d3,matrix.d4);
 
 		//配列長設定
 		for (unsigned int m = 0; m < node->mNumMeshes; m++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[m]];
-			NodeMesh->_Mesh->_VertexNum += mesh->mNumVertices;
-			NodeMesh->_Mesh->_IndexNum  += mesh->mNumFaces * 3;
+			nodeMesh->_Mesh->_VertexNum += mesh->mNumVertices;
+			nodeMesh->_Mesh->_IndexNum  += mesh->mNumFaces * 3;
 		}
-		NodeMesh->_SubsetNum = node->mNumMeshes;
+		nodeMesh->_SubsetNum = node->mNumMeshes;
 
 		//配列設定
-		NodeMesh->_Mesh->_VertexArray = new AssimpModel::MeshType::VertexType[NodeMesh->_Mesh->_VertexNum];	//頂点配列
-		NodeMesh->_Mesh->_IndexArray = new unsigned short[NodeMesh->_Mesh->_IndexNum];	//インデックス配列
-		NodeMesh->_SubsetArray = new ModelSubset[NodeMesh->_SubsetNum];		//サブセット配列
+		nodeMesh->_Mesh->_VertexArray = new NodeMesh::MeshType::VertexType[nodeMesh->_Mesh->_VertexNum];	//頂点配列
+		nodeMesh->_Mesh->_IndexArray = new unsigned short[nodeMesh->_Mesh->_IndexNum];	//インデックス配列
+		nodeMesh->_SubsetArray = new ModelSubset[nodeMesh->_SubsetNum];		//サブセット配列
 
 		//インデックスカウント
 		unsigned int iCount = 0;
@@ -78,7 +78,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 		for (unsigned int m = 0; m < node->mNumMeshes; m++)
 		{
 			//サブセット
-			ModelSubset* subset = &NodeMesh->_SubsetArray[m];
+			ModelSubset* subset = &nodeMesh->_SubsetArray[m];
 
 			//メッシュを取得
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[m]];
@@ -180,7 +180,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 
 				for (unsigned int v = 0; v < mesh->mNumVertices; v++)
 				{
-					VERTEX_3D* vertex = &NodeMesh->_Mesh->_VertexArray[v];
+					VERTEX_3D* vertex = &nodeMesh->_Mesh->_VertexArray[v];
 
 					//頂点
 					aiVector3D position(0.0f, 0.0f, 0.0f);
@@ -224,7 +224,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 					aiFace* face = &mesh->mFaces[f];
 					for (unsigned int i = 0; i < face->mNumIndices; i++)
 					{
-						NodeMesh->_Mesh->_IndexArray[iCount] = face->mIndices[i];
+						nodeMesh->_Mesh->_IndexArray[iCount] = face->mIndices[i];
 						iCount++;
 					}
 				}
@@ -239,17 +239,17 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 		//頂点バッファ生成
 		D3DApp::CreateBuffer(
 			D3D11_BIND_VERTEX_BUFFER,
-			sizeof(VERTEX_3D) * NodeMesh->_Mesh->_VertexNum,
-			NodeMesh->_Mesh->_VertexArray,
-			&NodeMesh->_Mesh->_VertexBuffer
+			sizeof(VERTEX_3D) * nodeMesh->_Mesh->_VertexNum,
+			nodeMesh->_Mesh->_VertexArray,
+			&nodeMesh->_Mesh->_VertexBuffer
 		);
 
 		// インデックスバッファ生成
 		D3DApp::CreateBuffer(
 			D3D11_BIND_INDEX_BUFFER,
-			sizeof(unsigned short) * NodeMesh->_Mesh->_IndexNum,
-			NodeMesh->_Mesh->_IndexArray,
-			&NodeMesh->_Mesh->_IndexBuffer
+			sizeof(unsigned short) * nodeMesh->_Mesh->_IndexNum,
+			nodeMesh->_Mesh->_IndexArray,
+			&nodeMesh->_Mesh->_IndexBuffer
 		);
 	}
 
@@ -258,7 +258,7 @@ void GetNodeMesh(aiNode* node, AssimpModel* model, const aiScene* scene, std::st
 		GetNodeMesh(node->mChildren[child], model,scene,folderPath,rootMtx);
 }
 
-AssimpModel* DirectX::ModelManager::LoadAssetForAssimp(std::string fileName)
+Model* DirectX::ModelManager::LoadAssetForAssimp(std::string fileName)
 {
 	//シーン
 	const aiScene* scene;
@@ -284,7 +284,7 @@ AssimpModel* DirectX::ModelManager::LoadAssetForAssimp(std::string fileName)
 		folderPath = fileName.substr(0, pos+1);
 
 	//モデル
-	AssimpModel* model = new AssimpModel();
+	Model* model = new Model();
 
 	aiMatrix4x4 mtx;
 	//ノードの取得
@@ -303,50 +303,41 @@ void DirectX::ModelManager::Release()
 	ModelIndex.clear();
 }
 
-AssimpModel::~AssimpModel()
-{
-	for(auto mesh : _NodeMeshArray) delete mesh;
-}
-
 float rot = 0.0f;
 
-void AssimpModel::Render(Vector3 Position)
-{
-	XMMATRIX worldMtx;
-	worldMtx = XMMatrixRotationY(rot);
-	worldMtx *= XMMatrixTranslation(Position.x,Position.y,Position.z);
-	worldMtx *= XMMatrixScaling(1.0f,1.0f,1.0f);
-	rot += 0.01f;
-
-	D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
-
-	for(auto nodeMesh : this->_NodeMeshArray)
-	{
-		nodeMesh->_Mesh->SetVertexBuffer();
-		nodeMesh->_Mesh->SetIndexBuffer();
-
-		XMMATRIX local;
-		local = nodeMesh->_OffsetMatrix * worldMtx;
-
-		D3DApp::Renderer::SetWorldMatrix(&local);
-
-		for (unsigned int s = 0; s < nodeMesh->_SubsetNum; s++)
-		{
-			ModelSubset& subset = nodeMesh->_SubsetArray[s];
-			D3DApp::GetShader()->SetShader();
-
-			subset._Material._Material.SetResource();
-			D3DApp::GetConstantBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
-			subset._Material._Texture[0].SetResource();
-
-			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			D3DApp::GetDeviceContext()->DrawIndexed(subset._IndexNum,subset._StartIndex,0);
-		}
-	}
-}
-
-AssimpModel::NodeMesh::~NodeMesh()
-{
-	delete _Mesh;
-	delete[] _SubsetArray;
-}
+//
+//void AssimpModel::Render(Vector3 Position)
+//{
+//	XMMATRIX worldMtx;
+//	worldMtx = XMMatrixRotationY(rot);
+//	worldMtx *= XMMatrixTranslation(Position.x,Position.y,Position.z);
+//	worldMtx *= XMMatrixScaling(1.0f,1.0f,1.0f);
+//	rot += 0.01f;
+//
+//	D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
+//
+//	for(auto nodeMesh : this->_NodeMeshArray)
+//	{
+//		nodeMesh->_Mesh->SetVertexBuffer();
+//		nodeMesh->_Mesh->SetIndexBuffer();
+//
+//		XMMATRIX local;
+//		local = nodeMesh->_OffsetMatrix * worldMtx;
+//
+//		D3DApp::Renderer::SetWorldMatrix(&local);
+//
+//		for (unsigned int s = 0; s < nodeMesh->_SubsetNum; s++)
+//		{
+//			ModelSubset& subset = nodeMesh->_SubsetArray[s];
+//			D3DApp::GetShader()->SetShader();
+//
+//			subset._Material._Material.SetResource();
+//			D3DApp::GetConstantBuffer()->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
+//			subset._Material._Texture[0].SetResource();
+//
+//			D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//			D3DApp::GetDeviceContext()->DrawIndexed(subset._IndexNum,subset._StartIndex,0);
+//		}
+//	}
+//}
+//

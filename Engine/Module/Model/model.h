@@ -3,46 +3,37 @@ using namespace DirectX;
 
 #include"Module\Material\Material.h"
 
-// 描画サブセット構造体
-struct SUBSET
+//サブセット マテリアル区分け
+struct ModelSubset
 {
-	unsigned short	StartIndex;
-	unsigned short	IndexNum;
-	ModelMaterial	Material;
+	unsigned short _StartIndex;
+	unsigned short _IndexNum;
+	TextureMaterial _Material;
 };
 
-// モデル構造体
-struct MODEL
+//ノードメッシュ　ノード区分け
+struct NodeMesh final
 {
-	VERTEX_3D		*VertexArray;
-	unsigned short	VertexNum;
-	unsigned short	*IndexArray;
-	unsigned short	IndexNum;
-	SUBSET			*SubsetArray;
-	unsigned short	SubsetNum;
+	using MeshType = Mesh<VERTEX_3D>;
+
+	//オフセット
+	XMMATRIX _offsetMatrix;
+
+	//メッシュ
+	MeshType* _Mesh;
+
+	//サブセット
+	ModelSubset* _SubsetArray;
+	unsigned short _SubsetNum;
+
+	~NodeMesh();
 };
 
-namespace DirectX
+class Model
 {
-	//Model
-	class Model:public Mesh
-	{
-		friend class ModelManager;
-	private:
-		XMMATRIX offsetMatrix;
-		ID3D11Buffer* VertexBuffer = nullptr;
-		ID3D11Buffer* IndexBuffer = nullptr;
+private:
 
-		DX11_SUBSET* SubsetArray = nullptr;
-		unsigned short SubsetNum;
-		bool IsCulling = false;
-		bool IsDepth = true;
-	public:
-		Model();
-		void Render(XMMATRIX& worldMatrix) override;
-		void GetAsset(std::string name);
-		void SetCulling(bool enable);
-		void SetDepth(bool enable);
-		void SetoffsetMatrix(XMMATRIX matrix);
-	};
-}
+public:
+	std::vector<NodeMesh*> _NodeMeshArray;
+	virtual~Model();
+};

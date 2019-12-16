@@ -17,6 +17,8 @@ struct Surface
 };
 
 //メッシュ
+#pragma region クラス：Mesh
+
 template<typename Type>
 class Mesh
 {
@@ -48,11 +50,21 @@ public:
 	void SetVertexBuffer();
 	void SetIndexBuffer();
 };
-	
+
 template<typename Type>
 inline Mesh<Type>::Mesh()
 {
+	_VertexBuffer = nullptr;
+	_IndexBuffer = nullptr;
 
+	_VertexArray = nullptr;
+	_VertexNum = 0;
+
+	_IndexArray = nullptr;
+	_IndexNum = 0;
+
+	_Surface = nullptr;
+	_SurfaceNum = 0;
 }
 
 template<typename Type>
@@ -78,3 +90,5 @@ inline void Mesh<Type>::SetIndexBuffer()
 {
 	D3DApp::Renderer::SetIndexBuffer(_IndexBuffer);
 }
+
+#pragma endregion

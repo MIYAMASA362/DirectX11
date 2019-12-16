@@ -28,55 +28,13 @@
 
 #include"Module\Shader\Shader.h"
 
-DirectX::Model::Model()
+NodeMesh::~NodeMesh()
 {
-	offsetMatrix = XMMatrixIdentity();
+	delete _Mesh;
+	delete[] _SubsetArray;
 }
 
-//ï`âÊ
-void DirectX::Model::Render(XMMATRIX& worldMatrix)
+Model::~Model()
 {
-	if(IsCulling)
-		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_NONE);
-	
-	worldMatrix = offsetMatrix * worldMatrix;
-
-	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
-
-	D3DApp::Renderer::SetVertexBuffer(VertexBuffer,sizeof(VERTEX_3D),0);
-	D3DApp::Renderer::SetIndexBuffer(IndexBuffer);
-
-	for(unsigned short i = 0; i<SubsetNum; i++)
-	{
-		SubsetArray[i].Material.Material.SetResource();
-
-		SubsetArray[i].Material.Texture->SetResource();
-
-		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		D3DApp::GetDeviceContext()->DrawIndexed((UINT)SubsetArray[i].IndexNum, (UINT)SubsetArray[i].StartIndex, 0);
-	}
-	if(IsCulling)
-		D3DApp::Renderer::SetRasterize(D3D11_FILL_SOLID, D3D11_CULL_BACK);
-}
-
-//ModelManagerÇÃAssetÇ©ÇÁì«Ç›çûÇ›
-void DirectX::Model::GetAsset(std::string name)
-{
-	Model* asset = ModelManager::GetModel(name).lock().get();
-	*this = *asset;
-}
-
-void DirectX::Model::SetCulling(bool enable)
-{
-	IsCulling = enable;
-}
-
-void DirectX::Model::SetDepth(bool enable)
-{
-	IsDepth = enable;
-}
-
-void DirectX::Model::SetoffsetMatrix(XMMATRIX matrix)
-{
-	offsetMatrix = matrix;
+	for (auto mesh : _NodeMeshArray) delete mesh;
 }

@@ -7,46 +7,10 @@ struct ModelMaterial;
 struct aiScene;
 
 class Texture;
-
-//サブセット マテリアル区分け
-struct ModelSubset
-{
-	unsigned short _StartIndex;
-	unsigned short _IndexNum;
-	TextureMaterial _Material;
-};
-
-//Assimp読み込み用のモデルデータ
-struct AssimpModel final
-{
-	using MeshType = Mesh<VERTEX_3D>;
-
-	//ノードメッシュ
-	struct NodeMesh final
-	{
-		//行列
-		XMMATRIX _OffsetMatrix;
-
-		//メッシュ
-		MeshType* _Mesh;
-
-		//サブセット
-		ModelSubset *_SubsetArray;
-		unsigned short _SubsetNum = 0;
-
-		~NodeMesh();
-	};
-	std::vector<NodeMesh*> _NodeMeshArray;
-
-	~AssimpModel();
-
-	void Render(Vector3 Position);
-};
+class Model;
 
 namespace DirectX
 {
-	class Model;
-
 	//Model資源
 	class ModelAsset
 	{
@@ -70,7 +34,7 @@ namespace DirectX
 		ModelManager() = default;
 		~ModelManager() = default;
 	public:
-		static AssimpModel* LoadAssetForAssimp(std::string fileName);
+		static Model* LoadAssetForAssimp(std::string fileName);
 		static void Release();
 		static std::weak_ptr<Model> GetModel(std::string name);	
 	};
