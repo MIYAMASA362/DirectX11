@@ -270,6 +270,22 @@ unsigned int D3DApp::GetFps()
 	return pInstance->fps;
 }
 
+void D3DApp::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void * subresource, ID3D11Buffer ** buffer)
+{
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = byteWidth;
+	bd.BindFlags = BindFlag;
+	bd.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA sd;
+	ZeroMemory(&sd, sizeof(sd));
+	sd.pSysMem = subresource;
+
+	D3DApp::GetDevice()->CreateBuffer(&bd, &sd, buffer);
+}
+
 //--- D3DApp::Renderer --------------------------------------------------------
 
 void D3DApp::Renderer::Begin()

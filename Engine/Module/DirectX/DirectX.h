@@ -76,6 +76,8 @@ public:
 
 	static Shader* GetShader() { return pInstance->_Shader; };
 	static ConstantBuffer* GetConstantBuffer() { return pInstance->_ConstantBuffer; };
+
+	static void CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void* subresource, ID3D11Buffer** buffer);
 public:
 	class Renderer
 	{
