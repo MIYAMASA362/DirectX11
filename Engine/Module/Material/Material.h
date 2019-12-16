@@ -3,9 +3,10 @@
 #include"Module\DirectX\DirectXStruct.h"
 
 class Texture;
+struct aiMaterial;
 
 //基準マテリアル
-class Material
+class Material final
 {
 public:
 	struct Constant
@@ -27,11 +28,12 @@ public:
 };
 
 //テクスチャマテリアル
-struct TextureMaterial
+struct TextureMaterial final
 {
 	Material _Material;
 	Texture* _Texture;
 
 	virtual ~TextureMaterial();
-};
 
+	void SetResource();
+};

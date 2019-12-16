@@ -2,6 +2,8 @@
 
 #include"Module\DirectX\DirectX.h"
 
+#include"Module\Texture\texture.h"
+
 #include "Material.h"
 #include"Module\Shader\Shader.h"
 
@@ -28,4 +30,10 @@ void Material::SetResource()
 TextureMaterial::~TextureMaterial()
 {
 	delete _Texture;
+}
+
+void TextureMaterial::SetResource()
+{
+	_Material.SetResource();
+	_Texture->SetResource();
 }
