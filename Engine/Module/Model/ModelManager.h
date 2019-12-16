@@ -8,20 +8,18 @@ struct aiScene;
 
 class Texture;
 
+//サブセット マテリアル区分け
+struct ModelSubset
+{
+	unsigned short _StartIndex;
+	unsigned short _IndexNum;
+	TextureMaterial _Material;
+};
+
 //Assimp読み込み用のモデルデータ
 struct AssimpModel final
 {
 	using MeshType = Mesh<VERTEX_3D>;
-
-	//サブセット
-	struct Subset
-	{
-		unsigned short _StartIndex;
-		unsigned short _IndexNum;
-		Material _Material;
-		Texture* _Texture;		//テクスチャ
-		unsigned int _TexNum;	//テクスチャ数
-	};
 
 	//ノードメッシュ
 	struct NodeMesh final
@@ -33,7 +31,7 @@ struct AssimpModel final
 		MeshType* _Mesh;
 
 		//サブセット
-		Subset *_SubsetArray;
+		ModelSubset *_SubsetArray;
 		unsigned short _SubsetNum = 0;
 
 		~NodeMesh();
@@ -44,7 +42,6 @@ struct AssimpModel final
 
 	void Render(Vector3 Position);
 };
-
 
 namespace DirectX
 {
@@ -73,12 +70,8 @@ namespace DirectX
 		ModelManager() = default;
 		~ModelManager() = default;
 	public:
-		static void LoadAsset(ModelAsset asset);
 		static AssimpModel* LoadAssetForAssimp(std::string fileName);
 		static void Release();
 		static std::weak_ptr<Model> GetModel(std::string name);	
-	private:
-		static void LoadObj(ModelAsset asset,MODEL* Model);
-		static void LoadMaterial(const char* FileName,const char* MaterialName,ModelMaterial **MaterialArray,unsigned short* MaterialNum);
 	};
 }
