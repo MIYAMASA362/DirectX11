@@ -37,6 +37,39 @@
 
 ModelManager::ModelIndex ModelManager::modelIndex;
 
+Material SetMaterial(aiMaterial* material)
+{
+	//Diffuse
+	aiColor3D diffuse(0.0f, 0.0f, 0.0f);
+	material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
+
+	//Ambient
+	aiColor3D ambient(0.0f, 0.0f, 0.0f);
+	material->Get(AI_MATKEY_COLOR_AMBIENT, ambient);
+
+	//Specular
+	aiColor3D specular(0.0f, 0.0f, 0.0f);
+	material->Get(AI_MATKEY_COLOR_SPECULAR, specular);
+
+	//Emmision
+	aiColor3D emission(0.0f, 0.0f, 0.0f);
+	material->Get(AI_MATKEY_COLOR_EMISSIVE, emission);
+
+	//Shininess
+	float shininess = 0.0f;
+	material->Get(AI_MATKEY_SHININESS, shininess);
+
+	//マテリアル設定
+	Material m;
+	m._constant.Diffuse = Color(diffuse.r, diffuse.g, diffuse.b, 1.0f);
+	m._constant.Ambient = Color(ambient.r, ambient.g, ambient.b, 1.0f);
+	m._constant.Specular = Color(specular.r, specular.g, specular.b, 1.0f);
+	m._constant.Emission = Color(emission.r, emission.g, emission.b, 1.0f);
+	m._constant.Shininess = shininess;
+
+	return m;
+}
+
 void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
 {
 	aiMatrix4x4 rootMtx = nodeMtx * node->mTransformation;
@@ -82,97 +115,19 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 			//メッシュを取得
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[m]];
 			{
-				//マテリアル設定
-#pragma region GetMaterial
-
 				//マテリアルの取得 1つのメッシュに対してマテリアル一つ
-				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+				aiMaterial* material;
+				material = scene->mMaterials[mesh->mMaterialIndex];
 
-				//Diffuse
-				aiColor3D diffuse(0.0f, 0.0f, 0.0f);
-				material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
-
-				//Ambient
-				aiColor3D ambient(0.0f, 0.0f, 0.0f);
-				material->Get(AI_MATKEY_COLOR_AMBIENT, ambient);
-
-				//Specular
-				aiColor3D specular(0.0f, 0.0f, 0.0f);
-				material->Get(AI_MATKEY_COLOR_SPECULAR, specular);
-
-				//Emmision
-				aiColor3D emission(0.0f, 0.0f, 0.0f);
-				material->Get(AI_MATKEY_COLOR_EMISSIVE, emission);
-
-				//Shininess
-				float shininess = 0.0f;
-				material->Get(AI_MATKEY_SHININESS, shininess);
-
-				//サブセット設定
-				subset->_Material._Material._constant.Diffuse = Color(diffuse.r, diffuse.g, diffuse.b, 1.0f);
-				subset->_Material._Material._constant.Ambient = Color(ambient.r, ambient.g, ambient.b, 1.0f);
-				subset->_Material._Material._constant.Specular = Color(specular.r, specular.g, specular.b, 1.0f);
-				subset->_Material._Material._constant.Emission = Color(emission.r, emission.g, emission.b, 1.0f);
-				subset->_Material._Material._constant.Shininess = shininess;
-
-#pragma endregion
+				//マテリアル設定
+				subset->_Material._Material = SetMaterial(material);
 
 				//テクスチャ設定
-#pragma region SetTexture
-
 				aiString texName;
 				subset->_Material._Texture = new Texture();
 
 				if (material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texName) == AI_SUCCESS)
-				{
-					//ファイルパス
-					std::string filePath = folderPath + texName.C_Str();
-					filePath = filePath;
-
-					//テクスチャ読み込み
-					unsigned char* pixels;	//画素
-					int width;
-					int height;
-					int bpp;
-
-					pixels = stbi_load(filePath.c_str(), &width, &height, &bpp, STBI_rgb_alpha);
-
-					D3D11_TEXTURE2D_DESC td;
-					td.Width = width;
-					td.Height = height;
-					td.MipLevels = 1;
-					td.ArraySize = 1;
-					td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					td.SampleDesc.Count = 1;
-					td.SampleDesc.Quality = 0;
-					td.Usage = D3D11_USAGE_DEFAULT;
-					td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-					td.CPUAccessFlags = 0;
-					td.MiscFlags = 0;
-
-					D3D11_SUBRESOURCE_DATA sd;
-					sd.pSysMem = pixels;
-					sd.SysMemPitch = width * 4;
-					sd.SysMemSlicePitch = width * height * bpp;
-
-					HRESULT hr = D3DApp::GetDevice()->CreateTexture2D(&td, &sd, &subset->_Material._Texture->texture);
-					if (FAILED(hr))
-						assert(false);
-
-					D3D11_SHADER_RESOURCE_VIEW_DESC srv = {};
-					srv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-					srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-					srv.Texture2D.MipLevels = 1;
-
-					hr = D3DApp::GetDevice()->CreateShaderResourceView(subset->_Material._Texture->texture, &srv, &subset->_Material._Texture->srv);
-
-					if (FAILED(hr))
-						assert(false);
-
-					stbi_image_free(pixels);
-				}
-
-#pragma endregion
+					subset->_Material._Texture->LoadTexture(folderPath + texName.C_Str());
 
 				//頂点設定
 #pragma region SetVertex
