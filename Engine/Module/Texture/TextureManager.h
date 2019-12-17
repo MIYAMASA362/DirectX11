@@ -1,12 +1,10 @@
 #pragma once
 
-#include<map>
-
 struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
 
 //TextureŠÇ—
-class TextureManager final:public AssetManager
+class TextureManager final
 {
 	using TextureIndex = std::map<std::string, std::shared_ptr<Texture>>;
 private:

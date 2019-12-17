@@ -2,11 +2,10 @@
 #include<stdio.h>
 #include<assert.h>
 #include<string>
+#include<map>
 #include<memory>
 
 #include"Module\DirectX\DirectX.h"
-
-#include"Module\AssetData\AssetData.h"
 
 #include"texture.h"
 #include"TextureManager.h"
@@ -26,6 +25,7 @@ std::weak_ptr<Texture> TextureManager::LoadTexture(std::string filePath)
 	std::string name;
 	name = filePath.substr(filePath.find_last_of("\\/"), filePath.find_last_of("."));
 
+	//インデックスに登録
 	return textureIndex.emplace(name,std::shared_ptr<Texture>(texture)).first->second;
 }
 
