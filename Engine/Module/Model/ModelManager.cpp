@@ -15,19 +15,11 @@
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
 
-#include"Module\AssetData\AssetData.h"
-
-//ECS
-#include"Module\ECSEngine.h"
-
 // Component
 #include"Module\Mesh\Mesh.h"
-#include"Module\Renderer\Renderer.h"
 
 #include"Module\Texture\texture.h"
 #include"Module\Texture\TextureManager.h"
-
-#include"Module\Shader\Shader.h"
 
 #include"Module\Mesh\Mesh.h"
 
@@ -84,10 +76,10 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 
 		//s—ñİ’è
 		aiMatrix4x4 matrix = node->mTransformation;
-		nodeMesh->_offsetMatrix.r[0] = XMVectorSet(matrix.a1,matrix.a2,matrix.a3,matrix.a4);
-		nodeMesh->_offsetMatrix.r[1] = XMVectorSet(matrix.b1,matrix.b2,matrix.b3,matrix.b4);
-		nodeMesh->_offsetMatrix.r[2] = XMVectorSet(matrix.c1,matrix.c2,matrix.c3,matrix.c4);
-		nodeMesh->_offsetMatrix.r[3] = XMVectorSet(matrix.d1,matrix.d2,matrix.d3,matrix.d4);
+		nodeMesh->_OffsetMatrix.r[0] = XMVectorSet(matrix.a1,matrix.a2,matrix.a3,matrix.a4);
+		nodeMesh->_OffsetMatrix.r[1] = XMVectorSet(matrix.b1,matrix.b2,matrix.b3,matrix.b4);
+		nodeMesh->_OffsetMatrix.r[2] = XMVectorSet(matrix.c1,matrix.c2,matrix.c3,matrix.c4);
+		nodeMesh->_OffsetMatrix.r[3] = XMVectorSet(matrix.d1,matrix.d2,matrix.d3,matrix.d4);
 
 		//”z—ñ’·İ’è
 		for (unsigned int m = 0; m < node->mNumMeshes; m++)

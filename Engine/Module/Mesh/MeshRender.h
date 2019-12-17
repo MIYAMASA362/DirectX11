@@ -1,31 +1,33 @@
 #pragma once
 
-namespace DirectX
+class Mesh;
+struct TextureMaterial;
+
+//MeshRenderer
+class MeshRender :public Renderer3D
 {
-	class Mesh;
-	//=== MeshRender ==========================================================
-	class MeshRender :public Renderer3D
-	{
-		friend class Physics;
-	private:
-		std::shared_ptr<Mesh> mesh;
-	public:
-		MeshRender(EntityID OwnerID);
-		virtual ~MeshRender();
-	public:
-		void Render(XMMATRIX& worldMatrix) override;
-		template<typename Type> Type* SetMesh();
-		Mesh* GetMesh();
-	};
+	friend class Physics;
+private:
+	//メッシュフィルタ
+	std::shared_ptr<MeshFilter> _MeshFilter;
+	//マテリアル
+	TextureMaterial* _TextureMaterial;
 
-	//-------------------------------------------------------------------------
-	inline Mesh* MeshRender::GetMesh()
-	{
-		return mesh.get();
-	}
+public:
+	MeshRender(EntityID OwnerID);
+	virtual ~MeshRender();
 
-	template<typename Type> Type* MeshRender::SetMesh() {
-		mesh = std::shared_ptr<Mesh>(new Type());
-		return static_cast<Type*>(mesh.get());
-	};
-}
+public:
+	//描画処理
+	void Render(XMMATRIX& worldMatrix) override;
+
+	//メッシュの設定
+	void SetMesh(std::weak_ptr<Mesh> mesh) { _MeshFilter->AddMesh(mesh); };
+	//メッシュの取得
+	std::weak_ptr<Mesh> GetMesh(unsigned int index) { return _MeshFilter->GetMesh(index); };
+	//メッシュ数
+	unsigned int GetNumMesh() { return _MeshFilter->GetNumMesh(); };
+
+	//マテリアル設定
+	void SetMaterial(TextureMaterial* material) { _TextureMaterial = material; };
+};

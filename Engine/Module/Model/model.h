@@ -1,8 +1,6 @@
 #pragma once
 using namespace DirectX;
 
-#include"Module\Material\Material.h"
-
 //サブセット マテリアル区分け
 struct ModelSubset
 {
@@ -14,10 +12,10 @@ struct ModelSubset
 //ノードメッシュ　ノード区分け
 struct NodeMesh final
 {
-	using MeshType = Mesh<VERTEX_3D>;
+	using MeshType = Mesh;
 
-	//オフセット
-	XMMATRIX _offsetMatrix;
+	//オフセット行列
+	XMMATRIX _OffsetMatrix;
 
 	//メッシュ
 	MeshType* _Mesh;

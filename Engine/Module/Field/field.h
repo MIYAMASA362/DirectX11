@@ -15,7 +15,6 @@ namespace DirectX
 		Texture* m_Texture = nullptr;
 		CField();
 		virtual ~CField();
-		void Render(XMMATRIX& worldMatrix) override;
 	};
 
 	class WallField :public Mesh

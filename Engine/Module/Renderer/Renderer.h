@@ -6,10 +6,10 @@ namespace DirectX
 {
 	struct XMMATRIX;
 
-
-	//=== Renderer ============================================================
+	//描画
 	class Renderer:public Component<Renderer>
 	{
+		//描画リスト
 		using RendererList = std::list<std::weak_ptr<Renderer>>;
 	public:
 		enum RendererTarget
@@ -21,14 +21,18 @@ namespace DirectX
 		using RendererIndex = std::map<RendererTarget, RendererList>;
 
 	public:
+		//描画配列
 		static RendererIndex _RendererIndex;
 
+		//有効・無効
 		bool m_IsEnable = true;
-		unsigned int _sort = 0;			// 描画順
-		RendererTarget _RendererTarget;	// 3D/2Dタイプ
+		// 描画順
+		unsigned int _sort = 0;
+		// 3D/2Dタイプ
+		RendererTarget _RendererTarget;
 	
 		D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology;	//描画タイプ
-		Shader* _Shader;				//シェーダ
+		Shader* _Shader;								//シェーダ
 	public:
 		static void Create();
 		static void Destroy();
@@ -48,6 +52,7 @@ namespace DirectX
 		void SetTopology(D3D11_PRIMITIVE_TOPOLOGY Topology) { _PrimitiveTopology = Topology; };
 	};
 
+	//3D描画
 	class Renderer3D:public Renderer
 	{
 	public:
@@ -60,6 +65,7 @@ namespace DirectX
 		virtual void Render(XMMATRIX& worldMatrix) =0;
 	};
 
+	//2D描画
 	class Renderer2D:public Renderer
 	{
 	public:

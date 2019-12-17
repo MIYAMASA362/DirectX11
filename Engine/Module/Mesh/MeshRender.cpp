@@ -7,6 +7,11 @@
 //ECS
 #include"Module\ECSEngine.h"
 
+#include"Module\Texture\texture.h"
+#include"Module\Material\Material.h"
+
+#include"Module\Shader\Shader.h"
+
 //Module
 #include"Module\Renderer\Renderer.h"
 #include"Module\Mesh\Mesh.h"
@@ -14,9 +19,10 @@
 
 #include"Module\Transform\Transform.h"
 
+
 using namespace DirectX;
 
-DirectX::MeshRender::MeshRender(EntityID OwnerID)
+MeshRender::MeshRender(EntityID OwnerID)
 	:
 	Renderer3D(OwnerID)
 {
@@ -33,12 +39,34 @@ DirectX::MeshRender::MeshRender(EntityID OwnerID)
 	};
 }
 
-DirectX::MeshRender::~MeshRender()
+MeshRender::~MeshRender()
 {
-	mesh.reset();
+	_MeshFilter.reset();
 }
 
-void DirectX::MeshRender::Render(XMMATRIX& worldMatrix)
+void MeshRender::Render(XMMATRIX& worldMatrix)
 {
-	mesh->Render(worldMatrix);
+	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
+
+	this->_TextureMaterial->SetResource();
+
+	//シェーダ
+	D3DApp::GetShader()->SetShader();
+
+	for(unsigned int index = 0; index < _MeshFilter->GetNumMesh(); index++)
+	{
+		//メッシュの取得
+		auto mesh = _MeshFilter->GetMesh(index);
+
+		XMMATRIX local = mesh.lock()->_OffsetMatrix * worldMatrix;
+		D3DApp::Renderer::SetWorldMatrix(&local);
+
+		//バッファ設定
+		mesh.lock()->SetVertexBuffer();
+		mesh.lock()->SetIndexBuffer();
+
+		//描画
+		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
+		D3DApp::GetDeviceContext()->DrawIndexed(mesh.lock()->_IndexNum,0,0);
+	}
 }

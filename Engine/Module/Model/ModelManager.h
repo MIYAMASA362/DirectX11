@@ -16,7 +16,6 @@ private:
 public:
 	//‰ğ•ú
 	static void Release();
-
 	//ƒ‚ƒfƒ‹“Ç‚İ‚İ
 	static Model* LoadAssetForAssimp(std::string fileName);
 	//ƒ‚ƒfƒ‹æ“¾

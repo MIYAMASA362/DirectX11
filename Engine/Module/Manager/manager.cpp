@@ -45,8 +45,6 @@
 
 using namespace DirectX;
 
-AssimpModel* model;
-
 void CManager::Initialize()
 {
 	//ECS
@@ -63,27 +61,24 @@ void CManager::Initialize()
 	Input::Mouse::SetScreenLoop(false);
 
 	//Texture
-	TextureManager::LoadAsset("field004","field004.tga");
-	TextureManager::LoadAsset("number","number.tga");
-	TextureManager::LoadAsset("k-on0664","k-on0664.tga");
-	TextureManager::LoadAsset("sky","sky.tga");
-	TextureManager::LoadAsset("bg","background.tga");
-	TextureManager::LoadAsset("ItemSlot","ItemSlot.tga");
-	TextureManager::LoadAsset("MapBG","MapBG.tga");
-	TextureManager::LoadAsset("Compass","Compass.tga");
-	TextureManager::LoadAsset("ItemSlotBG","ItemSlotBG.tga");
-	TextureManager::LoadAsset("PressMessage","PressMessage.tga");
+	TextureManager::LoadTexture("Asset/Texture/field004.tga");
+	TextureManager::LoadTexture("Asset/Texture/number.tga");
+	TextureManager::LoadTexture("Asset/Texture/k-on0664.tga");
+	TextureManager::LoadTexture("Asset/Texture/sky.tga");
+	TextureManager::LoadTexture("Asset/Texture/background.tga");
+	TextureManager::LoadTexture("Asset/Texture/ItemSlot.tga");
+	TextureManager::LoadTexture("Asset/Texture/MapBG.tga");
+	TextureManager::LoadTexture("Asset/Texture/Compass.tga");
+	TextureManager::LoadTexture("Asset/Texture/ItemSlotBG.tga");
+	TextureManager::LoadTexture("Asset/Texture/PressMessage.tga");
 
 	//Model
-	ModelManager::LoadAsset(ModelAsset("Miku","Miku","miku_01.obj"));
-	ModelManager::LoadAsset(ModelAsset("Miku02","Miku02","miku_02.obj"));
-	ModelManager::LoadAsset(ModelAsset("Monster","Monster","monster.obj"));
-	ModelManager::LoadAsset(ModelAsset("Rock","Rock","rock.obj"));
-	ModelManager::LoadAsset(ModelAsset("Cube", "Cube", "cube.obj"));
-	ModelManager::LoadAsset(ModelAsset("Ball", "Ball", "ball.obj"));
-
-
-	model = ModelManager::LoadAssetForAssimp("Asset/Model/Miku/miku_01.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Miku/miku_01.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Miku2/miku_02.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Monster/monster.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Rock/rock.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Cube/cube.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Ball/ball.obj");
 
 	//Audio
 	AudioManager::CreateDevice();
@@ -138,7 +133,7 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
-	Collider::IsHitReset();
+	//Collider::IsHitReset();
 	ComponentManager::SendComponentMessage("FixedUpdate");
 	Rigidbody::ApplyRigidbody();
 	Rigidbody::CollisionRigidbody();
@@ -149,8 +144,6 @@ void CManager::Render()
 	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
 
 	Camera::Render(Renderer3D::BeginRender, D3DApp::Renderer::Begin);
-
-	model->Render({ 0.0f,0.0f,2.0f });
 
 	Renderer2D::BeginRender();
 
@@ -179,8 +172,6 @@ void CManager::DebugRender()
 
 void CManager::Finalize()
 {
-	delete model;
-
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 
