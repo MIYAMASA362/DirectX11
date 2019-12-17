@@ -2,7 +2,7 @@
 
 namespace DirectX
 {
-	//--- ComponentManager -----------------------------------------------------------------
+	//Component‚ÌŠÇ—
 	class ComponentManager
 	{
 	private:

@@ -2,11 +2,13 @@
 
 namespace DirectX
 {
+	//Component コンポーネント
 	template<typename Type>
 	class Component:public IComponent
 	{
 		friend class ComponentManager;
 	public:
+		//Component毎のID
 		static const ComponentTypeID TypeID;
 
 		Component(EntityID OwnerID);
@@ -23,6 +25,9 @@ namespace DirectX
 		//このComponentの全インスタンス
 		const std::weak_ptr<Components> _Index;
 	};
+
+
+
 
 	template<typename Type>
 	const ComponentTypeID Component<Type>::TypeID = ComponentManager::AttachComponentTypeID();
