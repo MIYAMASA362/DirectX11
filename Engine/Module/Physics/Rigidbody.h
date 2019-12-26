@@ -1,38 +1,61 @@
 #pragma once
 
-namespace DirectX
+
+class Collider;
+
+//Rigidbody
+//	物理挙動を設定する
+//
+class Rigidbody final :public Component<Rigidbody>
 {
-	class Collider;
+private:
+	//重力の有効・無効
+	bool _UseGravity;
+	//加速度
+	Vector3 _Velocity;
+	//質量
+	float _Mass;
+	//前位置
+	Vector3 _OldPosition;
+	//衝突判定
+	std::list<std::weak_ptr<Collider>> _Colliders;
 
-	class Rigidbody final :public Component<Rigidbody>
-	{
-	private:
-		bool m_useGravity;
-		Vector3 m_velocity;
-		float m_mass;
 
-		Vector3 m_oldPosition;
-		std::list<std::weak_ptr<Collider>> _Colliders;
-	public:
-		static void ApplyRigidbody();
-		static void CollisionRigidbody();
+public:
+	//物理判定を適応
+	static void ApplyRigidbody();
+	//謎...
+	static void CollisionRigidbody();
 
-		Rigidbody(EntityID OwnerID);
-		virtual ~Rigidbody();
+	//コンスタント
+	Rigidbody(EntityID OwnerID);
+	//デストラクタ
+	virtual ~Rigidbody();
 
-		void IsUseGravity(bool enable);
-		
-		Vector3 GetVelocity();
-		void SetVelocity(Vector3 velocity);
-		
-		void SetMass(float mass);
-		void RegisterCollider(std::weak_ptr<Collider> collider);
+	//useGravityの切り替え
+	void IsUseGravity(bool enable) { _UseGravity = enable; }
+	
+	//重力取得
+	Vector3 GetVelocity() { return _Velocity; };
+	//加速度設定
+	void SetVelocity(Vector3 velocity) { _Velocity = velocity; };
+	
+	//質量設定
+	void SetMass(float mass) { _Mass = mass; };
+	//Colliderへ追加
+	void RegisterCollider(std::weak_ptr<Collider> collider) { _Colliders.push_back(collider); };
 
-		void AddForce(Vector3 force);
-		Vector3 GetOldPosition();
+	//力を追加
+	void AddForce(Vector3 force) { _Velocity = _Mass * force; }
+	//前位置取得
+	Vector3 GetOldPosition() { return this->_OldPosition; }
+	//一定時間更新
+	void FixedUpdate();
 
-		void FixedUpdate();
-	protected:
-		void OnDestroy() override;
-	};
-}
+
+protected:
+	//削除時実行関数
+	void OnDestroy() override;
+
+
+};

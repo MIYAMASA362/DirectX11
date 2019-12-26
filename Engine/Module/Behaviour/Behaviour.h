@@ -1,32 +1,29 @@
 #pragma once
 
-namespace DirectX
-{
-	//=== Behaviour =====================================================================
-	template<typename Type>
-	class Behaviour:public Component<Type>
-	{	
-	protected:
-		bool m_IsEnable = true;
-	public:
-		Behaviour(EntityID OwnerID) :Component(OwnerID) {};
-		virtual ~Behaviour() = default;
-	public:
-		void SetEnable(bool enable);
-		bool GetEnable();
-	public:
-		virtual void OnDestroy()	override {};
-	};
+//Behavuour
+//	動作をするかの切り替え
+//
+template<typename Type>
+class Behaviour:public Component<Type>
+{	
+protected:
+	//Componentの有効・無効
+	bool _IsEnable = true;
 
-	template<typename Type>
-	inline void Behaviour<Type>::SetEnable(bool enable)
-	{
-		this->m_IsEnable = enable;
-	}
 
-	template<typename Type>
-	inline bool Behaviour<Type>::GetEnable()
-	{
-		return this->m_IsEnable;
-	}
-}
+public:
+	//コンストラクタ
+	Behaviour(EntityID OwnerID) :Component(OwnerID) {};
+	//デストラクタ
+	virtual ~Behaviour() = default;
+
+	//IsEnable切り替え
+	void SetEnable(bool enable) { return _IsEnable = enable; }
+	//IsEnable取得
+	bool GetEnable() { return _IsEnable; }
+
+	//削除時実行関数
+	virtual void OnDestroy()	override {};
+
+
+};

@@ -2,21 +2,17 @@
 #include<assert.h>
 #include<xaudio2.h>
 
-#include"Module\AssetData\AssetData.h"
-
 #include"Audio.h"
 #include"AudioManager.h"
 
 #pragma comment (lib, "xaudio2.lib")
 
-using namespace DirectX;
-
-DirectX::Audio::Audio()
+Audio::Audio()
 {
 
 }
 
-DirectX::Audio::~Audio()
+Audio::~Audio()
 {
 	for(int j = 0; j<SOUND_SOURCE_MAX; j++)
 		if(SourceVoice[j])
@@ -33,7 +29,7 @@ DirectX::Audio::~Audio()
 	}
 }
 
-void DirectX::Audio::Play(bool loop)
+void Audio::Play(bool loop)
 {
 	for (int j = 0; j < SOUND_SOURCE_MAX; j++)
 	{
@@ -73,7 +69,7 @@ void DirectX::Audio::Play(bool loop)
 	}
 }
 
-void DirectX::Audio::Stop()
+void Audio::Stop()
 {
 	for (int j = 0; j < SOUND_SOURCE_MAX; j++)
 		SourceVoice[j]->Stop();

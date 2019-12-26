@@ -114,7 +114,7 @@ std::weak_ptr<Transform> Transform::GetParent()
 	return std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform();
 }
 
-std::list<std::weak_ptr<Transform>> DirectX::Transform::GetChildren()
+std::list<std::weak_ptr<Transform>> Transform::GetChildren()
 {
 	std::list<std::weak_ptr<Transform>> list;
 	for (auto child : _hierarchy->GetChildren())
@@ -122,7 +122,7 @@ std::list<std::weak_ptr<Transform>> DirectX::Transform::GetChildren()
 	return list;
 }
 
-void DirectX::Transform::SendComponentMessageChildren(std::string message)
+void Transform::SendComponentMessageChildren(std::string message)
 {
 	//自身に送信
 	ComponentManager::SendComponentMessage(message,this->GetOwnerID());
@@ -131,62 +131,58 @@ void DirectX::Transform::SendComponentMessageChildren(std::string message)
 		std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->SendComponentMessageChildren(message);
 }
 
-std::weak_ptr<IComponent> DirectX::Transform::GetComponentInParent(ComponentTypeID componentTypeID)
+std::weak_ptr<IComponent> Transform::GetComponentInParent(ComponentTypeID componentTypeID)
 {
 	if (_hierarchy->GetParent().expired()) return  std::weak_ptr<IComponent>();
 
 	//TypeID参照
-	auto index = ComponentManager::GetComponentIndex(componentTypeID);
-	if (index.expired()) return  std::weak_ptr<IComponent>();
+	if (ComponentIndex.size()) return  std::weak_ptr<IComponent>();
 
 	//親IDの物を検索
-	for (auto component : *index.lock())
-		if (component.lock()->GetOwnerID() == _hierarchy->GetParent().lock()->GetEntityID())
-			return component;
+	for (auto component : ComponentIndex)
+		if (component.second->GetOwnerID() == _hierarchy->GetParent().lock()->GetEntityID())
+			return component.second;
 
 	//親のGetComponentInParentを実行
 	return std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->GetComponentInParent(componentTypeID);
 }
 
-std::weak_ptr<IComponent> DirectX::Transform::GetComponentInChildren(ComponentTypeID componentTypeID)
+std::weak_ptr<IComponent> Transform::GetComponentInChildren(ComponentTypeID componentTypeID)
 {
 	if (_hierarchy->GetChildren().size() == 0) return std::weak_ptr<IComponent>();
-	auto index = ComponentManager::GetComponentIndex(componentTypeID);
-
 	//子IDの物を検索
 	for (auto child : _hierarchy->GetChildren()) 
 	{
 		auto id = child.lock()->GetEntityID();
-		for (auto component : *index.lock())
-			if (component.lock()->GetOwnerID() == id)
-				return component;
+		for (auto component : ComponentIndex)
+			if (component.second->GetOwnerID() == id)
+				return component.second;
 	}
 	return std::weak_ptr<IComponent>();
 }
 
-Components DirectX::Transform::GetComponentsInChildren(ComponentTypeID componentTypeID)
+ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID)
 {
-	Components components;
+	ComponentList list;
 
-	if (_hierarchy->GetChildren().size() == 0) return components;
-	auto index = ComponentManager::GetComponentIndex(componentTypeID);
-	
+	if (_hierarchy->GetChildren().size() == 0) return list;
+
 	//子Component検索
 	for (auto child : _hierarchy->GetChildren())
 	{
 		auto id = child.lock()->GetEntityID();
-		for(auto component:*index.lock())
+		for(auto component:ComponentIndex)
 		{
-			if (component.lock()->GetOwnerID() == id)
-				components.push_back(component);
+			if (component.second->GetOwnerID() == id)
+				list.Add(component.second);
 		}
 
-		auto childComponents = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
-		if(childComponents.size() != 0)
-			components.insert(components.end(),childComponents.begin(),childComponents.end());
+		auto childlist = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
+		if(childlist.Size() != 0) 
+			list.Add(&childlist);
 	}
 
-	return components;
+	return list;
 }
 
 void Transform::DetachChildren()
@@ -286,7 +282,7 @@ void Transform::LookAt(std::weak_ptr<Transform> target) {
 		this->m_Rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * this->m_Rotation;
 }
 
-void DirectX::Transform::OnDestroy()
+void Transform::OnDestroy()
 {
 
 }

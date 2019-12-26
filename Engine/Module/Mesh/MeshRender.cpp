@@ -58,8 +58,7 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 		//メッシュの取得
 		auto mesh = _MeshFilter->GetMesh(index);
 
-		XMMATRIX local = mesh.lock()->_OffsetMatrix * worldMatrix;
-		D3DApp::Renderer::SetWorldMatrix(&local);
+		D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 		//バッファ設定
 		mesh.lock()->SetVertexBuffer();

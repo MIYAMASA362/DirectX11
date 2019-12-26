@@ -26,7 +26,7 @@ public:
 	//メッシュの取得
 	std::weak_ptr<Mesh> GetMesh(unsigned int index) { return _MeshFilter->GetMesh(index); };
 	//メッシュ数
-	unsigned int GetNumMesh() { return _MeshFilter->GetNumMesh(); };
+	size_t GetNumMesh() { return _MeshFilter->GetNumMesh(); };
 
 	//マテリアル設定
 	void SetMaterial(TextureMaterial* material) { _TextureMaterial = material; };

@@ -9,9 +9,6 @@
 
 #pragma comment(lib,"assimp.lib")
 
-#define STB_IMAGE_IMPLEMENTATION
-#include<stb\stb_image.h>
-
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
 

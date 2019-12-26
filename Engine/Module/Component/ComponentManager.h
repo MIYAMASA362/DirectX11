@@ -1,99 +1,91 @@
 #pragma once
 
-namespace DirectX
+//Entityに付随するComponents
+using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<ComponentList>>;
+
+class IEntity;
+
+//ComponentManager
+//	EntityとComponentとの関わりを管理
+//
+class ComponentManager final
 {
-	//Componentの管理
-	class ComponentManager
-	{
-	private:
-		static EntityComponents _EntityComponentIndex;
-		static ComponentTypeIndex _ComponentTypeIndex;
-	public:
-		static void Create();
-		static void Release();
+private:
+	//インスタンス
+	static ComponentManager* g_pInstance;
 
-		//ComponentTypeID ComponentType毎のユニークなID
-		static ComponentTypeID AttachComponentTypeID();
+	//Entityに付加されたComponentsのインデックス
+	EntityComponents _EntityComponentIndex;
 
-		//Component毎のIndex
-		static std::weak_ptr<Components> GetOrCreateComponentIndex(ComponentTypeID componentTypeID);
-		static std::weak_ptr<Components> GetComponentIndex(ComponentTypeID componentTypeID);
-		
-		static void ReleaseComponentIndex(ComponentTypeID componentTypeID);
 
-		//Message
-		static void SendComponentMessage(std::string message);
-		static void SendComponentMessage(std::string message, EntityID entityID);
+private:
+	//コンストラクタ
+	ComponentManager();
+	//デストラクタ
+	~ComponentManager();
 
-		//ComponentManagerの持つIndexに追加する
-		static std::weak_ptr<IComponent> AddComponentIndex(std::weak_ptr<Object> object);
 
-		//AddComponent
-		template<typename Type> 
-		static std::weak_ptr<Type> AddComponent(EntityID OwnerID);
+public:
+	//インスタンス生成
+	static void Create();
+	//インスタンス破棄
+	static void Release();
 
-		//GetComponent
-		template<typename Type> 
-		static std::weak_ptr<Type> GetComponent(EntityID id);
-		template<typename Type>
-		static std::list<std::weak_ptr<Type>>GetComponents(EntityID id);
 
-		//削除
-		static void DestroyComponents(EntityID id);
+	//Componentに対してmessage送信
+	static void SendComponentMessage(std::string message);
+	//特定のEntityのComponentにmessage送信
+	static void SendComponentMessage(std::string message, EntityID entityID);
 
-		//解放
-		template<typename Type> static void ReleaseComponent(EntityID id);
-		static void ReleaseComponents(EntityID id);
 
-		//Debug表示
-		static void ImGui_ComponentView(EntityID id);
-	};
+	//EntityのComponentリストを生成
+	static std::weak_ptr<ComponentList> CreateComponents(IEntity* entity);
+	//EntityのComponentリストを取得
+	static std::weak_ptr<ComponentList> GetComponents(IEntity* entity);
+	//EntityのComponentsをObjectManagerの完全削除
+	static void DestroyComponents(IEntity* entity);
+	//EntityのComponentsを解放
+	static void ReleaseComponents(IEntity* entity);
+
 
 	//EntityにComponentを追加
-	template<typename Type>
-	inline std::weak_ptr<Type> ComponentManager::AddComponent(EntityID OwnerID)
-	{
-		//インスタンス生成
-		auto instance = new Type(OwnerID);
-		auto component = ComponentManager::AddComponentIndex(ObjectManager::GetInstance(instance->GetInstanceID()));
-		return std::dynamic_pointer_cast<Type>(component.lock());
-	}
-
+	template<typename Type>  static std::shared_ptr<Type> AddComponent(IEntity* entity);
 	//EntityのComponentを取得
-	template<typename Type >
-	inline std::weak_ptr<Type> ComponentManager::GetComponent(EntityID id)
-	{
-		auto components = _EntityComponentIndex.at(id);
-		ComponentTypeID targetID = Component<Type>::TypeID;
-		for (auto component : *components)
-			if (component.lock()->GetComponentTypeID() == targetID)
-				return std::dynamic_pointer_cast<Type>(component.lock());
-		return std::weak_ptr<Type>();
-	}
+	template<typename Type>  static std::shared_ptr<Type> GetComponent(IEntity* entity);
+	//EntityのComponentを解放
+	template<typename Type> static void ReleaseComponent(IEntity* entity);
 
-	//EntityのComponentを取得
-	template<typename Type>
-	inline std::list<std::weak_ptr<Type>> ComponentManager::GetComponents(EntityID id)
-	{
-		std::list<std::weak_ptr<Type>> list;
-		auto components = ComponentManager::GetComponentIndex(Component<Type>::TypeID).lock();
-		for (auto component : *components)
-			if (component.lock()->GetOwnerID() == id)
-				list.push_back(std::dynamic_pointer_cast<Type>(component.lock()));
-		return list;
-	}
+	//全ComponentのDebug表示
+	static void ImGui_ComponentView(EntityID id);
 
-	//EntityのComponentを開放
-	template<typename Type>
-	inline void ComponentManager::ReleaseComponent(EntityID id)
-	{
-		auto find = _EntityComponentIndex.find(id);
-		if (find == _EntityComponentIndex.end()) return;
-		ComponentTypeID targetID = Component<Type>::TypeID;
-		find->second->remove_if(
-			[targetID](std::weak_ptr<IComponent> obj)
-		{
-			return obj.lock()->GetComponentTypeID() == targetID;
-		});
-	}
+
+};
+
+
+
+//EntityにComponentを追加
+template<typename Type>
+inline std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
+{
+	//インスタンス生成
+	Object* instance = new Type(entity->GetEntityID());
+	std::shared_ptr<Type> component = std::dynamic_pointer_cast<Type>(ObjectManager::GetInstance(instance->GetInstanceID()).lock());
+	g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->Add(component);
+	return component;
+}
+
+//EntityのComponentを取得
+template<typename Type >
+inline std::shared_ptr<Type> ComponentManager::GetComponent(IEntity* entity)
+{
+	auto list = g_pInstance->_EntityComponentIndex.at(entity->GetEntityID());
+	ComponentTypeID targetID = Component<Type>::GetTypeID();
+	return std::dynamic_pointer_cast<Type>(list->Get(targetID).lock());
+}
+
+//EntityのComponentを開放
+template<typename Type>
+inline void ComponentManager::ReleaseComponent(IEntity* entity)
+{
+	g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->Remove(Component<Type>::GetTypeID());
 }

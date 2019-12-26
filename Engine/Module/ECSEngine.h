@@ -1,41 +1,35 @@
 #pragma once
-namespace DirectX
-{
-	using InstanceID = unsigned int;
-
-	using EntityID = InstanceID;
-	using ComponentID = InstanceID;
-	using ComponentTypeID = unsigned int;
-
-	class Object;		//Entity・Componentの基底クラス
-	class IEntity;		//Entity	EntityManagerで管理する為の基底クラス
-	class IComponent;	//Component ComponentManagerで管理する為の基底クラス
-
-	//全オブジェクト
-	using ObjectIndex = std::unordered_map<InstanceID, std::shared_ptr<Object>>;
-	//削除対象
-	using DestroyIndex = std::vector<InstanceID>;
-
-	//全Entity
-	using EntityIndex = std::unordered_map<EntityID,std::weak_ptr<IEntity>>;
-
-	//Component群
-	using Components = std::list<std::weak_ptr<IComponent>>;
-	//Entityに付随するComponents
-	using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<Components>>;
-	//TypeID参照
-	using ComponentTypeIndex = std::unordered_map<ComponentTypeID,std::shared_ptr<Components>>;
-}
-
+#include<functional>
 #include"IMGUI\GUI_ImGui.h"
 
-#include"Object\ObjectManager.h"
+//Object固有ID
+using InstanceID = unsigned int;
+
+using EntityID = InstanceID;
+using ComponentID = InstanceID;
+using ComponentTypeID = size_t;
+
+//ECSに必要なヘッダーファイルをIncludeします。
+#ifndef NOT_INCLUDE_ECS_FILES
+
+//Object
 #include"Object\Object.h"
-#include"Entity\IEntity.h"
-#include"Entity\EntityManager.h"
-#include"Entity\Entity.h"
+#include"Object\ObjectManager.h"
+
 #include"Component\IComponent.h"
+#include"Component\ComponentList.h"
 #include"Component\ComponentManager.h"
 #include"Component\Component.h"
-#include"Behaviour\Behaviour.h"
-#include"MonoBehaviour\MonoBehaviour.h"
+
+#include"Module\Entity\IEntity.h"
+#include"Module\Entity\EntityManager.h"
+#include"Module\Entity\Entity.h"
+
+#ifndef NOT_INCLUDE_BEHAVIOUR
+
+#include"Module\Behaviour\Behaviour.h"
+#include"Module\MonoBehaviour\MonoBehaviour.h"
+
+#endif
+
+#endif //NOT_INCLUDE_ECS_FILES

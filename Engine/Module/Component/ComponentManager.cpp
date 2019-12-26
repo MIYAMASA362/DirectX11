@@ -1,105 +1,133 @@
 #include"Common.h"
 #include<random>
+#include<functional>
 
+#define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
 
-using namespace DirectX;
+#include"Module\Object\Object.h"
+#include"Module\Object\ObjectManager.h"
 
-EntityComponents	ComponentManager::_EntityComponentIndex;
-ComponentTypeIndex	ComponentManager::_ComponentTypeIndex;
+#include"IComponent.h"
+#include"ComponentList.h"
 
-void ComponentManager::Create(){
-	_EntityComponentIndex.clear();
-	_ComponentTypeIndex.clear();
-}
+#include"Module\Entity\IEntity.h"
+#include"ComponentManager.h"
 
-void ComponentManager::Release(){
-	_EntityComponentIndex.clear();
-	_ComponentTypeIndex.clear();
-}
+//pInstance
+//	Singleton
+//
+ComponentManager * ComponentManager::g_pInstance = nullptr;
 
-//Component毎のIDを設定
-ComponentTypeID ComponentManager::AttachComponentTypeID(){
-	std::random_device rand;
-	return rand();
-}
 
-//Componentsの生成・取得
-std::weak_ptr<Components> ComponentManager::GetOrCreateComponentIndex(ComponentTypeID componentTypeID)
+
+//ComponentManager
+//	コンストラクタ
+//
+ComponentManager::ComponentManager()
 {
-	auto find = _ComponentTypeIndex.find(componentTypeID);
-	if (find != _ComponentTypeIndex.end())
-		return find->second;
-
-	auto instance = _ComponentTypeIndex.emplace(componentTypeID,std::shared_ptr<Components>(new Components()));
-	return instance.first->second;
+	
 }
 
-//Componentsの取得
-std::weak_ptr<Components> DirectX::ComponentManager::GetComponentIndex(ComponentTypeID componentTypeID)
+//~ComponentManager
+//	デストラクタ
+//
+ComponentManager::~ComponentManager()
 {
-	auto find = _ComponentTypeIndex.find(componentTypeID);
-	if (find == _ComponentTypeIndex.end())
-		return std::weak_ptr<Components>();
-	return find->second;
+	
 }
 
-//ReleaseComponents
-void DirectX::ComponentManager::ReleaseComponentIndex(ComponentTypeID componentTypeID)
+
+
+
+//Create
+//	インスタンスの生成
+//
+void ComponentManager::Create()
 {
-	_ComponentTypeIndex.erase(componentTypeID);
+	if (g_pInstance) return;
+	g_pInstance = new ComponentManager();
+	
 }
 
-//Componentに対してmessage送信
-void DirectX::ComponentManager::SendComponentMessage(std::string message)
+//Release
+//	インスタンスの破棄
+//
+void ComponentManager::Release()
 {
-	for (auto components : _EntityComponentIndex)
-		for (auto component : *components.second)
+	if (g_pInstance == nullptr) return;
+	delete g_pInstance;
+	g_pInstance = nullptr;
+}
+
+
+
+
+
+//SendComponentMessage
+//	Componentに対してmessage送信
+//
+void ComponentManager::SendComponentMessage(std::string message)
+{
+	for (auto components : g_pInstance->_EntityComponentIndex)
+		for (auto component : components.second->_components)
 			component.lock()->SendComponentMessage(message);
 }
 
-//特定のEntityのComponentに対してmessage送信
-void DirectX::ComponentManager::SendComponentMessage(std::string message, EntityID entityID)
+//SendComponentMessage
+//	特定のEntityのComponentに対してmessage送信
+//
+void ComponentManager::SendComponentMessage(std::string message, EntityID entityID)
 {
-	for(auto component : *_EntityComponentIndex.at(entityID))
+	for(auto component : g_pInstance->_EntityComponentIndex.at(entityID)->_components)
 		component.lock()->SendComponentMessage(message);
 }
 
+
+
+
+//CreateComponents
+//	EntityのComponentsを作成
 //
-std::weak_ptr<IComponent> DirectX::ComponentManager::AddComponentIndex(std::weak_ptr<Object> object)
+std::weak_ptr<ComponentList> ComponentManager::CreateComponents(IEntity* entity)
 {
-	//IComponentの設定
-	auto sptr = std::dynamic_pointer_cast<IComponent>(object.lock());
-	sptr->_self = sptr;
-
-	//EntityComponentIndexに追加
-	auto find = _EntityComponentIndex.find(sptr->GetOwnerID());
-	if (find == _EntityComponentIndex.end())
-		find = _EntityComponentIndex.emplace(sptr->GetOwnerID(),std::shared_ptr<Components>(new Components())).first;
-	find->second->push_back(sptr);
-
-	//ComponentTypeIndexに追加
-	_ComponentTypeIndex.at(sptr->GetComponentTypeID())->push_back(sptr);
-
-	return sptr;
+	return g_pInstance->_EntityComponentIndex.emplace(entity->GetEntityID(), std::shared_ptr<ComponentList>(new ComponentList())).first->second;
 }
 
-//Entityの持っているComponentsを削除
-void DirectX::ComponentManager::DestroyComponents(EntityID id)
+//GetComponents
+//	Entityの持っているComponentsを取得
+//
+std::weak_ptr<ComponentList> ComponentManager::GetComponents(IEntity* entity)
 {
-	for(auto component : *_EntityComponentIndex.at(id))
+	return g_pInstance->_EntityComponentIndex.at(entity->GetEntityID());
+}
+
+//DestroyComponents
+//	Entityの持っているComponentsを削除
+//
+void ComponentManager::DestroyComponents(IEntity* entity)
+{
+	for(auto component : g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->_components)
 		component.lock()->Destroy();
 }
 
-//Entityの持っているComponentsを開放
-void DirectX::ComponentManager::ReleaseComponents(EntityID id)
+//ReleaseComponents
+//	Entityの持っているComponentsを開放
+//
+void ComponentManager::ReleaseComponents(IEntity* entity)
 {
-	_EntityComponentIndex.erase(id);
+	g_pInstance->_EntityComponentIndex.erase(entity->GetEntityID());
 }
 
-//Entityの持っているComponentsのDebug表示
-void DirectX::ComponentManager::ImGui_ComponentView(EntityID id)
+
+
+
+
+//ImGui_ComponentView
+//	Entityの持っているComponentsのDebug表示
+//
+void ComponentManager::ImGui_ComponentView(EntityID id)
 {
-	for (auto component : *_EntityComponentIndex.at(id))
+	for (auto component : g_pInstance->_EntityComponentIndex.at(id)->_components)
 		component.lock()->OnDebugImGui();
 }

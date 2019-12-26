@@ -1,58 +1,98 @@
 #include"Common.h"
 #include<random>
 
+#define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
 
-using namespace DirectX;
+#include"Object.h"
+#include"ObjectManager.h"
 
-ObjectIndex ObjectManager::m_ObjectIndex;
-DestroyIndex ObjectManager::m_DestroyIndex;
+//ObjectIndex
+//	Objectのインスタンス保持
+//
+ObjectIndex ObjectManager::g_ObjectIndex;
 
-InstanceID DirectX::ObjectManager::AttachID()
+//DestroyIndex
+//	ObjectIndexから削除するターゲットのIndex
+//
+ObjectManager::DestroyIndex ObjectManager::g_DestroyIndex;
+
+
+
+//AttachID
+//	Object に固有IDを付加する
+//
+InstanceID ObjectManager::AttachID()
 {
 	std::random_device rand;
-	return rand();
-}
-
-void DirectX::ObjectManager::AddIndex(std::shared_ptr<Object> instance)
-{
-	m_ObjectIndex.emplace(instance->GetInstanceID(),instance);
-}
-
-void DirectX::ObjectManager::AddDestroy(InstanceID instanceID)
-{
-	m_DestroyIndex.push_back(instanceID);
-}
-
-void DirectX::ObjectManager::ClearnUp()
-{
-	if (m_DestroyIndex.size() == 0) return;
-	for (auto id : m_DestroyIndex) 
+	InstanceID id;
+	do
 	{
-		auto sptr = m_ObjectIndex.at(id);
-		sptr->OnDestroy();
-		m_ObjectIndex.erase(id);
+		id = rand();
+	} 
+	while (g_ObjectIndex.find(id) != g_ObjectIndex.end());
+	
+	return id;
+}
+
+
+
+
+//AddIndex
+//	ObjectIndexへObjectを追加
+//
+std::weak_ptr<Object> ObjectManager::AddIndex(Object * instance)
+{
+	return g_ObjectIndex.emplace(instance->GetInstanceID(),std::shared_ptr<Object>(instance)).first->second;
+}
+
+
+
+//AddDestroy
+//	DestroyIndexへ追加
+//
+void ObjectManager::AddDestroy(Object * instance)
+{
+	g_DestroyIndex.push_back(instance->GetInstanceID());
+}
+
+//ClearnUp
+//	DestroyIndex,ObjectIndexから削除
+//
+void ObjectManager::ClearnUp()
+{
+	if (g_DestroyIndex.size() == 0) return;
+
+	for (auto id : g_DestroyIndex)
+	{
+		auto itr = g_ObjectIndex.find(id);
+		itr->second->OnDestroy();
+		g_ObjectIndex.erase(itr);
 	}
-	m_DestroyIndex.clear();
+	g_DestroyIndex.clear();
 }
 
-std::weak_ptr<Object> DirectX::ObjectManager::GetInstance(InstanceID instanceID)
+
+
+//GetInstance
+//	ObjectIndexからObjectを取得
+//
+std::weak_ptr<Object> ObjectManager::GetInstance(InstanceID instanceID)
 {
-	return m_ObjectIndex.at(instanceID);
+	return g_ObjectIndex.at(instanceID);
 }
 
-void DirectX::ObjectManager::Release()
+//Release
+//	ObjectIndexを空にする
+//	OnDestroy関数の実行
+//
+void ObjectManager::Release()
 {
-	for (auto obj : m_ObjectIndex)
+	for (auto obj : g_ObjectIndex)
 	{
 		obj.second->OnDestroy();
 	}
 	
-	m_DestroyIndex.clear();
-	m_ObjectIndex.clear();
-}
-
-void DirectX::ObjectManager::RemoveIndex(InstanceID instanceID)
-{
-	m_ObjectIndex.erase(instanceID);
+	g_DestroyIndex.clear();
+	g_ObjectIndex.clear();
 }

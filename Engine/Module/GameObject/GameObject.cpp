@@ -38,19 +38,19 @@ GameObject::~GameObject()
 	scene->RemoveSceneObject(this->GetInstanceID());
 }
 
-std::weak_ptr<Transform> DirectX::GameObject::transform()
+std::weak_ptr<Transform> GameObject::transform()
 {
 	if (_transform.expired())
 		_transform = Transform::GetComponent(this->GetEntityID());
 	return _transform;
 }
 
-std::weak_ptr<GameObject> DirectX::GameObject::gameObject()
+std::weak_ptr<GameObject> GameObject::gameObject()
 {
 	return _gameObject;
 }
 
-void DirectX::GameObject::OnDebugGUI()
+void GameObject::OnDebugGUI()
 {
 	if(ImGui::TreeNode((name + " ID:" + std::to_string(this->GetEntityID())).c_str()))
 	{
@@ -59,7 +59,7 @@ void DirectX::GameObject::OnDebugGUI()
 	}
 }
 
-std::string DirectX::GameObject::GetName()
+std::string GameObject::GetName()
 {
 	return this->name;
 }
@@ -84,12 +84,12 @@ bool GameObject::GetActive()
 	return this->IsActive;
 }
 
-bool DirectX::GameObject::GetActiveSelf()
+bool GameObject::GetActiveSelf()
 {
 	return this->IsActive;
 }
 
-Scene * DirectX::GameObject::GetScene()
+Scene * GameObject::GetScene()
 {
 	return scene;
 }

@@ -6,7 +6,6 @@
 
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\AssetData\AssetData.h"
 #include"texture.h"
 #include"TextureManager.h"
 

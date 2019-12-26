@@ -1,6 +1,6 @@
 #pragma once
 
-class DirectX::GameObject;
+class GameObject;
 
 class TestScene2 final:public Scene
 {

@@ -1,39 +1,93 @@
 #include"Common.h"
+#include<functional>
+
+#define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
 
-using namespace DirectX;
+#include"Module\Object\Object.h"
+#include"Module\Component\IComponent.h"
+#include"Module\Component\ComponentList.h"
+#include"Module\Component\ComponentManager.h"
 
-EntityIndex EntityManager::m_EntityIndex;
+#include"Module\Entity\IEntity.h"
 
+#include"EntityManager.h"
+
+//pInstance
+//	Singleton インスタンス
+//
+EntityManager* EntityManager::g_pInstacne = nullptr;
+
+
+
+//EntityManager
+//	コンストラクタ
+//	EntityIndexの生成
+//
+EntityManager::EntityManager()
+{
+	_EntityIndex = new EntityIndex();
+}
+
+//~EntityManager
+//	デストラクタ
+//	EntityIndexの破棄
+//
+EntityManager::~EntityManager()
+{
+	_EntityIndex->clear();
+	delete _EntityIndex;
+}
+
+
+
+//Create
+//	インスタンス生成
+//
 void EntityManager::Create()
 {
-	m_EntityIndex.clear();
+	if (g_pInstacne) return;
+	g_pInstacne = new EntityManager();
 }
 
+//Release
+//	インスタンス破棄
+//
 void EntityManager::Release()
 {
-	m_EntityIndex.clear();
+	if (g_pInstacne == nullptr) return;
+	delete g_pInstacne;
+	g_pInstacne = nullptr;
 }
 
+
+
+//CreateEntity
+//	EntityIndexへの追加
+//
 std::weak_ptr<IEntity> EntityManager::CreateEntity(IEntity* instance)
 {
-	InstanceID id = instance->GetInstanceID();
-	auto object = ObjectManager::GetInstance(id).lock();
-	auto wptr = std::weak_ptr<IEntity>(std::dynamic_pointer_cast<IEntity>(object));
-	m_EntityIndex.emplace(id,wptr);
-	return wptr;
+	auto sptr = std::dynamic_pointer_cast<IEntity>(instance->Object::_self.lock());
+	return g_pInstacne->_EntityIndex->emplace(instance->GetEntityID(), sptr).first->second;
 }
 
+//GetEntity
+//	EntityIndexからEntityの取得
+//
 std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 {
-	auto find = m_EntityIndex.find(id);
-	if (find == m_EntityIndex.end()) 
+	auto find = g_pInstacne->_EntityIndex->find(id);
+	if (find == g_pInstacne->_EntityIndex->end()) 
 		return std::weak_ptr<IEntity>();
 	return find->second;
 }
 
-void EntityManager::ReleaseEntity(EntityID id)
+//ReleaseEntity
+//	EntityIndexから削除する
+//	ComponentManagerからEntityのComponentsも同様に削除
+//
+void EntityManager::ReleaseEntity(IEntity * instance)
 {
-	m_EntityIndex.erase(id);
-	ComponentManager::ReleaseComponents(id);
+	g_pInstacne->_EntityIndex->erase(instance->GetEntityID());
+	ComponentManager::ReleaseComponents(instance);
 }

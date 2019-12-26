@@ -1,27 +1,39 @@
 #pragma once
 
-namespace DirectX
+
+//Object
+//	ゲーム内のオブジェクトの基底
+//
+class Object
 {
-	class Object
-	{
-		friend class ObjectManager;
-	private:
-		const InstanceID m_InstanceID;
-	public:
-		static void Destroy(Object* obj);
+	friend class ObjectManager;
+private:
+	//固有ID
+	const InstanceID _InstanceID;
 
-		Object();
-		virtual ~Object();
-		
-		InstanceID GetInstanceID();
-		
-		virtual void Destroy();
-	protected:
-		virtual void OnDestroy();
-	};
+protected:
+	//ObjectManagerで管理されているInstacneへのアクセス
+	std::weak_ptr<Object> _self;
 
-	inline InstanceID DirectX::Object::GetInstanceID()
-	{
-		return m_InstanceID;
-	}
-}
+public:
+	//コンストラクタ
+	Object();
+	//デストラクタ
+	virtual ~Object();
+
+	//Objectの削除処理
+	static void Destroy(Object* obj);
+
+	//固有IDの取得
+	InstanceID GetInstanceID() { return _InstanceID; }
+
+	//削除宣言
+	virtual void Destroy();
+
+
+protected:
+	//削除時実行関数
+	virtual void OnDestroy();
+
+
+};

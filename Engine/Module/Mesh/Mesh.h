@@ -1,5 +1,6 @@
 #pragma once
 
+
 //レイヤー
 enum MeshLayer
 {
@@ -65,5 +66,5 @@ public:
 	//メッシュ取得
 	std::weak_ptr<Mesh> GetMesh(unsigned int index) { return _MeshArray.at(index); };
 	//メッシュ数の取得
-	unsigned int GetNumMesh() { return _MeshArray.size(); };
+	size_t GetNumMesh() { return _MeshArray.size(); };
 };

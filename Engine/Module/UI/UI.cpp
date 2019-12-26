@@ -14,6 +14,7 @@
 #include"font.h"
 #include"UI.h"
 
+#include"Module\Tag\Tag.h"
 #include"Module\GameObject\GameObject.h"
 #include"Module\Transform\Transform.h"
 
@@ -22,16 +23,16 @@
 using namespace DirectX;
 
 //--- Canvas --------------------------------------------------------
-DirectX::Canvas::Canvas(EntityID OwnerID)
+Canvas::Canvas(EntityID OwnerID)
 	:
 	Component(OwnerID)
 {
-
+	
 }
 
 //--- UI ------------------------------------------------------------
 
-DirectX::UI::UI(EntityID OwnerID)
+UI::UI(EntityID OwnerID)
 	:
 	Component(OwnerID)
 {
@@ -49,7 +50,7 @@ DirectX::UI::UI(EntityID OwnerID)
 
 //--- Image ---------------------------------------------------------
 
-DirectX::Image::Image(EntityID OwnerID)
+Image::Image(EntityID OwnerID)
 :
 	Renderer2D(OwnerID)
 {
@@ -76,13 +77,12 @@ DirectX::Image::Image(EntityID OwnerID)
 	}
 }
 
-DirectX::Image::~Image()
+Image::~Image()
 {
-	texture = nullptr;
 	vertexBuffer->Release();
 }
 
-void DirectX::Image::Render(XMMATRIX& world)
+void Image::Render(XMMATRIX& world)
 {
 	D3DApp::Renderer::SetDepthEnable(false);
 	UINT stride = sizeof(VERTEX_3D);
@@ -90,7 +90,7 @@ void DirectX::Image::Render(XMMATRIX& world)
 	//頂点バッファ設定
 	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&this->vertexBuffer,&stride,&offset);
 	//テクスチャ設定
-	this->texture->SetResource();
+	this->texture.lock()->SetResource();
 	//ワールド行列設定
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
@@ -102,7 +102,7 @@ void DirectX::Image::Render(XMMATRIX& world)
 
 //--- Button --------------------------------------------------------
 
-DirectX::Button::Button(EntityID OwnerID)
+Button::Button(EntityID OwnerID)
 :
 	UI(OwnerID),
 	m_scale(5.0f),
@@ -132,19 +132,19 @@ DirectX::Button::Button(EntityID OwnerID)
 	}
 }
 
-DirectX::Button::~Button()
+Button::~Button()
 {
 	this->m_vertexBuffer->Release();
 }
 
-//void DirectX::Button::SendBehaviourMessage(Message message)
+//void Button::SendBehaviourMessage(Message message)
 //{
 //	switch (message)
 //	{
-//	case DirectX::Component::Update:
+//	case Component::Update:
 //		Update();
 //		break;
-//	case DirectX::Component::Render:
+//	case Component::Render:
 //		UI::SendBehaviourMessage(message);
 //		break;
 //	default:
@@ -152,7 +152,7 @@ DirectX::Button::~Button()
 //	}
 //}
 
-void DirectX::Button::Update()
+void Button::Update()
 {
 	float mouseX,mouseY;
 	float left, right, top, bottom;
@@ -172,7 +172,7 @@ void DirectX::Button::Update()
 	this->m_isHover = (left <= mouseX && mouseX <= right && top <= mouseY && mouseY <= bottom);
 }
 
-void DirectX::Button::Render(XMMATRIX world)
+void Button::Render(XMMATRIX world)
 {
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -189,23 +189,23 @@ void DirectX::Button::Render(XMMATRIX world)
 	D3DApp::GetDeviceContext()->Draw(4, 0);
 }
 
-bool DirectX::Button::IsHover()
+bool Button::IsHover()
 {
 	return this->m_isHover;
 }
 
-bool DirectX::Button::IsClick()
+bool Button::IsClick()
 {
 	return this->m_isHover && Input::Mouse::IsLeftDown();
 }
 
-DirectX::Text::Text(EntityID OwnerID)
+Text::Text(EntityID OwnerID)
 :
 	UI(OwnerID)
 {
 }
 
-void DirectX::Text::SetText(std::string text)
+void Text::SetText(std::string text)
 {
 	if (this->m_texture)
 		delete this->m_texture;
@@ -261,7 +261,7 @@ void DirectX::Text::SetText(std::string text)
 	}
 }
 
-void DirectX::Text::SetFont(Font * font)
+void Text::SetFont(Font * font)
 {
 	m_font = font;
 }

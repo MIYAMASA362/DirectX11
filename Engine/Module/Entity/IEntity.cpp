@@ -1,35 +1,50 @@
 #include"Common.h"
 
+#define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
-using namespace DirectX;
 
+#include"Module\Object\Object.h"
+#include"Module\Object\ObjectManager.h"
+
+#include"Module\Component\IComponent.h"
+#include"Module\Component\ComponentList.h"
+#include"Module\Component\ComponentManager.h"
+
+#include"Module\Entity\IEntity.h"
+#include"Module\Entity\EntityManager.h"
+
+//IEntity
+//	コンストラクタ
+//
 IEntity::IEntity()
 {
 	_self = EntityManager::CreateEntity(this);
+	_components = ComponentManager::CreateComponents(this);
 }
 
-DirectX::IEntity::~IEntity()
+//~IEntity
+//	デストラクタ
+//
+IEntity::~IEntity()
 {
-	EntityManager::ReleaseEntity(GetEntityID());
+	EntityManager::ReleaseEntity(this);
 }
 
-EntityID IEntity::GetEntityID()
+
+
+//DestroyComponents
+//	ComponentManagerからComponentsを削除する
+//
+void IEntity::DestroyComponents()
 {
-	return this->GetInstanceID();
+	ComponentManager::DestroyComponents(this);
 }
 
-std::weak_ptr<IEntity> DirectX::IEntity::GetEntity()
+//Destroy
+//	Objectの削除
+//
+void IEntity::Destroy()
 {
-	return this->_self;
-}
-
-void DirectX::IEntity::DestroyComponents()
-{
-	ComponentManager::DestroyComponents(GetEntityID());
-}
-
-void DirectX::IEntity::Destroy()
-{
-	ComponentManager::DestroyComponents(GetEntityID());
+	this->DestroyComponents();
 	Object::Destroy();
 }

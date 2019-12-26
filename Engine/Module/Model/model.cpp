@@ -9,8 +9,6 @@
 //Engine
 #include"Module\ECSEngine.h"
 
-#include"Module\AssetData\AssetData.h"
-
 #include"Module\Material\Material.h"
 #include"Module\Texture\texture.h"
 

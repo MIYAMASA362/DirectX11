@@ -1,6 +1,6 @@
 #pragma once
 
-class DirectX::GameObject;
+class GameObject;
 
 class TestScene final :public Scene
 {
@@ -20,15 +20,15 @@ public:
 	void Load() override
 	{
 		//Sky
-		GameObject* Sky = this->AddSceneObject("Sky", TagName::Default);
+		/*GameObject* Sky = this->AddSceneObject("Sky", TagName::Default);
 		{
 			Sky->transform().lock()->localScale(Vector3::one()*80.0f);
-			Sky->AddComponent<MeshRender>().lock()->SetMesh<SkySphere>()
+			Sky->AddComponent<MeshRender>().lock()->SetMesh()
 				->m_Texture = TextureManager::GetTexture("sky");
-		}
+		}*/
 		
 		//Field
-		GameObject* Field = this->AddSceneObject("Field",TagName::Default);
+		/*GameObject* Field = this->AddSceneObject("Field",TagName::Default);
 		{
 			Field->transform().lock()->localScale(Vector3(1.0f,0.1f,1.0f) * 50.0f);
 			auto mesh = Field->AddComponent<MeshRender>().lock()->SetMesh<MeshField>();
@@ -38,7 +38,7 @@ public:
 
 			auto render = Field->GetComponent<Renderer>();
 			Physics::AddRayCastTarget(std::dynamic_pointer_cast<MeshRender>(render.lock()));
-		}
+		}*/
 
 		//pModel
 		//GameObject* pModel = this->AddSceneObject("Miku", TagName::ChildMiku);

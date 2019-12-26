@@ -1,42 +1,36 @@
 #pragma once
 
-#include<typeinfo>
-#include"Module\Tag\Tag.h"
+class GameObject;
+class Scene;
 
-namespace DirectX
+class GameObject final:public Entity<GameObject>
 {
-	class GameObject;
-	class Scene;
+	friend Scene;
+private:
+	Scene* const scene;
 
-	class GameObject final:public Entity<GameObject>
-	{
-		friend Scene;
-	private:
-		Scene* const scene;
+	const std::string name;
+	const Tag tag;
 
-		const std::string name;
-		const Tag tag;
+	bool IsDestroy = false;
+	bool IsActive  = true;
 
-		bool IsDestroy = false;
-		bool IsActive  = true;
+	std::weak_ptr<GameObject> _gameObject;
+	std::weak_ptr<Transform> _transform;
+public:
+	GameObject(std::string name,Scene* scene, TagName tagName);
+	virtual ~GameObject();
 
-		std::weak_ptr<GameObject> _gameObject;
-		std::weak_ptr<Transform> _transform;
-	public:
-		GameObject(std::string name,Scene* scene, TagName tagName);
-		virtual ~GameObject();
+	void SetActive(bool IsActive);
+	bool CompareTag(TagName tag);
+	bool GetIsDestroy();
+	bool GetActive();			//親の影響を受けるか
+	bool GetActiveSelf();		//自身のみ
+	Scene* GetScene();
 
-		void SetActive(bool IsActive);
-		bool CompareTag(TagName tag);
-		bool GetIsDestroy();
-		bool GetActive();			//親の影響を受けるか
-		bool GetActiveSelf();		//自身のみ
-		Scene* GetScene();
+	std::weak_ptr<Transform> transform();
+	std::weak_ptr<GameObject> gameObject();
 
-		std::weak_ptr<Transform> transform();
-		std::weak_ptr<GameObject> gameObject();
-
-		void OnDebugGUI();
-		std::string GetName();
-	};
-}
+	void OnDebugGUI();
+	std::string GetName();
+};

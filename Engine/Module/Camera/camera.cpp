@@ -40,7 +40,7 @@ void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 		itr++;
 
 		if (!camera->gameObject()->GetActive()) continue;
-		if (!camera->m_IsEnable) continue;
+		if (!camera->_IsEnable) continue;
 		pActiveCamera = camera;
 
 		Begin();

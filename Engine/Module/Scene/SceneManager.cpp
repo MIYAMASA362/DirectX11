@@ -51,7 +51,7 @@ void SceneManager::Destroy()
 }
 
 //Scene読み込み
-void DirectX::SceneManager::LoadScene(std::weak_ptr<Scene> scene)
+void SceneManager::LoadScene(std::weak_ptr<Scene> scene)
 {
 	//ActiveSceneが無い
 	if(pActiveScene.expired())
@@ -62,7 +62,7 @@ void DirectX::SceneManager::LoadScene(std::weak_ptr<Scene> scene)
 }
 
 //ActiveScene内オブジェクトのImGUI表示
-void DirectX::SceneManager::DebugGUI_ActiveScene()
+void SceneManager::DebugGUI_ActiveScene()
 {
 	std::string label = "Scene:";
 	label += pActiveScene.lock()->GetSceneName();
@@ -73,7 +73,7 @@ void DirectX::SceneManager::DebugGUI_ActiveScene()
 }
 
 //Scene遷移
-void DirectX::SceneManager::ChangeScene()
+void SceneManager::ChangeScene()
 {
 	
 	if (!IsChangeScene) return;	//遷移フラグが有効
@@ -92,18 +92,18 @@ void DirectX::SceneManager::ChangeScene()
 }
 
 //ActiveSceneの取得
-std::weak_ptr<Scene> DirectX::SceneManager::GetActiveScene()
+std::weak_ptr<Scene> SceneManager::GetActiveScene()
 {
 	return pActiveScene;
 }
 
-std::weak_ptr<Scene> DirectX::SceneManager::GetScene(SceneID id)
+std::weak_ptr<Scene> SceneManager::GetScene(SceneID id)
 {
 	return pSceneDictionary.at(id);
 }
 
 //Scene名からSceneを取得
-std::weak_ptr<Scene> DirectX::SceneManager::GetSceneByName(std::string SceneName)
+std::weak_ptr<Scene> SceneManager::GetSceneByName(std::string SceneName)
 {
 	for (auto scene : pSceneDictionary) {
 		if (scene.second->CompareName(SceneName))
@@ -113,27 +113,27 @@ std::weak_ptr<Scene> DirectX::SceneManager::GetSceneByName(std::string SceneName
 }
 
 //次のSceneを設定
-void DirectX::SceneManager::SetIsChangeScene(std::weak_ptr<Scene> scene)
+void SceneManager::SetIsChangeScene(std::weak_ptr<Scene> scene)
 {
 	pNextScene = scene;
 	IsChangeScene = true;
 }
 
 //ActiveSceneを設定
-void DirectX::SceneManager::AttachActiveScene(std::weak_ptr<Scene> scene)
+void SceneManager::AttachActiveScene(std::weak_ptr<Scene> scene)
 {
 	pActiveScene = scene;
 	pActiveScene.lock()->AttachActiveScene();
 }
 
 //ActiveSceneを破棄
-void DirectX::SceneManager::DetachActiveScene()
+void SceneManager::DetachActiveScene()
 {
 	pActiveScene.lock()->DetachActiveScene();
 	pActiveScene.reset();
 }
 
-SceneID DirectX::SceneManager::AttachID()
+SceneID SceneManager::AttachID()
 {
 	SceneID id = m_SceneID;
 	m_SceneID++;
@@ -155,7 +155,7 @@ inline Scene::~Scene()
 };
 
 //GameObjectをTag指定で追加
-GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
+GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
 
@@ -167,40 +167,40 @@ GameObject* DirectX::Scene::AddSceneObject(std::string name,TagName tag)
 	return instance;
 }
 
-void DirectX::Scene::RemoveSceneObject(EntityID id)
+void Scene::RemoveSceneObject(EntityID id)
 {
 	_hierarchyUtility->DetachHierarchy(id);
 }
 
 //
-void DirectX::Scene::AttachActiveScene()
+void Scene::AttachActiveScene()
 {
 	this->IsLoaded = true;
 	this->Load();	//読み込み
 }
 
 //
-void DirectX::Scene::DetachActiveScene()
+void Scene::DetachActiveScene()
 {
 	this->IsLoaded = false;
 	this->UnLoad();
 }
 
 //ImGui Debug表示
-void DirectX::Scene::DebugGUI()
+void Scene::DebugGUI()
 {
 	for (auto obj : _hierarchyUtility->GetHierarchyMap()) 
 		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->OnDebugGUI();
 }
 
-void DirectX::Scene::UnLoad()
+void Scene::UnLoad()
 {
 	for (auto obj : _hierarchyUtility->GetHierarchyMap())
 		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->Destroy();
 	_hierarchyUtility->ClearnHierarchy();
 }
 
-Hierarchy* DirectX::Scene::GetHierarchy(EntityID id)
+Hierarchy* Scene::GetHierarchy(EntityID id)
 {
 	return _hierarchyUtility->GetHierarchy(id);
 }

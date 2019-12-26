@@ -1,59 +1,57 @@
 #pragma once
 
-namespace DirectX
+
+class HierarchyUtility;
+
+class Hierarchy
 {
-	class HierarchyUtility;
+	friend HierarchyUtility;
+private:
+	HierarchyUtility* _utility;
+	std::weak_ptr<IEntity> _self;
+	std::weak_ptr<IEntity> _parent;
+	std::list<std::weak_ptr<IEntity>> _children;
 
-	class Hierarchy
-	{
-		friend HierarchyUtility;
-	private:
-		HierarchyUtility* _utility;
-		std::weak_ptr<IEntity> _self;
-		std::weak_ptr<IEntity> _parent;
-		std::list<std::weak_ptr<IEntity>> _children;
+public:
+	Hierarchy(HierarchyUtility* utility,std::weak_ptr<IEntity> self);
+	~Hierarchy();
 
-	public:
-		Hierarchy(HierarchyUtility* utility,std::weak_ptr<IEntity> self);
-		~Hierarchy();
+	HierarchyUtility& GetUtility();
+	std::weak_ptr<IEntity>& GetSelf();
+	std::weak_ptr<IEntity>& GetParent();
+	std::list<std::weak_ptr<IEntity>>& GetChildren();
 
-		HierarchyUtility& GetUtility();
-		std::weak_ptr<IEntity>& GetSelf();
-		std::weak_ptr<IEntity>& GetParent();
-		std::list<std::weak_ptr<IEntity>>& GetChildren();
+private:
+	void AttachParent(std::weak_ptr<IEntity> parent);
+	void DetachParent();
 
-	private:
-		void AttachParent(std::weak_ptr<IEntity> parent);
-		void DetachParent();
+	void AttachChild(std::weak_ptr<IEntity> child);
+	void DetachChild(std::weak_ptr<IEntity> child);
+	void DetachChildren();
+};
 
-		void AttachChild(std::weak_ptr<IEntity> child);
-		void DetachChild(std::weak_ptr<IEntity> child);
-		void DetachChildren();
-	};
+class HierarchyUtility
+{
+private:
+	std::map<EntityID, Hierarchy> _hierarchyMap;
+public:
+	std::weak_ptr<IEntity> GetParent(EntityID id);
+	std::list<std::weak_ptr<IEntity>> GetAllParent(EntityID id);
+	std::list<std::weak_ptr<IEntity>> GetChildren(EntityID id);
+	std::list<std::weak_ptr<IEntity>> GetAllChildren(EntityID id);
 
-	class HierarchyUtility
-	{
-	private:
-		std::map<EntityID, Hierarchy> _hierarchyMap;
-	public:
-		std::weak_ptr<IEntity> GetParent(EntityID id);
-		std::list<std::weak_ptr<IEntity>> GetAllParent(EntityID id);
-		std::list<std::weak_ptr<IEntity>> GetChildren(EntityID id);
-		std::list<std::weak_ptr<IEntity>> GetAllChildren(EntityID id);
+	void AttachHierarchy(EntityID id);
+	void DetachHierarchy(EntityID id);
+	void ClearnHierarchy();
 
-		void AttachHierarchy(EntityID id);
-		void DetachHierarchy(EntityID id);
-		void ClearnHierarchy();
+	void AttachParent(EntityID id, std::weak_ptr<IEntity> parent);
+	void AttachParent(std::weak_ptr<IEntity> self, std::weak_ptr<IEntity> parent);
+	void DetachParent(EntityID id);
 
-		void AttachParent(EntityID id, std::weak_ptr<IEntity> parent);
-		void AttachParent(std::weak_ptr<IEntity> self, std::weak_ptr<IEntity> parent);
-		void DetachParent(EntityID id);
+	void AttachChild(EntityID id, std::weak_ptr<IEntity> child);
+	void DetachChild(EntityID id,std::weak_ptr<IEntity> child);
+	void DetachChildren(EntityID id);
 
-		void AttachChild(EntityID id, std::weak_ptr<IEntity> child);
-		void DetachChild(EntityID id,std::weak_ptr<IEntity> child);
-		void DetachChildren(EntityID id);
-
-		Hierarchy* GetHierarchy(EntityID id);
-		std::map<EntityID, Hierarchy> GetHierarchyMap();
-	};
-}
+	Hierarchy* GetHierarchy(EntityID id);
+	std::map<EntityID, Hierarchy> GetHierarchyMap();
+};

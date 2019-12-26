@@ -1,46 +1,69 @@
 #pragma once
 
-namespace DirectX
+//IEntity
+//	Entityの基底クラス
+//	EntityManagerによって管理されるインターフェイス
+//
+class IEntity :public Object
 {
-	class IEntity :public Object
-	{
-	private:
-		std::weak_ptr<IEntity> _self;
-	public:
-		IEntity();
-		virtual ~IEntity();
+	friend class EntityManager;
+private:
+	//EntityManagerで管理されているInstanceへのアクセス
+	std::weak_ptr<IEntity> _self;
+	//ComponentManagerで管理されているComponentsへのアクセス
+	std::weak_ptr<ComponentList> _components;
 
-		EntityID GetEntityID();
-		std::weak_ptr<IEntity> GetEntity();
 
-		template<typename Type> std::weak_ptr<Type> AddComponent();
-		template<typename Type> std::weak_ptr<Type> GetComponent();
-		template<typename Type> std::list<std::weak_ptr<Type>> GetComponents();
-		template<typename Type> void DestroyComponent();
-		void DestroyComponents();
+public:
+	//コンストラクタ
+	IEntity();
+	//デストラクタ
+	virtual ~IEntity();
 
-		void Destroy() override;
-	};
+	//Entityの識別ID
+	EntityID GetEntityID() { return GetInstanceID(); };
+	//Entityのポインタ取得
+	std::weak_ptr<IEntity> GetEntity() { return _self; };
 
-	template<typename Type> std::weak_ptr<Type> IEntity::AddComponent()
-	{
-		return ComponentManager::AddComponent<Type>(GetEntityID());
-	}
+	//Componentsへの追加
+	template<typename Type> std::weak_ptr<Type> AddComponent();
+	//ComponentsからComponentの取得
+	template<typename Type> std::weak_ptr<Type> GetComponent();
+	//Componentsの取得
+	std::shared_ptr<ComponentList> GetComponents() { return _components.lock(); }
+	//ComponentsからComponentの削除
+	template<typename Type> void DestroyComponent();
+	//Componentsの削除
+	void DestroyComponents();
 
-	template<typename Type> std::weak_ptr<Type> IEntity::GetComponent()
-	{
-		return ComponentManager::GetComponent<Type>(GetEntityID()).lock();
-	}
+	//自身の破棄
+	void Destroy() override;
 
-	template<typename Type>
-	inline std::list<std::weak_ptr<Type>> IEntity::GetComponents()
-	{
-		return ComponentManager::GetComponents<Type>(GetEntityID());
-	}
 
-	template<typename Type> void IEntity::DestroyComponent()
-	{
-		ComponentManager::DestroyComponent<Type>(GetEntityID());
-	}
+};
 
+
+
+//AddComponent
+//	EntityのComponentsへ Type型のComponentを追加
+//
+template<typename Type> std::weak_ptr<Type> IEntity::AddComponent()
+{
+	return ComponentManager::AddComponent<Type>(this);
+}
+
+//GetComponent
+//	EntityのComponentsへ Type型のComponentを取得
+//
+template<typename Type> std::weak_ptr<Type> IEntity::GetComponent()
+{
+	return ComponentManager::GetComponent<Type>(this);
+}
+
+//DestroyComponent
+//
+//
+template<typename Type> void IEntity::DestroyComponent()
+{
+	ComponentManager::DestroyComponent<Type>(this);
 }

@@ -1,82 +1,140 @@
 #pragma once
 
-namespace DirectX
+
+//Component コンポーネント
+//
+//
+template<typename Type>
+class Component:public IComponent
 {
-	//Component コンポーネント
-	template<typename Type>
-	class Component:public IComponent
+	friend class ComponentManager;
+
+public:
+	//コンストラクタ
+	Component(EntityID OwnerID);
+	//デストラクタ
+	virtual ~Component();
+
+
+	//Component毎のID
+	static ComponentTypeID GetTypeID();
+
+	//IComponentからTypeIDへアクセスする
+	const ComponentTypeID GetComponentTypeID() const override final;
+
+
+
+	//Entityに付属されているComponentを取得
+	static std::weak_ptr<Type> GetComponent(EntityID entityID);
+
+	//Indexの取得
+	static std::map<EntityID, std::shared_ptr<Type>>* GetComponentIndex();
+
+	//削除時関数
+	virtual void OnDestroy() override {};
+
+
+
+protected:
+	//このComponentのインデックス
+	static std::map<EntityID, std::shared_ptr<Type>> ComponentIndex;
+
+	//ComponentIndexへの追加
+	void RegisterIndex();
+};
+
+template<typename Type>
+std::map<EntityID, std::shared_ptr<Type>> Component<Type>::ComponentIndex;
+
+//コンストラクタ
+//
+//
+template<typename Type>
+inline Component<Type>::Component(EntityID OwnerID)
+	:
+	IComponent(OwnerID)
+{
+	ComponentIndex.emplace(GetOwnerID(),std::shared_ptr<Type>((Type*)this));
+
+	//メッセージに対する処理
+	this->SendComponentMessage = [](std::string message)
 	{
-		friend class ComponentManager;
-	public:
-		//Component毎のID
-		static const ComponentTypeID TypeID;
-
-		Component(EntityID OwnerID);
-		virtual ~Component();
-
-		//Entityに付属されているComponentを取得
-		static std::weak_ptr<Type> GetComponent(EntityID entityID);
-
-		const ComponentTypeID GetComponentTypeID() const override final;
-
-		virtual void OnDestroy() override {};
-
-	protected:
-		//このComponentの全インスタンス
-		const std::weak_ptr<Components> _Index;
+		
 	};
 
-
-
-
-	template<typename Type>
-	const ComponentTypeID Component<Type>::TypeID = ComponentManager::AttachComponentTypeID();
-
-	template<typename Type>
-	inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
+	//ImGuiの表示関数
+	this->OnDebugImGui = [this]()
 	{
-		auto index = ComponentManager::GetComponentIndex(TypeID);
-		for (auto component : *index.lock()) {
-			if (component.lock()->GetOwnerID() == entityID)
-				return std::dynamic_pointer_cast<Type>(component.lock());
-		}
-		return std::weak_ptr<Type>();
-	}
-
-	template<typename Type>
-	inline Component<Type>::Component(EntityID OwnerID)
-	:
-		IComponent(OwnerID),
-		_Index(ComponentManager::GetOrCreateComponentIndex(TypeID))
-	{
-		this->SendComponentMessage = [](std::string message)
+		if (ImGui::TreeNode(typeid(*this).name()))
 		{
-			
-		};
-
-		this->OnDebugImGui = [this]()
-		{
-			if (ImGui::TreeNode(typeid(*this).name()))
-			{
-				ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-				ImGui::TreePop();
-			}
-		};
-	}
-
-	template<typename Type>
-	inline Component<Type>::~Component()
-	{
-		if (!_Index.expired()){
-			_Index.lock()->remove_if([](std::weak_ptr<IComponent> obj) {
-				return obj.expired();
-			});
+			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+			ImGui::TreePop();
 		}
-	}
+	};
 
-	template<typename Type>
-	inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
-	{
-		return TypeID;
-	}
+}
+
+//デストラクタ
+//	インデックスから削除
+//
+template<typename Type>
+inline Component<Type>::~Component()
+{
+	//Indexから破棄
+	ComponentIndex.erase(GetOwnerID());
+
+	//クリーン
+	/*if (!_Index.expired()) {
+		_Index.lock()->remove_if([](std::weak_ptr<IComponent> obj) {
+			return obj.expired();
+		});
+	}*/
+
+}
+
+//GetComponent
+//
+//
+template<typename Type>
+inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
+{
+	return ComponentIndex.find(entityID)->second;
+}
+
+//GetComponentIndex
+//
+//
+template<typename Type>
+inline std::map<EntityID, std::shared_ptr<Type>> * Component<Type>::GetComponentIndex()
+{
+	return &ComponentIndex;
+}
+
+//RegisterIndex
+//
+//
+template<typename Type>
+inline void Component<Type>::RegisterIndex()
+{
+	ComponentIndex.emplace(GetOwnerID(),std::shared_ptr<Type>((Type*)this));
+}
+
+
+//GetTypeID
+//
+//
+template<typename Type>
+inline ComponentTypeID Component<Type>::GetTypeID()
+{
+	return typeid(Type).hash_code();
+}
+
+
+//GetComponentTypeID
+//
+//
+template<typename Type>
+inline const ComponentTypeID Component<Type>::GetComponentTypeID() const
+{
+	return GetTypeID();
 }

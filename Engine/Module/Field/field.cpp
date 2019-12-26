@@ -1,16 +1,11 @@
 #include"Common.h"
+//DirectX
 #include"Module\DirectX\DirectX.h"
-
-#include"Module\AssetData\AssetData.h"
 
 #include"Module\Texture\texture.h"
 #include"Module\Texture\TextureManager.h"
 
-//DirectX
-
 #include"Module\ECSEngine.h"
-
-#include"Module\AssetData\AssetData.h"
 
 //Component Module
 #include"Module\Renderer\Renderer.h"
@@ -492,7 +487,7 @@ void MeshField::Render(XMMATRIX& worldMatrix)
 //--- MeshWall ------------------------------------------------------
 #pragma region MeshWall
 
-DirectX::MeshWall::MeshWall()
+MeshWall::MeshWall()
 {
 	HRESULT hr;
 
@@ -592,7 +587,7 @@ DirectX::MeshWall::MeshWall()
 	}
 }
 
-DirectX::MeshWall::~MeshWall()
+MeshWall::~MeshWall()
 {
 	if (this->m_VertexBuffer)
 		this->m_VertexBuffer->Release();
@@ -600,7 +595,7 @@ DirectX::MeshWall::~MeshWall()
 		this->m_IndexBuffer->Release();
 }
 
-void DirectX::MeshWall::Render(XMMATRIX& worldMatrix)
+void MeshWall::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
@@ -624,7 +619,7 @@ void DirectX::MeshWall::Render(XMMATRIX& worldMatrix)
 //--- MeshCircle ----------------------------------------------------
 #pragma region MeshCircle
 
-DirectX::MeshCircle::MeshCircle()
+MeshCircle::MeshCircle()
 {
 	HRESULT hr;
 
@@ -701,7 +696,7 @@ DirectX::MeshCircle::MeshCircle()
 	}
 }
 
-DirectX::MeshCircle::~MeshCircle()
+MeshCircle::~MeshCircle()
 {
 	if (this->m_IndexBuffer)
 		this->m_IndexBuffer->Release();
@@ -709,7 +704,7 @@ DirectX::MeshCircle::~MeshCircle()
 		this->m_VertexBuffer->Release();
 }
 
-void DirectX::MeshCircle::Render(XMMATRIX& worldMatrix)
+void MeshCircle::Render(XMMATRIX& worldMatrix)
 {
 	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);

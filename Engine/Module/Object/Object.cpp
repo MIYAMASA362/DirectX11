@@ -1,13 +1,16 @@
 #include"Common.h"
+
+#define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
 
-using namespace DirectX;
+#include"Object.h"
+#include"ObjectManager.h"
 
 Object::Object()
 :
-	m_InstanceID(ObjectManager::AttachID())
+	_InstanceID(ObjectManager::AttachID())
 {
-	ObjectManager::AddIndex(std::shared_ptr<Object>(this));
+	_self = ObjectManager::AddIndex(this);
 }
 
 Object::~Object()
@@ -25,7 +28,7 @@ void Object::Destroy(Object* obj)
 	obj->Destroy();
 }
 
-void DirectX::Object::Destroy()
+void Object::Destroy()
 {
-	ObjectManager::AddDestroy(m_InstanceID);
+	ObjectManager::AddDestroy(this);
 }

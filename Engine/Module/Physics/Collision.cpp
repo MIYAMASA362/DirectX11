@@ -3,7 +3,6 @@
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"
-#include"Module\AssetData\AssetData.h"
 #include"Module\Texture\TextureManager.h"
 #include"Module\ECSEngine.h"
 
@@ -21,48 +20,48 @@
 
 using namespace DirectX;
 
-DirectX::Bounds::Bounds(Vector3 center, Vector3 size)
+Bounds::Bounds(Vector3 center, Vector3 size)
 {
 	this->m_center = center;
 	this->m_size = size;
 }
 
-Vector3 DirectX::Bounds::GetCenter()
+Vector3 Bounds::GetCenter()
 {
 	return this->m_center;
 }
 
-Vector3 DirectX::Bounds::GetExtents()
+Vector3 Bounds::GetExtents()
 {
 	return this->m_size * 0.5f;
 }
 
-Vector3 DirectX::Bounds::GetMax()
+Vector3 Bounds::GetMax()
 {
 	return this->m_center + this->GetExtents();
 }
 
-Vector3 DirectX::Bounds::GetMin()
+Vector3 Bounds::GetMin()
 {
 	return this->m_center - this->GetExtents();
 }
 
-Vector3 DirectX::Bounds::GetSize()
+Vector3 Bounds::GetSize()
 {
 	return this->m_size;
 }
 
-float DirectX::Bounds::GetRadius()
+float Bounds::GetRadius()
 {
 	return m_size.x;
 }
 
-void DirectX::Bounds::SetCenter(Vector3 center)
+void Bounds::SetCenter(Vector3 center)
 {
 	this->m_center = center;
 }
 
-void DirectX::Bounds::SetSize(Vector3 size)
+void Bounds::SetSize(Vector3 size)
 {
 	this->m_size = size;
 }
@@ -79,7 +78,7 @@ void Bounds::DebugImGui()
 //--- Collider --------------------------------------------
 
 //Constrcutor
-DirectX::Collider::Collider(EntityID OwnerID)
+Collider::Collider(EntityID OwnerID)
 :
 	Component(OwnerID),
 	bound(Vector3::zero(),Vector3::one())
@@ -90,18 +89,18 @@ DirectX::Collider::Collider(EntityID OwnerID)
 	};
 }
 
-DirectX::Collider::~Collider()
+Collider::~Collider()
 {
 
 }
 
-void DirectX::Collider::Start()
+void Collider::Start()
 {
 	//Rigidbody‚ð’T‚·
-	auto rigidbody = ComponentManager::GetComponent<Rigidbody>(this->GetOwnerID());
+	auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
 	if (rigidbody.expired())
 	{
-		auto component = this->transform()->GetComponentInParent(Rigidbody::TypeID);
+		auto component = this->transform()->GetComponentInParent(Rigidbody::GetTypeID());
 		if (component.expired()) return;
 		rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
 	}
@@ -109,44 +108,32 @@ void DirectX::Collider::Start()
 	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(this->_self.lock()));
 }
 
-void DirectX::Collider::IsHitReset()
+void Collider::IsHitReset()
 {
-	auto index = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
-	for(auto col : *index)
-		std::dynamic_pointer_cast<Collider>(col.lock())->IsHit = false;
+	for (auto col : ComponentIndex) col.second->_IsHit = false;
 }
 
-void DirectX::Collider::Hitjudgment()
+void Collider::Hitjudgment()
 {
-	auto components = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
-	auto rigidbodys = ComponentManager::GetOrCreateComponentIndex(Rigidbody::TypeID).lock();
-
-	for(auto self:*components){
-		auto collider = std::dynamic_pointer_cast<Collider>(self.lock());
-		for (auto other : *components) {
-			if (self.lock() == other.lock()) continue;
-			auto otherCollider = std::dynamic_pointer_cast<Collider>(other.lock());
-
-			collider->Judgment(otherCollider.get());
+	for(auto collider : ComponentIndex)
+		for(auto other : ComponentIndex)
+		{
+			if (collider.second == other.second) continue;
+			collider.second->Judgment(other.second.get());
 		}
-	}
 }
 
-void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist)
+void Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist)
 {
-	auto components = ComponentManager::GetOrCreateComponentIndex(Collider::TypeID).lock();
-	std::list<std::weak_ptr<Collider>> colliders;
-
-	for (auto self : *components)
-		colliders.push_back(std::dynamic_pointer_cast<Collider>(self.lock()));
-
-	for(auto collider:colliderlist)
-		for (auto other : colliders)
-			if(collider.lock() != other.lock())
-				collider.lock()->Judgment(other.lock().get());
+	for(auto collider : colliderlist)
+		for(auto other : ComponentIndex)
+		{
+			if (collider.lock() == other.second) continue;
+			collider.lock()->Judgment(other.second.get());
+		}
 }
 
-void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist, std::list<std::weak_ptr<Collider>>& otherlist)
+void Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist, std::list<std::weak_ptr<Collider>>& otherlist)
 {
 	for(auto collider: colliderlist)
 	{
@@ -158,7 +145,7 @@ void DirectX::Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& collider
 	}
 }
 
-bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
+bool Collider::BoxVsBox(Collider * collider, Collider * other)
 {
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
@@ -186,7 +173,7 @@ bool DirectX::Collider::BoxVsBox(Collider * collider, Collider * other)
 	return false;
 }
 
-bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
+bool Collider::OBBVsOBB(Collider * colA, Collider * colB)
 {
 	Bounds& boundA = colA->bound;
 	Bounds& boundB = colB->bound;
@@ -428,7 +415,7 @@ bool DirectX::Collider::OBBVsOBB(Collider * colA, Collider * colB)
 	return true;
 }
 
-bool DirectX::Collider::OBBVsShpere(Collider * box, Collider * sphere)
+bool Collider::OBBVsShpere(Collider * box, Collider * sphere)
 {
 	Bounds& BoxB = box->bound;
 	Bounds& SphB = sphere->bound;
@@ -490,7 +477,7 @@ bool DirectX::Collider::OBBVsShpere(Collider * box, Collider * sphere)
 
 
 
-bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
+bool Collider::BoxVsShpere(Collider * collider, Collider * other)
 {
 	Bounds& BoxBound = collider->bound;
 	Bounds& SphereBound = other->bound;
@@ -540,7 +527,7 @@ bool DirectX::Collider::BoxVsShpere(Collider * collider, Collider * other)
 	return false;
 }
 
-bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
+bool Collider::SphereVsSphere(Collider * collider, Collider * other)
 {
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
@@ -573,7 +560,7 @@ bool DirectX::Collider::SphereVsSphere(Collider * collider, Collider * other)
 	return false;
 }
 
-bool DirectX::Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
+bool Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 {
 	Bounds& sphB = sphCol->bound;
 	
@@ -661,7 +648,7 @@ VERTEX_3D* SphereCollider::m_pVertex = nullptr;
 int SphereCollider::m_IndexNum = 0;
 Texture* SphereCollider::m_Texture = nullptr;
 
-DirectX::SphereCollider::SphereCollider(EntityID OwnerID)
+SphereCollider::SphereCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
@@ -671,17 +658,17 @@ DirectX::SphereCollider::SphereCollider(EntityID OwnerID)
 	{
 		if(ImGui::TreeNode("SphereCollider")){
 			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
-			ImGui::Checkbox("IsHit",&this->IsHit);
+			ImGui::Checkbox("IsHit",&this->_IsHit);
 			ImGui::TreePop();
 		}
 	};
 }
 
-DirectX::SphereCollider::~SphereCollider()
+SphereCollider::~SphereCollider()
 {
 }
 
-void DirectX::SphereCollider::SetRenderBuffer()
+void SphereCollider::SetRenderBuffer()
 {
 	HRESULT hr;
 	const int vertexCircle = 13;
@@ -749,10 +736,10 @@ void DirectX::SphereCollider::SetRenderBuffer()
 		delete[] pIndex;
 	}
 
-	m_Texture = TextureManager::GetTexture("sky");
+	m_Texture = TextureManager::GetTexture("sky").lock().get();
 }
 
-void DirectX::SphereCollider::ReleaseRenderBuffer()
+void SphereCollider::ReleaseRenderBuffer()
 {
 	if (m_IndexBuffer)
 		m_IndexBuffer->Release();
@@ -761,12 +748,12 @@ void DirectX::SphereCollider::ReleaseRenderBuffer()
 	delete[] m_pVertex;
 }
 
-void DirectX::SphereCollider::SetRadius(float radius)
+void SphereCollider::SetRadius(float radius)
 {
 	this->bound.SetSize(Vector3::one() * radius);
 }
 
-void DirectX::SphereCollider::Render()
+void SphereCollider::Render()
 {
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
@@ -798,24 +785,24 @@ void DirectX::SphereCollider::Render()
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
 
-bool DirectX::SphereCollider::Judgment(Collider * other)
+bool SphereCollider::Judgment(Collider * other)
 {
 	switch (other->GetShapeType())
 	{
-	case ShapeType::Box:
-		IsHit = BoxVsShpere(this,other) || IsHit;
+	case ShapeType::ST_Box:
+		_IsHit = BoxVsShpere(this,other) || _IsHit;
 		break;
-	case ShapeType::Sphere:
-		IsHit = SphereVsSphere(this,other) || IsHit;
+	case ShapeType::ST_Sphere:
+		_IsHit = SphereVsSphere(this,other) || _IsHit;
 		break;
-	case ShapeType::Mesh:
-		IsHit = SphereVsMesh(this,other) || IsHit;
+	case ShapeType::ST_Mesh:
+		_IsHit = SphereVsMesh(this,other) || _IsHit;
 		break;
 	default:
 		break;
 	}
 
-	return IsHit;
+	return _IsHit;
 }
 
 //--- BoxCollider -------------------------------------------------------------
@@ -826,7 +813,7 @@ VERTEX_3D* BoxCollider::m_pVertex = nullptr;
 int BoxCollider::m_IndexNum = 0;
 Texture* BoxCollider::m_Texture;
 
-void DirectX::BoxCollider::SetRenderBuffer()
+void BoxCollider::SetRenderBuffer()
 {
 	HRESULT hr;
 
@@ -904,10 +891,10 @@ void DirectX::BoxCollider::SetRenderBuffer()
 	
 		delete[] pIndex;
 	}
-	m_Texture = TextureManager::GetTexture("sky");
+	m_Texture = TextureManager::GetTexture("sky").lock().get();
 }
 
-void DirectX::BoxCollider::ReleaseRenderBuffer()
+void BoxCollider::ReleaseRenderBuffer()
 {
 	if (m_IndexBuffer)
 		m_IndexBuffer->Release();
@@ -916,14 +903,14 @@ void DirectX::BoxCollider::ReleaseRenderBuffer()
 	delete[] m_pVertex;
 }
 
-DirectX::BoxCollider::BoxCollider(EntityID OwnerID)
+BoxCollider::BoxCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
 	this->OnDebugImGui = [this]() {
 		if (ImGui::TreeNode("BoxCollider")) {
 			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
-			ImGui::Checkbox("IsHit",&this->IsHit);
+			ImGui::Checkbox("IsHit",&this->_IsHit);
 			if(!_rigidbody.expired())
 				ImGui::Text(("RigidbodyName:"+_rigidbody.lock()->gameObject()->GetName()).c_str());
 			this->bound.DebugImGui();
@@ -932,12 +919,12 @@ DirectX::BoxCollider::BoxCollider(EntityID OwnerID)
 	};
 }
 
-void DirectX::BoxCollider::SetSize(Vector3 size)
+void BoxCollider::SetSize(Vector3 size)
 {
 	this->bound.SetSize(size);
 }
 
-void DirectX::BoxCollider::Render()
+void BoxCollider::Render()
 {
 	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
 	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
@@ -958,34 +945,34 @@ void DirectX::BoxCollider::Render()
 	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
 }
 
-bool DirectX::BoxCollider::Judgment(Collider * other)
+bool BoxCollider::Judgment(Collider * other)
 {
 	switch (other->GetShapeType())
 	{
-	case ShapeType::Box:
-		IsHit = OBBVsOBB(this,other) || IsHit;
+	case ShapeType::ST_Box:
+		_IsHit = OBBVsOBB(this,other) || _IsHit;
 		break;
-	case ShapeType::Sphere:
-		IsHit = OBBVsShpere(this, other) || IsHit;
+	case ShapeType::ST_Sphere:
+		_IsHit = OBBVsShpere(this, other) || _IsHit;
 	default:
 		break;
 	}
-	return IsHit;
+	return _IsHit;
 }
 
-DirectX::FieldCollider::FieldCollider(EntityID OwnerID)
+FieldCollider::FieldCollider(EntityID OwnerID)
 	:
 	Collider(OwnerID)
 {
 
 }
 
-void DirectX::FieldCollider::SetMesh(MeshField * field)
+void FieldCollider::SetMesh(MeshField * field)
 {
 	this->_field = field;
 }
 
-bool DirectX::FieldCollider::IsOnGround(Vector3 Position)
+bool FieldCollider::IsOnGround(Vector3 Position)
 {
 	float width = this->_field->m_Width * this->transform()->scale().x;
 	float depth = this->_field->m_Depth * this->transform()->scale().z;
@@ -994,7 +981,7 @@ bool DirectX::FieldCollider::IsOnGround(Vector3 Position)
 	return 0.0 < x && x < (float)this->_field->m_WidthNum && 0.0f < z && z < (float)this->_field->m_DepthNum;
 }
 
-float DirectX::FieldCollider::GetHeight(Vector3 Position)
+float FieldCollider::GetHeight(Vector3 Position)
 {
 	Transform* trans = this->transform().get();
 	Vector3 scale = trans->scale();
@@ -1006,8 +993,8 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = (int)( Position.x + (width * widthNum * 0.5)) / width;
-	int z = (int)(-Position.z + (depth * depthNum * 0.5)) / depth;
+	int x = (int)(( Position.x + width * widthNum * 0.5) / width);
+	int z = (int)((-Position.z + depth * depthNum * 0.5) / depth);
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);
@@ -1056,7 +1043,7 @@ float DirectX::FieldCollider::GetHeight(Vector3 Position)
 	return hp.y;
 }
 
-Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
+Vector3 FieldCollider::GetNormal(Vector3 Position)
 {
 	Transform* trans = this->transform().get();
 	Vector3 scale = trans->scale();
@@ -1068,8 +1055,8 @@ Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
 	float width = this->_field->m_Width * scale.x;
 	float depth = this->_field->m_Depth * scale.z;
 
-	int x = (Position.x + (width * widthNum * 0.5)) / width;
-	int z = (-Position.z + (depth * depthNum * 0.5)) / depth;
+	int x = (int)(( Position.x + width * widthNum * 0.5) / width);
+	int z = (int)((-Position.z + depth * depthNum * 0.5) / depth);
 
 	Vector3 PosV(VertexIndex[z * (widthNum + 1) + x].Position);
 	Vector3 PosA(VertexIndex[(z + 1) * (widthNum + 1) + (x + 1)].Position);
@@ -1100,14 +1087,14 @@ Vector3 DirectX::FieldCollider::GetNormal(Vector3 Position)
 	return normal.normalize();
 }
 
-DirectX::MeshCollider::MeshCollider(EntityID OwnerID)
+MeshCollider::MeshCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
 
 }
 
-void DirectX::MeshCollider::SetMesh(DirectX::Mesh * mesh)
+void MeshCollider::SetMesh(Mesh * mesh)
 {
 	_mesh = mesh;
 }

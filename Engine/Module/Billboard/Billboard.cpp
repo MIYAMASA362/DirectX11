@@ -13,7 +13,7 @@
 
 #include"Module\Shader\Shader.h"
 
-DirectX::Billboard::Billboard()
+Billboard::Billboard()
 {
 	HRESULT hr;
 
@@ -73,7 +73,7 @@ DirectX::Billboard::Billboard()
 	}
 }
 
-DirectX::Billboard::~Billboard()
+Billboard::~Billboard()
 {
 	if (this->m_IndexBuffer != nullptr)
 		this->m_IndexBuffer->Release();
@@ -81,7 +81,7 @@ DirectX::Billboard::~Billboard()
 		this->m_VertexBuffer->Release();
 }
 
-void DirectX::Billboard::Render(XMMATRIX& worldMatrix)
+void Billboard::Render(XMMATRIX& worldMatrix)
 {
 	XMMATRIX InvView = Camera::GetActiveCamera()->GetViewMatrix();
 	InvView.r[0].m128_f32[3] = 0.0f;

@@ -5,19 +5,17 @@
 #include<assert.h>
 #include<xaudio2.h>
 
-#include"Module\AssetData\AssetData.h"
-
 #include"Audio.h"
 #include"AudioManager.h"
 
-const std::string DirectX::AudioManager::AssetDataBase = DirectX::AssetManager::AssetPath + "Sound/";
-std::map<std::string,std::shared_ptr<DirectX::Audio>> DirectX::AudioManager::AudioIndex;
+const std::string AudioManager::AssetDataBase = "Asset/Sound/";
+std::map<std::string,std::shared_ptr<Audio>> AudioManager::AudioIndex;
 
-IXAudio2* DirectX::AudioManager::pXAudio = nullptr;
-IXAudio2MasteringVoice* DirectX::AudioManager::pMasteringVoice = nullptr;
+IXAudio2* AudioManager::pXAudio = nullptr;
+IXAudio2MasteringVoice* AudioManager::pMasteringVoice = nullptr;
 
 //Asset読み込み
-void DirectX::AudioManager::LoadAsset(AudioAsset asset)
+void AudioManager::LoadAsset(AudioAsset asset)
 {
 	Audio* audio = new Audio();
 
@@ -27,7 +25,7 @@ void DirectX::AudioManager::LoadAsset(AudioAsset asset)
 }
 
 //Audioデータ読み込み
-DirectX::Audio* DirectX::AudioManager::LoadAudio(const char * FileName)
+Audio* AudioManager::LoadAudio(const char * FileName)
 {
 	Audio* audio = new Audio();
 
@@ -91,12 +89,12 @@ DirectX::Audio* DirectX::AudioManager::LoadAudio(const char * FileName)
 	return audio;
 }
 
-std::weak_ptr<DirectX::Audio> DirectX::AudioManager::GetAudio(std::string name)
+std::weak_ptr<Audio> AudioManager::GetAudio(std::string name)
 {
 	return AudioIndex[name];
 }
 
-void DirectX::AudioManager::CreateDevice()
+void AudioManager::CreateDevice()
 {
 	//エラーメッセージ
 	auto Error = [](HRESULT hr, std::string message) {
@@ -124,7 +122,7 @@ void DirectX::AudioManager::CreateDevice()
 	if (Error(hr, "マスタリングボイス生成に失敗しました。"))return;
 }
 
-void DirectX::AudioManager::Release()
+void AudioManager::Release()
 {
 	AudioIndex.clear();
 
