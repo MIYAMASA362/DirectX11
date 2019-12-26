@@ -37,14 +37,14 @@ public:
 
 protected:
 	//このComponentのインデックス
-	static std::map<EntityID, std::shared_ptr<Type>> ComponentIndex;
+	static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
 
-	//ComponentIndexへの追加
+	//ComponentIndexへ追加
 	void RegisterIndex();
 };
 
 template<typename Type>
-std::map<EntityID, std::shared_ptr<Type>> Component<Type>::ComponentIndex;
+std::map<EntityID, std::weak_ptr<Type>> Component<Type>::ComponentIndex;
 
 //コンストラクタ
 //
@@ -54,8 +54,6 @@ inline Component<Type>::Component(EntityID OwnerID)
 	:
 	IComponent(OwnerID)
 {
-	ComponentIndex.emplace(GetOwnerID(),std::shared_ptr<Type>((Type*)this));
-
 	//メッセージに対する処理
 	this->SendComponentMessage = [](std::string message)
 	{
@@ -110,13 +108,10 @@ inline std::map<EntityID, std::shared_ptr<Type>> * Component<Type>::GetComponent
 	return &ComponentIndex;
 }
 
-//RegisterIndex
-//
-//
 template<typename Type>
 inline void Component<Type>::RegisterIndex()
 {
-	ComponentIndex.emplace(GetOwnerID(),std::shared_ptr<Type>((Type*)this));
+	ComponentIndex.emplace(GetOwnerID(), std::dynamic_pointer_cast<Type>(Object::_self.lock()));
 }
 
 

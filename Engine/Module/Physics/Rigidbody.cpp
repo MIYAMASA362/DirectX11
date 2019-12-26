@@ -77,9 +77,9 @@ void Rigidbody::FixedUpdate()
 void Rigidbody::ApplyRigidbody()
 {
 	for (auto rigidbody : ComponentIndex) {
-		auto transform = rigidbody.second->transform();
-		rigidbody.second->_OldPosition = transform->position();
-		transform->position(transform->position() + rigidbody.second->_Velocity);
+		auto transform = rigidbody.second.lock()->transform();
+		rigidbody.second.lock()->_OldPosition = transform->position();
+		transform->position(transform->position() + rigidbody.second.lock()->_Velocity);
 	}
 }
 
@@ -90,7 +90,7 @@ void Rigidbody::CollisionRigidbody()
 {
 	for(auto rigidbody : ComponentIndex)
 	{
-		Collider::Hitjudgment(rigidbody.second->_Colliders);
+		Collider::Hitjudgment(rigidbody.second.lock()->_Colliders);
 	}
 }
 

@@ -61,6 +61,7 @@ void CManager::Initialize()
 	Input::Mouse::SetScreenLoop(false);
 
 	//Texture
+	TextureManager::Create();
 	TextureManager::LoadTexture("Asset/Texture/field004.tga");
 	TextureManager::LoadTexture("Asset/Texture/number.tga");
 	TextureManager::LoadTexture("Asset/Texture/k-on0664.tga");
@@ -74,7 +75,7 @@ void CManager::Initialize()
 
 	//Model
 	ModelManager::LoadAssetForAssimp("Asset/Model/Miku/miku_01.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Miku2/miku_02.obj");
+	ModelManager::LoadAssetForAssimp("Asset/Model/Miku02/miku_02.obj");
 	ModelManager::LoadAssetForAssimp("Asset/Model/Monster/monster.obj");
 	ModelManager::LoadAssetForAssimp("Asset/Model/Rock/rock.obj");
 	ModelManager::LoadAssetForAssimp("Asset/Model/Cube/cube.obj");
@@ -167,6 +168,9 @@ void CManager::DebugRender()
 	ImGui::Text("Z:%f",vec.z);
 	ImGui::End();
 
+	TextureManager::EditorWindow();
+	ObjectManager::EditorWindow();
+
 	GUI::guiImGui::Render();
 }
 
@@ -184,8 +188,9 @@ void CManager::Finalize()
 	TimeManager::Destroy();
 	GUI::guiImGui::Destroy();
 
-	ComponentManager::Release();
-	EntityManager::Release();
 
 	ObjectManager::Release();
+
+	ComponentManager::Release();
+	EntityManager::Release();
 }

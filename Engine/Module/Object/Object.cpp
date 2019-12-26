@@ -8,9 +8,10 @@
 
 Object::Object()
 :
-	_InstanceID(ObjectManager::AttachID())
+	_InstanceID(ObjectManager::AttachID()),
+	_self(ObjectManager::AddIndex(this))
 {
-	_self = ObjectManager::AddIndex(this);
+
 }
 
 Object::~Object()

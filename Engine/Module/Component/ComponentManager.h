@@ -70,7 +70,7 @@ inline std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
 	//インスタンス生成
 	Object* instance = new Type(entity->GetEntityID());
 	std::shared_ptr<Type> component = std::dynamic_pointer_cast<Type>(ObjectManager::GetInstance(instance->GetInstanceID()).lock());
-	g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->Add(component);
+	entity->GetComponents()->Add(component);
 	return component;
 }
 
@@ -78,14 +78,12 @@ inline std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
 template<typename Type >
 inline std::shared_ptr<Type> ComponentManager::GetComponent(IEntity* entity)
 {
-	auto list = g_pInstance->_EntityComponentIndex.at(entity->GetEntityID());
-	ComponentTypeID targetID = Component<Type>::GetTypeID();
-	return std::dynamic_pointer_cast<Type>(list->Get(targetID).lock());
+	return std::dynamic_pointer_cast<Type>(entity->GetComponents()->Get(Component<Type>::GetTypeID()).lock());
 }
 
 //EntityのComponentを開放
 template<typename Type>
 inline void ComponentManager::ReleaseComponent(IEntity* entity)
 {
-	g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->Remove(Component<Type>::GetTypeID());
+	entity->GetComponents()->Remove(Component<Type>::GetTypeID());
 }

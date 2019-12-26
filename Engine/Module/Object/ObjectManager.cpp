@@ -1,5 +1,8 @@
 #include"Common.h"
 #include<random>
+#include<sstream>
+
+#include"Module\IMGUI\GUI_ImGui.h"
 
 #define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
@@ -95,4 +98,23 @@ void ObjectManager::Release()
 	
 	g_DestroyIndex.clear();
 	g_ObjectIndex.clear();
+}
+
+//EditorWindow
+//
+//
+void ObjectManager::EditorWindow()
+{
+	ImGui::Begin("ObjectManager");
+	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,512),ImGuiWindowFlags_NoTitleBar);
+	for(auto obj :g_ObjectIndex)
+	{
+		std::string text = std::to_string(obj.first);
+		std::stringstream ss;
+		ss << std::hex << (uintptr_t)obj.second.get();
+		text += ":" + ss.str();
+		ImGui::Text(text.c_str());
+	}
+	ImGui::EndChild();
+	ImGui::End();
 }

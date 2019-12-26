@@ -18,7 +18,6 @@ private:
 	//Entity GameObject
 	std::weak_ptr<GameObject> _gameObject;
 
-
 protected:
 	//ComponentManagerで管理されているComponent
 	std::weak_ptr<IComponent> _self;
@@ -45,7 +44,10 @@ public:
 	//EntityのTranformへのアクセス
 	std::shared_ptr<Transform> transform();
 	//EntityのGameObjectへのアクセス
-	std::shared_ptr<GameObject> gameObject() { return _gameObject.lock(); };
+	std::shared_ptr<GameObject> gameObject() 
+	{ 
+		return _gameObject.lock(); 
+	};
 
 
 protected:

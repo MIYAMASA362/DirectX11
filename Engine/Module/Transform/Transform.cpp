@@ -30,6 +30,7 @@ Transform::Transform(EntityID OwnerID)
 	m_Rotation(Quaternion::Identity()),
 	m_Scale(Vector3::one())
 {
+	this->RegisterIndex();
 	//ŠK‘wæ“¾
 	_hierarchy = gameObject()->GetScene()->GetHierarchy(OwnerID);
 
@@ -140,7 +141,7 @@ std::weak_ptr<IComponent> Transform::GetComponentInParent(ComponentTypeID compon
 
 	//eID‚Ì•¨‚ğŒŸõ
 	for (auto component : ComponentIndex)
-		if (component.second->GetOwnerID() == _hierarchy->GetParent().lock()->GetEntityID())
+		if (component.second.lock()->GetOwnerID() == _hierarchy->GetParent().lock()->GetEntityID())
 			return component.second;
 
 	//e‚ÌGetComponentInParent‚ğÀs
@@ -155,7 +156,7 @@ std::weak_ptr<IComponent> Transform::GetComponentInChildren(ComponentTypeID comp
 	{
 		auto id = child.lock()->GetEntityID();
 		for (auto component : ComponentIndex)
-			if (component.second->GetOwnerID() == id)
+			if (component.second.lock()->GetOwnerID() == id)
 				return component.second;
 	}
 	return std::weak_ptr<IComponent>();
@@ -173,7 +174,7 @@ ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID
 		auto id = child.lock()->GetEntityID();
 		for(auto component:ComponentIndex)
 		{
-			if (component.second->GetOwnerID() == id)
+			if (component.second.lock()->GetOwnerID() == id)
 				list.Add(component.second);
 		}
 

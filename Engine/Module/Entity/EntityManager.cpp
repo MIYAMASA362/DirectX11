@@ -84,10 +84,8 @@ std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 
 //ReleaseEntity
 //	EntityIndex‚©‚çíœ‚·‚é
-//	ComponentManager‚©‚çEntity‚ÌComponents‚à“¯—l‚Éíœ
 //
 void EntityManager::ReleaseEntity(IEntity * instance)
 {
 	g_pInstacne->_EntityIndex->erase(instance->GetEntityID());
-	ComponentManager::ReleaseComponents(instance);
 }

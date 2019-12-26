@@ -54,7 +54,7 @@ Camera* Camera::GetActiveCamera()
 	return pActiveCamera;
 }
 
-Vector3 DirectX::Camera::ScreenToWorldPosition(Vector3 position)
+Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 {
 	XMFLOAT2 MousePos;
 	MousePos.x = Input::Mouse::GetMouseX();
@@ -131,6 +131,8 @@ Camera::Camera(EntityID OwnerID)
 	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
+	this->RegisterIndex();
+
 	this->m_ProjectionMatrix = XMMatrixIdentity();
 	this->m_ViewMatrix = XMMatrixIdentity();
 
@@ -152,7 +154,7 @@ Camera::~Camera()
 {
 }
 
-void DirectX::Camera::SetViewPort(float x, float y, float w, float h)
+void Camera::SetViewPort(float x, float y, float w, float h)
 {
 	x = min(x, 1.0f);
 	y = min(y, 1.0f);
@@ -176,7 +178,7 @@ XMMATRIX Camera::GetViewMatrix()
 	return this->m_ViewMatrix;
 }
 
-XMMATRIX DirectX::Camera::GetProjectionMatrix()
+XMMATRIX Camera::GetProjectionMatrix()
 {
 	return this->m_ProjectionMatrix;
 }
@@ -230,7 +232,7 @@ void Camera::OnDestroy()
 }
 
 //‹‘äƒJƒŠƒ“ƒO
-bool DirectX::Camera::GetVisibility(Vector3 position)
+bool Camera::GetVisibility(Vector3 position)
 {
 	XMVECTOR viewPos,projPos;
 	XMFLOAT3 projPosF;

@@ -17,9 +17,11 @@
 //	コンストラクタ
 //
 IEntity::IEntity()
+:
+	_self(EntityManager::CreateEntity(this)),
+	_components(ComponentManager::CreateComponents(this))
 {
-	_self = EntityManager::CreateEntity(this);
-	_components = ComponentManager::CreateComponents(this);
+
 }
 
 //~IEntity
@@ -27,17 +29,11 @@ IEntity::IEntity()
 //
 IEntity::~IEntity()
 {
+	_self.reset();
+	_components.reset();
+
+	ComponentManager::ReleaseComponents(this);
 	EntityManager::ReleaseEntity(this);
-}
-
-
-
-//DestroyComponents
-//	ComponentManagerからComponentsを削除する
-//
-void IEntity::DestroyComponents()
-{
-	ComponentManager::DestroyComponents(this);
 }
 
 //Destroy

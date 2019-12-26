@@ -6,15 +6,53 @@
 #include<memory>
 
 #include"Module\DirectX\DirectX.h"
+#include"Module\IMGUI\GUI_ImGui.h"
 
 #include"texture.h"
 #include"TextureManager.h"
 
 using namespace DirectX;
 
-TextureManager::TextureIndex TextureManager::textureIndex;
+TextureManager* TextureManager::g_pInstance = nullptr;
 
-//Texture読み込み
+//TextureManager
+//	コンストラクタ
+//
+TextureManager::TextureManager()
+{
+
+}
+
+//~TextureManager
+//	デストラクタ
+//
+TextureManager::~TextureManager()
+{
+	_TextureIndex.clear();
+}
+
+//Create
+//	インスタンス生成
+//
+void TextureManager::Create()
+{
+	if (g_pInstance) return;
+	g_pInstance = new TextureManager();
+}
+
+//Release
+//	インスタンス破棄
+//
+void TextureManager::Release()
+{
+	if (g_pInstance == nullptr) return;
+	delete g_pInstance;
+	g_pInstance = nullptr;
+}
+
+//LoadTexture
+//	Texture読み込み
+//
 std::weak_ptr<Texture> TextureManager::LoadTexture(std::string filePath)
 {
 	//テクスチャ
@@ -22,22 +60,44 @@ std::weak_ptr<Texture> TextureManager::LoadTexture(std::string filePath)
 	texture->LoadTexture(filePath);
 
 	//テクスチャ名
-	std::string name;
-	name = filePath.substr(filePath.find_last_of("\\/"), filePath.find_last_of("."));
+	size_t pos = filePath.find_last_of("\\/") + 1;
+	size_t len = filePath.find_last_of("\\.") - pos;
+	std::string name = filePath.substr(pos,len);
 
 	//インデックスに登録
-	return textureIndex.emplace(name,std::shared_ptr<Texture>(texture)).first->second;
+	return g_pInstance->_TextureIndex.emplace(name,std::shared_ptr<Texture>(texture)).first->second;
 }
 
-//Assetを解放
-void TextureManager::Release()
-{
-	textureIndex.clear();
-}
 
-//テクスチャ取得
+//GetTexture
+//	テクスチャ取得
+//
 std::weak_ptr<Texture> TextureManager::GetTexture(std::string name)
 {
-	return textureIndex.find(name)->second;
+	return g_pInstance->_TextureIndex.find(name)->second;
+}
+
+
+//EditorView用のポインタ
+ID3D11ShaderResourceView* gView = nullptr;
+
+//EditorWindow
+//	ImGuiエディタウィンドウ
+//
+void TextureManager::EditorWindow()
+{
+	ImGui::Begin("TextureManager");
+	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,128),ImGuiWindowFlags_NoTitleBar);
+	for(auto obj : g_pInstance->_TextureIndex)
+	{
+		if(ImGui::Button(obj.first.c_str()))
+		{
+			gView = obj.second->GetShaderResourceView();
+		};
+	}
+	ImGui::EndChild();
+
+	if (gView) ImGui::Image((void*)gView, ImVec2(128, 128));
+	ImGui::End();
 }
 

@@ -27,7 +27,7 @@
 IComponent::IComponent(EntityID OwnerID)
 	:
 	_ownerId(OwnerID),
-	_gameObject(GameObject::GetEntity(OwnerID))
+	_gameObject(GameObject::GetTypeEntity(OwnerID).lock())
 {
 
 }

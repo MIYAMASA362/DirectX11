@@ -21,49 +21,49 @@ public:
 	virtual ~IEntity();
 
 	//Entity‚Ì¯•ÊID
-	EntityID GetEntityID() { return GetInstanceID(); };
+	EntityID GetEntityID() 
+	{ 
+		return GetInstanceID();
+	};
+
 	//Entity‚Ìƒ|ƒCƒ“ƒ^æ“¾
-	std::weak_ptr<IEntity> GetEntity() { return _self; };
+	std::weak_ptr<IEntity> GetEntity() 
+	{ 
+		return _self;
+	};
 
 	//Components‚Ö‚Ì’Ç‰Á
-	template<typename Type> std::weak_ptr<Type> AddComponent();
-	//Components‚©‚çComponent‚Ìæ“¾
-	template<typename Type> std::weak_ptr<Type> GetComponent();
-	//Components‚Ìæ“¾
-	std::shared_ptr<ComponentList> GetComponents() { return _components.lock(); }
-	//Components‚©‚çComponent‚Ìíœ
-	template<typename Type> void DestroyComponent();
-	//Components‚Ìíœ
-	void DestroyComponents();
+	template<typename Type> std::weak_ptr<Type> AddComponent()
+	{ 
+		return ComponentManager::AddComponent<Type>(this);
+	}
 
-	//©g‚Ì”jŠü
+	//Components‚©‚çComponent‚Ìæ“¾
+	template<typename Type> std::weak_ptr<Type> GetComponent()
+	{ 
+		return ComponentManager::GetComponent<Type>(this); 
+	}
+
+	//Components‚Ìæ“¾
+	std::shared_ptr<ComponentList> GetComponents() 
+	{ 
+		return _components.lock();
+	}
+
+	//Components‚©‚çComponent‚Ìíœ
+	template<typename Type> void DestroyComponent()
+	{
+		ComponentManager::DestroyComponent<Type>(this); 
+	}
+
+	//Components‚Ìíœ
+	void DestroyComponents()
+	{ 
+		ComponentManager::DestroyComponents(this);
+	}
+
+	//ObjectManager‚ğ’Ê‚µ‚½”jŠü
 	void Destroy() override;
 
 
 };
-
-
-
-//AddComponent
-//	Entity‚ÌComponents‚Ö TypeŒ^‚ÌComponent‚ğ’Ç‰Á
-//
-template<typename Type> std::weak_ptr<Type> IEntity::AddComponent()
-{
-	return ComponentManager::AddComponent<Type>(this);
-}
-
-//GetComponent
-//	Entity‚ÌComponents‚Ö TypeŒ^‚ÌComponent‚ğæ“¾
-//
-template<typename Type> std::weak_ptr<Type> IEntity::GetComponent()
-{
-	return ComponentManager::GetComponent<Type>(this);
-}
-
-//DestroyComponent
-//
-//
-template<typename Type> void IEntity::DestroyComponent()
-{
-	ComponentManager::DestroyComponent<Type>(this);
-}

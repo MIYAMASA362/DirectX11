@@ -1,32 +1,47 @@
 #pragma once
 
+//Entity
+//	
+//
 template<typename Type>
 class Entity:public IEntity
 {
-	using EntityType = Entity<Type>;
-public:
-	static std::weak_ptr<Type> GetEntity(EntityID id);
-
-	Entity();
-	virtual ~Entity();
 protected:
-	static EntityIndex m_EntityIndex;
+	//このEntityのインスタンス配列
+	static std::unordered_map<EntityID,std::weak_ptr<Type>> g_EntityIndex;
+
+public:
+	//コンストラクタ
+	Entity();
+	//デストラクタ
+	virtual ~Entity();
+
+	//Entityの取得
+	static std::weak_ptr<Type> GetTypeEntity(EntityID id)
+	{
+		return g_EntityIndex.at(id);
+	}
 };
 
 template<typename Type>
+std::unordered_map<EntityID, std::weak_ptr<Type>> Entity<Type>::g_EntityIndex;
+
+
+
+//Entity
+//	コンストラクタ
+//
+template<typename Type>
 Entity<Type>::Entity()
 {
-	m_EntityIndex.emplace(GetEntityID(), EntityManager::GetEntity(GetEntityID()));
+	
 }
 
+//~Entity
+//	デストラクタ
+//
 template<typename Type>
 Entity<Type>::~Entity()
 {
-	m_EntityIndex.erase(GetEntityID());
-}
-
-template<typename Type>
-std::weak_ptr<Type> Entity<Type>::GetEntity(EntityID id)
-{
-	return std::dynamic_pointer_cast<Type>(EntityManager::GetEntity(id).lock());
+	g_EntityIndex.erase(GetEntityID());
 }

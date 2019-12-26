@@ -11,8 +11,11 @@
 #include"IComponent.h"
 #include"ComponentList.h"
 
-#include"Module\Entity\IEntity.h"
 #include"ComponentManager.h"
+#include"Module\Entity\IEntity.h"
+
+
+
 
 //pInstance
 //	Singleton
@@ -34,7 +37,7 @@ ComponentManager::ComponentManager()
 //
 ComponentManager::~ComponentManager()
 {
-	
+	_EntityComponentIndex.clear();
 }
 
 
@@ -103,7 +106,7 @@ std::weak_ptr<ComponentList> ComponentManager::GetComponents(IEntity* entity)
 }
 
 //DestroyComponents
-//	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ğíœ
+//	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ğ DestroyŠÖ”‚ğ—˜—p‚µ‚Äíœ
 //
 void ComponentManager::DestroyComponents(IEntity* entity)
 {

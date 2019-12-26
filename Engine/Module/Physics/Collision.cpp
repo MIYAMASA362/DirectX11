@@ -110,7 +110,7 @@ void Collider::Start()
 
 void Collider::IsHitReset()
 {
-	for (auto col : ComponentIndex) col.second->_IsHit = false;
+	for (auto col : ComponentIndex) col.second.lock()->_IsHit = false;
 }
 
 void Collider::Hitjudgment()
@@ -118,8 +118,8 @@ void Collider::Hitjudgment()
 	for(auto collider : ComponentIndex)
 		for(auto other : ComponentIndex)
 		{
-			if (collider.second == other.second) continue;
-			collider.second->Judgment(other.second.get());
+			if (collider.second.lock() == other.second.lock()) continue;
+			collider.second.lock()->Judgment(other.second.lock().get());
 		}
 }
 
@@ -128,8 +128,8 @@ void Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist)
 	for(auto collider : colliderlist)
 		for(auto other : ComponentIndex)
 		{
-			if (collider.lock() == other.second) continue;
-			collider.lock()->Judgment(other.second.get());
+			if (collider.lock() == other.second.lock()) continue;
+			collider.lock()->Judgment(other.second.lock().get());
 		}
 }
 

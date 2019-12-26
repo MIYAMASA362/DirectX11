@@ -4,8 +4,6 @@
 //DirectX
 #include"Module\DirectX\DirectX.h"
 
-#include"Module\IMGUI\GUI_ImGui.h"
-
 //ECS
 #include"../ECSEngine.h"
 
@@ -20,8 +18,6 @@
 
 using namespace DirectX;
 
-EntityIndex GameObject::EntityType::m_EntityIndex;
-
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	:
 	name(name),
@@ -30,7 +26,7 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	IsDestroy(false),
 	IsActive(true)
 {
-	_gameObject = std::dynamic_pointer_cast<GameObject>(m_EntityIndex.at(this->GetEntityID()).lock());
+	g_EntityIndex.emplace(GetEntityID(),std::dynamic_pointer_cast<GameObject>(Object::_self.lock()));
 }
 
 GameObject::~GameObject() 

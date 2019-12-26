@@ -36,6 +36,6 @@ public:
 	//g_ObjectIndexを削除
 	static void Release();
 
-
-
+	//Editorデバッグ表示
+	static void EditorWindow();
 };
