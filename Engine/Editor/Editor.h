@@ -15,6 +15,8 @@ namespace Editor
 	class EditorSubWindow : public System::Window
 	{
 	private:
+		HWND* _MDIClient = nullptr;	//MDIウィンドウ クライアント
+		MDICREATESTRUCT _MDIC;
 
 	public:
 		//コンストラクタ

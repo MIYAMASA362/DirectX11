@@ -27,7 +27,7 @@ Editor::EditorSubWindow::EditorSubWindow()
 //
 Editor::EditorSubWindow::~EditorSubWindow()
 {
-
+	
 }
 
 //Create
@@ -35,7 +35,7 @@ Editor::EditorSubWindow::~EditorSubWindow()
 //
 HRESULT EditorSubWindow::Create(EditorWindow * parent, LPSTR lpClassName, LPSTR lpCaption,int x,int y, long width, long height,DWORD style)
 {
-	//WndClass設定
+	//サブウィンドウ設定
 	this->_WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
@@ -45,31 +45,43 @@ HRESULT EditorSubWindow::Create(EditorWindow * parent, LPSTR lpClassName, LPSTR 
 		parent->Get_hInstance(),
 		NULL,
 		LoadCursor(NULL,IDC_ARROW),
-		(HBRUSH)(COLOR_WINDOW + 1),
+		(HBRUSH)(COLOR_APPWORKSPACE + 1),
 		NULL,
 		lpClassName,
 		NULL
 	};
 
+	//サブウィンドウ登録
 	if(!RegisterClassEx(&this->_WndClass)){
 		MessageBox(NULL,"WndClassの設定に失敗しました。","EditorSubWindow",MB_OK);
+		return E_FAIL;
+	}
+
+	//MDIウィンドウ設定
+	this->_WndClass.lpfnWndProc = DefMDIChildProc;
+	this->_WndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	this->_WndClass.lpszClassName = "MDICHILD";
+
+	//MDIウィンドウ登録
+	if (!RegisterClassEx(&this->_WndClass)){
+		MessageBox(NULL, "WndClassの設定に失敗しました。", "EditorSubWindow", MB_OK);
 		return E_FAIL;
 	}
 
 	//ウィンドウ生成
 	this->_hWnd = CreateWindowEx(
 		0,
-		this->_WndClass.lpszClassName,
+		lpClassName,
 		lpCaption,
 		style,
 		x,
 		y,
-		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+		width  + GetSystemMetrics(SM_CXDLGFRAME) * 2,
 		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
 		parent->Get_Window(),
 		NULL,
 		this->_WndClass.hInstance,
-		this	//自身のポインタ設定 プロシージャに渡す
+		this//this	//自身のポインタ設定 プロシージャに渡す
 	);
 
 	if (!this->_hWnd) {
@@ -91,9 +103,51 @@ HRESULT EditorSubWindow::Create(EditorWindow * parent, LPSTR lpClassName, LPSTR 
 //
 LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	//サブウィンドウ取得
+	EditorSubWindow* subWindow = (EditorSubWindow*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
+	CLIENTCREATESTRUCT ccsClient;
+	MDICREATESTRUCT mdic;
+
 	//メッセージ
 	switch (uMsg)
 	{
+		//ウィンドウ生成
+		case WM_CREATE:
+			//MDIを有効化
+			if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
+			{
+				ccsClient.hWindowMenu = NULL;
+				ccsClient.idFirstChild = 0x100;
+
+				subWindow->_MDIClient = new HWND;
+				*subWindow->_MDIClient = CreateWindow(
+					"MDICLIENT",
+					NULL,
+					WS_CHILD | WS_CLIPCHILDREN | WS_VISIBLE,
+					0,
+					200,
+					0,
+					0,
+					hWnd,
+					(HMENU)1,
+					this->_hInstance,
+					&ccsClient
+				);
+
+				//MDIウィンドウ
+				mdic.szClass = "MDICHILD";
+				mdic.szTitle = "MDIWindow";
+				mdic.style = NULL;
+				mdic.cx = 200;
+				mdic.cy = 200;
+				mdic.x = 0;
+				mdic.y = 0;
+				mdic.hOwner = this->_hInstance;
+				mdic.lParam = NULL;
+
+				SendMessage(*subWindow->_MDIClient,WM_MDICREATE,NULL,(LPARAM)&mdic);
+			}
+			break;
 		//キー入力
 		case WM_KEYDOWN:
 			switch (wParam)
@@ -113,9 +167,13 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 					break;
 			DestroyWindow(hWnd);
 			break;
+
 		//デフォルト
 		default:
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+			if(subWindow->_MDIClient != nullptr)
+				return DefFrameProc(hWnd, *subWindow->_MDIClient,uMsg, wParam, lParam);
+			else
+				return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
 	return 0;
@@ -146,14 +204,16 @@ EditorWindow::~EditorWindow()
 HRESULT EditorWindow::Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style)
 {
 	HRESULT hr;
-	RECT rect;
+	RECT rect;			//メインウィンドウRECT
 
-	//親ウィンドウ
+	//メインウィンドウ
+	this->_WindowFlag |= WindowFlags_CloseCheck ^ WindowFlags_DragDropFile;
 	hr = Window::Create(hInstance,lpClassName,lpCaption,width,height,style);
 	if (FAILED(hr)) return hr;
 	GetWindowRect(this->_hWnd,&rect);
 
 	//サブウィンドウ
+	_SubWindow->GetWindowFlags() |= WindowFlags_MultipleDocumentInterface;
 	hr = _SubWindow->Create(this,"SubWindow1","SubWindow",rect.right, rect.top,256,height,style);
 	if (FAILED(hr)) return hr;
 
