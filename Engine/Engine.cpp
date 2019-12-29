@@ -2,56 +2,53 @@
 #include<string>
 #include"Module\DirectX\DirectX.h"
 
+
 #include"Module\IMGUI\GUI_ImGui.h"
 #include"Window\Window.h"
 
 #include"Module\Manager\manager.h"
 
-using namespace DirectX;
-using namespace System;
+#include"Engine.h"
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+EngineWindow::EngineWindow()
 {
-	//Window
-	Window* MainWindow = new ImGui_Window();
-	MainWindow->Create(
-		hInstance,
-		"MainWindow",
-		"DirectX11 ECS",
-		1024, 576,
-		WS_OVERLAPPEDWINDOW
-	);
+}
+
+EngineWindow::~EngineWindow()
+{
+}
+
+WPARAM EngineWindow::MessageLoop()
+{
+	MSG msg;
 
 	//Applicationの生成
 	D3DApp::Create(
-		MainWindow->Get_Window(),
-		MainWindow->Get_hInstance(),
+		this->Get_Window(),
+		this->Get_hInstance(),
 		60
 	);
 
-	MSG msg;
-
 	CManager::Initialize();
 
-	while (1)
+	do
 	{
-		//Message
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			if (msg.message == WM_QUIT) {
-				break;	// PostQuitMessage()が呼ばれたらループ終了
-			}
-			else {
-				// メッセージの翻訳とディスパッチ
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			continue;
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			// メッセージの翻訳とディスパッチ
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		CManager::Run();
-	}
+		else
+		{
+			CManager::Run();
+		}
+	} 
+	while (msg.message != WM_QUIT);
+
 	CManager::Finalize();
 
 	D3DApp::Destroy();
 
-	return (int)msg.wParam;
+	return msg.wParam;
 }
