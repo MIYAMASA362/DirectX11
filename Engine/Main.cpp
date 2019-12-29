@@ -11,9 +11,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//Window
 	Window* MainWindow = new Editor::EditorWindow();
 
-	MainWindow->GetWindowFlags() |= WindowFlags_CloseCheck;
-	MainWindow->GetWindowFlags() |= WindowFlags_DragDropFile;
-
 	MainWindow->Create(
 		hInstance,
 		"MainWindow",
