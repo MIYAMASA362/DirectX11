@@ -47,15 +47,15 @@ HRESULT Window::Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, 
 		return E_FAIL;
 	}
 
+	//プロセスID
 	char text[256];
 	sprintf_s(text, " PID:%u", GetCurrentProcessId());
 
 	//ウィンドウ生成
-
 	this->_hWnd = CreateWindowEx(
 		0,
 		this->_WndClass.lpszClassName,
-		lpCaption,
+		(std::string(lpCaption) + std::string(text)).c_str(),
 		style,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

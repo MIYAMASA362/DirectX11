@@ -9,8 +9,9 @@ namespace System
 	enum WindowFlags_
 	{
 		WindowFlags_None = 0,
-		WindowFlags_CloseCheck = 1 << 0,	//Windowを閉じた時にメッセージウィンドウを表示する
-		WindowFlags_DragDropFile = 1 << 1	//Windowへファイルのドラッグ&ドロップを許可する
+		WindowFlags_CloseCheck = 1 << 0,				//Windowを閉じた時にメッセージウィンドウを表示する
+		WindowFlags_DragDropFile = 1 << 1,				//Windowへファイルのドラッグ&ドロップを許可する
+		WindowFlags_MultipleDocumentInterface = 1 << 2	//WindowのMDIを有効化
 	};
 
 	//Window
