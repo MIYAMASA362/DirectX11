@@ -2,29 +2,63 @@
 
 namespace System
 {
+	//ウィンドウのフラグ
+	typedef int WindowFlags;
+
+	//ウィンドウフラグ
+	enum WindowFlags_
+	{
+		WindowFlags_None = 0,
+		WindowFlags_CloseCheck = 1 << 0,	//Windowを閉じた時にメッセージウィンドウを表示する
+		WindowFlags_DragDropFile = 1 << 1	//Windowへファイルのドラッグ&ドロップを許可する
+	};
+
+	//Window
+	//	メインウィンドウ生成用のウィンドウクラス
+	//
 	class Window
 	{
 	protected:
-		HWND hWnd;
-		WNDCLASSEX WndClass;
-		HINSTANCE hInstance;
+		//ウィンドウハンドル
+		HWND _hWnd;
+		//ウィンドウクラス
+		WNDCLASSEX _WndClass;
+		//インスタンスハンドル
+		HINSTANCE _hInstance;
+
+		//ウィンドウフラグ
+		WindowFlags _WindowFlag = WindowFlags_None;
+
 	public:
+		//コンストラクタ
 		Window();
+		//デストラクタ
 		~Window();
-	public:
+
+		//生成
 		virtual HRESULT Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style);
+		//破棄
 		HRESULT Destroy();
-	public:
-		HWND Get_Window() { return hWnd; }
-		HINSTANCE Get_hInstance() { return hInstance; }
+
+		//HWND取得
+		HWND Get_Window() { return _hWnd; }
+		//インスタンス
+		HINSTANCE Get_hInstance() { return _hInstance; }
+
+		//ローカルなウィンドウプロシージャ
+		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		//メッセージループ イベントドリブン
+		virtual WPARAM MessageLoop();
+
+		//ウィンドウフラグの取得
+		WindowFlags& GetWindowFlags() { return this->_WindowFlag; };
+
+		//ウィンドウハンドル設定
+		void SetHWndPointer(HWND hWnd);
+
+		//ウィンドウプロシージャ
+		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
-	
-#ifdef GUI_ImGui_H
-	//IMGUIウィンドウのマウス移動に対応したウィンドウ
-	class ImGui_Window:public Window
-	{
-	public:
-		HRESULT Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style)override;
-	};
-#endif
+
 }
