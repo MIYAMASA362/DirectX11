@@ -106,13 +106,14 @@ void ObjectManager::Release()
 void ObjectManager::EditorWindow()
 {
 	ImGui::Begin("ObjectManager");
+	ImGui::Text("InstanceID[Pointer]");
 	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,512),ImGuiWindowFlags_NoTitleBar);
 	for(auto obj :g_ObjectIndex)
 	{
 		std::string text = std::to_string(obj.first);
 		std::stringstream ss;
 		ss << std::hex << (uintptr_t)obj.second.get();
-		text += ":" + ss.str();
+		text += "[" + ss.str()+"]";
 		ImGui::Text(text.c_str());
 	}
 	ImGui::EndChild();

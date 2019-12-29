@@ -13,7 +13,9 @@ private:
 	//テクスチャ保管
 	TextureIndex _TextureIndex;
 
+	//コンストラクタ
 	TextureManager();
+	//デストラクタ
 	~TextureManager();
 
 
