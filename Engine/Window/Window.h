@@ -37,7 +37,7 @@ namespace System
 		~Window();
 
 		//ê∂ê¨
-		virtual HRESULT Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style);
+		virtual HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption,int x,int y, long width, long height, DWORD style);
 		//îjä¸
 		HRESULT Destroy();
 

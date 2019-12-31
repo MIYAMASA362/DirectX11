@@ -5,6 +5,13 @@
 
 using namespace System;
 
+//*********************************************************************************************************************
+//
+//	Window
+//
+//*********************************************************************************************************************
+
+
 //Window
 //	コンストラクタ
 //
@@ -24,7 +31,7 @@ Window::~Window()
 //Create
 //	ウィンドウ生成
 //
-HRESULT Window::Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, long width, long height, DWORD style)
+HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption,int x, int y, long width, long height, DWORD style)
 {
 	//WndClass設定
 	this->_WndClass = {
@@ -57,11 +64,11 @@ HRESULT Window::Create(HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, 
 		this->_WndClass.lpszClassName,
 		(std::string(lpCaption) + std::string(text)).c_str(),
 		style,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
+		x,
+		y,
 		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
 		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
-		NULL,
+		hParent,
 		NULL,
 		this->_WndClass.hInstance,
 		this	//自身のポインタ設定 プロシージャに渡す
