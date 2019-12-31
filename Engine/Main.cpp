@@ -12,10 +12,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	Window* MainWindow = new Editor::EditorWindow();
 
 	MainWindow->Create(
+		NULL,
 		hInstance,
 		"MainWindow",
 		"DirectX11 ECS",
-		1024, 576,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		1024, 
+		576,
 		WS_OVERLAPPEDWINDOW
 	);
 
