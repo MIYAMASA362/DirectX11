@@ -127,7 +127,14 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			}
 
 			this->_FileTree = new FileTreeView();
-			_FileTree->Create(hWnd,this->_hInstance,"FileTree","FileView",0,500,500,500,WS_OVERLAPPEDWINDOW);
+			_FileTree->Create(hWnd,this->_hInstance,"FileTree","FileView",0,0,500,300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD);
+			break;
+
+		//サイズ
+		case WM_SIZE:
+			RECT rect;
+			GetWindowRect(this->_FileTree->Get_Window(),&rect);
+			MoveWindow(this->_FileTree->Get_Window(),0,HIWORD(lParam) - 300,LOWORD(lParam),300,TRUE);
 			break;
 
 		//コマンド
@@ -166,11 +173,18 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		case WM_KEYDOWN:
 			switch (wParam)
 			{
-			case VK_ESCAPE:
-				SendMessage(hWnd, WM_CLOSE, 0, 0);
-				break;
-			default:
-				break;
+				//スペース
+				case VK_ESCAPE:
+					SendMessage(hWnd, WM_CLOSE, 0, 0);
+					break;
+				//F1
+				case VK_F1:
+					ShowWindow(hWnd, SW_SHOW);
+					ShowWindow(hWnd, SW_RESTORE);
+					SendMessage(this->_FileTree->Get_Window(),uMsg,wParam,lParam);
+					break;
+				default:
+					break;
 			}
 			break;
 
@@ -232,14 +246,14 @@ HRESULT EditorWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassNam
 	RECT rect;			//メインウィンドウRECT
 
 	//メインウィンドウ
-	this->_WindowFlag |= WindowFlags_CloseCheck ^ WindowFlags_DragDropFile;
+	this->_WindowFlag |= WindowFlags_CloseCheck ^ WindowFlags_DragDropFile ^ WindowFlags_PreviewProcessID;
 	hr = Window::Create(hParent,hInstance, lpClassName, lpCaption, CW_USEDEFAULT,CW_USEDEFAULT,width, height, style);
 	if (FAILED(hr)) return hr;
 	GetWindowRect(this->_hWnd, &rect);
 
 	//サブウィンドウ
-	_SubWindow->GetWindowFlags() |= WindowFlags_MultipleDocumentInterface;
-	hr = _SubWindow->Create(this->_hWnd,hInstance, "SubWindow1", "SubWindow", rect.right, rect.top, 256, height, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
+	//_SubWindow->GetWindowFlags() |= WindowFlags_MultipleDocumentInterface;
+	hr = _SubWindow->Create(this->_hWnd,hInstance, "SubWindow1", "SubWindow", rect.right, rect.top, 400, height, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
 	if (FAILED(hr)) return hr;
 
 	return hr;
@@ -308,8 +322,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			break;
 			//F1
 		case VK_F1:
-			ShowWindow(this->_SubWindow->Get_Window(), SW_SHOW);
-			ShowWindow(this->_SubWindow->Get_Window(), SW_RESTORE);
+			SendMessage(this->_SubWindow->Get_Window(),uMsg,wParam,lParam);
 			break;
 		default:
 			break;

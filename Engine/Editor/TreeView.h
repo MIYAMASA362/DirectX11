@@ -1,5 +1,7 @@
 #pragma once
 
+#include<CommCtrl.h>
+
 namespace System
 {
 	class Window;
@@ -13,7 +15,14 @@ namespace Editor
 	class FileTreeView : public System::Window
 	{
 	private:
-		HWND _TreeView;
+		std::string _TreeDirectory;	//ツリービューでのディレクトリ
+
+		HWND _TreeView;		//ツリービュー
+		BOOL _IsDragging;	//ツリーが移動中
+		HIMAGELIST _hImage;	//イメージリスト
+
+		HWND _ListView;		//リストビュー
+		LVCOLUMN _Column;	//リストビュー表示形式
 
 	public:
 		//コンストラクタ
@@ -27,7 +36,40 @@ namespace Editor
 		//ローカルなウィンドウプロシージャ
 		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+
+
+
+		//*********************************************************************************************************************
+		//
+		//	TreeView
+		//
+		//*********************************************************************************************************************
+
 		//ファイルノード表示
 		void FileViewNode(LPSTR filePath, TVINSERTSTRUCT tv);
+
+		//ツリーがドラッグ移動開始
+		void TreeView_OnBeginDrag(HWND hwndTV, LPNMTREEVIEW lpnmtv);
+		//ツリーがドラッグ移動中
+		void TreeView_OnDragging(HWND hwndParent, HWND hwndTV, LONG xCur, LONG yCur);
+		//ツリーのドラッグ移動終了
+		void TreeView_OnEndDrag(HWND hwndTV);
+
+		//選択中のツリーノードを遡って、選択されたファイルのパスを得る
+		std::string TreeView_GetFilePath(HTREEITEM item);
+
+
+
+
+		//*********************************************************************************************************************
+		//
+		//	ListView
+		//
+		//*********************************************************************************************************************
+
+		//ディレクトリ内のファイルをリストビューで表示
+		void ListView_FileView(std::string DirectoryPath);
+
+		void ListView_FileOpen(LPNMITEMACTIVATE lpnmitem);
 	};
 }
