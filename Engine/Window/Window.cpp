@@ -55,14 +55,17 @@ HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPST
 	}
 
 	//プロセスID
-	char text[256];
-	sprintf_s(text, " PID:%u", GetCurrentProcessId());
+	char text[256] = "\0";
+	if ((this->_WindowFlag & WindowFlags_PreviewProcessID) == WindowFlags_PreviewProcessID)
+	{
+		sprintf_s(text, " PID:%u", GetCurrentProcessId());	
+	}
 
 	//ウィンドウ生成
 	this->_hWnd = CreateWindowEx(
 		0,
 		this->_WndClass.lpszClassName,
-		(std::string(lpCaption) + std::string(text)).c_str(),
+		(LPSTR)(std::string(lpCaption) + std::string(text)).c_str(),
 		style,
 		x,
 		y,
