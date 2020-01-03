@@ -47,9 +47,12 @@ bool Input::GetKeyUp(BYTE KeyCode)
 
 void DirectX::Input::DebugGUI()
 {
+	DXGI_SWAP_CHAIN_DESC sd;
+	sd = D3DApp::Renderer::GetD3DAppDevice()->GetSwapChainDesc();
+
 	ImGui::Begin("Input");
-	ImGui::Text("Screen Width:%d", D3DApp::Renderer::GetD3DAppDevice()->GetScreenWidth());
-	ImGui::Text("Screen Height:%d", D3DApp::Renderer::GetD3DAppDevice()->GetScreenHeight());
+	ImGui::Text("Screen Width:%d", sd.BufferDesc.Width);
+	ImGui::Text("Screen Height:%d",sd.BufferDesc.Height);
 	ImGui::Text("Mouse X:%f",Input::Mouse::GetMouseX());
 	ImGui::Text("Mouse Y:%f",Input::Mouse::GetMouseY());
 	ImGui::End();

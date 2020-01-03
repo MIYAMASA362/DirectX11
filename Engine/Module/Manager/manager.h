@@ -1,5 +1,8 @@
 #pragma once
 
+//GameManager
+//
+//
 class CManager
 {
 private:
