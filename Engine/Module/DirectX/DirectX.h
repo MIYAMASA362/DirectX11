@@ -47,10 +47,6 @@ class Material;
 class D3DApp final
 {
 private:
-	unsigned int ScreenWidth;		//画面 横
-	unsigned int ScreenHeight;		//画面 縦
-	unsigned int fps;				//画面更新速度
-
 	//DirectX Graphics Infrastructure
 	IDXGIDevice1* _pDXGI = nullptr;
 	IDXGIAdapter* _pAdapter = nullptr;
@@ -69,9 +65,6 @@ private:
 	ID3D11DepthStencilState* DepthStateEnable = nullptr;
 	ID3D11DepthStencilState* DepthStateDisable = nullptr;
 
-	XMMATRIX _ProjectionMatrix;
-
-
 public:
 	//コンストラクタ
 	D3DApp();
@@ -88,13 +81,12 @@ public:
 
 	//HWND取得
 	HWND GetWindow() { return hWnd; };
-	unsigned int GetScreenWidth() { return ScreenWidth; };
-	unsigned int GetScreenHeight() { return ScreenHeight; };
-	unsigned int GetFps() { return fps; };
+	unsigned int GetRefreshRate();
 
 	void CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void* subresource, ID3D11Buffer** buffer);
 
 	IDXGISwapChain* GetSwapChain() { return SwapChain; };
+	DXGI_SWAP_CHAIN_DESC GetSwapChainDesc();
 
 	void CreateRenderTargetView();
 	void CreateDepthStencilView();

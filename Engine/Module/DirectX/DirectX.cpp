@@ -73,13 +73,12 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(hWnd,GWLP_HINSTANCE);
 
 	this->hWnd = hWnd;
-	this->fps = fps;
 
 	//ウィンドウサイズの取得
 	RECT rect;
 	GetClientRect(hWnd, &rect);
-	ScreenWidth = rect.right - rect.left;
-	ScreenHeight = rect.bottom - rect.top;
+	unsigned int ScreenWidth = rect.right - rect.left;
+	unsigned int ScreenHeight = rect.bottom - rect.top;
 
 	D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
 
@@ -129,7 +128,6 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	//
 	_pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&_pFactory);
 
-
 	// スワップチェーン設定
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
@@ -140,7 +138,7 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.Windowed = TRUE;
-	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Numerator = fps;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
@@ -149,6 +147,7 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	//	
 	//
 	hr = _pFactory->CreateSwapChain(D3DDevice, &sd, &SwapChain);
+
 
 	// レンダーターゲットビュー生成、設定
 	this->CreateRenderTargetView();
@@ -244,6 +243,14 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	return S_OK;
 }
 
+unsigned int D3DApp::GetRefreshRate()
+{
+	DXGI_SWAP_CHAIN_DESC sd;
+	sd = GetSwapChainDesc();
+
+	return sd.BufferDesc.RefreshRate.Numerator / sd.BufferDesc.RefreshRate.Denominator;
+}
+
 //CreateBuffer
 //	DirectX CreateBuffer
 //
@@ -263,6 +270,18 @@ void D3DApp::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const v
 	D3DDevice->CreateBuffer(&bd, &sd, buffer);
 }
 
+DXGI_SWAP_CHAIN_DESC D3DApp::GetSwapChainDesc()
+{
+	DXGI_SWAP_CHAIN_DESC sd;
+
+	//DXGI_SWAP_CHAIN_DESCの取得
+	//	WARNING : Direct3D 11.1 の場合、DESC取得に推奨されない関数
+	//	ref: https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-getdesc
+	//
+	SwapChain->GetDesc(&sd);
+	return sd;
+}
+
 void D3DApp::CreateRenderTargetView()
 {
 	// レンダーターゲットビュー生成、設定
@@ -275,12 +294,7 @@ void D3DApp::CreateRenderTargetView()
 void D3DApp::CreateDepthStencilView()
 {
 	DXGI_SWAP_CHAIN_DESC sd;
-
-	//DXGI_SWAP_CHAIN_DESCの取得
-	//	WARNING : Direct3D 11.1 の場合、DESC取得に推奨されない関数
-	//	ref: https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-getdesc
-	//
-	SwapChain->GetDesc(&sd);
+	sd = this->GetSwapChainDesc();
 
 	ID3D11Texture2D* depthTexture = NULL;
 	D3D11_TEXTURE2D_DESC td;
@@ -304,7 +318,6 @@ void D3DApp::CreateDepthStencilView()
 	dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvd.Flags = 0;
 	D3DDevice->CreateDepthStencilView(depthTexture, &dsvd, &DepthStencilView);
-
 
 	ImmediateContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 }
@@ -387,7 +400,9 @@ void D3DApp::Renderer::RegisterDevice(D3DApp * d3dapp)
 	_Material->SetResource();
 	_Light->SetResource();
 
-	XMMATRIX matrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)_pDevice->ScreenWidth, (float)_pDevice->ScreenHeight, 0.0f, 0.0f, 1.0f);
+	DXGI_SWAP_CHAIN_DESC sd;
+	sd = _pDevice->GetSwapChainDesc();
+	XMMATRIX matrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
 	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &matrix);
 }
 
@@ -539,5 +554,6 @@ void D3DApp::Renderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int
 //
 XMMATRIX D3DApp::Renderer::GetProjectionMatrix2D()
 {
-	return XMMatrixOrthographicOffCenterLH(0.0f, (float)_pDevice->ScreenWidth, (float)_pDevice->ScreenHeight, 0.0f, 0.0f, 1.0f);
+	DXGI_SWAP_CHAIN_DESC sd = _pDevice->GetSwapChainDesc();
+	return XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
 }
