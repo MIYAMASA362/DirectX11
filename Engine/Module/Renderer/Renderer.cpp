@@ -18,19 +18,19 @@ using namespace DirectX;
 
 Renderer::RendererIndex Renderer::_RendererIndex;
 
-void DirectX::Renderer::Create()
+void Renderer::Create()
 {
 	_RendererIndex.emplace(RendererTarget::RenderTarget2D, RendererList());
 	_RendererIndex.emplace(RendererTarget::RenderTarget3D, RendererList());
 }
 
-void DirectX::Renderer::Destroy()
+void Renderer::Destroy()
 {
 	_RendererIndex.erase(RendererTarget::RenderTarget3D);
 	_RendererIndex.erase(RendererTarget::RenderTarget2D);
 }
 
-DirectX::Renderer::Renderer(EntityID OwnerID)
+Renderer::Renderer(EntityID OwnerID)
 :
 	Component(OwnerID)
 {
@@ -40,22 +40,22 @@ DirectX::Renderer::Renderer(EntityID OwnerID)
 	};
 }
 
-DirectX::Renderer::~Renderer()
+Renderer::~Renderer()
 {
 	if (_Shader) delete _Shader;
 }
 
-void DirectX::Renderer::SetEnable(bool enable)
+void Renderer::SetEnable(bool enable)
 {
 	this->m_IsEnable = enable;
 }
 
-bool DirectX::Renderer::GetEnable()
+bool Renderer::GetEnable()
 {
 	return this->m_IsEnable;
 }
 
-void DirectX::Renderer::SetSort(unsigned int sort)
+void Renderer::SetSort(unsigned int sort)
 {
 	auto* index = &_RendererIndex.at(_RendererTarget);
 	auto targert = std::dynamic_pointer_cast<Renderer>(_self.lock());
@@ -63,13 +63,13 @@ void DirectX::Renderer::SetSort(unsigned int sort)
 	index->insert(std::next(index->begin(), _sort), targert);
 }
 
-void DirectX::Renderer::Start()
+void Renderer::Start()
 {
 	auto* index = &_RendererIndex.at(_RendererTarget);
 	index->insert(std::next(index->begin(), _sort), std::dynamic_pointer_cast<Renderer>(_self.lock()));
 }
 
-void DirectX::Renderer3D::BeginRender()
+void Renderer3D::BeginRender()
 {
 	auto index = _RendererIndex.at(RendererTarget::RenderTarget3D);
 	ComponentManager::SendComponentMessage("Render");
@@ -85,19 +85,19 @@ void DirectX::Renderer3D::BeginRender()
 	}
 }
 
-DirectX::Renderer3D::Renderer3D(EntityID OwnerID)
+Renderer3D::Renderer3D(EntityID OwnerID)
 :
 	Renderer(OwnerID)
 {
 	_RendererTarget = RendererTarget::RenderTarget3D;
 }
 
-DirectX::Renderer3D::~Renderer3D()
+Renderer3D::~Renderer3D()
 {
 
 }
 
-void DirectX::Renderer2D::BeginRender()
+void Renderer2D::BeginRender()
 {
 	auto index = _RendererIndex.at(RendererTarget::RenderTarget2D);
 
@@ -112,14 +112,14 @@ void DirectX::Renderer2D::BeginRender()
 	}
 }
 
-DirectX::Renderer2D::Renderer2D(EntityID OwnerID)
+Renderer2D::Renderer2D(EntityID OwnerID)
 :
 	Renderer(OwnerID)
 {
 	_RendererTarget = RendererTarget::RenderTarget2D;
 }
 
-DirectX::Renderer2D::~Renderer2D()
+Renderer2D::~Renderer2D()
 {
 
 }
