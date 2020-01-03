@@ -1,33 +1,68 @@
 #pragma once
 
+//*********************************************************************************************************************
+//
+//	Camera Component
+//
+//*********************************************************************************************************************
+
 class Camera final :public Behaviour<Camera>
 {
 private:
+	//アクティブなカメラ 描画のターゲット
 	static Camera* pActiveCamera;
-	static std::list<std::weak_ptr<Camera>> CameraIndex;
+	//描画順でソート
+	static std::vector<Camera*> CameraSortIndex;
 
-	RECT viewport;
-	XMMATRIX m_ViewMatrix;
-	XMMATRIX m_ProjectionMatrix;
-	int priority;
+
+	D3D11_VIEWPORT _Viewport;		//描画領域
+	int _Priority;					//描画優先度
+
+	XMMATRIX _ViewMatrix;
+	XMMATRIX _ProjectionMatrix;
+
+
 private:
-	static void IndexSort(Camera* camera);
+	//CameraSortIndexに追加
+	static void RegisterSortIndex(Camera* camera);
+	//CameraSortIndexから削除
+	static void RemoveSortIndex(Camera* camera);
 
 public:
-	static void Render(void(*Draw)(void),void(*Begin)(void));
-	static Camera* GetActiveCamera();
-	static Vector3 ScreenToWorldPosition(Vector3 position);
-		
+	//コンストラクタ
 	Camera(EntityID OwnerID);
+	//デストラクタ
 	virtual ~Camera();
 
-	void SetViewPort(float x, float y,float w, float h);
+	//アクティブカメラ取得
+	static Camera* GetActiveCamera() { return pActiveCamera; };
+
+	//描画
+	static void Render(void(*Draw)(void), void(*Begin)(void));
+	//スクリーン座標に変換
+	static Vector3 ScreenToWorldPosition(Vector3 position);
+
+
+	//ビューポート設定
+	void SetViewPort(float x, float y, float w, float h);
+
+	//描画優先度設定
 	void SetPriority(int priority);
-	XMMATRIX GetViewMatrix();
-	XMMATRIX GetProjectionMatrix();
+	//描画優先度取得
+	int GetPriority() const { return _Priority; };
+	
+	XMMATRIX GetViewMatrix() { return _ViewMatrix; };
+	XMMATRIX GetProjectionMatrix() { return _ProjectionMatrix; };
 
+	//描画実行
 	void Run();
-	void OnDestroy() override;
 
+	//視錐台カリング
 	bool GetVisibility(Vector3 position);
+
+
+
+
+	//エディタ表示
+	static void EditorWindow();
 };

@@ -1,3 +1,5 @@
+#include<algorithm>
+
 #include"Common.h"
 #include"Module\DirectX\DirectX.h"
 
@@ -20,27 +22,73 @@
 
 using namespace DirectX;
 
-//--- Camera ------------------------------------------------------------------
-Camera* Camera::pActiveCamera = nullptr;
-std::list<std::weak_ptr<Camera>> Camera::CameraIndex;
+//*********************************************************************************************************************
+//
+//	Camera
+//
+//*********************************************************************************************************************
 
-//--- static method -------------------------------------------------
+
+//pActiveCamera
+Camera* Camera::pActiveCamera = nullptr;
+
+//CameraSortIndex
+std::vector<Camera*> Camera::CameraSortIndex;
+
+
+
+//Camera
+//	コンストラクタ
+//
+Camera::Camera(EntityID OwnerID)
+	:
+	Behaviour(OwnerID),
+	_Priority(1),
+	_ViewMatrix(XMMatrixIdentity()),
+	_ProjectionMatrix(XMMatrixIdentity())
+{
+	SetViewPort(0, 0, 1, 1);	//ViewPort設定
+
+	this->RegisterIndex();		//ComponentIndexへ追加
+	this->RegisterSortIndex(this);
+
+	if (pActiveCamera == nullptr)
+		pActiveCamera = this;
+
+	//ImGui表示
+	this->OnDebugImGui = [this]() {
+		if (ImGui::TreeNode("Camera"))
+		{
+			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+			ImGui::Text(("Priority:" + std::to_string(this->_Priority)).c_str());
+
+			ImGui::TreePop();
+		}
+	};
+}
+
+//~Camera
+//	デストラクタ
+//
+Camera::~Camera()
+{
+	RemoveSortIndex(this);
+}
+
+
+//Render
+//	描画
+//
 void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 {
-	auto itr = CameraIndex.begin();
-	while (itr != CameraIndex.end())
+	//Componentを参照
+	for (auto camera : CameraSortIndex)
 	{
-		//未使用枠を削除
-		if (itr->expired()) {
-			itr = CameraIndex.erase(itr);
-			continue;
-		}
-		//カメラ設定
-		Camera* camera = itr->lock().get();
-		itr++;
-
+		//有効
 		if (!camera->gameObject()->GetActive()) continue;
-		if (!camera->_IsEnable) continue;
+		if (!camera->GetEnable()) continue;
+
+		//アクティブなカメラに設定
 		pActiveCamera = camera;
 
 		Begin();
@@ -49,11 +97,10 @@ void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 	}
 }
 
-Camera* Camera::GetActiveCamera()
-{
-	return pActiveCamera;
-}
 
+//ScreenToWorldPosition
+//	引数をスクリーン座標に変換
+//
 Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 {
 	XMFLOAT2 MousePos;
@@ -61,8 +108,8 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 	MousePos.y = Input::Mouse::GetMouseY();
 
 	RECT rect;
-	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),&rect);
-	
+	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &rect);
+
 	const XMMATRIX projection = pActiveCamera->GetProjectionMatrix();
 	const XMMATRIX ViewMatrix = pActiveCamera->GetViewMatrix();
 	const XMMATRIX WorldMatrix = pActiveCamera->transform()->WorldMatrix();
@@ -82,79 +129,35 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 	rayDirection.z = screenRay.x * InvWorldView.r[0].m128_f32[2] + screenRay.y * InvWorldView.r[1].m128_f32[2] + screenRay.z * InvWorldView.r[2].m128_f32[2];
 	rayDirection = rayDirection.normalize();
 
-	screenRay = XMVector3TransformCoord(screenRay,pActiveCamera->transform()->MatrixQuaternion());
+	screenRay = XMVector3TransformCoord(screenRay, pActiveCamera->transform()->MatrixQuaternion());
 
 	return pActiveCamera->transform()->position() + screenRay*10.0f;
 }
 
-void Camera::IndexSort(Camera* target)
+
+//RegisterSortIndex
+//	CameraSortIndexに追加する
+//
+void Camera::RegisterSortIndex(Camera* target)
 {
-	std::weak_ptr<Camera> wPtr = Camera::GetComponent(target->GetOwnerID());
-
-	//配列長が0
-	if (CameraIndex.size() == 0) return CameraIndex.push_back(wPtr);
-
-	bool IsInsert = false;
-
-	//配列
-	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end();) {
-		Camera* camera = itr->lock().get();
-		//削除(重複を防ぐ)
-		if (camera == target)
-		{
-			itr->reset();
-			itr = CameraIndex.erase(itr);
-			continue;
-		}
-
-		//挿入
-		if (!IsInsert)
-			if (camera->priority >= target->priority) {
-				IsInsert = true;
-				if (itr == CameraIndex.begin())
-					CameraIndex.push_front(wPtr);
-				else
-					CameraIndex.insert(itr, wPtr);
-			}
-		itr++;
-	}
-
-	if (!IsInsert) CameraIndex.push_back(wPtr);	//末尾
+	RemoveSortIndex(target);
+	CameraSortIndex.push_back(target);//追加
+	std::sort(CameraSortIndex.begin(), CameraSortIndex.end(), [](const Camera* a, const Camera* b) { return a->GetPriority() > b->GetPriority(); });	//ソート
 	return;
 }
 
-//--- Camera --------------------------------------------------------
-
-Camera::Camera(EntityID OwnerID)
-:
-	Behaviour(OwnerID),
-	priority(1)
+//RemoveSoetIndex
+//	CameraSortIndexから削除する
+//
+void Camera::RemoveSortIndex(Camera * target)
 {
-	SetViewPort(0,0,1,1);
-
-	this->RegisterIndex();
-
-	this->m_ProjectionMatrix = XMMatrixIdentity();
-	this->m_ViewMatrix = XMMatrixIdentity();
-
-	if (pActiveCamera == nullptr)
-		pActiveCamera = this;
-
-	this->OnDebugImGui = [this]() {
-		if (ImGui::TreeNode("Camera"))
-		{
-			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-			ImGui::Text(("Priority:" + std::to_string(this->priority)).c_str());
-
-			ImGui::TreePop();
-		}
-	};
+	auto end = std::remove_if(CameraSortIndex.begin(), CameraSortIndex.end(), [target](const Camera* camera) { return camera == target; });
+	CameraSortIndex.erase(end, CameraSortIndex.end());
 }
 
-Camera::~Camera()
-{
-}
-
+//SetViewPort
+//	ビューポート設定
+//
 void Camera::SetViewPort(float x, float y, float w, float h)
 {
 	x = min(x, 1.0f);
@@ -163,96 +166,104 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 	h = min(h, 1.0f);
 
 	RECT rect;
-	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),&rect);
-	unsigned int width = rect.right - rect.left;
-	unsigned int height = rect.bottom - rect.top;
+	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &rect);
+	float width = rect.right - rect.left;
+	float height = rect.bottom - rect.top;
 
-	viewport.left	= (long)(x == 0.0f ? 0 : width *x);
-	viewport.right	= (long)(w == 0.0f ? 0 : width *w);
-	viewport.top	= (long)(y == 0.0f ? 0 : height*y);
-	viewport.bottom = (long)(h == 0.0f ? 0 : height*h);
+	rect.left = (long)(x == 0.0f ? 0 : width *x);
+	rect.right = (long)(w == 0.0f ? 0 : width *w);
+	rect.top = (long)(y == 0.0f ? 0 : height*y);
+	rect.bottom = (long)(h == 0.0f ? 0 : height*h);
+
+	_Viewport.TopLeftX = rect.left;
+	_Viewport.TopLeftY = rect.top;
+	_Viewport.Width = rect.right - rect.left;
+	_Viewport.Height = rect.bottom - rect.top;
+	_Viewport.MaxDepth = 1.0f;
+	_Viewport.MinDepth = 0.0f;
+
 }
 
+//SetPriority
+//	Camera描画優先度設定
+//
 void Camera::SetPriority(int priority)
 {
-	this->priority = priority;
-	Camera::IndexSort(this);
+	this->_Priority = priority;
+	Camera::RegisterSortIndex(this);
 }
 
-XMMATRIX Camera::GetViewMatrix()
-{
-	return this->m_ViewMatrix;
-}
-
-XMMATRIX Camera::GetProjectionMatrix()
-{
-	return this->m_ProjectionMatrix;
-}
-
-//描画
+//Run
+//	描画実行
+//
 void Camera::Run()
 {
 	XMMATRIX	ViewMatrix;
-	XMMATRIX	m_InvViewMatrix;
+	XMMATRIX	InvViewMatrix;
 
-	// ビューポート設定
-	D3D11_VIEWPORT dxViewport;
-	dxViewport.Width = (float)(viewport.right - viewport.left);
-	dxViewport.Height = (float)(viewport.bottom - viewport.top);
-	dxViewport.MinDepth = 0.0f;
-	dxViewport.MaxDepth = 1.0f;
-	dxViewport.TopLeftX = (float)viewport.left;
-	dxViewport.TopLeftY = (float)viewport.top;
-
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->RSSetViewports(1, &dxViewport);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->RSSetViewports(1, &_Viewport);
 
 	// ビューマトリクス設定
 	{
-		m_InvViewMatrix = this->transform()->WorldMatrix();
+		InvViewMatrix = this->transform()->WorldMatrix();
 
 		XMVECTOR det;
-		ViewMatrix = XMMatrixInverse(&det, m_InvViewMatrix);
+		ViewMatrix = XMMatrixInverse(&det, InvViewMatrix);
 
-		this->m_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
+		this->_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
 
 		D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
 	}
 
 	// プロジェクションマトリクス設定
 	{
-		this->m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, dxViewport.Width / dxViewport.Height, 1.0f, 1000.0f);
+		this->_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, _Viewport.Width / _Viewport.Height, 1.0f, 1000.0f);
 
-		D3DApp::Renderer::SetProjectionMatrix(&m_ProjectionMatrix);
+		D3DApp::Renderer::SetProjectionMatrix(&_ProjectionMatrix);
 	}
 }
 
-void Camera::OnDestroy()
-{
-	for (auto itr = CameraIndex.begin(); itr != CameraIndex.end(); itr++)
-	{
-		auto camera = itr->lock().get();
-		if (camera != this) continue;
-		CameraIndex.erase(itr);
-		break;
-	}
-}
-
-//視錐台カリング
+//GetVisibility
+//	視錐台カリング
+//
 bool Camera::GetVisibility(Vector3 position)
 {
-	XMVECTOR viewPos,projPos;
+	XMVECTOR viewPos, projPos;
 	XMFLOAT3 projPosF;
 
-	viewPos = XMVector3TransformCoord(position,m_ViewMatrix);
-	projPos = XMVector3TransformCoord(viewPos,m_ProjectionMatrix);
-	XMStoreFloat3(&projPosF,projPos);
+	viewPos = XMVector3TransformCoord(position, _ViewMatrix);
+	projPos = XMVector3TransformCoord(viewPos, _ProjectionMatrix);
+	XMStoreFloat3(&projPosF, projPos);
 
 	//画面内か
 	if (-1.0f < projPosF.x && projPosF.x < 1.0f &&
 		-1.0f < projPosF.y && projPosF.y < 1.0f &&
-		 0.0f < projPosF.z && projPosF.z < 1.0f)
+		0.0f < projPosF.z && projPosF.z < 1.0f)
 	{
 		return true;
 	}
 	return false;
+}
+
+
+
+
+//*********************************************************************************************************************
+//
+//	Editor用
+//
+//*********************************************************************************************************************
+
+//EditorWindow
+//	エディタ表示
+//
+void Camera::EditorWindow()
+{
+	ImGui::Begin("Camera : SortIndex");
+	for (auto camera : CameraSortIndex)
+	{
+		//GameObject名で設定
+		ImGui::Text((std::to_string(camera->_Priority) + " : " + camera->gameObject()->GetName()).c_str());
+	}
+	ImGui::End();
 }

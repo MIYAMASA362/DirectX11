@@ -171,6 +171,8 @@ void CManager::DebugRender()
 	TextureManager::EditorWindow();
 	ObjectManager::EditorWindow();
 
+	Camera::EditorWindow();
+
 	GUI::guiImGui::Render();
 }
 
