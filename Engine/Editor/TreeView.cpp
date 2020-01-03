@@ -349,7 +349,7 @@ void FileTreeView::FileViewNode(LPSTR filePath, TVINSERTSTRUCT tv)
 
 			FileViewNode(path, tv);
 		}
-		//ファイル名表示
+		//ファイル表示
 		else
 		{
 
@@ -603,4 +603,15 @@ void Editor::FileTreeView::ListView_FileOpen(LPNMITEMACTIVATE lpnmitem)
 	ShellExecute(this->_hWnd, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 
 	FindClose(hFind);
+}
+
+//ListView_GetFilePath
+//
+//
+std::string Editor::FileTreeView::ListView_GetFilePath(HTREEITEM item)
+{
+
+
+
+	return std::string();
 }

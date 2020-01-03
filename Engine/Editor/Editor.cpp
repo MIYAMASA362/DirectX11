@@ -67,8 +67,8 @@ HRESULT EditorSubWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClass
 	};
 
 	//サブウィンドウ登録
-	if(!RegisterClassEx(&this->_WndClass)){
-		MessageBox(NULL,"WndClassの設定に失敗しました。","EditorSubWindow",MB_OK);
+	if (!RegisterClassEx(&this->_WndClass)) {
+		MessageBox(NULL, "WndClassの設定に失敗しました。", "EditorSubWindow", MB_OK);
 		return E_FAIL;
 	}
 
@@ -80,7 +80,7 @@ HRESULT EditorSubWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClass
 		style | WS_CLIPCHILDREN,
 		x,
 		y,
-		width  + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
 		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
 		hParent,
 		NULL,
@@ -108,103 +108,103 @@ HRESULT EditorSubWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClass
 LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//サブウィンドウ取得
-	EditorSubWindow* subWindow = (EditorSubWindow*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
-	
+	EditorSubWindow* subWindow = (EditorSubWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
 	//メッセージ
 	switch (uMsg)
 	{
 		//ウィンドウ生成
-		case WM_CREATE:
-			//MDIを有効化
-			if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
-			{
-				//MDIウィンドウ設定
-				this->_MDIWindow = new MDIWindow();
-				if (FAILED(this->_MDIWindow->Create(hWnd,this->_hInstance, "MDIWindow", "MDIWindow", 0, 0,300,300,WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_VISIBLE))) {
-					MessageBox(NULL, "MDIWindowの設定に失敗しました", "EditorSubWindow", MB_OK);
-					return E_FAIL;
-				}
+	case WM_CREATE:
+		//MDIを有効化
+		if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
+		{
+			//MDIウィンドウ設定
+			this->_MDIWindow = new MDIWindow();
+			if (FAILED(this->_MDIWindow->Create(hWnd, this->_hInstance, "MDIWindow", "MDIWindow", 0, 0, 300, 300, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_VISIBLE))) {
+				MessageBox(NULL, "MDIWindowの設定に失敗しました", "EditorSubWindow", MB_OK);
+				return E_FAIL;
 			}
+		}
 
-			this->_FileTree = new FileTreeView();
-			_FileTree->Create(hWnd,this->_hInstance,"FileTree","FileView",0,0,500,300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD);
-			break;
+		this->_FileTree = new FileTreeView();
+		_FileTree->Create(hWnd, this->_hInstance, "FileTree", "FileView", 0, 0, 500, 300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD);
+		break;
 
 		//サイズ
-		case WM_SIZE:
-			RECT rect;
-			GetWindowRect(this->_FileTree->Get_Window(),&rect);
-			MoveWindow(this->_FileTree->Get_Window(),0,HIWORD(lParam) - 300,LOWORD(lParam),300,TRUE);
-			break;
+	case WM_SIZE:
+		RECT rect;
+		GetWindowRect(this->_FileTree->Get_Window(), &rect);
+		MoveWindow(this->_FileTree->Get_Window(), 0, HIWORD(lParam) - 300, LOWORD(lParam), 300, TRUE);
+		break;
 
 		//コマンド
-		case WM_COMMAND:
+	case WM_COMMAND:
 
-			switch (LOWORD(wParam))
-			{
-				//ウィンドウ => 新規作成
-				case ID_WINDOW_40003:
-					//MDIウィンドウの生成
-					if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
-						this->_MDIWindow->CreateMDI("Window",0,0,200,200,NULL);
-					break;
-				
-				//終了処理
-				case ID_40004:
-					SendMessage(hWnd, WM_DESTROY, 0, 0);
-					break;
-
-				//ゲーム実行
-				case ID_EDITOR_RUN:
-					this->_MainEditor->Start();
-					break;
-
-				//ゲーム停止
-				case ID_EDITOR_STOP:
-					this->_MainEditor->Stop();
-					break;
-
-				default:
-					break;
-			}
+		switch (LOWORD(wParam))
+		{
+			//ウィンドウ => 新規作成
+		case ID_WINDOW_40003:
+			//MDIウィンドウの生成
+			if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
+				this->_MDIWindow->CreateMDI("Window", 0, 0, 200, 200, NULL);
 			break;
+
+			//終了処理
+		case ID_40004:
+			SendMessage(hWnd, WM_DESTROY, 0, 0);
+			break;
+
+			//ゲーム実行
+		case ID_EDITOR_RUN:
+			this->_MainEditor->Start();
+			break;
+
+			//ゲーム停止
+		case ID_EDITOR_STOP:
+			this->_MainEditor->Stop();
+			break;
+
+		default:
+			break;
+		}
+		break;
 
 		//キー入力
-		case WM_KEYDOWN:
-			switch (wParam)
-			{
-				//スペース
-				case VK_ESCAPE:
-					SendMessage(hWnd, WM_CLOSE, 0, 0);
-					break;
-				//F1
-				case VK_F1:
-					ShowWindow(hWnd, SW_SHOW);
-					ShowWindow(hWnd, SW_RESTORE);
-					SendMessage(this->_FileTree->Get_Window(),uMsg,wParam,lParam);
-					break;
-				default:
-					break;
-			}
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+			//スペース
+		case VK_ESCAPE:
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
+			//F1
+		case VK_F1:
+			ShowWindow(hWnd, SW_SHOW);
+			ShowWindow(hWnd, SW_RESTORE);
+			SendMessage(this->_FileTree->Get_Window(), uMsg, wParam, lParam);
+			break;
+		default:
+			break;
+		}
+		break;
 
 		//ウィンドウ閉じる
-		case WM_CLOSE:
-			if ((this->_WindowFlag & WindowFlags_CloseCheck) == WindowFlags_CloseCheck)
-				if (MessageBox(NULL, "本当に終了してもよろしいですか？", "確認", MB_OKCANCEL || MB_DEFBUTTON2) != IDOK)
-					break;
-			ShowWindow(hWnd, SW_HIDE);
-			break;
+	case WM_CLOSE:
+		if ((this->_WindowFlag & WindowFlags_CloseCheck) == WindowFlags_CloseCheck)
+			if (MessageBox(NULL, "本当に終了してもよろしいですか？", "確認", MB_OKCANCEL || MB_DEFBUTTON2) != IDOK)
+				break;
+		ShowWindow(hWnd, SW_HIDE);
+		break;
 
 		//削除処理
-		case WM_DESTROY:
-			DestroyWindow(hWnd);
-			PostQuitMessage(0);
-			break;
+	case WM_DESTROY:
+		DestroyWindow(hWnd);
+		PostQuitMessage(0);
+		break;
 
 		//デフォルト
-		default:
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
 	return 0;
@@ -247,13 +247,13 @@ HRESULT EditorWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassNam
 
 	//メインウィンドウ
 	this->_WindowFlag |= WindowFlags_CloseCheck ^ WindowFlags_DragDropFile ^ WindowFlags_PreviewProcessID;
-	hr = Window::Create(hParent,hInstance, lpClassName, lpCaption, CW_USEDEFAULT,CW_USEDEFAULT,width, height, style);
+	hr = Window::Create(hParent, hInstance, lpClassName, lpCaption, CW_USEDEFAULT, CW_USEDEFAULT, width, height, style);
 	if (FAILED(hr)) return hr;
 	GetWindowRect(this->_hWnd, &rect);
 
 	//サブウィンドウ
 	//_SubWindow->GetWindowFlags() |= WindowFlags_MultipleDocumentInterface;
-	hr = _SubWindow->Create(this->_hWnd,hInstance, "SubWindow1", "SubWindow", rect.right, rect.top, 400, height, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
+	hr = _SubWindow->Create(this->_hWnd, hInstance, "SubWindow1", "SubWindow", rect.right, rect.top, 400, height, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
 	if (FAILED(hr)) return hr;
 
 	return hr;
@@ -282,6 +282,27 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 	case WM_SETFOCUS:
 		//最前面に表示する
 		//SetWindowPos(hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+		break;
+
+		//サイズ
+	case WM_SIZE:
+		
+		//Threadが違うのでRenderTargetなどにエラーが加わる
+		//	ERROR : サイズ変えすぎると強制停止
+		//
+		if (_D3DApp)
+		{
+			_IsRunProcess = false;
+			_D3DApp->CleanupRenderTargetView();
+			_D3DApp->CleanupDepthStencilView();
+
+			_D3DApp->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
+
+			_D3DApp->CreateRenderTargetView();
+			_D3DApp->CreateDepthStencilView();
+			_IsRunProcess = true;
+		}
+
 		break;
 
 		//ドロップファイル
@@ -322,7 +343,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			break;
 			//F1
 		case VK_F1:
-			SendMessage(this->_SubWindow->Get_Window(),uMsg,wParam,lParam);
+			SendMessage(this->_SubWindow->Get_Window(), uMsg, wParam, lParam);
 			break;
 		default:
 			break;
@@ -367,8 +388,7 @@ WPARAM EditorWindow::MessageLoop()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-	}
-	while (msg.message != WM_QUIT);
+	} while (msg.message != WM_QUIT);
 
 	_threadEnd = true;
 
@@ -383,28 +403,27 @@ WPARAM EditorWindow::MessageLoop()
 void Editor::EditorWindow::RunProcces()
 {
 	//Applicationの生成
-	D3DApp::Create(
-		this->Get_Window(),
-		this->Get_hInstance(),
-		60
-	);
+	_D3DApp = new D3DApp();
+	_D3DApp->Create(this->_hWnd,60);
+
+	D3DApp::Renderer::RegisterDevice(_D3DApp);
 
 	CManager::Initialize();
 
 	_IsRunProcess = true;
-	
+
 	do
 	{
-		if(_IsRunProcess)
+		if (_IsRunProcess)
 			CManager::Run();
-	} 
-	while (!_threadEnd);
-	
+	} while (!_threadEnd);
+
 	_IsRunProcess = false;
 
 	CManager::Finalize();
 
-	D3DApp::Destroy();
+	D3DApp::Renderer::Release();
+	delete _D3DApp;
 }
 
 //Start

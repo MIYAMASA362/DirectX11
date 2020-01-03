@@ -52,10 +52,10 @@ void CManager::Initialize()
 	ComponentManager::Create();
 
 	//GUI
-	GUI::guiImGui::Create(D3DApp::GetWindow(),D3DApp::GetDevice(),D3DApp::GetDeviceContext());
+	GUI::guiImGui::Create(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),D3DApp::Renderer::GetD3DAppDevice()->GetDevice(),D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext());
 
 	//Time
-	TimeManager::Create(D3DApp::GetFps());
+	TimeManager::Create(D3DApp::Renderer::GetD3DAppDevice()->GetFps());
 
 	Input::Initialize();
 	Input::Mouse::SetScreenLoop(false);

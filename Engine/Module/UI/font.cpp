@@ -168,7 +168,7 @@ Texture* Font::TransformToTexture()
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		desc.MiscFlags = 0;
 
-		hr = D3DApp::GetDevice()->CreateTexture2D(&desc, NULL, &texture);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateTexture2D(&desc, NULL, &texture);
 		if (FAILED(hr))
 			assert(false);
 	}
@@ -177,7 +177,7 @@ Texture* Font::TransformToTexture()
 	{
 		D3D11_MAPPED_SUBRESOURCE hMappedResource = {};
 
-		hr = D3DApp::GetDeviceContext()->Map(
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Map(
 			texture,
 			NULL,
 			D3D11_MAP_WRITE_DISCARD,
@@ -226,7 +226,7 @@ Texture* Font::TransformToTexture()
 			m_y += tm.tmHeight;
 		}
 	}
-	D3DApp::GetDeviceContext()->Unmap(texture, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Unmap(texture, 0);
 
 	//‰ð•úˆ—
 	{
@@ -244,7 +244,7 @@ Texture* Font::TransformToTexture()
 		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = 1;
 
-		hr = D3DApp::GetDevice()->CreateShaderResourceView(texture,&SRVDesc,&srv);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateShaderResourceView(texture,&SRVDesc,&srv);
 	}
 
 	this->m_texture = new Texture(texture, srv);

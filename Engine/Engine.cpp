@@ -38,11 +38,10 @@ WPARAM EngineWindow::MessageLoop()
 	MSG msg;
 
 	//Application‚Ì¶¬
-	D3DApp::Create(
-		this->Get_Window(),
-		this->Get_hInstance(),
-		60
-	);
+	D3DApp* d3dapp = new D3DApp();
+	d3dapp->Create(this->_hWnd,60);
+
+	D3DApp::Renderer::RegisterDevice(d3dapp);
 
 	CManager::Initialize();
 
@@ -63,7 +62,8 @@ WPARAM EngineWindow::MessageLoop()
 
 	CManager::Finalize();
 
-	D3DApp::Destroy();
+	D3DApp::Renderer::Release();
+	delete d3dapp;
 
 	return msg.wParam;
 }

@@ -20,17 +20,17 @@ void ConstantBuffer::CreateBuffer()
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
 	bd.StructureByteStride = sizeof(float);
-	
+
 	bd.ByteWidth = sizeof(XMMATRIX);
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_WORLD]);
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_VIEW]);
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_PROJECTION]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_WORLD]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_VIEW]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_PROJECTION]);
 
 	bd.ByteWidth = sizeof(Material::Constant);
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_MATERIAL]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_MATERIAL]);
 
 	bd.ByteWidth = sizeof(Light::Constant);
-	D3DApp::GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_LIGHT]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_LIGHT]);
 }
 
 ID3D11Buffer* ConstantBuffer::GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement)
@@ -38,19 +38,19 @@ ID3D11Buffer* ConstantBuffer::GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferEl
 	return _ConstantBuffer[bufferElement];
 }
 
-void ConstantBuffer::UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement,const void* data)
+void ConstantBuffer::UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement, const void* data)
 {
-	D3DApp::GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement],0,NULL,data,0,0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement], 0, NULL, data, 0, 0);
 }
 
 void ConstantBuffer::SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer)
 {
-	D3DApp::GetDeviceContext()->VSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->VSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
 }
 
 void ConstantBuffer::SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer)
 {
-	D3DApp::GetDeviceContext()->PSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->PSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
 }
 
 
@@ -76,7 +76,7 @@ void VertexShaderData::LoadShader(const char * vertexShader, VERTEX_INPUT_LAYOUT
 
 	LoadShaderFile(vertexShader, &buffer, &fsize);
 
-	D3DApp::GetDevice()->CreateVertexShader(buffer,fsize,NULL,&_VertexShader);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateVertexShader(buffer, fsize, NULL, &_VertexShader);
 
 	//入力レイアウト設定
 	{
@@ -137,7 +137,7 @@ void VertexShaderData::LoadShader(const char * vertexShader, VERTEX_INPUT_LAYOUT
 			}
 		}
 
-		D3DApp::GetDevice()->CreateInputLayout(layout, layoutSize, buffer, fsize, &_InputLayout);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateInputLayout(layout, layoutSize, buffer, fsize, &_InputLayout);
 
 		delete[] layout;
 
@@ -148,8 +148,8 @@ void VertexShaderData::LoadShader(const char * vertexShader, VERTEX_INPUT_LAYOUT
 
 void VertexShaderData::SetShader()
 {
-	D3DApp::GetDeviceContext()->VSSetShader(_VertexShader,NULL,0);
-	D3DApp::GetDeviceContext()->IASetInputLayout(_InputLayout);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->VSSetShader(_VertexShader, NULL, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetInputLayout(_InputLayout);
 }
 
 
@@ -174,14 +174,14 @@ void PixelShaderData::LoadShader(const char * pixelShader)
 
 	LoadShaderFile(pixelShader, &buffer, &fsize);
 
-	D3DApp::GetDevice()->CreatePixelShader(buffer,fsize,NULL,&_PixelShader);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreatePixelShader(buffer, fsize, NULL, &_PixelShader);
 
 	delete[] buffer;
 }
 
 void PixelShaderData::SetShader()
 {
-	D3DApp::GetDeviceContext()->PSSetShader(_PixelShader,NULL,0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->PSSetShader(_PixelShader, NULL, 0);
 }
 
 
@@ -203,7 +203,7 @@ Shader::~Shader()
 void Shader::SetVertexShader(const char * VertexShader, VERTEX_INPUT_LAYOUT * layout, unsigned int size)
 {
 	_VertexShader = new VertexShaderData();
-	_VertexShader->LoadShader(VertexShader,layout,size);
+	_VertexShader->LoadShader(VertexShader, layout, size);
 }
 
 void Shader::SetPixelShader(const char * PixelShader)

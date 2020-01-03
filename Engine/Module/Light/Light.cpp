@@ -20,5 +20,5 @@ Light::~Light()
 
 void Light::SetResource()
 {
-	D3DApp::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_LIGHT,&_constant);
+	D3DApp::Renderer::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_LIGHT,&_constant);
 }

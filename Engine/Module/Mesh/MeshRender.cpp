@@ -51,7 +51,7 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 	this->_TextureMaterial->SetResource();
 
 	//シェーダ
-	D3DApp::GetShader()->SetShader();
+	D3DApp::Renderer::GetShader()->SetShader();
 
 	for(unsigned int index = 0; index < _MeshFilter->GetNumMesh(); index++)
 	{
@@ -65,7 +65,7 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 		mesh.lock()->SetIndexBuffer();
 
 		//描画
-		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-		D3DApp::GetDeviceContext()->DrawIndexed(mesh.lock()->_IndexNum,0,0);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(mesh.lock()->_IndexNum,0,0);
 	}
 }

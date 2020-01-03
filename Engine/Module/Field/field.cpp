@@ -39,7 +39,7 @@ CField::CField()
 	ZeroMemory(&subResourceData, sizeof(subResourceData));
 	subResourceData.pSysMem = _VertexArray;
 
-	D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 }
 
 CField::~CField()
@@ -59,7 +59,7 @@ void CField::Render(XMMATRIX& worldMatrix)
 
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
-	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
 
 	//行列変換
@@ -69,9 +69,9 @@ void CField::Render(XMMATRIX& worldMatrix)
 	world *= XMMatrixTranslation(0.0f, 0.0f, 50.0f);
 	D3DApp::Renderer::SetWorldMatrix(&world);
 
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)　n:総数 i:どこから始めるか
-	D3DApp::GetDeviceContext()->Draw(4, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4, 0);
 
 }
 #pragma endregion
@@ -105,7 +105,7 @@ WallField::WallField()
 		ZeroMemory(&subResourceData, sizeof(subResourceData));
 		subResourceData.pSysMem = _VertexArray;
 
-		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
 
 
 		VERTEX_3D wall[4] =
@@ -126,7 +126,7 @@ WallField::WallField()
 		ZeroMemory(&subResourceData, sizeof(subResourceData));
 		subResourceData.pSysMem = wall;
 
-		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_WallVertexBuffer);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_WallVertexBuffer);
 	}
 }
 
@@ -148,12 +148,12 @@ void WallField::Render(XMMATRIX& worldMatrix)
 
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
-	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
 	D3DApp::Renderer::SetTexture(this->FieldTexture->GetShaderResourceView());
 
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)　n:総数 i:どこから始めるか
-	D3DApp::GetDeviceContext()->Draw(4, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4, 0);
 
 	for(int i=0; i< 4; i++)
 	{
@@ -163,16 +163,16 @@ void WallField::Render(XMMATRIX& worldMatrix)
 
 		XMMATRIX local = localScale* localPosition * localRotation;
 
-		D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
 		D3DApp::Renderer::SetTexture(this->WallTexture->GetShaderResourceView());
 
 		local = local * worldMatrix;
 
 		D3DApp::Renderer::SetWorldMatrix(&local);
 
-		D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		//Draw(n,i)　n:総数 i:どこから始めるか
-		D3DApp::GetDeviceContext()->Draw(4, 0);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4, 0);
 	}
 }
 
@@ -242,7 +242,7 @@ SkySphere::SkySphere()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = this->_VertexArray;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点バッファの生成に失敗しました。","SkySphere",MB_OK);
 	}
@@ -281,7 +281,7 @@ SkySphere::SkySphere()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点インデックスの生成に失敗しました。","SkyShpere",MB_OK);
 
@@ -304,9 +304,9 @@ void SkySphere::Render(XMMATRIX& worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 	
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
 }
 
 #pragma endregion
@@ -406,7 +406,7 @@ MeshField::MeshField()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = _VertexArray;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点バッファーの生成に失敗しました。","MeshField",MB_OK);
 	}
@@ -443,7 +443,7 @@ MeshField::MeshField()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"インデックスバッファの生成に失敗しました。","MeshField",MB_OK);
 
@@ -477,9 +477,9 @@ void MeshField::Render(XMMATRIX& worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
 }
 
 #pragma endregion
@@ -541,7 +541,7 @@ MeshWall::MeshWall()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = _VertexArray;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点インデックスの生成に失敗しました。","MeshWall",MB_OK);
 	}
@@ -579,7 +579,7 @@ MeshWall::MeshWall()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"インデックスバッファの生成に失敗しました。","MeshWall",MB_OK);
 
@@ -601,7 +601,7 @@ void MeshWall::Render(XMMATRIX& worldMatrix)
 	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
 
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	XMMATRIX world;
 	XMMATRIX local;
@@ -609,7 +609,7 @@ void MeshWall::Render(XMMATRIX& worldMatrix)
 	for (int i = 0; i < 4; i++) {
 		world = local * worldMatrix;
 		D3DApp::Renderer::SetWorldMatrix(&world);
-		D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
 		local *= XMMatrixRotationY(Mathf::PI_2);
 	}
 }
@@ -662,7 +662,7 @@ MeshCircle::MeshCircle()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = _VertexArray;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点バッファの生成に失敗しました。","MeshCircle",MB_OK);
 	}
@@ -688,7 +688,7 @@ MeshCircle::MeshCircle()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"インデックスバッファの生成に失敗しました。","MeshCircle",MB_OK);
 
@@ -711,9 +711,9 @@ void MeshCircle::Render(XMMATRIX& worldMatrix)
 	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
 
 	D3DApp::Renderer::SetTexture(this->m_Texture->GetShaderResourceView());
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	D3DApp::GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
 }
 
 #pragma endregion

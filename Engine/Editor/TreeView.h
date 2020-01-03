@@ -69,7 +69,10 @@ namespace Editor
 
 		//ディレクトリ内のファイルをリストビューで表示
 		void ListView_FileView(std::string DirectoryPath);
-
+		//選択ファイルを開く
 		void ListView_FileOpen(LPNMITEMACTIVATE lpnmitem);
+
+		//リストビューからファイルパスを得る
+		std::string ListView_GetFilePath(HTREEITEM item);
 	};
 }

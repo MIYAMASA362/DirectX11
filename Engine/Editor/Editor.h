@@ -1,5 +1,7 @@
 #pragma once
 
+class D3DApp;
+
 namespace System
 {
 	class Window;
@@ -49,6 +51,8 @@ namespace Editor
 
 		//エディタサブウィンドウ
 		EditorSubWindow* _SubWindow;
+
+		D3DApp* _D3DApp = nullptr;
 		
 		//スレッドの終了
 		bool _threadEnd = false;

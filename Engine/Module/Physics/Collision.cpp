@@ -706,7 +706,7 @@ void SphereCollider::SetRenderBuffer()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = m_pVertex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点バッファの生成に失敗しました。","SphereCollider",MB_OK);
 	}
@@ -729,7 +729,7 @@ void SphereCollider::SetRenderBuffer()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd,&sd,&m_IndexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点インデックスバッファの生成に失敗しました。","SphereCollider",MB_OK);
 	
@@ -771,18 +771,18 @@ void SphereCollider::Render()
 	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationZ(Mathf::PI_2) * world;
 	D3DApp::Renderer::SetWorldMatrix(&local);
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationX(Mathf::PI_2) * world;
 	D3DApp::Renderer::SetWorldMatrix(&local);
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
 
 bool SphereCollider::Judgment(Collider * other)
@@ -845,7 +845,7 @@ void BoxCollider::SetRenderBuffer()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = m_pVertex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd, &sd, &m_VertexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, &sd, &m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL, "頂点バッファの生成に失敗しました。", "BoxCollider", MB_OK);
 	}
@@ -885,7 +885,7 @@ void BoxCollider::SetRenderBuffer()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::GetDevice()->CreateBuffer(&bd, &sd, &m_IndexBuffer);
+		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, &sd, &m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL, "頂点インデックスバッファの生成に失敗しました。", "BoxCollider", MB_OK);
 	
@@ -941,8 +941,8 @@ void BoxCollider::Render()
 	
 
 	D3DApp::Renderer::SetWorldMatrix(&world);
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	D3DApp::GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
 }
 
 bool BoxCollider::Judgment(Collider * other)

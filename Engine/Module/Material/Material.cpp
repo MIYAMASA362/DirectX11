@@ -24,7 +24,7 @@ Material::~Material()
 
 void Material::SetResource()
 {
-	D3DApp::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
+	D3DApp::Renderer::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }
 
 TextureMaterial::~TextureMaterial()

@@ -73,7 +73,7 @@ Image::Image(EntityID OwnerID)
 		ZeroMemory(&subResourceData,sizeof(subResourceData));
 		subResourceData.pSysMem = vertex;
 
-		D3DApp::GetDevice()->CreateBuffer(&bufferDesc,&subResourceData,&this->vertexBuffer);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc,&subResourceData,&this->vertexBuffer);
 	}
 }
 
@@ -88,15 +88,15 @@ void Image::Render(XMMATRIX& world)
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	//頂点バッファ設定
-	D3DApp::GetDeviceContext()->IASetVertexBuffers(0,1,&this->vertexBuffer,&stride,&offset);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0,1,&this->vertexBuffer,&stride,&offset);
 	//テクスチャ設定
 	this->texture.lock()->SetResource();
 	//ワールド行列設定
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//描画
-	D3DApp::GetDeviceContext()->Draw(4,0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4,0);
 	D3DApp::Renderer::SetDepthEnable(true);
 }
 
@@ -128,7 +128,7 @@ Button::Button(EntityID OwnerID)
 		ZeroMemory(&subResourceData, sizeof(subResourceData));
 		subResourceData.pSysMem = vertex;
 
-		D3DApp::GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_vertexBuffer);
+		D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_vertexBuffer);
 	}
 }
 
@@ -178,15 +178,15 @@ void Button::Render(XMMATRIX world)
 	UINT offset = 0;
 
 	//頂点バッファ設定
-	D3DApp::GetDeviceContext()->IASetVertexBuffers(0, 1, &this->m_vertexBuffer, &stride, &offset);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0, 1, &this->m_vertexBuffer, &stride, &offset);
 	//テクスチャ設定
 	this->texture->SetResource();
 	//ワールド行列設定
 	D3DApp::Renderer::SetWorldMatrix(&world);
 	//トポロジ設定
-	D3DApp::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//描画
-	D3DApp::GetDeviceContext()->Draw(4, 0);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4, 0);
 }
 
 bool Button::IsHover()

@@ -61,7 +61,7 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 	MousePos.y = Input::Mouse::GetMouseY();
 
 	RECT rect;
-	GetWindowRect(D3DApp::GetWindow(),&rect);
+	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),&rect);
 	
 	const XMMATRIX projection = pActiveCamera->GetProjectionMatrix();
 	const XMMATRIX ViewMatrix = pActiveCamera->GetViewMatrix();
@@ -128,9 +128,10 @@ void Camera::IndexSort(Camera* target)
 Camera::Camera(EntityID OwnerID)
 :
 	Behaviour(OwnerID),
-	viewport({0,0,(long)D3DApp::GetScreenWidth(),(long)D3DApp::GetScreenHeight()}),
 	priority(1)
 {
+	SetViewPort(0,0,1,1);
+
 	this->RegisterIndex();
 
 	this->m_ProjectionMatrix = XMMatrixIdentity();
@@ -161,10 +162,15 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 	w = min(w, 1.0f);
 	h = min(h, 1.0f);
 
-	viewport.left	= (long)(x == 0.0f ? 0 : D3DApp::GetScreenWidth() *x);
-	viewport.right	= (long)(w == 0.0f ? 0 : D3DApp::GetScreenWidth() *w);
-	viewport.top	= (long)(y == 0.0f ? 0 : D3DApp::GetScreenHeight()*y);
-	viewport.bottom = (long)(h == 0.0f ? 0 : D3DApp::GetScreenHeight()*h);
+	RECT rect;
+	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),&rect);
+	unsigned int width = rect.right - rect.left;
+	unsigned int height = rect.bottom - rect.top;
+
+	viewport.left	= (long)(x == 0.0f ? 0 : width *x);
+	viewport.right	= (long)(w == 0.0f ? 0 : width *w);
+	viewport.top	= (long)(y == 0.0f ? 0 : height*y);
+	viewport.bottom = (long)(h == 0.0f ? 0 : height*h);
 }
 
 void Camera::SetPriority(int priority)
@@ -198,7 +204,7 @@ void Camera::Run()
 	dxViewport.TopLeftX = (float)viewport.left;
 	dxViewport.TopLeftY = (float)viewport.top;
 
-	D3DApp::GetDeviceContext()->RSSetViewports(1, &dxViewport);
+	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->RSSetViewports(1, &dxViewport);
 
 	// ビューマトリクス設定
 	{

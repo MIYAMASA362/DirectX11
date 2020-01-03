@@ -48,8 +48,8 @@ bool Input::GetKeyUp(BYTE KeyCode)
 void DirectX::Input::DebugGUI()
 {
 	ImGui::Begin("Input");
-	ImGui::Text("Screen Width:%d", D3DApp::GetScreenWidth());
-	ImGui::Text("Screen Height:%d", D3DApp::GetScreenHeight());
+	ImGui::Text("Screen Width:%d", D3DApp::Renderer::GetD3DAppDevice()->GetScreenWidth());
+	ImGui::Text("Screen Height:%d", D3DApp::Renderer::GetD3DAppDevice()->GetScreenHeight());
 	ImGui::Text("Mouse X:%f",Input::Mouse::GetMouseX());
 	ImGui::Text("Mouse Y:%f",Input::Mouse::GetMouseY());
 	ImGui::End();
@@ -63,8 +63,9 @@ void DirectX::Input::Initialize()
 
 	HRESULT hr;
 
+	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), GWLP_HINSTANCE);
 	hr = DirectInput8Create(
-		D3DApp::GethInstance(),
+		hInst,
 		DIRECTINPUT_VERSION,
 		IID_IDirectInput8,
 		(void**)&m_pInput,
@@ -81,7 +82,7 @@ void DirectX::Input::Initialize()
 
 	hr = m_pDevMouse->SetDataFormat(&c_dfDIMouse2);
 
-	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::GetWindow(), (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 
 	m_pDevMouse->Acquire();
 
@@ -106,7 +107,7 @@ void DirectX::Input::Update()
 		//カーソルループ
 		if (!Input::GetKeyPress(VK_CONTROL) && IsCursorLoop) {
 			WINDOWINFO info;
-			GetWindowInfo(D3DApp::GetWindow(), &info);
+			GetWindowInfo(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &info);
 			//--- 左右 -------------------------------------------------------------------
 			if ((UINT)m_MousePos.x <= info.rcWindow.left + info.cxWindowBorders)
 				SetCursorPos(info.rcWindow.right - info.cxWindowBorders, m_MousePos.y);
@@ -120,7 +121,7 @@ void DirectX::Input::Update()
 
 			GetCursorPos(&m_MousePos);
 		}
-		ScreenToClient(D3DApp::GetWindow(), &m_MousePos);
+		ScreenToClient(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &m_MousePos);
 
 		//DirectInput
 		if (FAILED(m_pDevMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState2)))
