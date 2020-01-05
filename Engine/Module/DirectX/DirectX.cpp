@@ -11,6 +11,7 @@
 #include<stdio.h>
 #include<io.h>
 #include<string>
+#include<memory>
 
 #include<d3d11.h>
 #include<DirectXMath.h>
@@ -243,6 +244,9 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	return S_OK;
 }
 
+//GetRefreshRate
+//	フレームレート取得
+//
 unsigned int D3DApp::GetRefreshRate()
 {
 	DXGI_SWAP_CHAIN_DESC sd;
@@ -270,6 +274,9 @@ void D3DApp::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const v
 	D3DDevice->CreateBuffer(&bd, &sd, buffer);
 }
 
+//GetSwapChainDesc
+//	スワップチェーン取得
+//
 DXGI_SWAP_CHAIN_DESC D3DApp::GetSwapChainDesc()
 {
 	DXGI_SWAP_CHAIN_DESC sd;
@@ -282,6 +289,9 @@ DXGI_SWAP_CHAIN_DESC D3DApp::GetSwapChainDesc()
 	return sd;
 }
 
+//CreateRenderTargetView
+//
+//
 void D3DApp::CreateRenderTargetView()
 {
 	// レンダーターゲットビュー生成、設定
@@ -291,6 +301,9 @@ void D3DApp::CreateRenderTargetView()
 	pBackBuffer->Release();
 }
 
+//CreateDepthStencilView
+//
+//
 void D3DApp::CreateDepthStencilView()
 {
 	DXGI_SWAP_CHAIN_DESC sd;
@@ -322,6 +335,9 @@ void D3DApp::CreateDepthStencilView()
 	ImmediateContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 }
 
+//CleanupRenderTargetView
+//
+//
 void D3DApp::CleanupRenderTargetView()
 {
 	if (RenderTargetView == nullptr) return;
@@ -329,17 +345,15 @@ void D3DApp::CleanupRenderTargetView()
 	RenderTargetView = nullptr;
 }
 
+//CleanupDepthStencilView
+//
+//
 void D3DApp::CleanupDepthStencilView()
 {
 	if (DepthStencilView == nullptr) return;
 	DepthStencilView->Release();
 	DepthStencilView = nullptr;
 }
-
-
-
-
-
 
 
 
@@ -370,26 +384,6 @@ void D3DApp::Renderer::RegisterDevice(D3DApp * d3dapp)
 	_ConstantBuffer = new ConstantBuffer();
 	_ConstantBuffer->CreateBuffer();
 
-	//Light
-	_Light = new Light();
-
-	//Material
-	_Material = new Material();
-
-	//シェーダ設定
-	_Shader = new Shader();
-	VERTEX_INPUT_LAYOUT layout[] =
-	{
-		VSIL_POSITION,
-		VSIL_NORMAL,
-		VSIL_COLOR,
-		VSIL_TEXCOORD
-	};
-	_Shader->SetVertexShader("Asset/Shader/vertexShader.cso", layout, ARRAYSIZE(layout));
-	_Shader->SetPixelShader("Asset/Shader/pixelShader.cso");
-
-	_Shader->SetShader();
-
 	//定数バッファ設定
 	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD, 0);
 	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW, 1);
@@ -397,11 +391,15 @@ void D3DApp::Renderer::RegisterDevice(D3DApp * d3dapp)
 	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL, 3);
 	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_LIGHT, 4);
 
-	_Material->SetResource();
+	//Material
+	_Material = new Material();
+	_Material->SetResourceMaterial();
+
+	//Light
+	_Light = new Light();
 	_Light->SetResource();
 
-	DXGI_SWAP_CHAIN_DESC sd;
-	sd = _pDevice->GetSwapChainDesc();
+	DXGI_SWAP_CHAIN_DESC sd = _pDevice->GetSwapChainDesc();
 	XMMATRIX matrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
 	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &matrix);
 }

@@ -27,7 +27,7 @@ public:
 };
 
 //UI Image
-class Image:public Renderer2D
+class Image:public Renderer
 {
 public:
 	std::weak_ptr<Texture> texture;

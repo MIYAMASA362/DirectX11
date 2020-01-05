@@ -1,3 +1,4 @@
+#include<algorithm>
 #include"Common.h"
 
 #include"Module\DirectX\DirectX.h"
@@ -6,120 +7,64 @@
 #include"Module\ECSEngine.h"
 
 #include"Renderer.h"
+
 #include"Module\Transform\Transform.h"
 #include"Module\Tag\Tag.h"
 #include"Module\GameObject\GameObject.h"
 
 #include"Module\Camera\camera.h"
 
+#include"Module\Material\Material.h"
 #include"Module\Shader\Shader.h"
 
 using namespace DirectX;
 
-Renderer::RendererIndex Renderer::_RendererIndex;
+//2D描画用
+//D3DApp::Renderer::SetProjectionMatrix2D();
 
-void Renderer::Create()
-{
-	_RendererIndex.emplace(RendererTarget::RenderTarget2D, RendererList());
-	_RendererIndex.emplace(RendererTarget::RenderTarget3D, RendererList());
-}
+//*********************************************************************************************************************
+//
+//	Renderer
+//
+//*********************************************************************************************************************
 
-void Renderer::Destroy()
-{
-	_RendererIndex.erase(RendererTarget::RenderTarget3D);
-	_RendererIndex.erase(RendererTarget::RenderTarget2D);
-}
+//描画
+std::vector<Renderer*> Renderer::RendererIndex;
 
+//Renderer
+//	コンストラクタ
+//
 Renderer::Renderer(EntityID OwnerID)
 :
 	Component(OwnerID)
 {
-	this->SendComponentMessage = [this](std::string message) 
-	{
-		if (message == "Start") Start();
-	};
+	RendererIndex.push_back(this);
 }
 
+//~Renderer
+//	デストラクタ
+//
 Renderer::~Renderer()
 {
-	if (_Shader) delete _Shader;
+	auto rEnd = std::remove_if(RendererIndex.begin(), RendererIndex.end(), [this](const Renderer* renderer) {
+		return this == renderer;
+	});
+	RendererIndex.erase(rEnd,RendererIndex.end());
+
+	delete _Material;
 }
 
-void Renderer::SetEnable(bool enable)
+//BeginRenderer
+//	描画開始
+//
+void Renderer::BeginRender()
 {
-	this->m_IsEnable = enable;
-}
-
-bool Renderer::GetEnable()
-{
-	return this->m_IsEnable;
-}
-
-void Renderer::SetSort(unsigned int sort)
-{
-	auto* index = &_RendererIndex.at(_RendererTarget);
-	auto targert = std::dynamic_pointer_cast<Renderer>(_self.lock());
-	index->remove_if([targert](std::weak_ptr<Renderer> renderer) { return renderer.lock() == targert; });
-	index->insert(std::next(index->begin(), _sort), targert);
-}
-
-void Renderer::Start()
-{
-	auto* index = &_RendererIndex.at(_RendererTarget);
-	index->insert(std::next(index->begin(), _sort), std::dynamic_pointer_cast<Renderer>(_self.lock()));
-}
-
-void Renderer3D::BeginRender()
-{
-	auto index = _RendererIndex.at(RendererTarget::RenderTarget3D);
-	ComponentManager::SendComponentMessage("Render");
-
-	index.remove_if([](std::weak_ptr<Renderer> obj) { return obj.expired(); });
-
-	for(auto renderer:index)
+	for (auto renderer : RendererIndex)
 	{
-		if (!renderer.lock()->gameObject()->GetActive()) continue;
-		if (!renderer.lock()->GetEnable()) continue;
+		if (!renderer->gameObject()->GetActive()) continue;
+		if (!renderer->GetEnable()) continue;
 		//if (!Camera::GetActiveCamera()->GetVisibility(renderer.lock()->transform()->position())) continue;
-		renderer.lock()->Render(renderer.lock()->gameObject()->transform().lock()->WorldMatrix());
+
+		renderer->Render(renderer->gameObject()->transform().lock()->WorldMatrix());
 	}
-}
-
-Renderer3D::Renderer3D(EntityID OwnerID)
-:
-	Renderer(OwnerID)
-{
-	_RendererTarget = RendererTarget::RenderTarget3D;
-}
-
-Renderer3D::~Renderer3D()
-{
-
-}
-
-void Renderer2D::BeginRender()
-{
-	auto index = _RendererIndex.at(RendererTarget::RenderTarget2D);
-
-	index.remove_if([](std::weak_ptr<Renderer> obj) { return obj.expired(); });
-
-	for (auto renderer : index)
-	{
-		if (!renderer.lock()->gameObject()->GetActive()) continue;
-		if (!renderer.lock()->GetEnable()) continue;
-		D3DApp::Renderer::SetProjectionMatrix2D();
-		renderer.lock()->Render(renderer.lock()->transform()->WorldMatrix());
-	}
-}
-
-Renderer2D::Renderer2D(EntityID OwnerID)
-:
-	Renderer(OwnerID)
-{
-	_RendererTarget = RendererTarget::RenderTarget2D;
-}
-
-Renderer2D::~Renderer2D()
-{
-
 }

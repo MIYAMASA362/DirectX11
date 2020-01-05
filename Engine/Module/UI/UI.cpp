@@ -52,7 +52,7 @@ UI::UI(EntityID OwnerID)
 
 Image::Image(EntityID OwnerID)
 :
-	Renderer2D(OwnerID)
+	Renderer(OwnerID)
 {
 	VERTEX_3D vertex[4] = {
 		{ XMFLOAT3(-5.0f, -5.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },

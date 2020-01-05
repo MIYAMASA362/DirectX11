@@ -7,24 +7,38 @@
 //ECS
 #include"Module\ECSEngine.h"
 
+//Module
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
 
 #include"Module\Shader\Shader.h"
 
-//Module
 #include"Module\Renderer\Renderer.h"
 #include"Module\Mesh\Mesh.h"
-#include"MeshRender.h"
 
 #include"Module\Transform\Transform.h"
+
+#include"Module\Texture\TextureManager.h"
+#include"Module\Model\model.h"
+#include"MeshRender.h"
 
 
 using namespace DirectX;
 
+
+
+//*********************************************************************************************************************
+//
+//	MeshRenderer
+//
+//*********************************************************************************************************************
+
+//MeshRender
+//	コンストラクタ
+//
 MeshRender::MeshRender(EntityID OwnerID)
 	:
-	Renderer3D(OwnerID)
+	Renderer(OwnerID)
 {
 	this->OnDebugImGui = [this]() {
 		if (ImGui::TreeNode("MeshRender")) 
@@ -39,33 +53,35 @@ MeshRender::MeshRender(EntityID OwnerID)
 	};
 }
 
+//~MeshRender
+//	デストラクタ
+//
 MeshRender::~MeshRender()
 {
 	_MeshFilter.reset();
 }
 
+//Render
+//	描画
+//
 void MeshRender::Render(XMMATRIX& worldMatrix)
 {
-	D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
-
-	this->_TextureMaterial->SetResource();
-
-	//シェーダ
-	D3DApp::Renderer::GetShader()->SetShader();
-
-	for(unsigned int index = 0; index < _MeshFilter->GetNumMesh(); index++)
+	for(auto nodeMesh : _Model.lock()->_NodeMeshArray)
 	{
-		//メッシュの取得
-		auto mesh = _MeshFilter->GetMesh(index);
+		XMMATRIX local = nodeMesh->_OffsetMatrix * worldMatrix;
+		D3DApp::Renderer::SetWorldMatrix(&local);
 
-		D3DApp::Renderer::SetWorldMatrix(&worldMatrix);
+		nodeMesh->_Mesh->SetVertexBuffer();
+		nodeMesh->_Mesh->SetIndexBuffer();
 
-		//バッファ設定
-		mesh.lock()->SetVertexBuffer();
-		mesh.lock()->SetIndexBuffer();
+		for(unsigned int index = 0; index < nodeMesh->_SubsetNum; index++)
+		{
+			ModelSubset* subset = &nodeMesh->_SubsetArray[index];
 
-		//描画
-		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-		D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(mesh.lock()->_IndexNum,0,0);
+			_Material->SetResource();
+
+			D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
+			D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(subset->_IndexNum,subset->_StartIndex, 0);
+		}
 	}
 }

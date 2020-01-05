@@ -2,76 +2,62 @@
 
 class Shader;
 
-struct XMMATRIX;
-
-//描画
-class Renderer:public Component<Renderer>
+namespace DirectX
 {
-	//描画リスト
-	using RendererList = std::list<std::weak_ptr<Renderer>>;
+	struct XMMATRIX;
+}
+
+class Material;
+class Shader;
+
+//*********************************************************************************************************************
+//
+//	RenderTarget
+//
+//*********************************************************************************************************************
+enum RenderTarget
+{
+	RenderTarget2D,
+	RenderTarget3D
+};
+
+//*********************************************************************************************************************
+//
+//	Renderer Intarface
+//
+//*********************************************************************************************************************
+class Renderer : public Component<Renderer>
+{
 public:
-	enum RendererTarget
-	{
-		RenderTarget2D,
-		RenderTarget3D
-	};
+	//描画インデックス
+	static std::vector<Renderer*> RendererIndex;
 
-	using RendererIndex = std::map<RendererTarget, RendererList>;
+	bool _IsEnable = true;			//描画の有無
+	RenderTarget _RenderTarget;		//描画設定　2D/3D
+
+	D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;	//トポロジー
+
+	Material* _Material;	//マテリアル
 
 public:
-	//描画配列
-	static RendererIndex _RendererIndex;
 
-	//有効・無効
-	bool m_IsEnable = true;
-	// 描画順
-	unsigned int _sort = 0;
-	// 3D/2Dタイプ
-	RendererTarget _RendererTarget;
-	
-	D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology;	//描画タイプ
-	Shader* _Shader;								//シェーダ
-public:
-	static void Create();
-	static void Destroy();
-
+	//コンストラクタ
 	Renderer(EntityID OwnerID);
+	//デストラクタ
 	virtual ~Renderer();
 
-	void SetEnable(bool enable);
-	bool GetEnable();
+	//描画の有無　set/get
+	void SetEnable(bool enable) { _IsEnable = enable; }
+	bool GetEnable() { return _IsEnable; }
 
-	void SetSort(unsigned int sort);
+	//マテリアル設定　set/get
+	void SetMaterial(Material* material) { _Material = material; }
+	Material* GetMaterial() { return _Material; }
 
-	virtual void Render(XMMATRIX& worldMatrix)=0;
-	void Start();
-
-	Shader* GetShader() { return _Shader; };
-	void SetTopology(D3D11_PRIMITIVE_TOPOLOGY Topology) { _PrimitiveTopology = Topology; };
-};
-
-//3D描画
-class Renderer3D:public Renderer
-{
-public:
-	static void BeginRender();
-
-public:
-	Renderer3D(EntityID OwnerID);
-	virtual ~Renderer3D();
-
-	virtual void Render(XMMATRIX& worldMatrix) =0;
-};
-
-//2D描画
-class Renderer2D:public Renderer
-{
-public:
-	static void BeginRender();
-
-public:
-	Renderer2D(EntityID OwnerID);
-	virtual ~Renderer2D();
-
+	//描画処理
 	virtual void Render(XMMATRIX& worldMatrix) = 0;
+
+	//RendererIndex内の描画を実行
+	static void BeginRender();
+
 };

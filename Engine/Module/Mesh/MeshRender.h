@@ -3,21 +3,27 @@
 class Mesh;
 struct TextureMaterial;
 
-//MeshRenderer
-class MeshRender :public Renderer3D
+//*********************************************************************************************************************
+//
+//	MeshRenderer
+//
+//*********************************************************************************************************************
+class MeshRender :public Renderer
 {
 	friend class Physics;
 private:
 	//メッシュフィルタ
 	std::shared_ptr<MeshFilter> _MeshFilter;
-	//マテリアル
-	TextureMaterial* _TextureMaterial;
+
+	//モデル
+	std::weak_ptr<Model> _Model;
 
 public:
+	//コンストラクタ
 	MeshRender(EntityID OwnerID);
+	//デストラクタ
 	virtual ~MeshRender();
 
-public:
 	//描画処理
 	void Render(XMMATRIX& worldMatrix) override;
 
@@ -28,6 +34,7 @@ public:
 	//メッシュ数
 	size_t GetNumMesh() { return _MeshFilter->GetNumMesh(); };
 
-	//マテリアル設定
-	void SetMaterial(TextureMaterial* material) { _TextureMaterial = material; };
+
+	//モデル
+	void SetModel(std::shared_ptr<Model> model) { _Model = model; }
 };
