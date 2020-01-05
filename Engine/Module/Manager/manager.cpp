@@ -6,7 +6,10 @@
 
 #include"Module\IMGUI\GUI_ImGui.h"
 
+
 #include"manager.h"
+#include"Module\Shader\Shader.h"
+#include"Module\Shader\ShaderManager.h"
 
 //--- Project Component -------------------------
 #include"../Project/CameraMouse.h"
@@ -35,7 +38,6 @@
 #include"../Project/Title.h"
 #include"../Project/GameMain.h"
 
-#include"Module\Shader\Shader.h"
 
 //------------------------------------------------
 
@@ -85,6 +87,9 @@ void CManager::Initialize()
 	AudioManager::CreateDevice();
 	AudioManager::LoadAsset(AudioAsset("Experimental","Experimental_Model_long .wav"));
 
+	//Shader
+	ShaderManager::Create();
+
 	//Scene
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
@@ -93,8 +98,6 @@ void CManager::Initialize()
 
 	SceneManager::CreateScene<TitleScene>();
 	SceneManager::CreateScene<GameMain>();
-
-	Renderer::Create();
 
 
 	SphereCollider::SetRenderBuffer();
@@ -144,9 +147,9 @@ void CManager::Render()
 {
 	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
 
-	Camera::Render(Renderer3D::BeginRender, D3DApp::Renderer::Begin);
+	Camera::Render(Renderer::BeginRender, D3DApp::Renderer::Begin);
 
-	Renderer2D::BeginRender();
+	//Renderer2D::BeginRender();
 
 	CManager::DebugRender();
 
@@ -181,8 +184,7 @@ void CManager::Finalize()
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 
-	Renderer::Destroy();
-
+	ShaderManager::Release();
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
