@@ -13,6 +13,13 @@
 
 using namespace DirectX;
 
+//*********************************************************************************************************************
+//
+//	TextureManager
+//
+//*********************************************************************************************************************
+
+//インスタンス
 TextureManager* TextureManager::g_pInstance = nullptr;
 
 //TextureManager
@@ -74,7 +81,10 @@ std::weak_ptr<Texture> TextureManager::LoadTexture(std::string filePath)
 //
 std::weak_ptr<Texture> TextureManager::GetTexture(std::string name)
 {
-	return g_pInstance->_TextureIndex.find(name)->second;
+	auto find = g_pInstance->_TextureIndex.find(name);
+	if (find == g_pInstance->_TextureIndex.end())
+		MessageBox(NULL,("テクスチャが見当たりませんでした。:" + name).c_str(),"TextureManager",MB_OK);
+	return find->second;
 }
 
 

@@ -3,11 +3,20 @@
 #include"Module\DirectX\DirectX.h"
 
 #include"Module\Texture\texture.h"
+#include"Module\Texture\TextureManager.h"
 
 #include "Material.h"
 #include"Module\Shader\Shader.h"
 
+//*********************************************************************************************************************
+//
+//	Material
+//
+//*********************************************************************************************************************
 
+//Material
+//	コンストラクタ
+//
 Material::Material()
 {
 	_constant.Diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -17,23 +26,46 @@ Material::Material()
 	float Shininess = 1.0f;
 }
 
+//~Material
+//	デストラクタ
+//
 Material::~Material()
 {
-
+	_Shader.reset();
+	_Texture.reset();
 }
 
+//SetResource
+//	リソース設定
+//
 void Material::SetResource()
+{
+	SetResourceShader();
+	SetResourceMaterial();
+	SetResourceTexture();
+}
+
+//SetResourceMaterial
+//	マテリアル設定
+//
+void Material::SetResourceMaterial()
 {
 	D3DApp::Renderer::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }
 
-TextureMaterial::~TextureMaterial()
+//SetResourceTexture
+//	テクスチャ設定
+//
+void Material::SetResourceTexture()
 {
-	delete _Texture;
+	_Texture.lock()->SetResource();
 }
 
-void TextureMaterial::SetResource()
+//SetResoueceShader
+//	シェーダ設定
+//
+void Material::SetResourceShader()
 {
-	_Material.SetResource();
-	_Texture->SetResource();
+	_Shader.lock()->SetShader();
 }
+

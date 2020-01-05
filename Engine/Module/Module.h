@@ -29,6 +29,7 @@
 #include"Physics\Physics.h"
 #include"Renderer\Renderer.h"
 #include"Mesh\Mesh.h"
+#include"Model\model.h"
 #include"Mesh\MeshRender.h"
 #include"Field\field.h"
 #include"Billboard\Billboard.h"

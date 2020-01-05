@@ -1,11 +1,13 @@
 #pragma once
 
-#include"Module\DirectX\DirectXStruct.h"
-
 class Texture;
 struct aiMaterial;
 
-//基準マテリアル
+//*********************************************************************************************************************
+//
+//	Material
+//
+//*********************************************************************************************************************
 class Material final
 {
 public:
@@ -18,22 +20,27 @@ public:
 		float Shininess;
 		float Dummy[3];	//16bitサイズに合わせる
 	};
-public:
+
+	//テクスチャ
+	std::weak_ptr<Texture> _Texture;
+	//シェーダ
+	std::weak_ptr<Shader> _Shader;
+	//マテリアル色
 	Material::Constant _constant;
 
+
+public:
+	//コンストラクタ
 	Material();
+	//デストラクタ
 	virtual ~Material();
 
+	//リソース設定
 	void SetResource();
-};
 
-//テクスチャマテリアル
-struct TextureMaterial final
-{
-	Material _Material;
-	Texture* _Texture;
+	void SetResourceMaterial();
+	void SetResourceTexture();
+	void SetResourceShader();
 
-	virtual ~TextureMaterial();
 
-	void SetResource();
 };

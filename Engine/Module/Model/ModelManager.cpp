@@ -26,7 +26,7 @@
 
 ModelManager::ModelIndex ModelManager::modelIndex;
 
-Material SetMaterial(aiMaterial* material)
+void SetMaterial(Material* m, aiMaterial* material)
 {
 	//Diffuse
 	aiColor3D diffuse(0.0f, 0.0f, 0.0f);
@@ -49,14 +49,11 @@ Material SetMaterial(aiMaterial* material)
 	material->Get(AI_MATKEY_SHININESS, shininess);
 
 	//マテリアル設定
-	Material m;
-	m._constant.Diffuse = Color(diffuse.r, diffuse.g, diffuse.b, 1.0f);
-	m._constant.Ambient = Color(ambient.r, ambient.g, ambient.b, 1.0f);
-	m._constant.Specular = Color(specular.r, specular.g, specular.b, 1.0f);
-	m._constant.Emission = Color(emission.r, emission.g, emission.b, 1.0f);
-	m._constant.Shininess = shininess;
-
-	return m;
+	m->_constant.Diffuse = Color(diffuse.r, diffuse.g, diffuse.b, 1.0f);
+	m->_constant.Ambient = Color(ambient.r, ambient.g, ambient.b, 1.0f);
+	m->_constant.Specular = Color(specular.r, specular.g, specular.b, 1.0f);
+	m->_constant.Emission = Color(emission.r, emission.g, emission.b, 1.0f);
+	m->_constant.Shininess = shininess;
 }
 
 void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
@@ -109,15 +106,15 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 				material = scene->mMaterials[mesh->mMaterialIndex];
 
 				//マテリアル設定
-				subset->_Material._Material = SetMaterial(material);
+				SetMaterial(&subset->_Material,material);
 
 				//テクスチャ設定
 				aiString texName;
-				subset->_Material._Texture = new Texture();
 
 				if (material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texName) == AI_SUCCESS)
-					subset->_Material._Texture->LoadTexture(folderPath + texName.C_Str());
-
+				{
+					subset->_Material._Texture  =TextureManager::LoadTexture(folderPath + texName.C_Str());
+				}
 				//頂点設定
 #pragma region SetVertex
 
@@ -219,12 +216,12 @@ Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 	}
 
 	//フォルダパス設定
-	size_t pos = fileName.find_last_of("\\/");
+	size_t pos = fileName.find_last_of("\\/") + 1;
 	std::string folderPath;
 	if (pos == std::string::npos)
 		folderPath = "";
 	else
-		folderPath = fileName.substr(0, pos+1);
+		folderPath = fileName.substr(0, pos);
 
 	//モデル
 	Model* model = new Model();
@@ -233,9 +230,10 @@ Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 
 	//ノードの取得
 	GetNodeMesh(scene->mRootNode,model,scene,folderPath,mtx);
+	fileName = fileName.substr(pos, fileName.find_last_of(".") - pos);
 
 	//追加
-	modelIndex.emplace(fileName.substr(pos,fileName.find_last_of(".")),std::shared_ptr<Model>(model));
+	modelIndex.emplace(fileName,std::shared_ptr<Model>(model));
 
 	return model;
 }

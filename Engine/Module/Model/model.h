@@ -6,7 +6,7 @@ struct ModelSubset
 {
 	unsigned short _StartIndex;
 	unsigned short _IndexNum;
-	TextureMaterial _Material;
+	Material _Material;
 };
 
 //ノードメッシュ　ノード区分け
