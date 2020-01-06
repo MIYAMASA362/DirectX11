@@ -47,20 +47,26 @@
 
 using namespace DirectX;
 
-void CManager::Initialize()
+//*********************************************************************************************************************
+//
+//	CManager
+//
+//*********************************************************************************************************************
+
+bool CManager::_IsUpdate = false;
+bool CManager::_IsFixedUpdate = false;
+
+void CManager::Initialize(HWND hWnd ,unsigned int fps)
 {
 	//ECS
 	EntityManager::Create();
 	ComponentManager::Create();
 
-	//GUI
-	GUI::guiImGui::Create(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(),D3DApp::Renderer::GetD3DAppDevice()->GetDevice(),D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext());
+	TimeManager::Create(fps);
 
-	//Time
-	TimeManager::Create(D3DApp::Renderer::GetD3DAppDevice()->GetRefreshRate());
-
-	Input::Initialize();
+	Input::Initialize(hWnd);
 	Input::Mouse::SetScreenLoop(false);
+
 
 	//Texture
 	TextureManager::Create();
@@ -91,6 +97,7 @@ void CManager::Initialize()
 	ShaderManager::Create();
 
 	//Scene
+	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();
@@ -108,28 +115,22 @@ void CManager::Initialize()
 	ComponentManager::SendComponentMessage("Start");
 }
 
-void CManager::Run()
+void CManager::SetFrame()
 {
 	TimeManager::Update();
 
-	bool IsUpdate = TimeManager::IsUpdate();
-	bool IsFixedUpdate = TimeManager::IsFixedUpdate();
+	_IsUpdate = TimeManager::IsUpdate();
+	_IsFixedUpdate = TimeManager::IsFixedUpdate();
+}
 
-	if (!IsUpdate && !IsFixedUpdate)return;
-
-	if (IsUpdate) CManager::Update();
-
-	if (IsFixedUpdate) CManager::FixedUpdate();
-
-	if (IsUpdate) CManager::Render();
-
-	if (IsUpdate || IsFixedUpdate) SceneManager::ChangeScene();
-
-	ObjectManager::ClearnUp();
+bool CManager::IsProcess()
+{
+	return _IsUpdate || _IsFixedUpdate;
 }
 
 void CManager::Update()
 {
+	if (!_IsUpdate) return;
 	Input::Update();
 
 	ComponentManager::SendComponentMessage("Update");
@@ -137,23 +138,25 @@ void CManager::Update()
 
 void CManager::FixedUpdate()
 {
+	if (!_IsFixedUpdate) return;
 	//Collider::IsHitReset();
 	ComponentManager::SendComponentMessage("FixedUpdate");
 	Rigidbody::ApplyRigidbody();
 	Rigidbody::CollisionRigidbody();
 }
 
-void CManager::Render()
+void CManager::Render(RenderStatus* renderstatus)
 {
-	D3DApp::Renderer::ClearRenderTargetView(Color::gray());
-
-	Camera::Render(Renderer::BeginRender, D3DApp::Renderer::Begin);
+	D3DRenderer::SetRenderStatus(renderstatus);
+	Camera::Render(Renderer::BeginRender,renderstatus);
 
 	//Renderer2D::BeginRender();
+}
 
-	CManager::DebugRender();
-
-	D3DApp::Renderer::End();
+void CManager::EndFrame()
+{
+	SceneManager::ChangeScene();
+	ObjectManager::ClearnUp();
 }
 
 void CManager::DebugRender()
@@ -162,6 +165,7 @@ void CManager::DebugRender()
 
 	Input::DebugGUI();
 	SceneManager::DebugGUI_ActiveScene();
+
 	TimeManager::DebugGUI_Time();
 
 	ImGui::Begin("ScreenToWorld");
@@ -188,10 +192,6 @@ void CManager::Finalize()
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
-
-	TimeManager::Destroy();
-	GUI::guiImGui::Destroy();
-
 
 	ObjectManager::Release();
 

@@ -69,7 +69,7 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 	for(auto nodeMesh : _Model.lock()->_NodeMeshArray)
 	{
 		XMMATRIX local = nodeMesh->_OffsetMatrix * worldMatrix;
-		D3DApp::Renderer::SetWorldMatrix(&local);
+		D3DRenderer::GetInstance()->SetWorldMatrix(&local);
 
 		nodeMesh->_Mesh->SetVertexBuffer();
 		nodeMesh->_Mesh->SetIndexBuffer();
@@ -80,8 +80,8 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 
 			_Material->SetResource();
 
-			D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-			D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(subset->_IndexNum,subset->_StartIndex, 0);
+			D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
+			D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(subset->_IndexNum,subset->_StartIndex, 0);
 		}
 	}
 }

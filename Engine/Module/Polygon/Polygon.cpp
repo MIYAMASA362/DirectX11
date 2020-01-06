@@ -37,7 +37,7 @@ void CPolygon::Start()
 	ZeroMemory(&subResourceData, sizeof(subResourceData));
 	subResourceData.pSysMem = vertex;
 
-	D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 }
 
 void CPolygon::OnDestroy()
@@ -59,12 +59,12 @@ void CPolygon::Render()
 	UINT offset = 0;
 
 	//頂点バッファ設定 複数個登録もできる
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetVertexBuffers(0,1,&m_VertexBuffer,&stride,&offset);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetVertexBuffers(0,1,&m_VertexBuffer,&stride,&offset);
 	(*this->m_Texture)->SetResource();
-	D3DApp::Renderer::SetWorldViewProjection2D();
+	D3DRenderer::GetInstance()->SetWorldViewProjection2D();
 
 	//どうやって頂点を繋げるのか頂点の設定をトポロジという
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)　n:総数 i:どこから始めるか
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->Draw(4,0);
+	D3DRenderer::GetInstance()->GetDeviceContext()->Draw(4,0);
 }

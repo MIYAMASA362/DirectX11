@@ -15,14 +15,24 @@ public:
 			camera->transform().lock()->position(Vector3::up()*2.0f);
 			camera->AddComponent<Camera>().lock()->SetPriority(1);
 		}
-		////Ball
-		//{
-		//	GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
-		//	ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
-		//	ball->AddComponent<MeshRender>().lock()->SetMesh<Model>()->GetAsset("Ball");
-		//	ball->AddComponent<BallScript>();
-		//	ball->AddComponent<SceneChange>().lock()->nextScene = "BallTest";
-		//}
+		//Ball
+		{
+			GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
+			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
+			auto renderer = ball->AddComponent<MeshRender>().lock();
+
+			renderer->SetModel(ModelManager::GetModel("miku_01").lock());
+
+			Material* material = new Material();
+			material->_Shader = ShaderManager::GetShader();
+			material->_Texture = TextureManager::GetTexture("miku_01");
+
+			renderer->SetMaterial(material);
+
+			ball->AddComponent<BallScript>();
+			ball->AddComponent<SceneChange>().lock()->nextScene = "BallTest";
+
+		}
 		////Field
 		//{
 		//	GameObject* field = this->AddSceneObject("Field",TagName::Default);

@@ -1,5 +1,7 @@
 #pragma once
 
+//Object固有ID
+using InstanceID = unsigned int;
 
 //Object
 //	ゲーム内のオブジェクトの基底

@@ -39,8 +39,8 @@ public:
 
 	Material* _Material;	//マテリアル
 
-public:
 
+public:	
 	//コンストラクタ
 	Renderer(EntityID OwnerID);
 	//デストラクタ
@@ -59,5 +59,6 @@ public:
 
 	//RendererIndex内の描画を実行
 	static void BeginRender();
+
 
 };

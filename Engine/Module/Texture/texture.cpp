@@ -31,7 +31,7 @@ Texture::~Texture()
 
 void Texture::SetResource()
 {
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->PSSetShaderResources(0,1,&_srv);
+	D3DRenderer::GetInstance()->GetDeviceContext()->PSSetShaderResources(0,1,&_srv);
 }
 
 void Texture::LoadTexture(std::string filePath)
@@ -66,7 +66,7 @@ void Texture::LoadTexture(std::string filePath)
 		sd.SysMemPitch = width * 4;
 		sd.SysMemSlicePitch = width * height * bpp;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateTexture2D(&td, &sd, &_texture);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateTexture2D(&td, &sd, &_texture);
 		if (FAILED(hr))
 			MessageBox(NULL, "テクスチャの読み込みに失敗しました。", "エラー", MB_OK);
 
@@ -75,7 +75,7 @@ void Texture::LoadTexture(std::string filePath)
 		srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srv.Texture2D.MipLevels = 1;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateShaderResourceView(_texture, &srv, &_srv);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateShaderResourceView(_texture, &srv, &_srv);
 		if (FAILED(hr))
 			MessageBox(NULL, "テクスチャのシェーダーリソースの作成に失敗しました。", "エラー", MB_OK);
 	}

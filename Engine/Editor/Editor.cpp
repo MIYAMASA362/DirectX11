@@ -1,6 +1,8 @@
 #include<Windows.h>
 #include<string>
 #include<thread>
+#include<map>
+
 #include"Module\DirectX\DirectX.h"
 
 #include"../resource.h"
@@ -290,16 +292,16 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		//Threadが違うのでRenderTargetなどにエラーが加わる
 		//	ERROR : サイズ変えすぎると強制停止
 		//
-		if (_D3DApp)
+		if (_RenderStatus)
 		{
 			_IsRunProcess = false;
-			_D3DApp->CleanupRenderTargetView();
-			_D3DApp->CleanupDepthStencilView();
+			_RenderStatus->CleanupRenderTargetView();
+			_RenderStatus->CleanupDepthStencilView();
 
-			_D3DApp->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
+			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
 
-			_D3DApp->CreateRenderTargetView();
-			_D3DApp->CreateDepthStencilView();
+			_RenderStatus->CreateRenderTargetView();
+			_RenderStatus->CreateDepthStencilView();
 			_IsRunProcess = true;
 		}
 
@@ -403,27 +405,54 @@ WPARAM EditorWindow::MessageLoop()
 void Editor::EditorWindow::RunProcces()
 {
 	//Applicationの生成
-	_D3DApp = new D3DApp();
-	_D3DApp->Create(this->_hWnd,60);
+	D3DRenderer::Create();
 
-	D3DApp::Renderer::RegisterDevice(_D3DApp);
+	if(FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd,&_RenderStatus,60)))
+	{
+		MessageBox(NULL,"RenderStatusの生成に失敗しました。","EditorWindow",MB_OK);
+		return;
+	}
+	//GUI
+	GUI::guiImGui::Create(this->_hWnd,D3DRenderer::GetInstance()->GetDevice(), D3DRenderer::GetInstance()->GetDeviceContext());
 
-	CManager::Initialize();
+	//Manager
+	CManager::Initialize(this->_hWnd,60);
 
 	_IsRunProcess = true;
 
 	do
 	{
-		if (_IsRunProcess)
-			CManager::Run();
-	} while (!_threadEnd);
+		//処理しない
+		if (!_IsRunProcess && !CManager::IsProcess()) continue;
+
+		CManager::SetFrame();
+
+		CManager::Update();
+		CManager::FixedUpdate();
+
+		if (!CManager::IsUpdate())
+		{
+			_RenderStatus->ClearRenderTargetView(Color::gray());
+
+			CManager::Render(_RenderStatus);
+			CManager::DebugRender();
+
+			_RenderStatus->End();
+		}
+
+		CManager::EndFrame();
+		
+	}
+	while (!_threadEnd);
 
 	_IsRunProcess = false;
 
 	CManager::Finalize();
 
-	D3DApp::Renderer::Release();
-	delete _D3DApp;
+	GUI::guiImGui::Destroy();
+
+	_RenderStatus->Release();
+	D3DRenderer::Destroy();
 }
 
 //Start

@@ -1,4 +1,5 @@
 #include<memory>
+#include<map>
 #include<vector>
 
 #include"Module\DirectX\DirectX.h"
@@ -32,10 +33,10 @@ Mesh::~Mesh()
 
 void Mesh::SetVertexBuffer()
 {
-	D3DApp::Renderer::SetVertexBuffer(_VertexBuffer, sizeof(VertexType), 0);
+	D3DRenderer::GetInstance()->SetVertexBuffer(_VertexBuffer, sizeof(VertexType), 0);
 }
 
 void Mesh::SetIndexBuffer()
 {
-	D3DApp::Renderer::SetIndexBuffer(_IndexBuffer);
+	D3DRenderer::GetInstance()->SetIndexBuffer(_IndexBuffer);
 }

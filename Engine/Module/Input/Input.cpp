@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<list>
 #include<memory>
+#include<map>
 #include<string>
 
 #include"Module\DirectX\DirectX.h"
@@ -14,8 +15,9 @@
 
 using namespace DirectX;
 
-//入力値に対しては特殊なVK_@@@を利用
+HWND Input::_hWnd;
 
+//入力値に対しては特殊なVK_@@@を利用
 BYTE Input::m_OldKeyState[256];
 BYTE Input::m_KeyState[256];
 POINT Input::m_MousePos;
@@ -45,10 +47,10 @@ bool Input::GetKeyUp(BYTE KeyCode)
 	return (!(m_KeyState[KeyCode] & 0x80) && (m_OldKeyState[KeyCode]&0x80));
 }
 
-void DirectX::Input::DebugGUI()
+void Input::DebugGUI()
 {
 	DXGI_SWAP_CHAIN_DESC sd;
-	sd = D3DApp::Renderer::GetD3DAppDevice()->GetSwapChainDesc();
+	sd = D3DRenderer::GetRenderStatus(_hWnd)->GetSwapChainDesc();
 
 	ImGui::Begin("Input");
 	ImGui::Text("Screen Width:%d", sd.BufferDesc.Width);
@@ -58,15 +60,16 @@ void DirectX::Input::DebugGUI()
 	ImGui::End();
 }
 
-void DirectX::Input::Initialize()
+void Input::Initialize(HWND hWnd)
 {
+	_hWnd = hWnd;
 	//キーボード設定
 	memset(m_OldKeyState, 0, 256);
 	memset(m_KeyState, 0, 256);
 
 	HRESULT hr;
 
-	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), GWLP_HINSTANCE);
+	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(_hWnd, GWLP_HINSTANCE);
 	hr = DirectInput8Create(
 		hInst,
 		DIRECTINPUT_VERSION,
@@ -85,14 +88,14 @@ void DirectX::Input::Initialize()
 
 	hr = m_pDevMouse->SetDataFormat(&c_dfDIMouse2);
 
-	hr = m_pDevMouse->SetCooperativeLevel(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+	hr = m_pDevMouse->SetCooperativeLevel(_hWnd, (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 
 	m_pDevMouse->Acquire();
 
 	Mouse::SetScreenLoop(true);
 }
 
-void DirectX::Input::Update()
+void Input::Update()
 {
 	//キー処理
 	{
@@ -110,7 +113,7 @@ void DirectX::Input::Update()
 		//カーソルループ
 		if (!Input::GetKeyPress(VK_CONTROL) && IsCursorLoop) {
 			WINDOWINFO info;
-			GetWindowInfo(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &info);
+			GetWindowInfo(_hWnd, &info);
 			//--- 左右 -------------------------------------------------------------------
 			if ((UINT)m_MousePos.x <= info.rcWindow.left + info.cxWindowBorders)
 				SetCursorPos(info.rcWindow.right - info.cxWindowBorders, m_MousePos.y);
@@ -124,7 +127,7 @@ void DirectX::Input::Update()
 
 			GetCursorPos(&m_MousePos);
 		}
-		ScreenToClient(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &m_MousePos);
+		ScreenToClient(_hWnd, &m_MousePos);
 
 		//DirectInput
 		if (FAILED(m_pDevMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState2)))
@@ -132,7 +135,7 @@ void DirectX::Input::Update()
 	}
 }
 
-void DirectX::Input::Finalize()
+void Input::Finalize()
 {
 	if (m_pDevMouse != nullptr)
 	{
@@ -147,72 +150,72 @@ void DirectX::Input::Finalize()
 	}
 }
 
-float DirectX::Input::Mouse::GetMouseX()
+float Input::Mouse::GetMouseX()
 {
 	return (float)m_MousePos.x;
 }
 
-float DirectX::Input::Mouse::GetMouseY()
+float Input::Mouse::GetMouseY()
 {
 	return (float)m_MousePos.y;
 }
 
-bool DirectX::Input::Mouse::IsLeftDown()
+bool Input::Mouse::IsLeftDown()
 {
 	return (m_MouseState2.rgbButtons[0] & 0x80) ? true : false;
 }
 
-bool DirectX::Input::Mouse::IsRightDown()
+bool Input::Mouse::IsRightDown()
 {
 	return (m_MouseState2.rgbButtons[1] & 0x80) ? true : false;
 }
 
-bool DirectX::Input::Mouse::IsWheelDown()
+bool Input::Mouse::IsWheelDown()
 {
 	return (m_MouseState2.rgbButtons[2] & 0x80) ? true : false;
 }
 
-bool DirectX::Input::Mouse::IsLeftTrigger()
+bool Input::Mouse::IsLeftTrigger()
 {
 	return ((m_OldMouseButtons[0] & 0x80) && !(m_MouseState2.rgbButtons[0] & 0x80));
 }
 
-bool DirectX::Input::Mouse::IsRightTrigger()
+bool Input::Mouse::IsRightTrigger()
 {
 	return ((m_OldMouseButtons[1] & 0x80) && !(m_MouseState2.rgbButtons[1] & 0x80));
 }
 
-bool DirectX::Input::Mouse::IsWheelTrigger()
+bool Input::Mouse::IsWheelTrigger()
 {
 	return ((m_OldMouseButtons[2] & 0x80) && !(m_MouseState2.rgbButtons[2] & 0x80));
 }
 
-void DirectX::Input::Mouse::SetMouseShow()
+void Input::Mouse::SetMouseShow()
 {
 	ShowCursor(true);
 }
 
-void DirectX::Input::Mouse::SetMouseHide()
+void Input::Mouse::SetMouseHide()
 {
 	ShowCursor(false);
 }
 
-void DirectX::Input::Mouse::SetScreenLoop(bool IsLoop)
+void Input::Mouse::SetScreenLoop(bool IsLoop)
 {
 	IsCursorLoop = IsLoop;
 }
 
-float DirectX::Input::Mouse::GetAccelerationX()
+float Input::Mouse::GetAccelerationX()
 {
 	return (float)m_MouseState2.lX;
 }
 
-float DirectX::Input::Mouse::GetAccelerationY()
+float Input::Mouse::GetAccelerationY()
 {
 	return (float)m_MouseState2.lY;
 }
 
-float DirectX::Input::Mouse::GetAccelerationZ()
+float Input::Mouse::GetAccelerationZ()
 {
 	return (float)m_MouseState2.lZ;
 }

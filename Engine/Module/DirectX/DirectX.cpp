@@ -11,7 +11,9 @@
 #include<stdio.h>
 #include<io.h>
 #include<string>
+#include<map>
 #include<memory>
+#include<algorithm>
 
 #include<d3d11.h>
 #include<DirectXMath.h>
@@ -29,105 +31,26 @@
 
 using namespace DirectX;
 
-
-
-
-
-
 //*********************************************************************************************************************
 //
-//	D3DApp
+//	RenderStatus
 //
 //*********************************************************************************************************************
 
-//D3DApp
+//RenderStatus
 //	コンストラクタ
 //
-D3DApp::D3DApp()
+RenderStatus::RenderStatus(HWND hWnd, D3DRenderer * renderer,unsigned int fps)
+	:
+	_D3DRenderer(renderer)
 {
-
-}
-
-//~D3DApp
-//	デストラクタ
-//
-D3DApp::~D3DApp()
-{
-	if (ImmediateContext) ImmediateContext->ClearState();
-	if (RenderTargetView) RenderTargetView->Release();
-	if (SwapChain) SwapChain->Release();
-
-	if (ImmediateContext) ImmediateContext->Release();
-	if (_pFactory) _pFactory->Release();
-	if (_pAdapter) _pAdapter->Release();
-	if (_pDXGI)	_pDXGI->Release();
-	if (D3DDevice)	D3DDevice->Release();
-
-}
-
-//Create
-//	D3DApp初期化処理
-//
-HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
-{
-	HRESULT hr = E_FAIL;
-	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(hWnd,GWLP_HINSTANCE);
-
-	this->hWnd = hWnd;
+	HRESULT hr;
 
 	//ウィンドウサイズの取得
 	RECT rect;
-	GetClientRect(hWnd, &rect);
+	GetClientRect(hWnd,&rect);
 	unsigned int ScreenWidth = rect.right - rect.left;
 	unsigned int ScreenHeight = rect.bottom - rect.top;
-
-	D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
-
-	//Create a Device that represents the display adapter
-	// ref : https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-d3d11createdevice
-	//
-	hr = D3D11CreateDevice(
-		NULL,							//Default Adapter
-		D3D_DRIVER_TYPE_HARDWARE,		//Driver Type : D3D_DRIVER_TYPE_HARDWARE 最高品質
-		NULL,							//Software Rasterizer DLL Handler : Driver Type が SoftwareならNULLは駄目
-		0,								//Device parameters
-		featureLevels,					//FeatureLevels
-		1,								//FeatureLevels Num
-		D3D11_SDK_VERSION,				//SDK Version
-		&D3DDevice,			//D3DDevice
-		&featureLevel,		//successful FeatureLevel
-		&ImmediateContext	//DeviceContext
-	);
-
-
-	if (FAILED(hr)) {
-		MessageBox(NULL, "Deviceの生成に失敗しました。", "D3DApp", MB_OK);
-		return hr;
-	}
-
-	//QuearyInterface
-	//	IDXGIDevice1 のIntarfaceを取得
-	//	D3D11Device は IUnkownクラスを継承している
-	//	ref : https://docs.microsoft.com/ja-jp/cpp/atl/introduction-to-com?view=vs-2019
-	//
-	//	COMについて
-	//	ref : http://chokuto.ifdef.jp/urawaza/com/com.html	
-	//
-	D3DDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&_pDXGI);
-
-	//GetAdapter
-	//	DeviceのApapter取得
-	//	ref : https://docs.microsoft.com/ja-jp/windows/win32/api/dxgi/nn-dxgi-idxgidevice
-	//
-	_pDXGI->GetAdapter(&_pAdapter);
-
-	//GetParent
-	//	DXGIAdapterの親 IDXGIFactoryを取得
-	//
-	//	DXGIObject
-	//	ref : https://docs.microsoft.com/ja-jp/windows/win32/api/dxgi/nn-dxgi-idxgiobject
-	//
-	_pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&_pFactory);
 
 	// スワップチェーン設定
 	DXGI_SWAP_CHAIN_DESC sd;
@@ -144,19 +67,111 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 
-	//CreateSwapChain
-	//	
-	//
-	hr = _pFactory->CreateSwapChain(D3DDevice, &sd, &SwapChain);
-
+	if (FAILED(_D3DRenderer->CreateSwapChain(&_SwapChain, &sd))) {
+		MessageBox(NULL, "SwapChainの生成に失敗しました。", "RenderStatus", MB_OK);
+		return;
+	}
 
 	// レンダーターゲットビュー生成、設定
-	this->CreateRenderTargetView();
+	CreateRenderTargetView();
 
 	//ステンシル用テクスチャー作成
-	this->CreateDepthStencilView();
+	CreateDepthStencilView();
 
-	// ビューポート設定
+	
+
+	// 深度ステンシルステート設定
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+
+	//深度有効ステート
+	_D3DRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &_DepthStateEnable);
+
+	//depthStencilDesc.DepthEnable = FALSE; //深度無効ステート
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	_D3DRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &_DepthStateDisable);
+
+	_D3DRenderer->GetDeviceContext()->OMSetDepthStencilState(_DepthStateEnable, NULL);
+
+	//ビューポート設定
+	SetViewport(1);
+
+	_IsReleased = false;
+}
+
+//~RendererStatus
+//	デストラクタ
+//
+RenderStatus::~RenderStatus()
+{
+	if (_IsReleased) return;
+	if (_RenderTargetView) _RenderTargetView->Release();
+	if (_DepthStencilView) _DepthStencilView->Release();
+
+	if (_DepthStateEnable) _DepthStateEnable->Release();
+	if (_DepthStateDisable) _DepthStateDisable->Release();
+
+	if (_SwapChain) _SwapChain->Release();
+}
+
+//CreateRenderTargetView
+//	RenderTargetView生成
+//
+void RenderStatus::CreateRenderTargetView()
+{
+	ID3D11Texture2D* pBackBuffer = NULL;
+	_SwapChain->GetBuffer(NULL,__uuidof(ID3D11Texture2D),(LPVOID*)&pBackBuffer);
+	_D3DRenderer->GetDevice()->CreateRenderTargetView(pBackBuffer,NULL,&_RenderTargetView);
+	pBackBuffer->Release();
+}
+
+//CreateDepthStencilView
+//	DepthStencilViewの生成
+//
+void RenderStatus::CreateDepthStencilView()
+{
+	DXGI_SWAP_CHAIN_DESC sd = GetSwapChainDesc();
+	
+	ID3D11Texture2D* depthTexture = NULL;
+	D3D11_TEXTURE2D_DESC td;
+	ZeroMemory(&td, sizeof(td));
+	td.Width = sd.BufferDesc.Width;
+	td.Height = sd.BufferDesc.Height;
+	td.MipLevels = 1;
+	td.ArraySize = 1;
+	td.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	td.SampleDesc = sd.SampleDesc;
+	td.Usage = D3D11_USAGE_DEFAULT;
+	td.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	td.CPUAccessFlags = 0;
+	td.MiscFlags = 0;
+	_D3DRenderer->GetDevice()->CreateTexture2D(&td, NULL, &depthTexture);
+	
+	//ステンシルターゲット作成
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
+	ZeroMemory(&dsvd, sizeof(dsvd));
+	dsvd.Format = td.Format;
+	dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvd.Flags = 0;
+	_D3DRenderer->GetDevice()->CreateDepthStencilView(depthTexture, &dsvd, &_DepthStencilView);
+	
+	_D3DRenderer->GetDeviceContext()->OMSetRenderTargets(1, &_RenderTargetView, _DepthStencilView);
+}
+
+//SetViewport
+//	ビューポート設定
+//
+void RenderStatus::SetViewport(UINT NumViewports)
+{
+	RECT rect;
+	GetClientRect(GetSwapChainDesc().OutputWindow, &rect);
+	unsigned int ScreenWidth = rect.right - rect.left;
+	unsigned int ScreenHeight = rect.bottom - rect.top;
+
 	D3D11_VIEWPORT vp;
 	vp.Width = (float)ScreenWidth;
 	vp.Height = (float)ScreenHeight;
@@ -164,21 +179,219 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	ImmediateContext->RSSetViewports(1, &vp);
+	_D3DRenderer->GetDeviceContext()->RSSetViewports(NumViewports, &vp);
+}
 
+//ClearnupRenderTargetView
+//	RenderTargetViewの削除・破棄
+//
+void RenderStatus::CleanupRenderTargetView()
+{
+	if (_RenderTargetView == nullptr) return;
+	_RenderTargetView->Release();
+	_RenderTargetView = nullptr;
+}
+
+//ClearnupDepthStencilView
+//	DepthStencilViewの削除・破棄
+//
+void RenderStatus::CleanupDepthStencilView()
+{
+	if (_DepthStencilView == nullptr) return;
+	_DepthStencilView->Release();
+	_DepthStencilView = nullptr;
+}
+
+void RenderStatus::ClearRenderTargetView(Color clearColor)
+{
+	_D3DRenderer->GetDeviceContext()->ClearRenderTargetView(_RenderTargetView,clearColor);
+}
+
+void RenderStatus::Begin()
+{
+	_D3DRenderer->GetDeviceContext()->ClearDepthStencilView(_DepthStencilView,D3D11_CLEAR_DEPTH,1.0f,0);
+}
+
+void RenderStatus::End()
+{
+	_SwapChain->Present(1,0);
+}
+
+void RenderStatus::SetDepthEnable(bool Enable)
+{
+	if (Enable)
+		_D3DRenderer->GetDeviceContext()->OMSetDepthStencilState(_DepthStateDisable, NULL);
+	else
+		_D3DRenderer->GetDeviceContext()->OMSetDepthStencilState(_DepthStateEnable,NULL);
+}
+
+unsigned int RenderStatus::GetRefreshRate()
+{
+	auto sd = GetSwapChainDesc();
+	return sd.BufferDesc.RefreshRate.Numerator / sd.BufferDesc.RefreshRate.Denominator;
+}
+
+void RenderStatus::Release()
+{
+	if (_RenderTargetView) _RenderTargetView->Release();
+	if (_DepthStencilView) _DepthStencilView->Release();
+
+	if (_DepthStateEnable) _DepthStateEnable->Release();
+	if (_DepthStateDisable) _DepthStateDisable->Release();
+
+	if (_SwapChain) _SwapChain->Release();
+	_IsReleased = true;
+}
+
+DXGI_SWAP_CHAIN_DESC RenderStatus::GetSwapChainDesc()
+{
+	DXGI_SWAP_CHAIN_DESC sd;
+	
+	//DXGI_SWAP_CHAIN_DESCの取得
+	//	WARNING : Direct3D 11.1 の場合、DESC取得に推奨されない関数
+	//	ref: https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-getdesc
+	//
+	_SwapChain->GetDesc(&sd);
+	return sd;
+}
+
+
+
+//*********************************************************************************************************************
+//
+//	D3DRenderer
+//
+//*********************************************************************************************************************
+
+D3DRenderer* D3DRenderer::pInstance = nullptr;
+RenderStatus* D3DRenderer::pTargetRenderStatus = nullptr;
+
+//D3DRenderer
+//	コンストラクタ
+//
+D3DRenderer::D3DRenderer()
+{
+	HRESULT hr = E_FAIL;
+
+	D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
+
+	//Create a Device that represents the display adapter
+	// ref : https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-d3d11createdevice
+	//
+	hr = D3D11CreateDevice(
+		NULL,							//Default Adapter
+		D3D_DRIVER_TYPE_HARDWARE,		//Driver Type : D3D_DRIVER_TYPE_HARDWARE 最高品質
+		NULL,							//Software Rasterizer DLL Handler : Driver Type が SoftwareならNULLは駄目
+		0,								//Device parameters
+		featureLevels,					//FeatureLevels
+		1,								//FeatureLevels Num
+		D3D11_SDK_VERSION,				//SDK Version
+		&_D3DDevice,			//D3DDevice
+		&featureLevel,		//successful FeatureLevel
+		&_ImmediateContext	//DeviceContext
+	);
+
+
+	if (FAILED(hr)) {
+		MessageBox(NULL, "Deviceの生成に失敗しました。", "D3DRenderer", MB_OK);
+		return;
+	}
+
+	//QuearyInterface
+	//	IDXGIDevice1 のIntarfaceを取得
+	//	D3D11Device は IUnkownクラスを継承している
+	//	ref : https://docs.microsoft.com/ja-jp/cpp/atl/introduction-to-com?view=vs-2019
+	//
+	//	COMについて
+	//	ref : http://chokuto.ifdef.jp/urawaza/com/com.html	
+	//
+	_D3DDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&_pDXGI);
+
+	//GetAdapter
+	//	DeviceのApapter取得
+	//	ref : https://docs.microsoft.com/ja-jp/windows/win32/api/dxgi/nn-dxgi-idxgidevice
+	//
+	_pDXGI->GetAdapter(&_pAdapter);
+
+	//GetParent
+	//	DXGIAdapterの親 IDXGIFactoryを取得
+	//
+	//	DXGIObject
+	//	ref : https://docs.microsoft.com/ja-jp/windows/win32/api/dxgi/nn-dxgi-idxgiobject
+	//
+	_pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&_pFactory);
+
+	pInstance = this;
+
+	//コンスタントバッファの生成
+	_ConstantBuffer = new ConstantBuffer(this);
+	_ConstantBuffer->CreateBuffer();
+
+	_Light = new Light();
+	_Light->SetResource();
+
+	_Material = new Material();
+	_Material->SetResourceMaterial();
+}
+
+//~D3DRenderer
+//	デストラクタ
+//
+D3DRenderer::~D3DRenderer()
+{
+	for(auto status : _ClientRenderStatus)
+	{
+		if (status.second)
+			MessageBox(NULL,"","",MB_OK);
+		delete status.second;
+	}
+
+	if (_ConstantBuffer) delete _ConstantBuffer;
+	if (_Light) delete _Light;
+	if (_Material) delete _Material;
+	if (_ImmediateContext)_ImmediateContext->ClearState();
+
+	if (_ImmediateContext) _ImmediateContext->Release();
+	if (_pFactory) _pFactory->Release();
+	if (_pAdapter) _pAdapter->Release();
+	if (_pDXGI)	_pDXGI->Release();
+	if (_D3DDevice)	_D3DDevice->Release();
+}
+
+HRESULT D3DRenderer::Create()
+{
+	if (pInstance != nullptr) return E_FAIL;
+	pInstance = new D3DRenderer();
+
+	return S_OK;
+}
+
+HRESULT D3DRenderer::Destroy()
+{
+	if (pInstance == nullptr) return E_FAIL;
+	delete pInstance;
+	pInstance = nullptr;
+	return S_OK;
+}
+
+RenderStatus * D3DRenderer::GetRenderStatus(HWND hWnd)
+{
+	return pInstance->_ClientRenderStatus.at(hWnd);
+}
+
+
+//CreateRenderStatus
+//	RenderStatusの生成
+//
+HRESULT D3DRenderer::CreateRenderStatus(HWND hWnd,RenderStatus** renderstatus, unsigned int fps)
+{
+	HRESULT hr;
+
+	//クライアント追加
+	*renderstatus = new RenderStatus(hWnd,this,fps);
 
 	// ラスタライザステート設定
-	D3D11_RASTERIZER_DESC rd;
-	ZeroMemory(&rd, sizeof(rd));
-	rd.FillMode = D3D11_FILL_SOLID;
-	rd.CullMode = D3D11_CULL_BACK;
-	rd.DepthClipEnable = TRUE;
-	rd.MultisampleEnable = FALSE;
-
-	ID3D11RasterizerState *rs;
-	D3DDevice->CreateRasterizerState(&rd, &rs);
-
-	ImmediateContext->RSSetState(rs);
+	SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_BACK);
 
 	// ブレンドステート設定
 	D3D11_BLEND_DESC blendDesc;
@@ -196,30 +409,8 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	ID3D11BlendState* blendState = NULL;
-	D3DDevice->CreateBlendState(&blendDesc, &blendState);
-	ImmediateContext->OMSetBlendState(blendState, blendFactor, 0xffffffff);
-
-
-
-
-	// 深度ステンシルステート設定
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-	depthStencilDesc.DepthEnable = TRUE;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	depthStencilDesc.StencilEnable = FALSE;
-
-	//深度有効ステート
-	D3DDevice->CreateDepthStencilState(&depthStencilDesc, &DepthStateEnable);
-
-	//depthStencilDesc.DepthEnable = FALSE; //深度無効ステート
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	D3DDevice->CreateDepthStencilState(&depthStencilDesc, &DepthStateDisable);
-
-	ImmediateContext->OMSetDepthStencilState(DepthStateEnable, NULL);
-
-
+	_D3DDevice->CreateBlendState(&blendDesc, &blendState);
+	_ImmediateContext->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
 
 	// サンプラーステート設定
@@ -236,29 +427,17 @@ HRESULT D3DApp::Create(HWND hWnd, unsigned int fps)
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	ID3D11SamplerState* samplerState = NULL;
-	D3DDevice->CreateSamplerState(&samplerDesc, &samplerState);
+	_D3DDevice->CreateSamplerState(&samplerDesc, &samplerState);
 
-	ImmediateContext->PSSetSamplers(0, 1, &samplerState);
+	_ImmediateContext->PSSetSamplers(0, 1, &samplerState);
 
+	//追加
+	_ClientRenderStatus.emplace(hWnd,*renderstatus);
 
 	return S_OK;
 }
 
-//GetRefreshRate
-//	フレームレート取得
-//
-unsigned int D3DApp::GetRefreshRate()
-{
-	DXGI_SWAP_CHAIN_DESC sd;
-	sd = GetSwapChainDesc();
-
-	return sd.BufferDesc.RefreshRate.Numerator / sd.BufferDesc.RefreshRate.Denominator;
-}
-
-//CreateBuffer
-//	DirectX CreateBuffer
-//
-void D3DApp::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void * subresource, ID3D11Buffer ** buffer)
+void D3DRenderer::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void * subresource, ID3D11Buffer ** buffer)
 {
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -271,191 +450,37 @@ void D3DApp::CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const v
 	ZeroMemory(&sd, sizeof(sd));
 	sd.pSysMem = subresource;
 
-	D3DDevice->CreateBuffer(&bd, &sd, buffer);
+	_D3DDevice->CreateBuffer(&bd, &sd, buffer);
 }
 
-//GetSwapChainDesc
-//	スワップチェーン取得
-//
-DXGI_SWAP_CHAIN_DESC D3DApp::GetSwapChainDesc()
+void D3DRenderer::SetVertexBuffer(ID3D11Buffer * VertexBuffer, UINT stride, UINT offset)
 {
-	DXGI_SWAP_CHAIN_DESC sd;
-
-	//DXGI_SWAP_CHAIN_DESCの取得
-	//	WARNING : Direct3D 11.1 の場合、DESC取得に推奨されない関数
-	//	ref: https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-getdesc
-	//
-	SwapChain->GetDesc(&sd);
-	return sd;
+	_ImmediateContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
 }
 
-//CreateRenderTargetView
-//
-//
-void D3DApp::CreateRenderTargetView()
+void D3DRenderer::SetIndexBuffer(ID3D11Buffer * IndexBuffer)
 {
-	// レンダーターゲットビュー生成、設定
-	ID3D11Texture2D* pBackBuffer = NULL;
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &RenderTargetView);
-	pBackBuffer->Release();
+	_ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
-//CreateDepthStencilView
-//
-//
-void D3DApp::CreateDepthStencilView()
+void D3DRenderer::SetTexture(ID3D11ShaderResourceView * texture, UINT slot, UINT numView)
 {
-	DXGI_SWAP_CHAIN_DESC sd;
-	sd = this->GetSwapChainDesc();
-
-	ID3D11Texture2D* depthTexture = NULL;
-	D3D11_TEXTURE2D_DESC td;
-	ZeroMemory(&td, sizeof(td));
-	td.Width = sd.BufferDesc.Width;
-	td.Height = sd.BufferDesc.Height;
-	td.MipLevels = 1;
-	td.ArraySize = 1;
-	td.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	td.SampleDesc = sd.SampleDesc;
-	td.Usage = D3D11_USAGE_DEFAULT;
-	td.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	td.CPUAccessFlags = 0;
-	td.MiscFlags = 0;
-	D3DDevice->CreateTexture2D(&td, NULL, &depthTexture);
-
-	//ステンシルターゲット作成
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
-	ZeroMemory(&dsvd, sizeof(dsvd));
-	dsvd.Format = td.Format;
-	dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsvd.Flags = 0;
-	D3DDevice->CreateDepthStencilView(depthTexture, &dsvd, &DepthStencilView);
-
-	ImmediateContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+	ID3D11ShaderResourceView* srv[1] = { texture };
+	_ImmediateContext->PSSetShaderResources(slot, numView, srv);
 }
 
-//CleanupRenderTargetView
-//
-//
-void D3DApp::CleanupRenderTargetView()
+void D3DRenderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation)
 {
-	if (RenderTargetView == nullptr) return;
-	RenderTargetView->Release();
-	RenderTargetView = nullptr;
+	_ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_ImmediateContext->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
 }
 
-//CleanupDepthStencilView
-//
-//
-void D3DApp::CleanupDepthStencilView()
+HRESULT D3DRenderer::CreateSwapChain(IDXGISwapChain** SwapChain, DXGI_SWAP_CHAIN_DESC* sd)
 {
-	if (DepthStencilView == nullptr) return;
-	DepthStencilView->Release();
-	DepthStencilView = nullptr;
+	return _pFactory->CreateSwapChain(_D3DDevice,sd,SwapChain);
 }
 
-
-
-//*********************************************************************************************************************
-//
-//	D3DApp::Renderer
-//
-//*********************************************************************************************************************
-
-
-D3DApp* D3DApp::Renderer::_pDevice = nullptr;					//Renderに使うD3DApp
-
-Shader* D3DApp::Renderer::_Shader = nullptr;					//Shader
-ConstantBuffer* D3DApp::Renderer::_ConstantBuffer = nullptr;	//ConstantBuffer
-Light* D3DApp::Renderer::_Light = nullptr;						//Light
-Material* D3DApp::Renderer::_Material = nullptr;				//Material
-
-//RegisterDevice
-//	登録
-//
-void D3DApp::Renderer::RegisterDevice(D3DApp * d3dapp)
-{
-	_pDevice = d3dapp;
-
-	//シェーダ
-
-	//定数バッファ生成
-	_ConstantBuffer = new ConstantBuffer();
-	_ConstantBuffer->CreateBuffer();
-
-	//定数バッファ設定
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD, 0);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW, 1);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION, 2);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL, 3);
-	_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_LIGHT, 4);
-
-	//Material
-	_Material = new Material();
-	_Material->SetResourceMaterial();
-
-	//Light
-	_Light = new Light();
-	_Light->SetResource();
-
-	DXGI_SWAP_CHAIN_DESC sd = _pDevice->GetSwapChainDesc();
-	XMMATRIX matrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
-	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &matrix);
-}
-
-//Release
-//	リソースの破棄・解放
-//
-void D3DApp::Renderer::Release()
-{
-	_pDevice = nullptr;
-
-	if (_Light) delete _Light;
-	if (_Material) delete _Material;
-	if (_Shader) delete _Shader;
-	if (_ConstantBuffer) delete _ConstantBuffer;
-}
-
-//Begin
-//	描画開始
-//
-void D3DApp::Renderer::Begin()
-{
-	_pDevice->ImmediateContext->ClearDepthStencilView(_pDevice->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-}
-
-//End
-//	描画終了
-//
-void D3DApp::Renderer::End()
-{
-	_pDevice->SwapChain->Present(1, 0);
-}
-
-//ClearRenderTargetView
-//	コンテキストリセット
-//
-void D3DApp::Renderer::ClearRenderTargetView(Color clearColor)
-{
-	_pDevice->ImmediateContext->ClearRenderTargetView(_pDevice->RenderTargetView, clearColor);
-}
-
-//SetDepthEnable
-//	
-//
-void D3DApp::Renderer::SetDepthEnable(bool Enable)
-{
-	if (Enable)
-		_pDevice->ImmediateContext->OMSetDepthStencilState(_pDevice->DepthStateEnable, NULL);
-	else
-		_pDevice->ImmediateContext->OMSetDepthStencilState(_pDevice->DepthStateDisable, NULL);
-}
-
-//SetRasterize
-//
-//
-void D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode)
+void D3DRenderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cullmode)
 {
 	// ラスタライザステート設定
 	D3D11_RASTERIZER_DESC rd;
@@ -466,92 +491,42 @@ void D3DApp::Renderer::SetRasterize(D3D11_FILL_MODE fillmode, D3D11_CULL_MODE cu
 	rd.MultisampleEnable = FALSE;
 
 	ID3D11RasterizerState *rs;
-	_pDevice->D3DDevice->CreateRasterizerState(&rd, &rs);
+	_D3DDevice->CreateRasterizerState(&rd, &rs);
 
-	_pDevice->ImmediateContext->RSSetState(rs);
+	_ImmediateContext->RSSetState(rs);
 }
 
-//SetWorldViewProjection2D
-//
-//
-void D3DApp::Renderer::SetWorldViewProjection2D()
+void D3DRenderer::SetWorldViewProjection2D()
 {
 	SetWorldMatrix(&XMMatrixIdentity());
 	SetProjectionMatrix2D();
 }
 
-//SetWorldMatrix
-//
-//
-void D3DApp::Renderer::SetWorldMatrix(XMMATRIX* WorldMatrix)
+void D3DRenderer::SetWorldMatrix(XMMATRIX * WorldMatrix)
 {
 	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_WORLD, &XMMatrixTranspose(*WorldMatrix));
 }
 
-//SetViewMatrix
-//
-//
-void D3DApp::Renderer::SetViewMatrix(XMMATRIX* ViewMatrix)
+void D3DRenderer::SetViewMatrix(XMMATRIX * ViewMatrix)
 {
 	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_VIEW, &XMMatrixTranspose(*ViewMatrix));
 }
 
-//SetProjectionMatrix
-//
-//
-void D3DApp::Renderer::SetProjectionMatrix(XMMATRIX* ProjectionMatrix)
+void D3DRenderer::SetProjectionMatrix(XMMATRIX * ProjectionMatrix)
 {
 	_ConstantBuffer->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &XMMatrixTranspose(*ProjectionMatrix));
 }
 
-//SetProjectionMatrix2D
-//
-//
-void D3DApp::Renderer::SetProjectionMatrix2D()
+void D3DRenderer::SetProjectionMatrix2D()
 {
 	SetViewMatrix(&XMMatrixIdentity());
-	SetProjectionMatrix(&Renderer::GetProjectionMatrix2D());
+	SetProjectionMatrix(&GetProjectionMatrix2D());
 }
 
-//SetVertexBuffer
-//
-//
-void D3DApp::Renderer::SetVertexBuffer(ID3D11Buffer * VertexBuffer, UINT stride, UINT offset)
+XMMATRIX D3DRenderer::GetProjectionMatrix2D()
 {
-	_pDevice->ImmediateContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
+	//DXGI_SWAP_CHAIN_DESC sd = ;
+	//return XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
+	return XMMatrixIdentity();
 }
 
-//SetIndexBuffer
-//
-//
-void D3DApp::Renderer::SetIndexBuffer(ID3D11Buffer* IndexBuffer)
-{
-	_pDevice->ImmediateContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-}
-
-//Comment
-//	SetTexture
-//
-void D3DApp::Renderer::SetTexture(ID3D11ShaderResourceView* texture, UINT slot, UINT numView)
-{
-	ID3D11ShaderResourceView* srv[1] = { texture };
-	_pDevice->ImmediateContext->PSSetShaderResources(slot, numView, srv);
-}
-
-//DrawIndexed
-//
-//
-void D3DApp::Renderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, int BaseVertexLocation)
-{
-	_pDevice->ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	_pDevice->ImmediateContext->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
-}
-
-//GetProjectionMatrix2D
-//	TODO : Shaderベースの変換にする
-//
-XMMATRIX D3DApp::Renderer::GetProjectionMatrix2D()
-{
-	DXGI_SWAP_CHAIN_DESC sd = _pDevice->GetSwapChainDesc();
-	return XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
-}

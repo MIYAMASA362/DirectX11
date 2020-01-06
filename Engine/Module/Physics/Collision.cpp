@@ -706,7 +706,7 @@ void SphereCollider::SetRenderBuffer()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = m_pVertex;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&m_VertexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd,&sd,&m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点バッファの生成に失敗しました。","SphereCollider",MB_OK);
 	}
@@ -729,7 +729,7 @@ void SphereCollider::SetRenderBuffer()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&m_IndexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd,&sd,&m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"頂点インデックスバッファの生成に失敗しました。","SphereCollider",MB_OK);
 	
@@ -755,8 +755,8 @@ void SphereCollider::SetRadius(float radius)
 
 void SphereCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
-	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
+	D3DRenderer::GetInstance()->SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
+	D3DRenderer::GetInstance()->SetIndexBuffer(m_IndexBuffer);
 
 	m_Texture->SetResource();
 	float rad = this->transform()->scale().MaxElement();
@@ -770,19 +770,19 @@ void SphereCollider::Render()
 	world *= XMMatrixTranslation(pos.x,pos.y,pos.z);
 	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
 
-	D3DApp::Renderer::SetWorldMatrix(&world);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationZ(Mathf::PI_2) * world;
-	D3DApp::Renderer::SetWorldMatrix(&local);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DRenderer::GetInstance()->SetWorldMatrix(&local);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 
 	local = XMMatrixRotationX(Mathf::PI_2) * world;
-	D3DApp::Renderer::SetWorldMatrix(&local);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
+	D3DRenderer::GetInstance()->SetWorldMatrix(&local);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(m_IndexNum, 0, 0);
 }
 
 bool SphereCollider::Judgment(Collider * other)
@@ -845,7 +845,7 @@ void BoxCollider::SetRenderBuffer()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = m_pVertex;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, &sd, &m_VertexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, &sd, &m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL, "頂点バッファの生成に失敗しました。", "BoxCollider", MB_OK);
 	}
@@ -885,7 +885,7 @@ void BoxCollider::SetRenderBuffer()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, &sd, &m_IndexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, &sd, &m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL, "頂点インデックスバッファの生成に失敗しました。", "BoxCollider", MB_OK);
 	
@@ -926,8 +926,8 @@ void BoxCollider::SetSize(Vector3 size)
 
 void BoxCollider::Render()
 {
-	D3DApp::Renderer::SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
-	D3DApp::Renderer::SetIndexBuffer(m_IndexBuffer);
+	D3DRenderer::GetInstance()->SetVertexBuffer(m_VertexBuffer,sizeof(VERTEX_3D),0);
+	D3DRenderer::GetInstance()->SetIndexBuffer(m_IndexBuffer);
 
 	m_Texture->SetResource();
 
@@ -940,9 +940,9 @@ void BoxCollider::Render()
 	world *= this->transform()->WorldMatrix();
 	
 
-	D3DApp::Renderer::SetWorldMatrix(&world);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
+	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(m_IndexNum,0,0);
 }
 
 bool BoxCollider::Judgment(Collider * other)

@@ -42,7 +42,7 @@ Billboard::Billboard()
 		ZeroMemory(&sd, sizeof(sd));
 		sd.pSysMem = this->_VertexArray;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd, &sd, &this->m_VertexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, &sd, &this->m_VertexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL, "頂点バッファの生成に失敗しました。", "Billboard", MB_OK);
 	}
@@ -65,7 +65,7 @@ Billboard::Billboard()
 		ZeroMemory(&sd,sizeof(sd));
 		sd.pSysMem = pIndex;
 
-		hr = D3DApp::Renderer::GetD3DAppDevice()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
+		hr = D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd,&sd,&this->m_IndexBuffer);
 		if (FAILED(hr))
 			MessageBox(NULL,"インデックスバッファの生成に失敗しました。","Billboard",MB_OK);
 
@@ -107,10 +107,10 @@ void Billboard::Render(XMMATRIX& worldMatrix)
 		world = XMMatrixTranslation(0.0f, this->m_scale, 0.0f);
 	world *= InvView * worldMatrix;
 
-	D3DApp::Renderer::SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
-	D3DApp::Renderer::SetIndexBuffer(this->m_IndexBuffer);
-	D3DApp::Renderer::SetWorldMatrix(&world);
+	D3DRenderer::GetInstance()->SetVertexBuffer(this->m_VertexBuffer, sizeof(VERTEX_3D), 0);
+	D3DRenderer::GetInstance()->SetIndexBuffer(this->m_IndexBuffer);
+	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
 	this->m_Texture->SetResource();
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
 }

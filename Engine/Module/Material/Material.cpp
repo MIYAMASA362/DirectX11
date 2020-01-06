@@ -50,7 +50,7 @@ void Material::SetResource()
 //
 void Material::SetResourceMaterial()
 {
-	D3DApp::Renderer::GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
+	D3DRenderer::GetInstance()->GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_MATERIAL,&_constant);
 }
 
 //SetResourceTexture

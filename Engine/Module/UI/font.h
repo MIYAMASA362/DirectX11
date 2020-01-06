@@ -1,6 +1,7 @@
 #pragma once
 
 class Texture;
+class D3DRenderer;
 
 class Font
 {

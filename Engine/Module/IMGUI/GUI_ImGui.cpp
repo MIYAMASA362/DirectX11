@@ -1,4 +1,5 @@
 #include<String>
+#include<map>
 #include"Module\DirectX\DirectX.h"
 
 #include"GUI_ImGui.h"

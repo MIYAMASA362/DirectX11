@@ -2,8 +2,9 @@
 #include<functional>
 #include"IMGUI\GUI_ImGui.h"
 
-//Object固有ID
-using InstanceID = unsigned int;
+//Object
+#include"Object\Object.h"
+#include"Object\ObjectManager.h"
 
 using EntityID = InstanceID;
 using ComponentID = InstanceID;
@@ -11,10 +12,6 @@ using ComponentTypeID = size_t;
 
 //ECSに必要なヘッダーファイルをIncludeします。
 #ifndef NOT_INCLUDE_ECS_FILES
-
-//Object
-#include"Object\Object.h"
-#include"Object\ObjectManager.h"
 
 #include"Component\IComponent.h"
 #include"Component\ComponentList.h"

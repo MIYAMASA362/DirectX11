@@ -1,5 +1,6 @@
 #include<Windows.h>
 #include<String>
+#include<map>
 #include"Module\DirectX\DirectX.h"
 #include "Time.h"
 
@@ -89,7 +90,7 @@ void TimeManager::Update()
 	pInstance->dwCurrentTime = timeGetTime();
 }
 
-void DirectX::TimeManager::DebugGUI_Time()
+void TimeManager::DebugGUI_Time()
 {
 	ImGui::Begin("Time");
 	ImGui::Text("FPS:%d",pInstance->Fps);
@@ -130,7 +131,7 @@ float Time::Get_FixedDeltaTime()
 	return TimeManager::pInstance->dwFixedDeltaTime * SET_SECOND_TIME;
 }
 
-int DirectX::Time::Get_SecGameTime()
+int Time::Get_SecGameTime()
 {
 	if (TimeManager::pInstance == nullptr) return 0;
 	return (TimeManager::pInstance->dwCurrentTime - TimeManager::pInstance->dwStartTime) / 1000;

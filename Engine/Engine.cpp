@@ -1,5 +1,6 @@
 #include<Windows.h>
 #include<string>
+#include<map>
 #include"Module\DirectX\DirectX.h"
 
 
@@ -9,6 +10,8 @@
 #include"Module\Manager\manager.h"
 
 #include"Engine.h"
+
+#define FRAME_RATE (60)
 
 //*********************************************************************************************************************
 //
@@ -38,12 +41,14 @@ WPARAM EngineWindow::MessageLoop()
 	MSG msg;
 
 	//Application‚Ì¶¬
-	D3DApp* d3dapp = new D3DApp();
-	d3dapp->Create(this->_hWnd,60);
-
-	D3DApp::Renderer::RegisterDevice(d3dapp);
-
-	CManager::Initialize();
+	D3DRenderer::Create();
+	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd, &_RenderStatus, FRAME_RATE)))
+	{
+		MessageBox(NULL, "RenderStatus‚Ì¶¬‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", "EditorWindow", MB_OK);
+		return 0;
+	}
+	
+	CManager::Initialize(this->_hWnd,FRAME_RATE);
 
 	do
 	{
@@ -55,15 +60,31 @@ WPARAM EngineWindow::MessageLoop()
 		}
 		else
 		{
-			CManager::Run();
+			if (!CManager::IsProcess()) return msg.wParam;
+
+			CManager::SetFrame();
+
+			CManager::Update();
+			CManager::FixedUpdate();
+
+			if (!CManager::IsUpdate())
+			{
+				_RenderStatus->ClearRenderTargetView(Color::gray());
+
+				CManager::Render(_RenderStatus);
+				CManager::DebugRender();
+
+				_RenderStatus->End();
+			}
+
 		}
 	} 
 	while (msg.message != WM_QUIT);
 
 	CManager::Finalize();
 
-	D3DApp::Renderer::Release();
-	delete d3dapp;
+	delete _RenderStatus;
+	D3DRenderer::Destroy();
 
 	return msg.wParam;
 }

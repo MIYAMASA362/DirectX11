@@ -79,7 +79,7 @@ Camera::~Camera()
 //Render
 //	描画
 //
-void Camera::Render(void(*Draw)(void), void(*Begin)(void))
+void Camera::Render(void(*Draw)(void),RenderStatus* renderStatus)
 {
 	//Componentを参照
 	for (auto camera : CameraSortIndex)
@@ -91,7 +91,7 @@ void Camera::Render(void(*Draw)(void), void(*Begin)(void))
 		//アクティブなカメラに設定
 		pActiveCamera = camera;
 
-		Begin();
+		renderStatus->Begin();
 		camera->Run();
 		Draw();
 	}
@@ -108,7 +108,7 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 	MousePos.y = Input::Mouse::GetMouseY();
 
 	RECT rect;
-	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &rect);
+	GetWindowRect(D3DRenderer::GetRenderStatus()->GetSwapChainDesc().OutputWindow, &rect);
 
 	const XMMATRIX projection = pActiveCamera->GetProjectionMatrix();
 	const XMMATRIX ViewMatrix = pActiveCamera->GetViewMatrix();
@@ -166,7 +166,7 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 	h = min(h, 1.0f);
 
 	RECT rect;
-	GetWindowRect(D3DApp::Renderer::GetD3DAppDevice()->GetWindow(), &rect);
+	GetWindowRect(D3DRenderer::GetRenderStatus()->GetSwapChainDesc().OutputWindow, &rect);
 	float width = rect.right - rect.left;
 	float height = rect.bottom - rect.top;
 
@@ -201,7 +201,7 @@ void Camera::Run()
 	XMMATRIX	ViewMatrix;
 	XMMATRIX	InvViewMatrix;
 
-	D3DApp::Renderer::GetD3DAppDevice()->GetDeviceContext()->RSSetViewports(1, &_Viewport);
+	D3DRenderer::GetInstance()->GetDeviceContext()->RSSetViewports(1, &_Viewport);
 
 	// ビューマトリクス設定
 	{
@@ -212,14 +212,14 @@ void Camera::Run()
 
 		this->_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
 
-		D3DApp::Renderer::SetViewMatrix(&ViewMatrix);
+		D3DRenderer::GetInstance()->SetViewMatrix(&ViewMatrix);
 	}
 
 	// プロジェクションマトリクス設定
 	{
 		this->_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, _Viewport.Width / _Viewport.Height, 1.0f, 1000.0f);
 
-		D3DApp::Renderer::SetProjectionMatrix(&_ProjectionMatrix);
+		D3DRenderer::GetInstance()->SetProjectionMatrix(&_ProjectionMatrix);
 	}
 }
 

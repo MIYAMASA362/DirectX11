@@ -10,14 +10,17 @@ public:
 public:
 	void Update() override
 	{
-		float horizontal = 0.0f, vertical = 0.0f;
+		//float horizontal = 0.0f, vertical = 0.0f;
 
-		vertical = Input::Mouse::GetAccelerationY() * MouseSpeed;
+		//vertical = Input::Mouse::GetAccelerationY() * MouseSpeed;
 
-		this->transform()->localRotation(
-			this->transform()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
-		);
-		//this->transform.lock()->LookAt(looktarget);
+		//this->transform()->localRotation(
+		//	this->transform()->localRotation() * Quaternion::AngleAxisToRadian(vertical,Vector3::right())
+		//);
+		////this->transform.lock()->LookAt(looktarget);
+
+		if (Input::GetKeyTrigger('Q'))
+			gameObject()->Destroy();
 	}
 
 	void OnDestroy()  override

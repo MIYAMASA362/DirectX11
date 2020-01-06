@@ -1,6 +1,6 @@
 #pragma once
 
-class D3DApp;
+class RenderStatus;
 
 namespace System
 {
@@ -52,8 +52,8 @@ namespace Editor
 		//エディタサブウィンドウ
 		EditorSubWindow* _SubWindow;
 
-		D3DApp* _D3DApp = nullptr;
-		
+		RenderStatus* _RenderStatus = nullptr;
+
 		//スレッドの終了
 		bool _threadEnd = false;
 		//実行状態か

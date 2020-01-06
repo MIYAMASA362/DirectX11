@@ -177,7 +177,7 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		}
 
 		//頂点バッファ生成
-		D3DApp::Renderer::GetD3DAppDevice()->CreateBuffer(
+		D3DRenderer::GetInstance()->CreateBuffer(
 			D3D11_BIND_VERTEX_BUFFER,
 			sizeof(VERTEX_3D) * nodeMesh->_Mesh->_VertexNum,
 			nodeMesh->_Mesh->_VertexArray,
@@ -185,7 +185,7 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		);
 
 		// インデックスバッファ生成
-		D3DApp::Renderer::GetD3DAppDevice()->CreateBuffer(
+		D3DRenderer::GetInstance()->CreateBuffer(
 			D3D11_BIND_INDEX_BUFFER,
 			sizeof(unsigned short) * nodeMesh->_Mesh->_IndexNum,
 			nodeMesh->_Mesh->_IndexArray,

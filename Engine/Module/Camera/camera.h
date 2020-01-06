@@ -38,7 +38,7 @@ public:
 	static Camera* GetActiveCamera() { return pActiveCamera; };
 
 	//描画
-	static void Render(void(*Draw)(void), void(*Begin)(void));
+	static void Render(void(*Draw)(void), RenderStatus* renderState);
 	//スクリーン座標に変換
 	static Vector3 ScreenToWorldPosition(Vector3 position);
 
