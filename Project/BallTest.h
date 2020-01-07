@@ -16,6 +16,7 @@ public:
 			camera->AddComponent<Camera>().lock()->SetPriority(1);
 		}
 		//Ball
+		//	TODO : ‚±‚±‚Ìˆ—‚ðComponent–ˆ‚É®—‚·‚é
 		{
 			GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
 			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);

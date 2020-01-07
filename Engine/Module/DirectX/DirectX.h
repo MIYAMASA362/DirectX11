@@ -47,6 +47,7 @@ class D3DRenderer;
 //*********************************************************************************************************************
 //
 //	RenderStatus
+//		D3DRendererに対して複数
 //
 //*********************************************************************************************************************
 class RenderStatus final
@@ -64,6 +65,11 @@ private:
 	ID3D11DepthStencilState* _DepthStateDisable = nullptr;
 
 	bool _IsReleased;
+
+	UINT _NumViewPortSrot;
+	D3D11_VIEWPORT _ViewPort;
+
+
 public:
 	RenderStatus(HWND hWnd, D3DRenderer* renderer,unsigned int fps);
 	~RenderStatus();
@@ -76,6 +82,7 @@ public:
 	void CreateDepthStencilView();
 	
 	void SetViewport(UINT NumViewports);
+	void SetClientViewport(HWND hWnd);
 
 	void CleanupRenderTargetView();
 	void CleanupDepthStencilView();
@@ -88,6 +95,8 @@ public:
 	unsigned int GetRefreshRate();
 
 	void Release();
+
+	bool IsProcess();
 };
 
 
@@ -95,7 +104,7 @@ public:
 
 //*********************************************************************************************************************
 //
-//	D3DApp DirectX Application
+//	D3DRenderer
 //
 //*********************************************************************************************************************
 class D3DRenderer final
@@ -151,7 +160,6 @@ public:
 
 	//描画ターゲット作成
 	HRESULT CreateRenderStatus(HWND hWnd, RenderStatus** renderstatus,unsigned int fps);
-
 
 	void CreateBuffer(unsigned int BindFlag, unsigned int byteWidth, const void* subresource, ID3D11Buffer** buffer);
 	void SetVertexBuffer(ID3D11Buffer * VertexBuffer, UINT stride, UINT offset);

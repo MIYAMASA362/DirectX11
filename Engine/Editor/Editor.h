@@ -25,11 +25,14 @@ namespace Editor
 		MDIWindow* _MDIWindow = nullptr;
 		FileTreeView* _FileTree = nullptr;
 
+		RenderStatus* _RenderStatus = nullptr;
 	public:
 		//コンストラクタ
 		EditorSubWindow(EditorWindow* editor);
 		//デストラクタ
 		~EditorSubWindow();
+
+		RenderStatus** GetLPRenderStatus() { return &_RenderStatus; };
 
 		//ウィンドウ生成
 		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName,LPSTR lpCaption, int x,int y, long width,long height,DWORD style) override;

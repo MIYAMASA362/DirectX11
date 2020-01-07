@@ -78,8 +78,6 @@ RenderStatus::RenderStatus(HWND hWnd, D3DRenderer * renderer,unsigned int fps)
 	//ステンシル用テクスチャー作成
 	CreateDepthStencilView();
 
-	
-
 	// 深度ステンシルステート設定
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
@@ -98,6 +96,12 @@ RenderStatus::RenderStatus(HWND hWnd, D3DRenderer * renderer,unsigned int fps)
 	_D3DRenderer->GetDeviceContext()->OMSetDepthStencilState(_DepthStateEnable, NULL);
 
 	//ビューポート設定
+	_ViewPort.Width = (float)ScreenWidth;
+	_ViewPort.Height = (float)ScreenHeight;
+	_ViewPort.MinDepth = 0.0f;
+	_ViewPort.MaxDepth = 1.0f;
+	_ViewPort.TopLeftX = 0;
+	_ViewPort.TopLeftY = 0;
 	SetViewport(1);
 
 	_IsReleased = false;
@@ -167,19 +171,24 @@ void RenderStatus::CreateDepthStencilView()
 //
 void RenderStatus::SetViewport(UINT NumViewports)
 {
-	RECT rect;
-	GetClientRect(GetSwapChainDesc().OutputWindow, &rect);
-	unsigned int ScreenWidth = rect.right - rect.left;
-	unsigned int ScreenHeight = rect.bottom - rect.top;
+	_NumViewPortSrot = NumViewports;
+	_D3DRenderer->GetDeviceContext()->RSSetViewports(_NumViewPortSrot, &_ViewPort);
 
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)ScreenWidth;
-	vp.Height = (float)ScreenHeight;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	_D3DRenderer->GetDeviceContext()->RSSetViewports(NumViewports, &vp);
+	XMMATRIX matrix = XMMatrixOrthographicOffCenterLH(0.0f, (float)_ViewPort.Width, (float)_ViewPort.Height, 0.0f, 0.0f, 1.0f);
+	D3DRenderer::GetInstance()->GetConstantBuffer()->UpdateSubresource(CONSTANT_BUFFER_PROJECTION, &matrix);
+}
+
+void RenderStatus::SetClientViewport(HWND hWnd)
+{
+	RECT rect;
+	GetClientRect(hWnd,&rect);
+
+	_ViewPort.Width = rect.right - rect.left;
+	_ViewPort.Height = rect.bottom - rect.top;
+	_ViewPort.MaxDepth = 1.0f;
+	_ViewPort.MinDepth = 0.0f;
+	_ViewPort.TopLeftX = 0;
+	_ViewPort.TopLeftY = 0;
 }
 
 //ClearnupRenderTargetView
@@ -204,6 +213,8 @@ void RenderStatus::CleanupDepthStencilView()
 
 void RenderStatus::ClearRenderTargetView(Color clearColor)
 {
+	SetViewport(1);
+	_D3DRenderer->GetDeviceContext()->OMSetRenderTargets(1, &_RenderTargetView, _DepthStencilView);
 	_D3DRenderer->GetDeviceContext()->ClearRenderTargetView(_RenderTargetView,clearColor);
 }
 
@@ -214,7 +225,7 @@ void RenderStatus::Begin()
 
 void RenderStatus::End()
 {
-	_SwapChain->Present(1,0);
+	_SwapChain->Present(0,0);
 }
 
 void RenderStatus::SetDepthEnable(bool Enable)
@@ -241,6 +252,11 @@ void RenderStatus::Release()
 
 	if (_SwapChain) _SwapChain->Release();
 	_IsReleased = true;
+}
+
+bool RenderStatus::IsProcess()
+{
+	return _ViewPort.Width >0 && _ViewPort.Height > 0;
 }
 
 DXGI_SWAP_CHAIN_DESC RenderStatus::GetSwapChainDesc()
@@ -321,77 +337,8 @@ D3DRenderer::D3DRenderer()
 	//
 	_pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&_pFactory);
 
-	pInstance = this;
-
-	//コンスタントバッファの生成
-	_ConstantBuffer = new ConstantBuffer(this);
-	_ConstantBuffer->CreateBuffer();
-
-	_Light = new Light();
-	_Light->SetResource();
-
-	_Material = new Material();
-	_Material->SetResourceMaterial();
-}
-
-//~D3DRenderer
-//	デストラクタ
-//
-D3DRenderer::~D3DRenderer()
-{
-	for(auto status : _ClientRenderStatus)
-	{
-		if (status.second)
-			MessageBox(NULL,"","",MB_OK);
-		delete status.second;
-	}
-
-	if (_ConstantBuffer) delete _ConstantBuffer;
-	if (_Light) delete _Light;
-	if (_Material) delete _Material;
-	if (_ImmediateContext)_ImmediateContext->ClearState();
-
-	if (_ImmediateContext) _ImmediateContext->Release();
-	if (_pFactory) _pFactory->Release();
-	if (_pAdapter) _pAdapter->Release();
-	if (_pDXGI)	_pDXGI->Release();
-	if (_D3DDevice)	_D3DDevice->Release();
-}
-
-HRESULT D3DRenderer::Create()
-{
-	if (pInstance != nullptr) return E_FAIL;
-	pInstance = new D3DRenderer();
-
-	return S_OK;
-}
-
-HRESULT D3DRenderer::Destroy()
-{
-	if (pInstance == nullptr) return E_FAIL;
-	delete pInstance;
-	pInstance = nullptr;
-	return S_OK;
-}
-
-RenderStatus * D3DRenderer::GetRenderStatus(HWND hWnd)
-{
-	return pInstance->_ClientRenderStatus.at(hWnd);
-}
-
-
-//CreateRenderStatus
-//	RenderStatusの生成
-//
-HRESULT D3DRenderer::CreateRenderStatus(HWND hWnd,RenderStatus** renderstatus, unsigned int fps)
-{
-	HRESULT hr;
-
-	//クライアント追加
-	*renderstatus = new RenderStatus(hWnd,this,fps);
-
 	// ラスタライザステート設定
-	SetRasterize(D3D11_FILL_SOLID,D3D11_CULL_BACK);
+	SetRasterize(D3D11_FILL_SOLID, D3D11_CULL_BACK);
 
 	// ブレンドステート設定
 	D3D11_BLEND_DESC blendDesc;
@@ -430,6 +377,77 @@ HRESULT D3DRenderer::CreateRenderStatus(HWND hWnd,RenderStatus** renderstatus, u
 	_D3DDevice->CreateSamplerState(&samplerDesc, &samplerState);
 
 	_ImmediateContext->PSSetSamplers(0, 1, &samplerState);
+}
+
+//~D3DRenderer
+//	デストラクタ
+//
+D3DRenderer::~D3DRenderer()
+{
+	for(auto status : _ClientRenderStatus)
+	{
+		delete status.second;
+	}
+
+	if (_ConstantBuffer) delete _ConstantBuffer;
+	if (_Light) delete _Light;
+	if (_Material) delete _Material;
+	if (_ImmediateContext)_ImmediateContext->ClearState();
+
+	if (_ImmediateContext) _ImmediateContext->Release();
+	if (_pFactory) _pFactory->Release();
+	if (_pAdapter) _pAdapter->Release();
+	if (_pDXGI)	_pDXGI->Release();
+	if (_D3DDevice)	_D3DDevice->Release();
+}
+
+HRESULT D3DRenderer::Create()
+{
+	if (pInstance != nullptr) return E_FAIL;
+	pInstance = new D3DRenderer();
+
+	pInstance->_ConstantBuffer = new ConstantBuffer();
+	pInstance->_ConstantBuffer->CreateBuffer();
+
+	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_WORLD,0);
+	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_VIEW,1);
+	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_PROJECTION,2);
+	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_MATERIAL,3);
+	pInstance->_ConstantBuffer->SetVSConstantBuffer(CONSTANT_BUFFER_LIGHT,4);
+
+	pInstance->_Material = new Material();
+	pInstance->_Material->SetResourceMaterial();
+
+	pInstance->_Light = new Light();
+	pInstance->_Light->SetResource();
+
+	
+	return S_OK;
+}
+
+HRESULT D3DRenderer::Destroy()
+{
+	if (pInstance == nullptr) return E_FAIL;
+	delete pInstance;
+	pInstance = nullptr;
+	return S_OK;
+}
+
+RenderStatus * D3DRenderer::GetRenderStatus(HWND hWnd)
+{
+	return pInstance->_ClientRenderStatus.at(hWnd);
+}
+
+
+//CreateRenderStatus
+//	RenderStatusの生成
+//
+HRESULT D3DRenderer::CreateRenderStatus(HWND hWnd,RenderStatus** renderstatus, unsigned int fps)
+{
+	HRESULT hr;
+
+	//クライアント追加
+	*renderstatus = new RenderStatus(hWnd,this,fps);
 
 	//追加
 	_ClientRenderStatus.emplace(hWnd,*renderstatus);
@@ -525,8 +543,7 @@ void D3DRenderer::SetProjectionMatrix2D()
 
 XMMATRIX D3DRenderer::GetProjectionMatrix2D()
 {
-	//DXGI_SWAP_CHAIN_DESC sd = ;
-	//return XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
-	return XMMatrixIdentity();
+	DXGI_SWAP_CHAIN_DESC sd = pTargetRenderStatus->GetSwapChainDesc();
+	return XMMatrixOrthographicOffCenterLH(0.0f, (float)sd.BufferDesc.Width, (float)sd.BufferDesc.Height, 0.0f, 0.0f, 1.0f);
 }
 

@@ -137,6 +137,20 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		RECT rect;
 		GetWindowRect(this->_FileTree->Get_Window(), &rect);
 		MoveWindow(this->_FileTree->Get_Window(), 0, HIWORD(lParam) - 300, LOWORD(lParam), 300, TRUE);
+
+		if(_RenderStatus)
+		{
+			_MainEditor->Stop();
+			_RenderStatus->CleanupRenderTargetView();
+			_RenderStatus->CleanupDepthStencilView();
+
+			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
+			_RenderStatus->SetClientViewport(hWnd);
+
+			_RenderStatus->CreateRenderTargetView();
+			_RenderStatus->CreateDepthStencilView();
+			_MainEditor->Start();
+		}
 		break;
 
 		//コマンド
@@ -181,9 +195,17 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			break;
 			//F1
 		case VK_F1:
-			ShowWindow(hWnd, SW_SHOW);
-			ShowWindow(hWnd, SW_RESTORE);
-			SendMessage(this->_FileTree->Get_Window(), uMsg, wParam, lParam);
+			WINDOWPLACEMENT placement;
+			GetWindowPlacement(hWnd,&placement);
+			if(placement.showCmd == SW_SHOWNORMAL)
+			{
+				ShowWindow(hWnd,SW_SHOWMINNOACTIVE);
+			}
+			else
+			{
+				ShowWindow(hWnd, SW_SHOWNORMAL);
+				SendMessage(this->_FileTree->Get_Window(), uMsg, wParam, lParam);
+			}
 			break;
 		default:
 			break;
@@ -294,17 +316,17 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		//
 		if (_RenderStatus)
 		{
-			_IsRunProcess = false;
+			Stop();
 			_RenderStatus->CleanupRenderTargetView();
 			_RenderStatus->CleanupDepthStencilView();
 
 			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
+			_RenderStatus->SetClientViewport(hWnd);
 
 			_RenderStatus->CreateRenderTargetView();
 			_RenderStatus->CreateDepthStencilView();
-			_IsRunProcess = true;
+			Start();
 		}
-
 		break;
 
 		//ドロップファイル
@@ -380,6 +402,29 @@ WPARAM EditorWindow::MessageLoop()
 {
 	MSG msg;
 
+	//Applicationの生成
+	D3DRenderer::Create();
+
+	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd, &_RenderStatus, 60)))
+	{
+		MessageBox(NULL, "RenderStatusの生成に失敗しました。", "EditorWindow", MB_OK);
+		return 0;
+	}
+
+	auto SubWindowRenderStatus = _SubWindow->GetLPRenderStatus();
+	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_SubWindow->Get_Window(), &(*SubWindowRenderStatus), 60)))
+	{
+		MessageBox(NULL, "RenderStatusの生成に失敗しました。", "EditorWindow", MB_OK);
+		return 0;
+	}
+
+	//GUI
+	GUI::guiImGui::Create(this->_SubWindow->Get_Window(), D3DRenderer::GetInstance()->GetDevice(), D3DRenderer::GetInstance()->GetDeviceContext());
+	//Manager
+	CManager::Initialize(this->_hWnd, 60);
+
+
+	//Gameビュースレッド
 	std::thread thread([this]() { this->RunProcces(); });
 
 	do
@@ -389,12 +434,21 @@ WPARAM EditorWindow::MessageLoop()
 			// メッセージの翻訳とディスパッチ
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+			continue;
 		}
+
+		//処理
+
+		
+
+
 	} while (msg.message != WM_QUIT);
 
 	_threadEnd = true;
 
 	thread.join();
+
+	CManager::Finalize();
 
 	return msg.wParam;
 }
@@ -404,19 +458,8 @@ WPARAM EditorWindow::MessageLoop()
 //
 void Editor::EditorWindow::RunProcces()
 {
-	//Applicationの生成
-	D3DRenderer::Create();
-
-	if(FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd,&_RenderStatus,60)))
-	{
-		MessageBox(NULL,"RenderStatusの生成に失敗しました。","EditorWindow",MB_OK);
-		return;
-	}
-	//GUI
-	GUI::guiImGui::Create(this->_hWnd,D3DRenderer::GetInstance()->GetDevice(), D3DRenderer::GetInstance()->GetDeviceContext());
-
-	//Manager
-	CManager::Initialize(this->_hWnd,60);
+	auto SubWindowRenderStatus = _SubWindow->GetLPRenderStatus();
+	
 
 	_IsRunProcess = true;
 
@@ -432,12 +475,23 @@ void Editor::EditorWindow::RunProcces()
 
 		if (!CManager::IsUpdate())
 		{
-			_RenderStatus->ClearRenderTargetView(Color::gray());
+			if (_RenderStatus->IsProcess())
+			{
+				_RenderStatus->ClearRenderTargetView(Color::gray());
 
-			CManager::Render(_RenderStatus);
-			CManager::DebugRender();
+				CManager::Render(_RenderStatus);
 
-			_RenderStatus->End();
+				_RenderStatus->End();
+			}
+
+			if ((*SubWindowRenderStatus)->IsProcess())
+			{
+				(*SubWindowRenderStatus)->ClearRenderTargetView(Color::blue());
+
+				CManager::DebugRender();
+
+				(*SubWindowRenderStatus)->End();
+			}
 		}
 
 		CManager::EndFrame();
@@ -447,11 +501,8 @@ void Editor::EditorWindow::RunProcces()
 
 	_IsRunProcess = false;
 
-	CManager::Finalize();
-
 	GUI::guiImGui::Destroy();
 
-	_RenderStatus->Release();
 	D3DRenderer::Destroy();
 }
 

@@ -201,7 +201,10 @@ void Camera::Run()
 	XMMATRIX	ViewMatrix;
 	XMMATRIX	InvViewMatrix;
 
-	D3DRenderer::GetInstance()->GetDeviceContext()->RSSetViewports(1, &_Viewport);
+	D3D11_VIEWPORT vp;
+	UINT vpn = 1;
+	D3DRenderer::GetInstance()->GetDeviceContext()->RSGetViewports(&vpn,&vp);
+	//D3DRenderer::GetInstance()->GetDeviceContext()->RSSetViewports(1, &_Viewport);
 
 	// ビューマトリクス設定
 	{
@@ -217,7 +220,7 @@ void Camera::Run()
 
 	// プロジェクションマトリクス設定
 	{
-		this->_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f, _Viewport.Width / _Viewport.Height, 1.0f, 1000.0f);
+		this->_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.0f,vp.Width / vp.Height, 1.0f, 1000.0f);
 
 		D3DRenderer::GetInstance()->SetProjectionMatrix(&_ProjectionMatrix);
 	}

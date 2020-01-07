@@ -1,7 +1,5 @@
 #pragma once
 
-class D3DRenderer;
-
 //*********************************************************************************************************************
 //
 //	CONSTANT_BUFFER_ELEMENT
@@ -26,10 +24,9 @@ enum CONSTANT_BUFFER_ELEMENT
 class ConstantBuffer
 {
 private:
-	D3DRenderer* _Renderer;
 	ID3D11Buffer* _ConstantBuffer[CONSTANT_BUFFER_NUM];
 public:
-	ConstantBuffer(D3DRenderer* renderer);
+	ConstantBuffer();
 	//コンスタントバッファの生成
 	void CreateBuffer();
 	//バッファの取得

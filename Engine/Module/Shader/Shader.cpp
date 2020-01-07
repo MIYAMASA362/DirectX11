@@ -18,9 +18,7 @@
 //ConstBuffer
 //	コンストラクタ
 //
-ConstantBuffer::ConstantBuffer(D3DRenderer * renderer)
-	:
-	_Renderer(renderer)
+ConstantBuffer::ConstantBuffer()
 {
 
 }
@@ -36,15 +34,15 @@ void ConstantBuffer::CreateBuffer()
 	bd.StructureByteStride = sizeof(float);
 
 	bd.ByteWidth = sizeof(XMMATRIX);
-	_Renderer->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_WORLD]);
-	_Renderer->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_VIEW]);
-	_Renderer->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_PROJECTION]);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_WORLD]);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_VIEW]);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_PROJECTION]);
 
 	bd.ByteWidth = sizeof(Material::Constant);
-	_Renderer->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_MATERIAL]);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_MATERIAL]);
 
 	bd.ByteWidth = sizeof(Light::Constant);
-	_Renderer->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_LIGHT]);
+	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bd, NULL, &_ConstantBuffer[CONSTANT_BUFFER_LIGHT]);
 }
 
 
@@ -55,17 +53,17 @@ ID3D11Buffer* ConstantBuffer::GetConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferEl
 
 void ConstantBuffer::UpdateSubresource(CONSTANT_BUFFER_ELEMENT bufferElement, const void* data)
 {
-	_Renderer->GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement], 0, NULL, data, 0, 0);
+	D3DRenderer::GetInstance()->GetDeviceContext()->UpdateSubresource(_ConstantBuffer[bufferElement], 0, NULL, data, 0, 0);
 }
 
 void ConstantBuffer::SetVSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer)
 {
-	_Renderer->GetDeviceContext()->VSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
+	D3DRenderer::GetInstance()->GetDeviceContext()->VSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
 }
 
 void ConstantBuffer::SetPSConstantBuffer(CONSTANT_BUFFER_ELEMENT bufferElement, UINT slot, UINT NumBuffer)
 {
-	_Renderer->GetDeviceContext()->PSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
+	D3DRenderer::GetInstance()->GetDeviceContext()->PSSetConstantBuffers(slot, NumBuffer, &_ConstantBuffer[(int)bufferElement]);
 }
 
 
