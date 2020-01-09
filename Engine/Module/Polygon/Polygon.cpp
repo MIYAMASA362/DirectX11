@@ -4,6 +4,7 @@
 
 #include"Module\IMGUI\GUI_ImGui.h"
 
+#include"Module\Object\Object.h"
 #include"Module\Texture\texture.h"
 
 //ECS

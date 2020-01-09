@@ -1,6 +1,8 @@
 #pragma once
 
 class Model;
+class GameObject;
+class Scene;
 
 //ƒ‚ƒfƒ‹ŠÇ—
 class ModelManager
@@ -20,4 +22,6 @@ public:
 	static Model* LoadAssetForAssimp(std::string fileName);
 	//ƒ‚ƒfƒ‹æ“¾
 	static std::weak_ptr<Model> GetModel(std::string name);
+
+	static GameObject* AddSceneModel(std::string name,Scene* scene);
 };

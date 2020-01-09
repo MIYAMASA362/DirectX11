@@ -8,6 +8,11 @@
 #include"Module\DirectX\DirectX.h"
 #include"Module\IMGUI\GUI_ImGui.h"
 
+#include"cereal\cereal.hpp"
+#include"cereal\archives\json.hpp"
+#include<fstream>
+
+#include"Module\Object\Object.h"
 #include"texture.h"
 #include"TextureManager.h"
 

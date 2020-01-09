@@ -486,7 +486,7 @@ void Editor::EditorWindow::RunProcces()
 
 			if ((*SubWindowRenderStatus)->IsProcess())
 			{
-				(*SubWindowRenderStatus)->ClearRenderTargetView(Color::blue());
+				(*SubWindowRenderStatus)->ClearRenderTargetView(Color::gray());
 
 				CManager::DebugRender();
 

@@ -3,6 +3,11 @@
 class GameObject;
 class Scene;
 
+//*********************************************************************************************************************
+//
+//	GameObject Entity
+//
+//*********************************************************************************************************************
 class GameObject final:public Entity<GameObject>
 {
 	friend Scene;
@@ -17,6 +22,7 @@ private:
 
 	std::weak_ptr<GameObject> _gameObject;
 	std::weak_ptr<Transform> _transform;
+
 public:
 	GameObject(std::string name,Scene* scene, TagName tagName);
 	virtual ~GameObject();

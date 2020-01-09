@@ -13,7 +13,12 @@ class HierarchyUtility;
 
 using SceneID = unsigned int;
 
-//=== SceneManager ===========================================================
+//*********************************************************************************************************************
+//
+//	SceneMaanger
+//		Scnee管理
+//
+//*********************************************************************************************************************
 class SceneManager
 {
 	friend Scene;
@@ -25,7 +30,6 @@ private:
 	static std::weak_ptr<Scene> pNextScene;
 	static bool IsChangeScene;
 
-private:
 	static void SetIsChangeScene(std::weak_ptr<Scene> scene);
 	static void AttachActiveScene(std::weak_ptr<Scene> scene);
 	static void DetachActiveScene();
@@ -55,18 +59,22 @@ template<typename Type> static std::weak_ptr<Scene> SceneManager::CreateScene()
 	return AddScene;
 }
 
-//=== Scene ==================================================================
+//*********************************************************************************************************************
+//
+//	Scene
+//
+//*********************************************************************************************************************
 class Scene
 {
 private:
-	const SceneID m_id;
-	const std::string m_name;
-	bool IsLoaded = false;
+	const SceneID m_id;			//シーンID
+	const std::string m_name;	//シーン名
+	bool IsLoaded = false;		//読み込みされてる
 
-	HierarchyUtility* const _hierarchyUtility;
+	HierarchyUtility* const _hierarchyUtility;	//オブジェクト階層
 protected:
-	Scene(std::string name);
-	virtual ~Scene();
+	Scene(std::string name);	//コンストラクタ
+	virtual ~Scene();			//デストラクタ
 
 public:
 	std::string GetSceneName();
@@ -84,7 +92,7 @@ public:
 	virtual void Load() = 0;
 	void UnLoad();
 
-	Hierarchy* GetHierarchy(EntityID id);
+	HierarchyUtility* GetHierarchyUtility() { return _hierarchyUtility; };
 };
 
 //----------------------------------------------------------------------------

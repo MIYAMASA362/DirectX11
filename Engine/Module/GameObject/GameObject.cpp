@@ -18,6 +18,15 @@
 
 using namespace DirectX;
 
+//*********************************************************************************************************************
+//
+//	GameObject
+//
+//*********************************************************************************************************************
+
+//GameObject
+//	コンストラクタ
+//
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	:
 	name(name),
@@ -29,11 +38,17 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	g_EntityIndex.emplace(GetEntityID(),std::dynamic_pointer_cast<GameObject>(Object::_self.lock()));
 }
 
+//~GameObject
+//	デストラクタ
+//
 GameObject::~GameObject() 
 {
 	scene->RemoveSceneObject(this->GetInstanceID());
 }
 
+//Transform
+//	
+//
 std::weak_ptr<Transform> GameObject::transform()
 {
 	if (_transform.expired())

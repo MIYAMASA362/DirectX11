@@ -8,59 +8,57 @@
 
 using namespace DirectX;
 
-Hierarchy::Hierarchy(HierarchyUtility* utility,std::weak_ptr<IEntity> self)
+//*********************************************************************************************************************
+//
+//	Hierarchy
+//
+//*********************************************************************************************************************
+
+//Hierarchy
+//	コンストラクタ
+//
+Hierarchy::Hierarchy(std::weak_ptr<IEntity> self)
 	:
-	_self(self),
-	_utility(utility)
+	_self(self)
 {
 
 }
 
+//~Hierarchy
+//	デストラクタ
+//
 Hierarchy::~Hierarchy()
 {
-	_utility = nullptr;
+	
 }
 
-HierarchyUtility& Hierarchy::GetUtility()
-{
-	return *_utility;
-}
-
-std::weak_ptr<IEntity>& Hierarchy::GetSelf()
-{
-	return _self;
-}
-
-std::weak_ptr<IEntity>& Hierarchy::GetParent()
-{
-	return _parent;
-}
-
-std::list<std::weak_ptr<IEntity>>& Hierarchy::GetChildren()
-{
-	return _children;
-}
-
-void Hierarchy::AttachParent(std::weak_ptr<IEntity> parent)
-{
-	_parent = parent;
-}
-
+//DetachParent
+//
+//
 void Hierarchy::DetachParent()
 {
 	_parent.reset();
 }
 
+//AttachChild
+//
+//
 void Hierarchy::AttachChild(std::weak_ptr<IEntity> child)
 {
 	_children.push_back(child);
 }
 
+//DetachChild
+//
+//
 void Hierarchy::DetachChild(std::weak_ptr<IEntity> child)
 {
 	_children.remove_if([child](std::weak_ptr<IEntity> obj) { return obj.lock() == child.lock(); });
 }
 
+//DetachChildren
+//
+//
 void Hierarchy::DetachChildren()
 {
 	_children.clear();
@@ -68,6 +66,12 @@ void Hierarchy::DetachChildren()
 
 
 
+
+//*********************************************************************************************************************
+//
+//	HierarchyUtility
+//
+//*********************************************************************************************************************
 
 std::weak_ptr<IEntity> HierarchyUtility::GetParent(EntityID id)
 {
@@ -103,7 +107,7 @@ std::list<std::weak_ptr<IEntity>> HierarchyUtility::GetAllChildren(EntityID id)
 
 void HierarchyUtility::AttachHierarchy(EntityID id)
 {
-	_hierarchyMap.emplace(id,Hierarchy(this,EntityManager::GetEntity(id)));
+	_hierarchyMap.emplace(id,Hierarchy(EntityManager::GetEntity(id)));
 }
 
 void HierarchyUtility::DetachHierarchy(EntityID id)

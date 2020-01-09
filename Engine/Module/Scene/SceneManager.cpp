@@ -27,6 +27,11 @@
 
 using namespace DirectX;
 
+//*********************************************************************************************************************
+//
+//	SceneManager
+//
+//*********************************************************************************************************************
 
 //SceneIDのカウント
 SceneID SceneManager::m_SceneID;
@@ -39,12 +44,14 @@ std::weak_ptr<Scene> SceneManager::pNextScene;
 //遷移が有効か
 bool SceneManager::IsChangeScene = false;
 
-//インスタンス削除
+//Destroy
+//	Scene削除
+//
 void SceneManager::Destroy()
 {
 	if (!pActiveScene.expired())
 		pActiveScene.reset();
-	if (!pNextScene.expired())
+	if (!pNextScene.expired()) 
 		pNextScene.reset();
 
 	pSceneDictionary.clear();
@@ -75,7 +82,6 @@ void SceneManager::DebugGUI_ActiveScene()
 //Scene遷移
 void SceneManager::ChangeScene()
 {
-	
 	if (!IsChangeScene) return;	//遷移フラグが有効
 	//無効化
 	pNextScene = pNextScene;
@@ -140,6 +146,18 @@ SceneID SceneManager::AttachID()
 	return id;
 }
 
+
+
+
+//*********************************************************************************************************************
+//
+//	Scene
+//
+//*********************************************************************************************************************
+
+//Scene
+//	コンストラクタ
+//
 Scene::Scene(std::string name)
 	:
 	m_id(SceneManager::AttachID()),
@@ -149,12 +167,17 @@ Scene::Scene(std::string name)
 
 };
 
+//~Scene
+//	デストラクタ
+//
 inline Scene::~Scene()
 {
 	delete _hierarchyUtility;
 };
 
-//GameObjectをTag指定で追加
+//AddSceneObject
+//	Sceneにオブジェクトを追加する
+//
 GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 {
 	auto instance = new GameObject(name, this, tag);
@@ -167,11 +190,16 @@ GameObject* Scene::AddSceneObject(std::string name,TagName tag)
 	return instance;
 }
 
+//RemoveSceneObject
+//	Sceneからオブジェクト削除
+//
 void Scene::RemoveSceneObject(EntityID id)
 {
 	_hierarchyUtility->DetachHierarchy(id);
 }
 
+//AttachActiveScene
+//	アクティブなシーンにする
 //
 void Scene::AttachActiveScene()
 {
@@ -179,6 +207,8 @@ void Scene::AttachActiveScene()
 	this->Load();	//読み込み
 }
 
+//DetachActiveScene
+//	非アクティブなシーンにする
 //
 void Scene::DetachActiveScene()
 {
@@ -186,21 +216,21 @@ void Scene::DetachActiveScene()
 	this->UnLoad();
 }
 
-//ImGui Debug表示
+//DebugGUI
+//	デバッグ表示
+//
 void Scene::DebugGUI()
 {
 	for (auto obj : _hierarchyUtility->GetHierarchyMap()) 
 		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->OnDebugGUI();
 }
 
+//UnLoad
+//	
+//
 void Scene::UnLoad()
 {
 	for (auto obj : _hierarchyUtility->GetHierarchyMap())
 		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->Destroy();
 	_hierarchyUtility->ClearnHierarchy();
-}
-
-Hierarchy* Scene::GetHierarchy(EntityID id)
-{
-	return _hierarchyUtility->GetHierarchy(id);
 }

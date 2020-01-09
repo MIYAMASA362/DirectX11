@@ -6,6 +6,7 @@
 //ECS
 #include"Module\ECSEngine.h"
 
+#include"Module\Mesh\Mesh.h"
 #include"Renderer.h"
 
 #include"Module\Transform\Transform.h"
@@ -50,8 +51,6 @@ Renderer::~Renderer()
 		return this == renderer;
 	});
 	RendererIndex.erase(rEnd,RendererIndex.end());
-
-	delete _Material;
 }
 
 //BeginRenderer

@@ -20,7 +20,6 @@ private:
 	//デストラクタ
 	~TextureManager();
 
-
 public:
 	//インスタンス生成
 	static void Create();

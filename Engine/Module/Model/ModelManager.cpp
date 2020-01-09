@@ -12,6 +12,11 @@
 #include"Module\Texture\texture.h"
 #include"Module\Material\Material.h"
 
+#include"Module\ECSEngine.h"
+#include"Module\Transform\Transform.h"
+#include"Module\Tag\Tag.h"
+#include"Module\GameObject\GameObject.h"
+
 // Component
 #include"Module\Mesh\Mesh.h"
 
@@ -19,13 +24,29 @@
 #include"Module\Texture\TextureManager.h"
 
 #include"Module\Mesh\Mesh.h"
+#include"Module\Scene\SceneManager.h"
+
+#include"Module\Renderer\Renderer.h"
+#include"Module\Mesh\MeshRender.h"
+
+#include"Module\Shader\Shader.h"
+#include"Module\Shader\ShaderManager.h"
 
 //Model
 #include"model.h"
 #include"ModelManager.h"
 
+//*********************************************************************************************************************
+//
+//	ModelManager
+//
+//*********************************************************************************************************************
+
 ModelManager::ModelIndex ModelManager::modelIndex;
 
+//SetMaterial
+//	マテリアル設定
+//
 void SetMaterial(Material* m, aiMaterial* material)
 {
 	//Diffuse
@@ -56,6 +77,9 @@ void SetMaterial(Material* m, aiMaterial* material)
 	m->_constant.Shininess = shininess;
 }
 
+//GetNodeMesh
+//	ノードメッシュ取得
+//
 void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string folderPath,const aiMatrix4x4& nodeMtx)
 {
 	aiMatrix4x4 rootMtx = nodeMtx * node->mTransformation;
@@ -67,6 +91,8 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		model->_NodeMeshArray.push_back(nodeMesh);
 
 		nodeMesh->_Mesh = new NodeMesh::MeshType();
+		//ノード名設定
+		nodeMesh->_NodeName = node->mName.C_Str();
 
 		//行列設定
 		aiMatrix4x4 matrix = node->mTransformation;
@@ -241,6 +267,41 @@ Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 std::weak_ptr<Model> ModelManager::GetModel(std::string name)
 {
 	return modelIndex[name];
+}
+
+void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
+{
+	for(int i = 0; i < nodeMesh->_SubsetNum; i++)
+	{
+		auto subset = nodeMesh->_SubsetArray[i];
+
+		GameObject* child = scene->AddSceneObject(nodeMesh->_NodeName + std::to_string(i),TagName::Default);
+		child->transform().lock()->SetParent(parent->transform());
+
+		auto renderer = child->AddComponent<MeshRender>().lock();
+		renderer->_Mesh = nodeMesh->_Mesh;
+
+		renderer->_IndexNum = subset._IndexNum;
+		renderer->_IndexStartNum = subset._StartIndex;
+
+		renderer->SetMaterial(&subset._Material);
+		renderer->_Material._Shader = ShaderManager::GetShader();
+	}
+}
+
+GameObject * ModelManager::AddSceneModel(std::string name, Scene * scene)
+{
+	auto model = modelIndex.at(name);
+
+	GameObject* result = scene->AddSceneObject(name, TagName::Default);
+
+	GameObject* parent = result;
+	for(auto nodeMesh : model->_NodeMeshArray)
+	{
+		AddSceneNodeModel(nodeMesh,parent,scene);
+	}
+
+	return result;
 }
 
 void ModelManager::Release()

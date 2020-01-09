@@ -32,7 +32,7 @@ Transform::Transform(EntityID OwnerID)
 {
 	this->RegisterIndex();
 	//ŠK‘wæ“¾
-	_hierarchy = gameObject()->GetScene()->GetHierarchy(OwnerID);
+	_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(OwnerID);
 
 	this->OnDebugImGui =[this]()
 	{
@@ -61,7 +61,7 @@ Transform::Transform(EntityID OwnerID)
 //SetParent
 void Transform::SetParent(std::weak_ptr<Transform> parent)
 {
-	_hierarchy->GetUtility().AttachParent(gameObject(),parent.lock()->gameObject());
+	gameObject()->GetScene()->GetHierarchyUtility()->AttachParent(gameObject()->GetEntityID(),parent.lock()->gameObject());
 
 	//Œü‚«‚È‚Ç‚ğ•Û‚µ‚½‚Ü‚Üq‚É‚È‚é
 	XMMATRIX matrix;
@@ -82,7 +82,7 @@ void Transform::detachParent()
 	Vector3 scale = this->scale();
 	Quaternion q = Quaternion::AtMatrix(this->MatrixQuaternion());
 
-	_hierarchy->GetUtility().DetachParent(this->gameObject()->GetEntityID());
+	gameObject()->GetScene()->GetHierarchyUtility()->DetachParent(gameObject()->GetEntityID());
 
 	this->position(position);
 	this->localScale(scale);
@@ -91,7 +91,7 @@ void Transform::detachParent()
 
 void Transform::detachChild(std::weak_ptr<Transform> target)
 {
-	_hierarchy->GetUtility().DetachChild(target.lock()->gameObject()->GetEntityID(),target.lock()->gameObject());
+	gameObject()->GetScene()->GetHierarchyUtility()->DetachChild(gameObject()->GetEntityID(),target.lock()->gameObject());
 }
 
 void Transform::childTransformUpdate()
@@ -105,7 +105,7 @@ void Transform::childTransformUpdate()
 void Transform::DetachParent()
 {
 	if (_hierarchy->GetParent().expired()) return;
-	_hierarchy->GetUtility().DetachParent(this->gameObject()->GetEntityID());
+	gameObject()->GetScene()->GetHierarchyUtility()->DetachParent(gameObject()->GetEntityID());
 	detachParent();
 }
 
@@ -188,7 +188,7 @@ ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID
 
 void Transform::DetachChildren()
 {
-	_hierarchy->GetUtility().DetachChildren(this->gameObject()->GetEntityID());
+	gameObject()->GetScene()->GetHierarchyUtility()->DetachChildren(gameObject()->GetEntityID());
 }
 
 //--- •ûŒüˆ— ----------------------------------------------------------------

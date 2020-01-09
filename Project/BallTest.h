@@ -1,7 +1,11 @@
 #pragma once
 
 class GameObject;
-
+//*********************************************************************************************************************
+//
+//	BallTest Scene
+//
+//*********************************************************************************************************************
 class BallTest final :public Scene 
 {
 public:
@@ -20,7 +24,7 @@ public:
 		{
 			GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
 			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
-			auto renderer = ball->AddComponent<MeshRender>().lock();
+			/*auto renderer = ball->AddComponent<MeshRender>().lock();
 
 			renderer->SetModel(ModelManager::GetModel("miku_01").lock());
 
@@ -28,12 +32,19 @@ public:
 			material->_Shader = ShaderManager::GetShader();
 			material->_Texture = TextureManager::GetTexture("miku_01");
 
-			renderer->SetMaterial(material);
+			renderer->SetMaterial(material);*/
 
 			ball->AddComponent<BallScript>();
 			ball->AddComponent<SceneChange>().lock()->nextScene = "BallTest";
 
 		}
+
+		{
+			GameObject* miku = ModelManager::AddSceneModel("miku_01", this);
+			miku->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
+			miku->AddComponent<BallScript>();
+		}
+
 		////Field
 		//{
 		//	GameObject* field = this->AddSceneObject("Field",TagName::Default);

@@ -14,6 +14,8 @@ struct NodeMesh final
 {
 	using MeshType = Mesh;
 
+	std::string _NodeName;
+
 	//オフセット行列
 	XMMATRIX _OffsetMatrix;
 

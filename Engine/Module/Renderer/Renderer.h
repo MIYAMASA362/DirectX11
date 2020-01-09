@@ -1,14 +1,14 @@
 #pragma once
 
-class Shader;
+#include"Module\Material\Material.h"
 
 namespace DirectX
 {
 	struct XMMATRIX;
 }
 
-class Material;
 class Shader;
+class Mesh;
 
 //*********************************************************************************************************************
 //
@@ -37,8 +37,8 @@ public:
 
 	D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;	//トポロジー
 
-	Material* _Material;	//マテリアル
-
+	Material _Material;	//マテリアル
+	
 
 public:	
 	//コンストラクタ
@@ -51,8 +51,8 @@ public:
 	bool GetEnable() { return _IsEnable; }
 
 	//マテリアル設定　set/get
-	void SetMaterial(Material* material) { _Material = material; }
-	Material* GetMaterial() { return _Material; }
+	void SetMaterial(Material* material) { _Material = *material; }
+	Material* GetMaterial() { return &_Material; }
 
 	//描画処理
 	virtual void Render(XMMATRIX& worldMatrix) = 0;

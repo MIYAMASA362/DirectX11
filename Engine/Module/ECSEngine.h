@@ -2,10 +2,6 @@
 #include<functional>
 #include"IMGUI\GUI_ImGui.h"
 
-//Object
-#include"Object\Object.h"
-#include"Object\ObjectManager.h"
-
 using EntityID = InstanceID;
 using ComponentID = InstanceID;
 using ComponentTypeID = size_t;
