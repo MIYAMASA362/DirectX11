@@ -58,7 +58,7 @@ MeshRender::MeshRender(EntityID OwnerID)
 //
 MeshRender::~MeshRender()
 {
-	_MeshFilter.reset();
+	
 }
 
 //Render
@@ -75,23 +75,4 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 
 	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
 	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(_IndexNum,_IndexStartNum, 0);
-
-	//for(auto nodeMesh : _Model.lock()->_NodeMeshArray)
-	//{
-	//	XMMATRIX local = nodeMesh->_OffsetMatrix * worldMatrix;
-	//	D3DRenderer::GetInstance()->SetWorldMatrix(&local);
-
-	//	nodeMesh->_Mesh->SetVertexBuffer();
-	//	nodeMesh->_Mesh->SetIndexBuffer();
-
-	//	for(unsigned int index = 0; index < nodeMesh->_SubsetNum; index++)
-	//	{
-	//		ModelSubset* subset = &nodeMesh->_SubsetArray[index];
-
-	//		_Material->SetResource();
-
-	//		D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-	//		D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(subset->_IndexNum,subset->_StartIndex, 0);
-	//	}
-	//}
 }

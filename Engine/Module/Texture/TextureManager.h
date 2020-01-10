@@ -33,4 +33,6 @@ public:
 
 	//エディタ用ウィンドウ
 	static void EditorWindow();
+
+	static void SetEditorView(ID3D11ShaderResourceView* view);
 };

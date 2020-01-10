@@ -129,7 +129,10 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		}
 
 		this->_FileTree = new FileTreeView();
-		_FileTree->Create(hWnd, this->_hInstance, "FileTree", "FileView", 0, 0, 500, 300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD);
+		_FileTree->Create(hWnd, this->_hInstance, "FileTree", "FileView", 0, 0, 500, 300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD );
+
+		//	TRY : 透過ウィンドウ
+
 		break;
 
 		//サイズ
@@ -243,7 +246,6 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 //	EditorWindow
 //
 //*********************************************************************************************************************
-
 
 //EditorWindow
 //	コンストラクタ
@@ -420,6 +422,7 @@ WPARAM EditorWindow::MessageLoop()
 
 	//GUI
 	GUI::guiImGui::Create(this->_SubWindow->Get_Window(), D3DRenderer::GetInstance()->GetDevice(), D3DRenderer::GetInstance()->GetDeviceContext());
+
 	//Manager
 	CManager::Initialize(this->_hWnd, 60);
 

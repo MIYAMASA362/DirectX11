@@ -21,8 +21,9 @@ public:
 		}
 		//Ball
 		//	TODO : ‚±‚±‚Ìˆ—‚ðComponent–ˆ‚É®—‚·‚é
+		GameObject* ball = this->AddSceneObject("Ball", TagName::Default);
 		{
-			GameObject* ball = this->AddSceneObject("Ball",TagName::Default);
+			
 			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
 			/*auto renderer = ball->AddComponent<MeshRender>().lock();
 
@@ -41,8 +42,10 @@ public:
 
 		{
 			GameObject* miku = ModelManager::AddSceneModel("miku_01", this);
-			miku->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
-			miku->AddComponent<BallScript>();
+			miku->transform().lock()->SetParent(ball->transform());
+			
+			//miku->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
+			//miku->AddComponent<BallScript>();
 		}
 
 		////Field

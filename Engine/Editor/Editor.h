@@ -26,6 +26,8 @@ namespace Editor
 		FileTreeView* _FileTree = nullptr;
 
 		RenderStatus* _RenderStatus = nullptr;
+
+
 	public:
 		//コンストラクタ
 		EditorSubWindow(EditorWindow* editor);
@@ -38,6 +40,8 @@ namespace Editor
 		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName,LPSTR lpCaption, int x,int y, long width,long height,DWORD style) override;
 		//ウィンドウプロシージャ
 		LRESULT localWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override;
+
+
 	};
 
 
@@ -86,6 +90,8 @@ namespace Editor
 
 		//ゲームの更新を開始
 		void Stop();
+
+
 
 	};
 }

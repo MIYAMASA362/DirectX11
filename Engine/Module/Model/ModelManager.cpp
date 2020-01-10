@@ -224,6 +224,9 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		GetNodeMesh(node->mChildren[child], model,scene,folderPath,rootMtx);
 }
 
+//LoadAssetForAssimp
+//
+//
 Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 {
 	//ÉVÅ[Éì
@@ -264,11 +267,17 @@ Model* ModelManager::LoadAssetForAssimp(std::string fileName)
 	return model;
 }
 
+//GetModel
+//
+//
 std::weak_ptr<Model> ModelManager::GetModel(std::string name)
 {
 	return modelIndex[name];
 }
 
+//AddSceneNodeModel
+//
+//
 void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 {
 	for(int i = 0; i < nodeMesh->_SubsetNum; i++)
@@ -279,16 +288,19 @@ void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 		child->transform().lock()->SetParent(parent->transform());
 
 		auto renderer = child->AddComponent<MeshRender>().lock();
-		renderer->_Mesh = nodeMesh->_Mesh;
+		renderer->SetMesh(nodeMesh->_Mesh);
 
-		renderer->_IndexNum = subset._IndexNum;
-		renderer->_IndexStartNum = subset._StartIndex;
+		renderer->SetIndexNum(subset._IndexNum);
+		renderer->SetStartNum(subset._StartIndex);
 
 		renderer->SetMaterial(&subset._Material);
 		renderer->_Material._Shader = ShaderManager::GetShader();
 	}
 }
 
+//AddSceneModel
+//
+//
 GameObject * ModelManager::AddSceneModel(std::string name, Scene * scene)
 {
 	auto model = modelIndex.at(name);

@@ -13,20 +13,13 @@ class MeshRender :public Renderer
 {
 	friend class Physics;
 private:
+	Mesh* _Mesh;	//メッシュ
 	
+	unsigned int _IndexNum;			//インデックス数
+	unsigned int _IndexStartNum;	//開始インデックス数
 
-	//メッシュフィルタ
-	std::shared_ptr<MeshFilter> _MeshFilter;
-
-	//モデル
-	std::weak_ptr<Model> _Model;
 
 public:
-	//メッシュ
-	Mesh* _Mesh;
-	unsigned int _IndexNum;
-	unsigned int _IndexStartNum;
-
 	//コンストラクタ
 	MeshRender(EntityID OwnerID);
 	//デストラクタ
@@ -35,15 +28,14 @@ public:
 	//描画処理
 	void Render(XMMATRIX& worldMatrix) override;
 
-	//メッシュの設定
-	void SetMesh(std::weak_ptr<Mesh> mesh) { _MeshFilter->AddMesh(mesh); };
+	//メッシュ設定
+	void SetMesh(Mesh* mesh) { _Mesh = mesh; }
+	Mesh* GetMesh() { return _Mesh; }
+	
+	//インデックス設定
+	void SetIndexNum(unsigned int indexNum) { _IndexNum = indexNum; }
+	//開始インデックス設定
+	void SetStartNum(unsigned int indexStart) { _IndexStartNum = indexStart; }
 
-	//メッシュの取得
-	std::weak_ptr<Mesh> GetMesh(unsigned int index) { return _MeshFilter->GetMesh(index); };
-	//メッシュ数
-	size_t GetNumMesh() { return _MeshFilter->GetNumMesh(); };
 
-
-	//モデル
-	void SetModel(std::shared_ptr<Model> model) { _Model = model; }
 };

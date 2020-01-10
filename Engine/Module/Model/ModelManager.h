@@ -23,5 +23,6 @@ public:
 	//モデル取得
 	static std::weak_ptr<Model> GetModel(std::string name);
 
+	//モデルをシーンに追加
 	static GameObject* AddSceneModel(std::string name,Scene* scene);
 };

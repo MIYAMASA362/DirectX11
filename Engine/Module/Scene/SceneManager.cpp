@@ -216,13 +216,54 @@ void Scene::DetachActiveScene()
 	this->UnLoad();
 }
 
+static GameObject* Debug_InspectorObject = nullptr;
+
+//DebugGUI_SceneHierarchy
+//	HierarchyのDebug表示
+//
+void DebugGUI_SceneHierarchy(std::list<std::weak_ptr<IEntity>> children,HierarchyUtility* utility)
+{
+	for(auto child : children)
+	{
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(child.lock()->GetEntityID()).lock());
+		if(ImGui::TreeNode(gameObject->GetName().c_str()))
+		{
+			if (ImGui::Button("Inspector"))
+			{
+				Debug_InspectorObject = gameObject.get();
+			}
+			DebugGUI_SceneHierarchy(utility->GetChildren(child.lock()->GetEntityID()),utility);
+			ImGui::TreePop();
+		}
+	}
+}
+
 //DebugGUI
 //	デバッグ表示
 //
 void Scene::DebugGUI()
 {
-	for (auto obj : _hierarchyUtility->GetHierarchyMap()) 
-		std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock())->OnDebugGUI();
+	for(auto obj : _hierarchyUtility->GetHierarchyMap())
+	{
+		if (!obj.second.GetParent().expired()) continue;
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(EntityManager::GetEntity(obj.first).lock());
+		if(ImGui::TreeNode(gameObject->name.c_str()))
+		{
+			if (ImGui::Button("Inspector"))
+			{
+				Debug_InspectorObject = gameObject.get();
+			}
+			DebugGUI_SceneHierarchy(obj.second.GetChildren(),_hierarchyUtility);
+			ImGui::TreePop();
+		}
+	}
+
+	if(Debug_InspectorObject != nullptr)
+	{
+		ImGui::Begin("Inspector");
+		Debug_InspectorObject->OnDebugGUI();
+		ImGui::End();
+	}
 }
 
 //UnLoad

@@ -1,8 +1,15 @@
 #include<Windows.h>
 #include<string>
-
+#include<memory>
+#include<map>
 
 #include"Window\Window.h"
+
+#include"Module\DirectX\DirectX.h"
+#include"Module\IMGUI\GUI_ImGui.h"
+
+#include"Module\Texture\texture.h"
+#include"Module\Texture\TextureManager.h"
 
 #include "TreeView.h"
 #pragma comment(lib,"comctl32.lib")
@@ -349,11 +356,6 @@ void FileTreeView::FileViewNode(LPSTR filePath, TVINSERTSTRUCT tv)
 
 			FileViewNode(path, tv);
 		}
-		//ファイル表示
-		else
-		{
-
-		}
 	} while (FindNextFile(hFind, &file));
 
 	//破棄
@@ -599,9 +601,24 @@ void Editor::FileTreeView::ListView_FileOpen(LPNMITEMACTIVATE lpnmitem)
 		return;
 	}
 
-	//ファイルオープン
-	ShellExecute(this->_hWnd, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+	// TODO : リストビュー操作/選択時の機能を作成する
 
+	std::string extension;
+	size_t pos = path.find_last_of(".");
+	extension = path.substr(pos + 1);
+
+	if(extension == "tga")
+	{
+		size_t fpos = path.find_last_of("\\");
+		std::string name = path.substr(fpos + 1,pos - (fpos +1));
+		auto texture = TextureManager::GetTexture(name);
+		TextureManager::SetEditorView(texture.lock()->GetShaderResourceView());
+	}
+	else
+	{
+		//ファイルオープン
+		ShellExecute(this->_hWnd, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+	}
 	FindClose(hFind);
 }
 

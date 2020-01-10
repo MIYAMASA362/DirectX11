@@ -13,15 +13,27 @@
 
 using namespace DirectX;
 
+//*********************************************************************************************************************
+//
+//	Physics
+//
+//*********************************************************************************************************************
+
 std::vector<std::weak_ptr<MeshRender>> Physics::_RayCastTarget;
 
 const float Physics::m_Gravity = -0.98f;
 
+//Get_Gravity
+//	重力の取得
+//
 Vector3 Physics::Get_Gravity()
 {
 	return Vector3::up() * Physics::m_Gravity;
 }
 
+//RayCast
+//	レイキャスト
+//
 bool Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& info, float distance)
 {
 	//削除
@@ -40,9 +52,8 @@ bool Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& info, float 
 	for (auto meshrender : _RayCastTarget)
 	{
 		//Meshから頂点取得
-		for (int m = 0; m < meshrender.lock()->GetNumMesh(); m++)
 		{
-			auto mesh = meshrender.lock()->GetMesh(m).lock();
+			auto mesh = meshrender.lock()->GetMesh();
 			auto world = meshrender.lock()->transform()->WorldMatrix();
 
 			bool hit = false;

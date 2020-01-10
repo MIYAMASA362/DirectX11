@@ -49,6 +49,83 @@ using namespace DirectX;
 
 //*********************************************************************************************************************
 //
+//	内部関数
+//
+//*********************************************************************************************************************
+
+//LoadAssetData_Directory
+//	ディレクトリ内のアセットを見つける
+//
+void LoadAssetData_Directory(std::string directory,std::string AssetDirectory)
+{
+	HANDLE hFind;
+	WIN32_FIND_DATA file;
+
+	TCHAR current[MAX_PATH + 1];
+	strcpy_s(current, directory.c_str());
+	strcat_s(current, "\\*");
+	hFind = FindFirstFile(current, &file);
+
+	if (hFind == INVALID_HANDLE_VALUE) return;
+
+	do
+	{
+		//下層ディレクトリ探査
+		if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if ((strcmp(file.cFileName, ".") == 0) || strcmp(file.cFileName, "..") == 0) continue;
+
+			TCHAR path[MAX_PATH + 1];
+			strcpy_s(path, directory.c_str());
+			strcat_s(path, "\\");
+			strcat_s(path, file.cFileName);
+
+			LoadAssetData_Directory(path,AssetDirectory + "\\" + file.cFileName);
+		}
+		//ファイルを発見
+		else
+		{
+			//拡張子の取得
+			std::string asset = file.cFileName;
+			size_t pos = asset.find_last_of(".");
+			std::string extension = asset.substr(pos + 1);
+
+			std::string name = AssetDirectory + "\\" + file.cFileName;
+
+			//テクスチャ
+			if (extension == "tga" || extension == "png")
+			{
+				TextureManager::LoadTexture(name);
+			}
+			//モデル
+			else if(extension == "obj")
+			{
+				ModelManager::LoadAssetForAssimp(name);
+			}
+		}
+	} while (FindNextFile(hFind, &file));
+
+	FindClose(hFind);
+}
+
+//LoadAssetData
+//	LoadAssetData_Directoryへの入り口
+//
+void LoadAssetData(std::string AssetDirectory)
+{
+	//ディレクトリ取得 現在のディレクトリ
+	TCHAR path[MAX_PATH + 1];
+	GetCurrentDirectory(sizeof(path), path);
+	strcat_s(path, "\\");
+	strcat_s(path, AssetDirectory.c_str());
+
+	LoadAssetData_Directory(path,AssetDirectory);
+}
+
+
+
+//*********************************************************************************************************************
+//
 //	CManager
 //
 //*********************************************************************************************************************
@@ -67,27 +144,10 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 	Input::Initialize(hWnd);
 	Input::Mouse::SetScreenLoop(false);
 
-
-	//Texture
 	TextureManager::Create();
-	TextureManager::LoadTexture("Asset/Texture/field004.tga");
-	TextureManager::LoadTexture("Asset/Texture/number.tga");
-	TextureManager::LoadTexture("Asset/Texture/k-on0664.tga");
-	TextureManager::LoadTexture("Asset/Texture/sky.tga");
-	TextureManager::LoadTexture("Asset/Texture/background.tga");
-	TextureManager::LoadTexture("Asset/Texture/ItemSlot.tga");
-	TextureManager::LoadTexture("Asset/Texture/MapBG.tga");
-	TextureManager::LoadTexture("Asset/Texture/Compass.tga");
-	TextureManager::LoadTexture("Asset/Texture/ItemSlotBG.tga");
-	TextureManager::LoadTexture("Asset/Texture/PressMessage.tga");
 
-	//Model
-	ModelManager::LoadAssetForAssimp("Asset/Model/Miku/miku_01.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Miku02/miku_02.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Monster/monster.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Rock/rock.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Cube/cube.obj");
-	ModelManager::LoadAssetForAssimp("Asset/Model/Ball/ball.obj");
+	//Assetフォルダ内のデータを資源として読み込む
+	LoadAssetData("Asset");
 
 	//Audio
 	AudioManager::CreateDevice();
@@ -198,3 +258,4 @@ void CManager::Finalize()
 	ComponentManager::Release();
 	EntityManager::Release();
 }
+

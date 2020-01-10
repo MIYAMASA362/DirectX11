@@ -67,14 +67,18 @@ void TextureManager::Release()
 //
 std::weak_ptr<Texture> TextureManager::LoadTexture(std::string filePath)
 {
-	//テクスチャ
-	Texture* texture = new Texture();
-	texture->LoadTexture(filePath);
-
 	//テクスチャ名
 	size_t pos = filePath.find_last_of("\\/") + 1;
 	size_t len = filePath.find_last_of("\\.") - pos;
 	std::string name = filePath.substr(pos,len);
+
+	auto find = g_pInstance->_TextureIndex.find(name);
+	if (find != g_pInstance->_TextureIndex.end())
+		return find->second;
+
+	//テクスチャ
+	Texture* texture = new Texture();
+	texture->LoadTexture(filePath);
 
 	//インデックスに登録
 	return g_pInstance->_TextureIndex.emplace(name,std::shared_ptr<Texture>(texture)).first->second;
@@ -114,5 +118,10 @@ void TextureManager::EditorWindow()
 
 	if (gView) ImGui::Image((void*)gView, ImVec2(128, 128));
 	ImGui::End();
+}
+
+void TextureManager::SetEditorView(ID3D11ShaderResourceView * view)
+{
+	gView = view;
 }
 

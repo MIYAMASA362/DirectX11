@@ -7,6 +7,8 @@ struct ID3D11ShaderResourceView;
 class Texture final
 {
 private:
+	std::string _filePath;				//ファイルパス
+
 	ID3D11Texture2D* _texture;			//テクスチャ
 	ID3D11ShaderResourceView* _srv;		//シェーダーリソース
 
