@@ -28,7 +28,7 @@
 
 NodeMesh::~NodeMesh()
 {
-	delete _Mesh;
+	_Mesh.reset();
 	delete[] _SubsetArray;
 }
 

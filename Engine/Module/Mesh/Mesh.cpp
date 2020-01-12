@@ -2,7 +2,10 @@
 #include<map>
 #include<vector>
 
+#include"Common.h"
 #include"Module\DirectX\DirectX.h"
+#include"Module\ECSEngine.h"
+
 #include "Mesh.h"
 
 Mesh::Mesh()
@@ -39,4 +42,55 @@ void Mesh::SetVertexBuffer()
 void Mesh::SetIndexBuffer()
 {
 	D3DRenderer::GetInstance()->SetIndexBuffer(_IndexBuffer);
+}
+
+void Mesh::CreateVertexBuffer()
+{
+	D3DRenderer::GetInstance()->CreateBuffer(
+		D3D11_BIND_VERTEX_BUFFER,
+		sizeof(VertexType) * _VertexNum,
+		_VertexArray,
+		&_VertexBuffer
+	);
+}
+
+void Mesh::CreateIndexBuffer()
+{
+	D3DRenderer::GetInstance()->CreateBuffer(
+		D3D11_BIND_INDEX_BUFFER,
+		sizeof(unsigned short) * _IndexNum,
+		_IndexArray,
+		&_IndexBuffer
+	);
+}
+
+
+//*********************************************************************************************************************
+//
+//	MeshManager
+//
+//*********************************************************************************************************************
+
+MeshManager::MeshIndex MeshManager::g_MeshIndex;
+
+//RegisterIndex
+//	インテックス登録
+//
+std::weak_ptr<Mesh> MeshManager::RegisterIndex(std::string name,Mesh * mesh)
+{
+	return g_MeshIndex.emplace(name,std::shared_ptr<Mesh>(mesh)).first->second;
+}
+
+//Release
+//	インデックス解放
+//
+void MeshManager::Release()
+{
+	g_MeshIndex.clear();
+}
+
+MeshFilter::MeshFilter(EntityID OwnerID)
+	:
+	Component(OwnerID)
+{
 }

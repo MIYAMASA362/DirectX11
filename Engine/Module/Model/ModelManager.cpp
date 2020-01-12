@@ -86,11 +86,13 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 
 	if (node->mNumMeshes > 0)
 	{
+		//メッシュ
+		Mesh* mesh = new Mesh();
+
 		//ノードメッシュ
 		NodeMesh* nodeMesh = new NodeMesh();
 		model->_NodeMeshArray.push_back(nodeMesh);
 
-		nodeMesh->_Mesh = new NodeMesh::MeshType();
 		//ノード名設定
 		nodeMesh->_NodeName = node->mName.C_Str();
 
@@ -104,15 +106,15 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		//配列長設定
 		for (unsigned int m = 0; m < node->mNumMeshes; m++)
 		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[m]];
-			nodeMesh->_Mesh->_VertexNum += mesh->mNumVertices;
-			nodeMesh->_Mesh->_IndexNum  += mesh->mNumFaces * 3;
+			aiMesh* aimesh = scene->mMeshes[node->mMeshes[m]];
+			mesh->_VertexNum += aimesh->mNumVertices;
+			mesh->_IndexNum  += aimesh->mNumFaces * 3;
 		}
 		nodeMesh->_SubsetNum = node->mNumMeshes;
 
 		//配列設定
-		nodeMesh->_Mesh->_VertexArray = new NodeMesh::MeshType::VertexType[nodeMesh->_Mesh->_VertexNum];	//頂点配列
-		nodeMesh->_Mesh->_IndexArray = new unsigned short[nodeMesh->_Mesh->_IndexNum];	//インデックス配列
+		mesh->_VertexArray = new NodeMesh::MeshType::VertexType[mesh->_VertexNum];	//頂点配列
+		mesh->_IndexArray = new unsigned short[mesh->_IndexNum];	//インデックス配列
 		nodeMesh->_SubsetArray = new ModelSubset[nodeMesh->_SubsetNum];		//サブセット配列
 
 		//インデックスカウント
@@ -125,11 +127,11 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 			ModelSubset* subset = &nodeMesh->_SubsetArray[m];
 
 			//メッシュを取得
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[m]];
+			aiMesh* aimesh = scene->mMeshes[node->mMeshes[m]];
 			{
 				//マテリアルの取得 1つのメッシュに対してマテリアル一つ
 				aiMaterial* material;
-				material = scene->mMaterials[mesh->mMaterialIndex];
+				material = scene->mMaterials[aimesh->mMaterialIndex];
 
 				//マテリアル設定
 				SetMaterial(&subset->_Material,material);
@@ -144,36 +146,36 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 				//頂点設定
 #pragma region SetVertex
 
-				for (unsigned int v = 0; v < mesh->mNumVertices; v++)
+				for (unsigned int v = 0; v < aimesh->mNumVertices; v++)
 				{
-					VERTEX_3D* vertex = &nodeMesh->_Mesh->_VertexArray[v];
+					VERTEX_3D* vertex = &mesh->_VertexArray[v];
 
 					//頂点
 					aiVector3D position(0.0f, 0.0f, 0.0f);
-					if (mesh->HasPositions()) position = mesh->mVertices[v];
+					if (aimesh->HasPositions()) position = aimesh->mVertices[v];
 					vertex->Position = XMFLOAT3(position.x, position.y, position.z);
 
 					//法線
 					aiVector3D normal(0.0f, 1.0f, 0.0f);
-					if (mesh->HasNormals()) normal = mesh->mNormals[v];
+					if (aimesh->HasNormals()) normal = aimesh->mNormals[v];
 					vertex->Normal = XMFLOAT3(normal.x, normal.y, normal.z);
 
 					//接線
 					aiVector3D tangent(1.0f, 0.0f, 0.0f);
-					if (mesh->HasTangentsAndBitangents()) tangent = mesh->mTangents[v];
+					if (aimesh->HasTangentsAndBitangents()) tangent = aimesh->mTangents[v];
 
 					//従法線
 					aiVector3D binormal(0.0f, 0.0f, 1.0f);
-					if (mesh->HasTangentsAndBitangents()) binormal = mesh->mBitangents[v];
+					if (aimesh->HasTangentsAndBitangents()) binormal = aimesh->mBitangents[v];
 
 					//UV座標
 					aiVector3D texCoord(0.0f, 0.0f, 0.0f);
-					if (mesh->HasTextureCoords(0)) texCoord = mesh->mTextureCoords[0][v];
+					if (aimesh->HasTextureCoords(0)) texCoord = aimesh->mTextureCoords[0][v];
 					vertex->TexCoord = XMFLOAT2(texCoord.x, texCoord.y);
 
 					//頂点色
 					aiColor4D diffuse(1.0f, 1.0f, 1.0f, 1.0f);
-					if (mesh->HasVertexColors(0)) diffuse = mesh->mColors[0][v];
+					if (aimesh->HasVertexColors(0)) diffuse = aimesh->mColors[0][v];
 					vertex->Diffuse = XMFLOAT4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
 				}
 #pragma endregion
@@ -185,12 +187,12 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 				subset->_StartIndex = iCount;
 
 				//インデックス設定
-				for (unsigned int f = 0; f < mesh->mNumFaces; f++)
+				for (unsigned int f = 0; f < aimesh->mNumFaces; f++)
 				{
-					aiFace* face = &mesh->mFaces[f];
+					aiFace* face = &aimesh->mFaces[f];
 					for (unsigned int i = 0; i < face->mNumIndices; i++)
 					{
-						nodeMesh->_Mesh->_IndexArray[iCount] = face->mIndices[i];
+						mesh->_IndexArray[iCount] = face->mIndices[i];
 						iCount++;
 					}
 				}
@@ -203,20 +205,12 @@ void GetNodeMesh(aiNode* node, Model* model, const aiScene* scene, std::string f
 		}
 
 		//頂点バッファ生成
-		D3DRenderer::GetInstance()->CreateBuffer(
-			D3D11_BIND_VERTEX_BUFFER,
-			sizeof(VERTEX_3D) * nodeMesh->_Mesh->_VertexNum,
-			nodeMesh->_Mesh->_VertexArray,
-			&nodeMesh->_Mesh->_VertexBuffer
-		);
+		mesh->CreateVertexBuffer();
 
 		// インデックスバッファ生成
-		D3DRenderer::GetInstance()->CreateBuffer(
-			D3D11_BIND_INDEX_BUFFER,
-			sizeof(unsigned short) * nodeMesh->_Mesh->_IndexNum,
-			nodeMesh->_Mesh->_IndexArray,
-			&nodeMesh->_Mesh->_IndexBuffer
-		);
+		mesh->CreateIndexBuffer();
+
+		nodeMesh->_Mesh = MeshManager::RegisterIndex(nodeMesh->_NodeName,mesh);
 	}
 
 	//子のノードを取得
@@ -286,12 +280,11 @@ void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 
 		GameObject* child = scene->AddSceneObject(nodeMesh->_NodeName + std::to_string(i),TagName::Default);
 		child->transform().lock()->SetParent(parent->transform());
-
 		auto renderer = child->AddComponent<MeshRender>().lock();
-		renderer->SetMesh(nodeMesh->_Mesh);
-
-		renderer->SetIndexNum(subset._IndexNum);
-		renderer->SetStartNum(subset._StartIndex);
+		auto meshfilter = child->AddComponent<MeshFilter>().lock();
+		meshfilter->_mesh = nodeMesh->_Mesh;
+		meshfilter->_IndexNum = subset._IndexNum;
+		meshfilter->_IndexStartNum = subset._StartIndex;
 
 		renderer->SetMaterial(&subset._Material);
 		renderer->_Material._Shader = ShaderManager::GetShader();

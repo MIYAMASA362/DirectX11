@@ -6,6 +6,8 @@
 
 //ECS
 #include"Module\ECSEngine.h"
+#include"Module\Tag\Tag.h"
+#include"Module\GameObject\GameObject.h"
 
 //Module
 #include"Module\Texture\texture.h"
@@ -66,13 +68,27 @@ MeshRender::~MeshRender()
 //
 void MeshRender::Render(XMMATRIX& worldMatrix)
 {
-	D3DRenderer::GetInstance()->SetWorldMatrix(&worldMatrix);
+	if (_meshfilter.expired())
+		_meshfilter = this->gameObject()->GetComponent<MeshFilter>();
 
-	_Mesh->SetVertexBuffer();
-	_Mesh->SetIndexBuffer();
+	D3DRenderer::GetInstance()->SetWorldMatrix(&worldMatrix);
+	auto filter = _meshfilter.lock();
+
+	filter->_mesh.lock()->SetVertexBuffer();
+	filter->_mesh.lock()->SetIndexBuffer();
 
 	_Material.SetResource();
 
 	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(_IndexNum,_IndexStartNum, 0);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(filter->_IndexNum,filter->_IndexStartNum, 0);
+}
+
+//GetMeshFilter
+//	メッシュフィルターの取得
+//
+std::shared_ptr<MeshFilter> MeshRender::GetMeshFilter()
+{
+	if (!_meshfilter.expired())
+		_meshfilter = gameObject()->GetComponent<MeshFilter>();
+	return _meshfilter.lock();
 }

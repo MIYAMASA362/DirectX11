@@ -5,32 +5,11 @@ struct ID3D11Buffer;
 
 class Texture;
 
-class CField :public Mesh
-{
-private:
-	ID3D11Buffer* m_VertexBuffer = nullptr;
-public:
-	Texture* m_Texture = nullptr;
-	CField();
-	virtual ~CField();
-	void Render(XMMATRIX& worldMatrix);
-};
-
-class WallField :public Mesh
-{
-private:
-	ID3D11Buffer* m_FieldVertexBuffer = nullptr;
-	ID3D11Buffer* m_WallVertexBuffer = nullptr;
-public:
-	Texture* FieldTexture = nullptr;
-	Texture* WallTexture = nullptr;
-public:
-	WallField();
-	~WallField();
-	void Render(XMMATRIX& worldMatrix);
-};
-
-
+//*********************************************************************************************************************
+//
+//	SkySphere
+//
+//*********************************************************************************************************************
 class SkySphere final :public Mesh
 {
 private:
@@ -45,6 +24,11 @@ public:
 	void Render(XMMATRIX& worldMatrix);
 };
 
+//*********************************************************************************************************************
+//
+//	MeshField
+//
+//*********************************************************************************************************************
 class MeshField final :public Mesh
 {
 	friend class FieldCollider;

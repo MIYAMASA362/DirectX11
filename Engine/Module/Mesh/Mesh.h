@@ -32,7 +32,7 @@ struct Surface
 
 
 //*********************************************************************************************************************
-//
+//	
 //	Mesh
 //
 //*********************************************************************************************************************
@@ -52,7 +52,7 @@ public:
 	VertexType* _VertexArray;
 	unsigned int _VertexNum;
 
-	//インデックス
+	//頂点インデックス
 	unsigned short* _IndexArray;
 	unsigned int _IndexNum;
 
@@ -67,11 +67,15 @@ public:
 
 
 public:
-	//頂点バッファ設定
+	//コンテキストに頂点バッファ設定
 	void SetVertexBuffer();
-	//インデックス設定
+	//コンテキストに頂点インデックス設定
 	void SetIndexBuffer();
 
+	//頂点バッファ生成
+	void CreateVertexBuffer();
+	//頂点インデックス生成
+	void CreateIndexBuffer();
 };
 
 
@@ -80,19 +84,33 @@ public:
 //	MeshFilter
 //
 //*********************************************************************************************************************
-class MeshFilter
+class MeshFilter : public Component<MeshFilter>
 {
-	using MeshArray = std::vector<std::shared_ptr<Mesh>>;
-private:
-	//メッシュ行列 複数メッシュに対応
-	MeshArray _MeshArray;
+public:
+	std::weak_ptr<Mesh> _mesh;
+	unsigned int _IndexNum;
+	unsigned int _IndexStartNum;
 
+	MeshFilter(EntityID OwnerID);
+
+
+};
+
+//*********************************************************************************************************************
+//
+//	MeshManager
+//
+//*********************************************************************************************************************
+class MeshManager
+{
+	using MeshIndex = std::map<std::string, std::shared_ptr<Mesh>>;
+private:
+	static MeshIndex g_MeshIndex;
 
 public:
-	//メッシュ設定
-	void AddMesh(std::weak_ptr<Mesh> mesh) { _MeshArray.emplace_back(mesh.lock()); };
-	//メッシュ取得
-	std::weak_ptr<Mesh> GetMesh(unsigned int index) { return _MeshArray.at(index); };
-	//メッシュ数の取得
-	size_t GetNumMesh() { return _MeshArray.size(); };
+	static std::weak_ptr<Mesh> RegisterIndex(std::string name, Mesh* mesh);
+	static void Release();
+
+
 };
+

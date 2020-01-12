@@ -13,174 +13,15 @@
 
 #include"field.h"
 
-//--- CField --------------------------------------------------------
-#pragma region CField
+//*********************************************************************************************************************
+//
+//	SkySphere
+//
+//*********************************************************************************************************************
 
-CField::CField()
-{
-	this->_VertexArray = new VERTEX_3D[4]
-	{
-		{ XMFLOAT3(50.0f, 0.0f, 50.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-50.0f, 0.0f, 50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(50.0f, 0.0f, -50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(-50.0f, 0.0f, -50.0f),	XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
-	};
-	_VertexNum = 4;
-
-	//頂点バッファの生成
-	D3D11_BUFFER_DESC bufferDesc;
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(_VertexArray) / sizeof(VERTEX_3D));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA subResourceData;
-	ZeroMemory(&subResourceData, sizeof(subResourceData));
-	subResourceData.pSysMem = _VertexArray;
-
-	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
-}
-
-CField::~CField()
-{
-	if (m_Texture) {
-		m_Texture = nullptr;
-	}
-	if (m_VertexBuffer) {
-		m_VertexBuffer->Release();
-	}
-}
-
-void CField::Render(XMMATRIX& worldMatrix)
-{
-	UINT stride = sizeof(VERTEX_3D);
-	UINT offset = 0;
-
-	D3DRenderer::GetInstance()->SetWorldMatrix(&worldMatrix);
-	
-	D3DRenderer::GetInstance()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
-	D3DRenderer::GetInstance()->SetTexture(this->m_Texture->GetShaderResourceView());
-
-	//行列変換
-	XMMATRIX world;
-	world = XMMatrixScaling(1.0f,1.0f,1.0f);
-	world *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	world *= XMMatrixTranslation(0.0f, 0.0f, 50.0f);
-	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
-
-	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	//Draw(n,i)　n:総数 i:どこから始めるか
-	D3DRenderer::GetInstance()->GetDeviceContext()->Draw(4, 0);
-
-}
-#pragma endregion
-
-//--- WallField ----------------------------------------------------
-#pragma region WallField
-
-WallField::WallField()
-{
-	//Mesh設定
-	{
-		D3D11_BUFFER_DESC bufferDesc;
-		D3D11_SUBRESOURCE_DATA subResourceData;
-
-		_VertexArray = new VERTEX_3D[4]
-		{
-			{ XMFLOAT3(1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, 0.0f, 1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 0.0f, -1.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
-		};
-		_VertexNum = 4;
-
-		//頂点バッファの生成
-		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(_VertexArray) / sizeof(VERTEX_3D));
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.CPUAccessFlags = 0;
-
-		ZeroMemory(&subResourceData, sizeof(subResourceData));
-		subResourceData.pSysMem = _VertexArray;
-
-		D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_FieldVertexBuffer);
-
-
-		VERTEX_3D wall[4] =
-		{
-			{ XMFLOAT3(1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 0.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(1.0f, 1.0f) },
-		};
-
-		//頂点バッファの生成
-		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = sizeof(VERTEX_3D) * (sizeof(wall) / sizeof(VERTEX_3D));
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.CPUAccessFlags = 0;
-
-		ZeroMemory(&subResourceData, sizeof(subResourceData));
-		subResourceData.pSysMem = wall;
-
-		D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_WallVertexBuffer);
-	}
-}
-
-WallField::~WallField()
-{
-	if(m_WallVertexBuffer)
-	{
-		m_WallVertexBuffer->Release();
-	}
-	if (m_FieldVertexBuffer) {
-		m_FieldVertexBuffer->Release();
-	}
-}
-
-void WallField::Render(XMMATRIX& worldMatrix)
-{
-	UINT stride = sizeof(VERTEX_3D);
-	UINT offset = 0;
-
-	D3DRenderer::GetInstance()->SetWorldMatrix(&worldMatrix);
-
-	D3DRenderer::GetInstance()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_FieldVertexBuffer, &stride, &offset);
-	D3DRenderer::GetInstance()->SetTexture(this->FieldTexture->GetShaderResourceView());
-
-	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	//Draw(n,i)　n:総数 i:どこから始めるか
-	D3DRenderer::GetInstance()->GetDeviceContext()->Draw(4, 0);
-
-	for(int i=0; i< 4; i++)
-	{
-		XMMATRIX localPosition = XMMatrixTranslation(0.0f,0.0f,1.0f);
-		XMMATRIX localRotation = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2 * i, 0.0f);
-		XMMATRIX localScale = XMMatrixScaling(1.0f,0.5f,0.0f);
-
-		XMMATRIX local = localScale* localPosition * localRotation;
-
-		D3DRenderer::GetInstance()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_WallVertexBuffer, &stride, &offset);
-		D3DRenderer::GetInstance()->SetTexture(this->WallTexture->GetShaderResourceView());
-
-		local = local * worldMatrix;
-
-		D3DRenderer::GetInstance()->SetWorldMatrix(&local);
-
-		D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		//Draw(n,i)　n:総数 i:どこから始めるか
-		D3DRenderer::GetInstance()->GetDeviceContext()->Draw(4, 0);
-	}
-}
-
-#pragma endregion
-
-//--- SkySphere -----------------------------------------------------
-#pragma region SkySphere
-
+//SkySphere
+//	コンストラクタ
+//
 SkySphere::SkySphere()
 {
 	HRESULT hr;
@@ -309,11 +150,15 @@ void SkySphere::Render(XMMATRIX& worldMatrix)
 	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(this->m_IndexNum,0,0);
 }
 
-#pragma endregion
+//*********************************************************************************************************************
+//
+//	MeshField
+//
+//*********************************************************************************************************************
 
-//--- MeshField -----------------------------------------------------
-#pragma region MeshField
-
+//MeshField
+//	コンストラクタ
+//
 MeshField::MeshField()
 {
 	HRESULT hr;
@@ -481,8 +326,6 @@ void MeshField::Render(XMMATRIX& worldMatrix)
 
 	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
 }
-
-#pragma endregion
 
 //--- MeshWall ------------------------------------------------------
 #pragma region MeshWall

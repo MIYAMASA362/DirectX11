@@ -252,6 +252,7 @@ void CManager::Finalize()
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
+	MeshManager::Release();
 
 	ObjectManager::Release();
 
