@@ -133,6 +133,7 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 
 		//	TRY : 透過ウィンドウ
 
+
 		break;
 
 		//サイズ
@@ -287,13 +288,6 @@ HRESULT EditorWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassNam
 
 LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
-	//ドロップ
-	HDROP hDrop;
-	UINT FileNum = 0;
-
-	char fileName[256];
-
 	//メッセージ
 	switch (uMsg)
 	{
@@ -328,34 +322,6 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			_RenderStatus->CreateRenderTargetView();
 			_RenderStatus->CreateDepthStencilView();
 			Start();
-		}
-		break;
-
-		//ドロップファイル
-	case WM_DROPFILES:
-		if ((this->_WindowFlag & WindowFlags_DragDropFile) == WindowFlags_DragDropFile)
-		{
-			//ドロップ
-			hDrop = (HDROP)wParam;
-
-			//ドロップされたファイル数取得
-			FileNum = DragQueryFile(
-				hDrop,
-				0xFFFFFFFF,
-				NULL,
-				0
-			);
-
-			//ファイル
-			for (UINT i = 0; i < FileNum; i++)
-			{
-				DragQueryFile(hDrop, i, fileName, sizeof(fileName));
-				if (ShellExecute(hWnd, NULL, fileName, NULL, NULL, SW_SHOWNORMAL) <= (HINSTANCE)32)
-					MessageBox(hWnd, "ファイルを開けませんでした。", "失敗", MB_OK);
-			}
-
-			//ドロップ解放
-			DragFinish(hDrop);
 		}
 		break;
 

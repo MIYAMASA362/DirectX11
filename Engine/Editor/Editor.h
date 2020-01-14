@@ -53,9 +53,6 @@ namespace Editor
 	class EditorWindow final : public System::Window
 	{
 	private:
-		//Window
-		System::Window* _Window;
-
 		//エディタサブウィンドウ
 		EditorSubWindow* _SubWindow;
 
@@ -65,6 +62,7 @@ namespace Editor
 		bool _threadEnd = false;
 		//実行状態か
 		bool _IsRunProcess= false;
+
 
 	public:
 		//コンストラクタ

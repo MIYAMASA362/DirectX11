@@ -326,7 +326,6 @@ void MeshField::Render(XMMATRIX& worldMatrix)
 
 	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(this->m_IndexNum, 0, 0);
 }
-
 //--- MeshWall ------------------------------------------------------
 #pragma region MeshWall
 

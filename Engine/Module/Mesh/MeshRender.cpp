@@ -73,14 +73,15 @@ void MeshRender::Render(XMMATRIX& worldMatrix)
 
 	D3DRenderer::GetInstance()->SetWorldMatrix(&worldMatrix);
 	auto filter = _meshfilter.lock();
+	auto mesh = filter->GetMesh().lock();
 
-	filter->_mesh.lock()->SetVertexBuffer();
-	filter->_mesh.lock()->SetIndexBuffer();
+	mesh->SetVertexBuffer();
+	mesh->SetIndexBuffer();
 
 	_Material.SetResource();
 
-	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(this->_PrimitiveTopology);
-	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(filter->_IndexNum,filter->_IndexStartNum, 0);
+	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(mesh->_PrimitiveTopology);
+	D3DRenderer::GetInstance()->GetDeviceContext()->DrawIndexed(filter->GetIndexNum(),filter->GetIndesStartNum(), 0);
 }
 
 //GetMeshFilter

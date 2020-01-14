@@ -26,8 +26,6 @@ struct Surface
 	Vector3 _normal;
 
 	Vector3 Normal() { return Vector3::Cross(_p2 - _p1, _p3 - _p1); };
-
-
 };
 
 
@@ -43,6 +41,9 @@ class Mesh
 	friend class Collider;
 public:
 	using VertexType = VERTEX_3D;
+
+	//トポロジ設定
+	D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	//バッファ
 	ID3D11Buffer* _VertexBuffer;
@@ -76,6 +77,8 @@ public:
 	void CreateVertexBuffer();
 	//頂点インデックス生成
 	void CreateIndexBuffer();
+
+
 };
 
 
@@ -86,14 +89,20 @@ public:
 //*********************************************************************************************************************
 class MeshFilter : public Component<MeshFilter>
 {
-public:
+private:
 	std::weak_ptr<Mesh> _mesh;
 	unsigned int _IndexNum;
 	unsigned int _IndexStartNum;
 
+public:
 	MeshFilter(EntityID OwnerID);
 
+	void SetMesh(std::weak_ptr<Mesh> mesh);
+	void SetIndexNum(unsigned int IndexNum,unsigned int StartNum);
 
+	std::weak_ptr<Mesh> GetMesh() { return _mesh; };
+	unsigned int GetIndexNum() { return _IndexNum; }
+	unsigned int GetIndesStartNum() { return _IndexStartNum; }
 };
 
 //*********************************************************************************************************************
@@ -110,6 +119,7 @@ private:
 public:
 	static std::weak_ptr<Mesh> RegisterIndex(std::string name, Mesh* mesh);
 	static void Release();
+	static std::weak_ptr<Mesh> GetMesh(std::string name);
 
 
 };

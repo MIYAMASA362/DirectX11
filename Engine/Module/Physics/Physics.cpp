@@ -53,7 +53,7 @@ bool Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& info, float 
 	{
 		//Mesh‚©‚ç’¸“_Žæ“¾
 		{
-			auto mesh = meshrender.lock()->GetMeshFilter()->_mesh.lock();
+			auto mesh = meshrender.lock()->GetMeshFilter()->GetMesh().lock();
 			auto world = meshrender.lock()->transform()->WorldMatrix();
 
 			bool hit = false;

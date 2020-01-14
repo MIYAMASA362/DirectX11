@@ -106,15 +106,13 @@ ID3D11ShaderResourceView* gView = nullptr;
 void TextureManager::EditorWindow()
 {
 	ImGui::Begin("TextureManager");
-	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,128),ImGuiWindowFlags_NoTitleBar);
-	for(auto obj : g_pInstance->_TextureIndex)
+	for (auto obj : g_pInstance->_TextureIndex)
 	{
-		if(ImGui::Button(obj.first.c_str()))
-		{
-			gView = obj.second->GetShaderResourceView();
-		};
+
+		ImGui::Image((void*)obj.second->GetShaderResourceView(), ImVec2(64,64));
+		ImGui::SameLine();
+		ImGui::Text(obj.first.c_str());
 	}
-	ImGui::EndChild();
 
 	if (gView) ImGui::Image((void*)gView, ImVec2(128, 128));
 	ImGui::End();

@@ -11,6 +11,8 @@
 #include"Module\Shader\Shader.h"
 #include"Module\Shader\ShaderManager.h"
 
+#include"Module\Geometry\Geometry.h"
+
 //--- Project Component -------------------------
 #include"../Project/CameraMouse.h"
 #include"../Project/CameraFollow.h"
@@ -24,6 +26,7 @@
 #include"../Project/MapUIScript.h"
 
 #include"../Project/BallScript.h"
+
 
 //--- Scene -------------------------------------
 
@@ -155,6 +158,18 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 
 	//Shader
 	ShaderManager::Create();
+	VERTEX_INPUT_LAYOUT layout[] = 
+	{
+		VSIL_POSITION,
+		VSIL_NORMAL,
+		VSIL_COLOR,
+		VSIL_TEXCOORD
+	};
+	ShaderManager::RegisterShader("Shader2D", "Asset/Shader/vertexShader.cso",layout,ARRAYSIZE(layout), "Asset/Shader/pixelShader2D.cso");
+
+	MeshManager::RegisterIndex("Plane",new Geometry::Plane());
+	MeshManager::RegisterIndex("Cube",new Geometry::Cube());
+	MeshManager::RegisterIndex("Sphere",new Geometry::Sphere());
 
 	//Scene
 	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
@@ -237,6 +252,7 @@ void CManager::DebugRender()
 
 	TextureManager::EditorWindow();
 	ObjectManager::EditorWindow();
+	ModelManager::EditorWindow();
 
 	Camera::EditorWindow();
 

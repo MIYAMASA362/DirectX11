@@ -89,8 +89,25 @@ void MeshManager::Release()
 	g_MeshIndex.clear();
 }
 
+std::weak_ptr<Mesh> MeshManager::GetMesh(std::string name)
+{
+	return g_MeshIndex.at(name);
+}
+
 MeshFilter::MeshFilter(EntityID OwnerID)
 	:
 	Component(OwnerID)
 {
+}
+
+void MeshFilter::SetMesh(std::weak_ptr<Mesh> mesh)
+{
+	_mesh = mesh;
+	SetIndexNum(mesh.lock()->_IndexNum,0);
+}
+
+void MeshFilter::SetIndexNum(unsigned int IndexNum, unsigned int StartNum)
+{
+	_IndexNum = IndexNum;
+	_IndexStartNum = StartNum;
 }

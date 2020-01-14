@@ -35,10 +35,7 @@ public:
 	bool _IsEnable = true;			//描画の有無
 	RenderTarget _RenderTarget;		//描画設定　2D/3D
 
-	D3D11_PRIMITIVE_TOPOLOGY _PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;	//トポロジー
-
 	Material _Material;	//マテリアル
-	
 
 public:	
 	//コンストラクタ

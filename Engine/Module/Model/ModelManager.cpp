@@ -282,9 +282,8 @@ void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 		child->transform().lock()->SetParent(parent->transform());
 		auto renderer = child->AddComponent<MeshRender>().lock();
 		auto meshfilter = child->AddComponent<MeshFilter>().lock();
-		meshfilter->_mesh = nodeMesh->_Mesh;
-		meshfilter->_IndexNum = subset._IndexNum;
-		meshfilter->_IndexStartNum = subset._StartIndex;
+		meshfilter->SetMesh(nodeMesh->_Mesh);
+		meshfilter->SetIndexNum(subset._IndexNum, subset._StartIndex);
 
 		renderer->SetMaterial(&subset._Material);
 		renderer->_Material._Shader = ShaderManager::GetShader();
@@ -307,6 +306,18 @@ GameObject * ModelManager::AddSceneModel(std::string name, Scene * scene)
 	}
 
 	return result;
+}
+
+void ModelManager::EditorWindow()
+{
+	ImGui::Begin("ModelManager");
+
+	for(auto model : modelIndex)
+	{
+		ImGui::Text(model.first.c_str());
+	}
+
+	ImGui::End();
 }
 
 void ModelManager::Release()

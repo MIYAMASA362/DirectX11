@@ -4,7 +4,11 @@ class Model;
 class GameObject;
 class Scene;
 
-//モデル管理
+//*********************************************************************************************************************
+//
+//	ModelManager
+//
+//*********************************************************************************************************************
 class ModelManager
 {
 	//モデル配列
@@ -25,4 +29,6 @@ public:
 
 	//モデルをシーンに追加
 	static GameObject* AddSceneModel(std::string name,Scene* scene);
+
+	static void EditorWindow();
 };
