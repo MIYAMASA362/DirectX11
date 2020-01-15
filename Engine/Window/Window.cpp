@@ -34,7 +34,7 @@ Window::~Window()
 HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption,int x, int y, long width, long height, DWORD style)
 {
 	//WndClass設定
-	this->_WndClass = {
+	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
 		WndProc,
@@ -49,31 +49,24 @@ HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPST
 		NULL
 	};
 
-	if (!RegisterClassEx(&this->_WndClass)) {
+	if (!RegisterClassEx(&WndClass)) {
 		MessageBox(NULL, "WndClassの設定に失敗しました。", "失敗", MB_OK);
 		return E_FAIL;
-	}
-
-	//プロセスID
-	char text[256] = "\0";
-	if ((this->_WindowFlag & WindowFlags_PreviewProcessID) == WindowFlags_PreviewProcessID)
-	{
-		sprintf_s(text, " PID:%u", GetCurrentProcessId());	
 	}
 
 	//ウィンドウ生成
 	this->_hWnd = CreateWindowEx(
 		0,
-		this->_WndClass.lpszClassName,
-		(LPSTR)(std::string(lpCaption) + std::string(text)).c_str(),
+		lpClassName,
+		lpCaption,
 		style,
 		x,
 		y,
-		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+		width  + GetSystemMetrics(SM_CXDLGFRAME) * 2,
 		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
 		hParent,
 		NULL,
-		this->_WndClass.hInstance,
+		hInstance,
 		this	//自身のポインタ設定 プロシージャに渡す
 	);
 
@@ -82,21 +75,10 @@ HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPST
 		return E_FAIL;
 	}
 
-	this->_hInstance = hInstance;
-
 	//表示
 	ShowWindow(this->_hWnd, SW_SHOW);
 	UpdateWindow(this->_hWnd);
 
-	return S_OK;
-}
-
-//Destroy
-//	ウィンドウ破棄
-//
-HRESULT Window::Destroy()
-{
-	UnregisterClass(this->_WndClass.lpszClassName,this->_WndClass.hInstance);
 	return S_OK;
 }
 
@@ -116,6 +98,8 @@ LRESULT System::Window::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	{
 		//生成
 	case WM_CREATE:
+		this->CaptionClipProcessID();
+
 		//ファイルのドラッグ・ドロップ許可
 		if((this->_WindowFlag & WindowFlags_DragDropFile) == WindowFlags_DragDropFile)
 			DragAcceptFiles(this->_hWnd, TRUE);
@@ -240,10 +224,22 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam
 		}
 	}
 
+	//ウィンドウ共通事項
 	if(window != nullptr)
 	{
-		return window->localWndProc(hWnd,uMsg,wParam,lParam);
+		return window->localWndProc(hWnd, uMsg, wParam, lParam);
 	}
-
 	return DefWindowProc(hWnd,uMsg,wParam,lParam);
+}
+
+void System::Window::CaptionClipProcessID()
+{
+	if ((this->_WindowFlag & WindowFlags_PreviewProcessID) != WindowFlags_PreviewProcessID) return;
+	char caption[256];
+	char text[256];
+
+	GetWindowText(_hWnd, caption, ARRAYSIZE(caption));
+	sprintf_s(text, " PID:%u", GetCurrentProcessId());
+	strcat_s(caption, text);
+	SetWindowText(_hWnd, caption);
 }

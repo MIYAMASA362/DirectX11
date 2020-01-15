@@ -1,4 +1,5 @@
 #include<Windows.h>
+#include<vector>
 
 #include"Window\Window.h"
 #include"Editor\Editor.h"
@@ -44,7 +45,7 @@ HRESULT MDIWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, 
 {
 	//MDI親ウィンドウ
 	//サブウィンドウ設定
-	this->_WndClass = {
+	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
 		WndProc,
@@ -60,7 +61,7 @@ HRESULT MDIWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, 
 	};
 
 	//サブウィンドウ登録
-	if (!RegisterClassEx(&this->_WndClass)) {
+	if (!RegisterClassEx(&WndClass)) {
 		MessageBox(NULL, "WndClassの設定に失敗しました。", "EditorSubWindow", MB_OK);
 		return E_FAIL;
 	}
@@ -77,7 +78,7 @@ HRESULT MDIWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, 
 		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
 		hParent,
 		NULL,
-		this->_WndClass.hInstance,
+		hInstance,
 		this//this	//自身のポインタ設定 プロシージャに渡す
 	);
 
@@ -146,7 +147,7 @@ HRESULT Editor::MDIWindow::CreateMDI(LPSTR lpCaption, int x, int y, long width, 
 		width,
 		height,
 		this->_Client,
-		this->_hInstance,
+		(HINSTANCE)GetWindowLongPtr(this->_hWnd,GWLP_HINSTANCE),
 		NULL
 	);
 

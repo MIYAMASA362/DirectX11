@@ -1,4 +1,5 @@
 #include<Windows.h>
+#include<vector>
 #include"Window\Window.h"
 
 #include"Editor\Editor.h"
@@ -24,5 +25,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	);
 
 	//MainLoop
-	return (int)MainWindow->MessageLoop();
+	auto result = (int)MainWindow->MessageLoop();
+
+	delete MainWindow;
+
+	return result;
 }

@@ -1,6 +1,8 @@
 #include<Windows.h>
 #include<string>
 #include<thread>
+#include<vector>
+#include<algorithm>
 #include<map>
 
 #include"Module\DirectX\DirectX.h"
@@ -17,6 +19,18 @@
 
 #include "Editor.h"
 
+#define WINDOW_XBORDERFRAME ((GetSystemMetrics(SM_CXBORDER) + GetSystemMetrics(SM_CXFIXEDFRAME) + GetSystemMetrics(SM_CXFRAME)) * 2)
+#define WINDOW_YBORDERFRAME ((GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYFRAME)) * 2 + GetSystemMetrics(SM_CYCAPTION))
+
+//ユーザー定義メッセージ
+#define WM_INSPECTOR_DELETE (WM_APP + 1)
+
+#define EDITOR_WINDOW		("EditorWindow")
+#define EDITOR_BASICWINDOW	("EditorBasicWindow")
+#define EDITOR_INSPECTOR	("EditorInspector")
+#define EDITOR_INSPECTOR_VIEW ("EditorInspectorView")
+#define EDITOR_GUIOVERRAP ("EditorGuiOverRap")
+
 using namespace DirectX;
 using namespace System;
 
@@ -24,36 +38,64 @@ using namespace Editor;
 
 //*********************************************************************************************************************
 //
-//	EditorSubWindow
+//	SceneWindow
 //
 //*********************************************************************************************************************
 
-//EditorSubWindow
-//	コンストラクタ
-//
-EditorSubWindow::EditorSubWindow(EditorWindow* editor)
-	:
-	_MainEditor(editor)
+LRESULT Editor::SceneWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	RECT rect;
+	char caption[256];
 
+	switch (uMsg)
+	{
+		//生成
+	case WM_CREATE:
+		GetClientRect(hWnd, &rect);
+		sprintf_s(caption, "Scene:%d x %d", rect.right - rect.left, rect.bottom - rect.top);
+		SetWindowText(hWnd, caption);
+
+		break;
+
+	case WM_LBUTTONDOWN:
+		SetFocus(hWnd);
+		break;
+
+		//サイズ
+	case WM_SIZE:
+		if (_RenderStatus)
+		{
+			_RenderStatus->CleanupRenderTargetView();
+			_RenderStatus->CleanupDepthStencilView();
+
+			GetClientRect(hWnd, &rect);
+			sprintf_s(caption, "Scene:%d x %d", rect.right - rect.left, rect.bottom - rect.top);
+			SetWindowText(hWnd, caption);
+
+			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)rect.right - rect.left, (UINT)rect.bottom - rect.top, DXGI_FORMAT_UNKNOWN, 0);
+			_RenderStatus->SetClientViewport(hWnd);
+
+			_RenderStatus->CreateRenderTargetView();
+			_RenderStatus->CreateDepthStencilView();
+		}
+		break;
+
+		//左ボタンが押された
+	case WM_NCLBUTTONDOWN:
+		//ウィンドウのサイズ変更を無視
+		break;
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		break;
+	}
+
+	return 0;
 }
 
-//~EditorSubWindow
-//	デストラクタ
-//
-EditorSubWindow::~EditorSubWindow()
+HRESULT Editor::SceneWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
 {
-	delete _FileTree;
-	delete _MDIWindow;
-}
-
-//Create
-//	サブウィンドウ生成
-//
-HRESULT EditorSubWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
-{
-	//サブウィンドウ設定
-	this->_WndClass = {
+	//WndClass設定
+	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
 		WndProc,
@@ -62,185 +104,45 @@ HRESULT EditorSubWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClass
 		hInstance,
 		NULL,
 		LoadCursor(NULL,IDC_ARROW),
-		(HBRUSH)(COLOR_APPWORKSPACE + 1),
-		MAKEINTRESOURCE(IDR_MENU1),
+		(HBRUSH)(COLOR_WINDOW + 1),
+		NULL,
 		lpClassName,
 		NULL
 	};
 
-	//サブウィンドウ登録
-	if (!RegisterClassEx(&this->_WndClass)) {
-		MessageBox(NULL, "WndClassの設定に失敗しました。", "EditorSubWindow", MB_OK);
+	if (!RegisterClassEx(&WndClass)) {
+		MessageBox(NULL, "WndClassの設定に失敗しました。", lpCaption, MB_OK);
 		return E_FAIL;
 	}
 
 	//ウィンドウ生成
 	this->_hWnd = CreateWindowEx(
-		0,
+		WS_EX_TOOLWINDOW,
 		lpClassName,
 		lpCaption,
-		style | WS_CLIPCHILDREN,
+		style,
 		x,
 		y,
-		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
-		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
+		width + WINDOW_XBORDERFRAME,
+		height + WINDOW_YBORDERFRAME,
 		hParent,
 		NULL,
-		this->_WndClass.hInstance,
-		this//this	//自身のポインタ設定 プロシージャに渡す
+		hInstance,
+		this	//自身のポインタ設定 プロシージャに渡す
 	);
 
 	if (!this->_hWnd) {
-		MessageBox(NULL, "hWndの設定に失敗しました。", "失敗", MB_OK);
+		MessageBox(NULL, "hWndの設定に失敗しました。", lpCaption, MB_OK);
 		return E_FAIL;
 	}
 
-	//表示
-	ShowWindow(this->_hWnd, SW_SHOW);
-	UpdateWindow(this->_hWnd);
+	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd, &_RenderStatus, 60))) {
+		MessageBox(NULL, "RenderStatusの生成に失敗しました。", "GameWindow", MB_OK);
+		return 0;
+	}
 
 	return S_OK;
 }
-
-//localWndProc
-//	サブウィンドウ用ウィンドウプロシージャ
-//
-//	SendMessage()	別ウィンドウへメッセージの送信
-//
-LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	//サブウィンドウ取得
-	EditorSubWindow* subWindow = (EditorSubWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
-	//メッセージ
-	switch (uMsg)
-	{
-		//ウィンドウ生成
-	case WM_CREATE:
-		//MDIを有効化
-		if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
-		{
-			//MDIウィンドウ設定
-			this->_MDIWindow = new MDIWindow();
-			if (FAILED(this->_MDIWindow->Create(hWnd, this->_hInstance, "MDIWindow", "MDIWindow", 0, 0, 300, 300, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_VISIBLE))) {
-				MessageBox(NULL, "MDIWindowの設定に失敗しました", "EditorSubWindow", MB_OK);
-				return E_FAIL;
-			}
-		}
-
-		this->_FileTree = new FileTreeView();
-		_FileTree->Create(hWnd, this->_hInstance, "FileTree", "FileView", 0, 0, 500, 300, WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD );
-
-		//	TRY : 透過ウィンドウ
-
-
-		break;
-
-		//サイズ
-	case WM_SIZE:
-		RECT rect;
-		GetWindowRect(this->_FileTree->Get_Window(), &rect);
-		MoveWindow(this->_FileTree->Get_Window(), 0, HIWORD(lParam) - 300, LOWORD(lParam), 300, TRUE);
-
-		if(_RenderStatus)
-		{
-			_MainEditor->Stop();
-			_RenderStatus->CleanupRenderTargetView();
-			_RenderStatus->CleanupDepthStencilView();
-
-			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
-			_RenderStatus->SetClientViewport(hWnd);
-
-			_RenderStatus->CreateRenderTargetView();
-			_RenderStatus->CreateDepthStencilView();
-			_MainEditor->Start();
-		}
-		break;
-
-		//コマンド
-	case WM_COMMAND:
-
-		switch (LOWORD(wParam))
-		{
-			//ウィンドウ => 新規作成
-		case ID_WINDOW_40003:
-			//MDIウィンドウの生成
-			if ((this->_WindowFlag & WindowFlags_MultipleDocumentInterface) == WindowFlags_MultipleDocumentInterface)
-				this->_MDIWindow->CreateMDI("Window", 0, 0, 200, 200, NULL);
-			break;
-
-			//終了処理
-		case ID_40004:
-			SendMessage(hWnd, WM_DESTROY, 0, 0);
-			break;
-
-			//ゲーム実行
-		case ID_EDITOR_RUN:
-			this->_MainEditor->Start();
-			break;
-
-			//ゲーム停止
-		case ID_EDITOR_STOP:
-			this->_MainEditor->Stop();
-			break;
-
-		default:
-			break;
-		}
-		break;
-
-		//キー入力
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-			//スペース
-		case VK_ESCAPE:
-			SendMessage(hWnd, WM_CLOSE, 0, 0);
-			break;
-			//F1
-		case VK_F1:
-			WINDOWPLACEMENT placement;
-			GetWindowPlacement(hWnd,&placement);
-			if(placement.showCmd == SW_SHOWNORMAL)
-			{
-				ShowWindow(hWnd,SW_SHOWMINNOACTIVE);
-			}
-			else
-			{
-				ShowWindow(hWnd, SW_SHOWNORMAL);
-				SendMessage(this->_FileTree->Get_Window(), uMsg, wParam, lParam);
-			}
-			break;
-		default:
-			break;
-		}
-		break;
-
-		//ウィンドウ閉じる
-	case WM_CLOSE:
-		if ((this->_WindowFlag & WindowFlags_CloseCheck) == WindowFlags_CloseCheck)
-			if (MessageBox(NULL, "本当に終了してもよろしいですか？", "確認", MB_OKCANCEL || MB_DEFBUTTON2) != IDOK)
-				break;
-		ShowWindow(hWnd, SW_HIDE);
-		break;
-
-		//削除処理
-	case WM_DESTROY:
-		DestroyWindow(hWnd);
-		PostQuitMessage(0);
-		break;
-
-		//デフォルト
-	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
-
-	return 0;
-}
-
-
-
-
 
 //*********************************************************************************************************************
 //
@@ -248,12 +150,24 @@ LRESULT EditorSubWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 //
 //*********************************************************************************************************************
 
+void Editor::EditorWindow::CheckInspectors()
+{
+	auto rend = std::remove_if(this->_Inspectors.begin(), this->_Inspectors.end(), [](InspectorView* obj) 
+	{
+		bool enable = obj->GetIsDelete();
+		if(enable) delete obj;
+		return enable;
+	});
+	this->_Inspectors.erase(rend,this->_Inspectors.end());
+}
+
 //EditorWindow
 //	コンストラクタ
 //
 EditorWindow::EditorWindow()
 {
-	_SubWindow = new EditorSubWindow(this);
+	_FileTree = new FileTreeView();
+	_SceneWindow = new SceneWindow();
 }
 
 //~EditorWindow
@@ -261,7 +175,13 @@ EditorWindow::EditorWindow()
 //
 EditorWindow::~EditorWindow()
 {
-	delete _SubWindow;
+	int i = 0;
+	for(auto obj : _Inspectors)
+	{
+		delete obj;
+	}
+	delete _SceneWindow;
+	delete _FileTree;
 }
 
 //Create
@@ -269,23 +189,123 @@ EditorWindow::~EditorWindow()
 //
 HRESULT EditorWindow::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
 {
-	HRESULT hr;
-	RECT rect;			//メインウィンドウRECT
-
-	//メインウィンドウ
+	//
+	//	メインウィンドウ
+	//
 	this->_WindowFlag |= WindowFlags_CloseCheck ^ WindowFlags_DragDropFile ^ WindowFlags_PreviewProcessID;
-	hr = Window::Create(hParent, hInstance, lpClassName, lpCaption, CW_USEDEFAULT, CW_USEDEFAULT, width, height, style);
-	if (FAILED(hr)) return hr;
-	GetWindowRect(this->_hWnd, &rect);
 
-	//サブウィンドウ
-	//_SubWindow->GetWindowFlags() |= WindowFlags_MultipleDocumentInterface;
-	hr = _SubWindow->Create(this->_hWnd, hInstance, "SubWindow1", "SubWindow", rect.right, rect.top, 400, height, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
-	if (FAILED(hr)) return hr;
+	WNDCLASSEX WndClass = {
+		sizeof(WNDCLASSEX),
+		CS_CLASSDC,
+		WndProc,
+		0,
+		0,
+		hInstance,
+		NULL,
+		LoadCursor(NULL,IDC_ARROW),
+		(HBRUSH)(COLOR_WINDOW + 1),
+		MAKEINTRESOURCE(IDR_MENU1),
+		EDITOR_WINDOW,
+		NULL
+	};
+	if (!RegisterClassEx(&WndClass)) {
+		MessageBox(NULL, "WndClassの設定に失敗しました。", EDITOR_WINDOW, MB_OK);
+		return E_FAIL;
+	}
 
-	return hr;
+	//
+	//	サブウィンドウ
+	//
+	WndClass = {
+		sizeof(WNDCLASSEX),
+		CS_CLASSDC,
+		DefWindowProc,
+		0,
+		0,
+		hInstance,
+		NULL,
+		LoadCursor(NULL,IDC_ARROW),
+		(HBRUSH)(COLOR_WINDOW + 1),
+		NULL,
+		EDITOR_BASICWINDOW,
+		NULL
+	};
+
+	if(!RegisterClassExA(&WndClass)){
+		MessageBox(NULL,"WndClassの設定に失敗しました。",EDITOR_WINDOW,MB_OK);
+		return E_FAIL;
+	}
+
+	//
+	//	インスペクター
+	//
+	WndClass = {
+		sizeof(WNDCLASSEX),
+		CS_CLASSDC,
+		WndProc,
+		0,
+		0,
+		hInstance,
+		NULL,
+		LoadCursor(NULL,IDC_ARROW),
+		(HBRUSH)(COLOR_WINDOW + 1),
+		NULL,
+		EDITOR_INSPECTOR,
+		NULL
+	};
+
+	if (!RegisterClassExA(&WndClass)) {
+		MessageBox(NULL, "WndClassの設定に失敗しました。", EDITOR_WINDOW, MB_OK);
+		return E_FAIL;
+	}
+
+	//
+	//	ウィンドウ生成
+	//
+	this->_hWnd = CreateWindowEx(
+		NULL,
+		EDITOR_WINDOW,
+		"EditorWindow",
+		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		width + GetSystemMetrics(SM_CXDLGFRAME) * 2,
+		height + GetSystemMetrics(SM_CXDLGFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION),
+		hParent,
+		NULL,
+		hInstance,
+		this
+	);
+
+	if(!this->_hWnd){
+		MessageBox(NULL,"hWndの生成に失敗しました。",EDITOR_WINDOW,MB_OK);
+	}
+
+	
+
+	return S_OK;
 }
 
+//Toolber
+//	ref : http://wisdom.sakura.ne.jp/system/winapi/common/common8.html
+//
+
+#define TOOLBER_ID (400)
+
+//ボタン識別子 WM_COMMANDメッセージ受け取り時に利用
+#define TOOLBER_ID_01 (1) 
+#define TOOLBER_ID_02 (2)
+
+TBBUTTON tbButton[] =
+{
+	{ 0 , 0, TBSTATE_ENABLED, TBSTYLE_SEP, 0, 0, 0},
+	{ STD_FILENEW, TOOLBER_ID_01,TBSTATE_ENABLED,TBSTYLE_BUTTON,0,0,0},
+	{ VIEW_DETAILS, TOOLBER_ID_02,TBSTATE_ENABLED,TBSTYLE_BUTTON,0,0,0}
+};
+
+//localWndProc
+//	プロシージャー処理
+//
 LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//メッセージ
@@ -296,6 +316,91 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		//ファイルのドラッグ・ドロップ許可
 		if ((this->_WindowFlag & WindowFlags_DragDropFile) == WindowFlags_DragDropFile)
 			DragAcceptFiles(this->_hWnd, TRUE);
+
+		this->CaptionClipProcessID();
+
+		//DirectX11デバイス生成
+		D3DRenderer::Create();
+
+		InitCommonControls();
+
+		//ツールバー
+		//
+		//
+		_hToolBer = CreateToolbarEx(
+			hWnd,
+			WS_VISIBLE | WS_CLIPCHILDREN | WS_CHILD,
+			TOOLBER_ID,
+			1,
+			(HINSTANCE)HINST_COMMCTRL,
+			IDB_STD_SMALL_COLOR,
+			tbButton,
+			ARRAYSIZE(tbButton),
+			0,
+			0,
+			0,
+			0,
+			sizeof(TBBUTTON)
+		);
+
+		//カラムスペース
+		//	SceneWindow や Inspectorのウィンドウはこの範囲内
+		//
+		_hColumnSpace = CreateWindowEx(
+			NULL,
+			EDITOR_BASICWINDOW,
+			"SubWindow",
+			WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_CHILD | WS_VISIBLE,
+			0,
+			30,
+			0,
+			0,
+			hWnd,
+			NULL,
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			NULL
+		);
+
+
+
+		//エディタ ゲームシーン
+		//
+		//
+		this->_SceneWindow->Create(
+			_hColumnSpace,
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			"SceneWindow",
+			"Scene",
+			300,
+			0,
+			1024,
+			576,
+			WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_CHILD | WS_CAPTION
+		);
+
+		//ゲームウィンドウの生成
+		//_GameWindow->Create(hWnd, "Game", CW_USEDEFAULT, CW_USEDEFAULT, 1024, 576, WS_OVERLAPPEDWINDOW);
+
+		//ツリービュー
+		//
+		//
+		this->_FileTree->Create(
+			hWnd,
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			"FileTree",
+			"Project",
+			0,
+			0,
+			500,
+			300,
+			WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_CHILD
+		);
+
+		//ウィンドウ最大で生成
+		//
+		//
+		ShowWindow(hWnd, SW_MAXIMIZE);
+
 		break;
 
 		//フォーカスされた
@@ -303,26 +408,15 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		//最前面に表示する
 		//SetWindowPos(hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 		break;
-
 		//サイズ
 	case WM_SIZE:
-		
-		//Threadが違うのでRenderTargetなどにエラーが加わる
-		//	ERROR : サイズ変えすぎると強制停止
-		//
-		if (_RenderStatus)
-		{
-			Stop();
-			_RenderStatus->CleanupRenderTargetView();
-			_RenderStatus->CleanupDepthStencilView();
+		RECT rect;
+		GetWindowRect(this->_hColumnSpace, &rect);
+		MoveWindow(this->_hColumnSpace, 0, 30, LOWORD(lParam), HIWORD(lParam) - 330, TRUE);
 
-			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
-			_RenderStatus->SetClientViewport(hWnd);
-
-			_RenderStatus->CreateRenderTargetView();
-			_RenderStatus->CreateDepthStencilView();
-			Start();
-		}
+		MoveWindow(this->_hToolBer, 0, 0, HIWORD(lParam), 100, TRUE);
+		//ファイルツリー
+		MoveWindow(this->_FileTree->Get_Window(), 0, HIWORD(lParam) - 300, LOWORD(lParam), 300, TRUE);
 		break;
 
 		//キー入力
@@ -335,19 +429,59 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			break;
 			//F1
 		case VK_F1:
-			SendMessage(this->_SubWindow->Get_Window(), uMsg, wParam, lParam);
+			/*SendMessage(this->_GameWindow->Get_Window(), uMsg, wParam, lParam);*/
 			break;
 		default:
 			break;
 		}
 		break;
 
-		//ウィンドウ閉じる
-	case WM_CLOSE:
-		if ((this->_WindowFlag & WindowFlags_CloseCheck) == WindowFlags_CloseCheck)
-			if (MessageBox(NULL, "本当に終了してもよろしいですか？", "確認", MB_OKCANCEL || MB_DEFBUTTON2) != IDOK)
-				break;
-		DestroyWindow(hWnd);
+		//コマンド
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+			//Window -> 新規作成
+		case ID_WINDOW_40003:
+			RECT rect;
+			GetClientRect(this->_hColumnSpace, &rect);
+
+			//インスペクタ
+			//
+			//
+			InspectorView* inspector;
+			inspector = new InspectorView();
+
+			inspector->Create(
+				_hColumnSpace,
+				(HINSTANCE)GetWindowLong(hWnd, GWLP_HINSTANCE),
+				EDITOR_INSPECTOR,
+				"Inspector",
+				0,
+				0,
+				300 - WINDOW_XBORDERFRAME,
+				(rect.bottom - rect.top) - WINDOW_YBORDERFRAME,
+				WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_CHILD | WS_OVERLAPPEDWINDOW,
+				this
+			);
+
+			_Inspectors.push_back(inspector);
+
+			break;
+			//エディタ終了
+		case ID_40004:
+			SendMessage(hWnd, WM_DESTROY, 0, 0);
+			break;
+
+		case TOOLBER_ID_01:
+			SendMessage(hWnd,WM_COMMAND,ID_WINDOW_40003,NULL);
+			break;
+			//ツールボタン押し 02
+		case TOOLBER_ID_02:
+			_EnableGUI = !_EnableGUI;
+			break;
+		default:
+			break;
+		}
 		break;
 
 		//ウィンドウ削除
@@ -366,35 +500,27 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 //MessageLoop
 //	メッセージループ
 //
+//	TODO : エディタの設定をする
+//
 WPARAM EditorWindow::MessageLoop()
 {
+
+	RenderStatus* RS_SceneWindow = *this->_SceneWindow->GetLPRenderStatus();
+
 	MSG msg;
 
-	//Applicationの生成
-	D3DRenderer::Create();
-
-	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_hWnd, &_RenderStatus, 60)))
-	{
-		MessageBox(NULL, "RenderStatusの生成に失敗しました。", "EditorWindow", MB_OK);
-		return 0;
-	}
-
-	auto SubWindowRenderStatus = _SubWindow->GetLPRenderStatus();
-	if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_SubWindow->Get_Window(), &(*SubWindowRenderStatus), 60)))
-	{
-		MessageBox(NULL, "RenderStatusの生成に失敗しました。", "EditorWindow", MB_OK);
-		return 0;
-	}
-
 	//GUI
-	GUI::guiImGui::Create(this->_SubWindow->Get_Window(), D3DRenderer::GetInstance()->GetDevice(), D3DRenderer::GetInstance()->GetDeviceContext());
+	GUI::guiImGui::Create(
+		this->_SceneWindow->Get_Window(),
+		D3DRenderer::GetInstance()->GetDevice(),
+		D3DRenderer::GetInstance()->GetDeviceContext()
+	);
+
+	auto& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	//Manager
-	CManager::Initialize(this->_hWnd, 60);
-
-
-	//Gameビュースレッド
-	std::thread thread([this]() { this->RunProcces(); });
+	CManager::Initialize(this->_SceneWindow->Get_Window(), 60);
 
 	do
 	{
@@ -403,90 +529,204 @@ WPARAM EditorWindow::MessageLoop()
 			// メッセージの翻訳とディスパッチ
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
+			this->CheckInspectors();
+
 			continue;
 		}
 
-		//処理
-
-		
-
-
-	} while (msg.message != WM_QUIT);
-
-	_threadEnd = true;
-
-	thread.join();
-
-	CManager::Finalize();
-
-	return msg.wParam;
-}
-
-//RunProcces
-//	ゲームウィンドウ用のスレッド
-//
-void Editor::EditorWindow::RunProcces()
-{
-	auto SubWindowRenderStatus = _SubWindow->GetLPRenderStatus();
-	
-
-	_IsRunProcess = true;
-
-	do
-	{
-		//処理しない
-		if (!_IsRunProcess && !CManager::IsProcess()) continue;
-
+		//エディタの処理
 		CManager::SetFrame();
 
-		CManager::Update();
-		CManager::FixedUpdate();
+		//エディタ更新
+		Update();
 
-		if (!CManager::IsUpdate())
+		if (CManager::IsProcess())
 		{
-			if (_RenderStatus->IsProcess())
+			CManager::Update();
+			CManager::FixedUpdate();
+
+			if (CManager::IsUpdate())
 			{
-				_RenderStatus->ClearRenderTargetView(Color::gray());
+				if (RS_SceneWindow->IsProcess())
+				{
+					RS_SceneWindow->ClearRenderTargetView(Color::gray());
 
-				CManager::Render(_RenderStatus);
+					CManager::Render(RS_SceneWindow);
 
-				_RenderStatus->End();
-			}
+					if(_EnableGUI)
+						CManager::DebugRender();
 
-			if ((*SubWindowRenderStatus)->IsProcess())
-			{
-				(*SubWindowRenderStatus)->ClearRenderTargetView(Color::gray());
+					RS_SceneWindow->End();
+				}
 
-				CManager::DebugRender();
-
-				(*SubWindowRenderStatus)->End();
+				for(auto obj : this->_Inspectors)
+				{
+					auto rs = *obj->GetLPRenderStatus();
+					
+					if(rs->IsProcess())
+					{
+						rs->ClearRenderTargetView(Color::cyan());
+						CManager::Render(rs);
+						rs->End();
+					}
+				}
 			}
 		}
 
 		CManager::EndFrame();
-		
-	}
-	while (!_threadEnd);
 
-	_IsRunProcess = false;
+	} while (msg.message != WM_QUIT);
+
+	CManager::Finalize();
 
 	GUI::guiImGui::Destroy();
 
 	D3DRenderer::Destroy();
+
+	return msg.wParam;
 }
 
-//Start
-//
-//
-void Editor::EditorWindow::Start()
+void Editor::EditorWindow::Update()
 {
-	_IsRunProcess = true;
+
 }
 
-//Stop
+
+
+//*********************************************************************************************************************
 //
+//	InspectorView
 //
-void Editor::EditorWindow::Stop()
+//*********************************************************************************************************************
+
+Editor::InspectorView::~InspectorView()
 {
-	_IsRunProcess = false;
+
+}
+
+LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	RECT rect;
+	float width,height;
+
+	switch (uMsg)
+	{
+		//生成
+	case WM_CREATE:
+
+		GetClientRect(hWnd,&rect);
+
+		width = rect.right - rect.left;
+		this->_ModelView = CreateWindow(
+			EDITOR_INSPECTOR_VIEW,
+			"ModelView",
+			WS_CHILD | WS_VISIBLE,
+			0,
+			rect.bottom -(width),
+			width,
+			width,
+			hWnd,
+			NULL,
+			(HINSTANCE)GetWindowLongPtr(hWnd,GWLP_HINSTANCE),
+			NULL
+		);
+
+		if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_ModelView, &_RenderStatus, 60))) {
+			MessageBox(NULL, "RenderStatusの生成に失敗しました。","失敗", MB_OK);
+			return 0;
+		}
+
+		SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE);
+		break;
+
+		//サイズ
+	case WM_SIZE:
+
+		GetClientRect(this->_ModelView,&rect);
+		height = rect.bottom - rect.top;
+		width = rect.right - rect.left;
+		MoveWindow(this->_ModelView,0,HIWORD(lParam) - height,LOWORD(lParam),height,TRUE);
+
+		if (_RenderStatus)
+		{
+			_RenderStatus->CleanupRenderTargetView();
+			_RenderStatus->CleanupDepthStencilView();
+
+			GetClientRect(this->_ModelView, &rect);
+			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)rect.right - rect.left, (UINT)rect.bottom - rect.top, DXGI_FORMAT_UNKNOWN, 0);
+			_RenderStatus->SetClientViewport(this->_ModelView);
+
+			_RenderStatus->CreateRenderTargetView();
+			_RenderStatus->CreateDepthStencilView();
+		}
+		break;
+
+		//最小・最大サイズの設定
+	case WM_GETMINMAXINFO:
+		MINMAXINFO* info;
+		info = (MINMAXINFO*)lParam;
+		info->ptMinTrackSize.x = 300;
+		info->ptMinTrackSize.y = 300;
+		break;
+
+	case WM_CLOSE:
+		DestroyWindow(hWnd);
+		break;
+	case WM_DESTROY:
+		this->_IsDelete = true;
+		break;
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		break;
+	}
+	return 0;
+}
+
+HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style, EditorWindow * editor)
+{
+	this->_EditorWindow = editor;
+	return Create(hParent,hInstance,lpClassName,lpCaption,x,y,width,height,style);
+}
+
+
+
+HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
+{
+	WNDCLASS WndClass = {
+		CS_CLASSDC,
+		DefWindowProc,
+		0,
+		0,
+		hInstance,
+		NULL,
+		LoadCursor(NULL,IDC_ARROW),
+		(HBRUSH)(COLOR_WINDOW + 1),
+		NULL,
+		EDITOR_INSPECTOR_VIEW
+	};
+	RegisterClass(&WndClass);
+
+	//ウィンドウ生成
+	this->_hWnd = CreateWindowEx(
+		WS_EX_TOOLWINDOW,
+		lpClassName,
+		lpCaption,
+		style,
+		x,
+		y,
+		width + (GetSystemMetrics(SM_CXBORDER) + GetSystemMetrics(SM_CXFIXEDFRAME) + GetSystemMetrics(SM_CXFRAME)) * 2,
+		height + (GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYFRAME)) * 2 + GetSystemMetrics(SM_CYCAPTION),
+		hParent,
+		NULL,
+		hInstance,
+		this	//自身のポインタ設定 プロシージャに渡す
+	);
+
+	if (!this->_hWnd) {
+		MessageBox(NULL, "hWndの設定に失敗しました。", lpCaption, MB_OK);
+		return E_FAIL;
+	}
+
+	return S_OK;
 }

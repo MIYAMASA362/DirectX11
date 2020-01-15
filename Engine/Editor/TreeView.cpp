@@ -48,7 +48,7 @@ FileTreeView::~FileTreeView()
 //
 HRESULT FileTreeView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
 {
-	this->_WndClass = {
+	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
 		WndProc,
@@ -63,9 +63,7 @@ HRESULT FileTreeView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassNam
 		NULL
 	};
 
-	RegisterClassEx(&this->_WndClass);
-
-	this->_hInstance = hInstance;
+	RegisterClassEx(&WndClass);
 
 	this->_hWnd = CreateWindowEx(
 		NULL,
@@ -121,9 +119,9 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 				0,
 				300,
 				HIWORD(lParam),
-				this->_hWnd,
+				hWnd,
 				NULL,
-				this->_hInstance,
+				(HINSTANCE)GetWindowLongPtr(hWnd,GWLP_HINSTANCE),
 				NULL
 			);
 
@@ -167,9 +165,9 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 				0,
 				LOWORD(lParam) - 300,
 				HIWORD(lParam),
-				this->_hWnd,
+				hWnd,
 				NULL,
-				this->_hInstance,
+				(HINSTANCE)GetWindowLongPtr(hWnd,GWLP_HINSTANCE),
 				NULL
 			);
 

@@ -69,7 +69,7 @@ void Input::Initialize(HWND hWnd)
 
 	HRESULT hr;
 
-	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtrA(_hWnd, GWLP_HINSTANCE);
+	HINSTANCE hInst = (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
 	hr = DirectInput8Create(
 		hInst,
 		DIRECTINPUT_VERSION,

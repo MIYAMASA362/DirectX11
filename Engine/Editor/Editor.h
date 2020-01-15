@@ -14,55 +14,90 @@ namespace Editor
 	class CommonControlWindow;
 	class FileTreeView;
 
-	//Editor用のサブウィンドウ
-	//	メニュー操作　可能ウィンドウ
+	//*********************************************************************************************************************
 	//
-	class EditorSubWindow final : public System::Window
+	//	InspectorView
+	//
+	//*********************************************************************************************************************
+	class InspectorView final : public System::Window
 	{
 	private:
-		EditorWindow* _MainEditor = nullptr;
-
-		MDIWindow* _MDIWindow = nullptr;
-		FileTreeView* _FileTree = nullptr;
+		EditorWindow* _EditorWindow = nullptr;
 
 		RenderStatus* _RenderStatus = nullptr;
 
+		HWND _ModelView;
+
+		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
+	
+		bool _IsDelete = false;
+	
 
 	public:
-		//コンストラクタ
-		EditorSubWindow(EditorWindow* editor);
-		//デストラクタ
-		~EditorSubWindow();
+		~InspectorView();
+
+		//ウィンドウプロシージャ
+		LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+		//ウィンドウ生成
+		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style,EditorWindow* editor);
 
 		RenderStatus** GetLPRenderStatus() { return &_RenderStatus; };
 
-		//ウィンドウ生成
-		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName,LPSTR lpCaption, int x,int y, long width,long height,DWORD style) override;
+		bool GetIsDelete() { return _IsDelete; }
+
+
+	};
+
+	//*********************************************************************************************************************
+	//
+	//	SceneWindow
+	//
+	//*********************************************************************************************************************
+	class SceneWindow final : public System::Window
+	{
+	private:
+		RenderStatus* _RenderStatus = nullptr;
+
+	public:
 		//ウィンドウプロシージャ
-		LRESULT localWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override;
+		LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+		//ウィンドウ生成
+		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
+
+		RenderStatus** GetLPRenderStatus() { return &_RenderStatus; };
 
 
 	};
 
 
-	//EditorWindow
-	//	エディタ用のウィンドウ　メインウィンドウ
-	//	
+	//*********************************************************************************************************************
+	//
+	//	EditorWindow
+	//	　エディタ用のウィンドウ メインウィンドウ
+	//
+	//	TODO : SubWindow 廃止 
+	//
 	//	WARNING : スレッドを操作しているので、リソースの読み込みなどに影響を与える可能性
 	//
+	//*********************************************************************************************************************
 	class EditorWindow final : public System::Window
 	{
 	private:
-		//エディタサブウィンドウ
-		EditorSubWindow* _SubWindow;
+		//ファイルビュー
+		FileTreeView* _FileTree = nullptr;
 
-		RenderStatus* _RenderStatus = nullptr;
+		//シーンウィンドウ
+		SceneWindow* _SceneWindow = nullptr;
 
-		//スレッドの終了
-		bool _threadEnd = false;
-		//実行状態か
-		bool _IsRunProcess= false;
+		std::vector<InspectorView*> _Inspectors;
 
+		HWND _hToolBer;		//ツールバー
+		HWND _hColumnSpace; //エディタ領域
+
+		bool _EnableGUI = true;
+
+
+		void CheckInspectors();
 
 	public:
 		//コンストラクタ
@@ -71,7 +106,7 @@ namespace Editor
 		~EditorWindow();
 
 		//ウィンドウ生成
-		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption,int x,int y, long width, long height, DWORD style) override;
+		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
 
 		//ウィンドウプロシージャ
 		LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
@@ -79,17 +114,6 @@ namespace Editor
 		//メッセージループ
 		WPARAM MessageLoop() override;
 
-
-		//ゲーム用のスレッド
-		void RunProcces();
-
-		//ゲームの更新を停止
-		void Start();
-
-		//ゲームの更新を開始
-		void Stop();
-
-
-
+		void Update();
 	};
 }
