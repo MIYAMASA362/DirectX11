@@ -1,8 +1,11 @@
 #pragma once
 
-//ComponentArray
-//	IComponentの配列
+//*********************************************************************************************************************
 //
+//	ComponentArray
+//	　IComponentの配列
+//
+//*********************************************************************************************************************
 class ComponentList final
 {
 	friend class ComponentManager;
@@ -33,4 +36,10 @@ public:
 
 	//Componentsのサイズ
 	size_t Size() { return _components.size(); };
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(cereal::make_nvp("Components", _components));
+	}
 };

@@ -14,7 +14,7 @@ class IComponent:public Object
 	friend class ComponentManager;
 private:
 	//OwnerID 所有EntityのID
-	const EntityID _ownerId;
+	EntityID _ownerId;
 	//Entity GameObject
 	std::weak_ptr<GameObject> _gameObject;
 
@@ -29,6 +29,7 @@ protected:
 
 
 public:
+	IComponent() :IComponent(0) {};
 	//コンストラクタ
 	IComponent(EntityID OwnerID);
 	//デストラクタ
@@ -49,6 +50,11 @@ public:
 		return _gameObject.lock(); 
 	};
 
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(_ownerId);
+	}
 
 protected:
 	//削除時実行関数
@@ -56,3 +62,5 @@ protected:
 
 
 };
+
+CEREAL_REGISTER_TYPE(IComponent)

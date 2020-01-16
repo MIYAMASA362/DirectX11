@@ -10,8 +10,9 @@ template<typename Type>
 class Component:public IComponent
 {
 	friend class ComponentManager;
-
+	
 public:
+	Component() :Component(0) {};
 	//コンストラクタ
 	Component(EntityID OwnerID);
 	//デストラクタ
@@ -35,8 +36,13 @@ public:
 	//削除時関数
 	virtual void OnDestroy() override {};
 
+	template<class Archive>
+	void serealize(Archive& archive)
+	{
+		archive(cereal::base_class<IComponent>(this));
+	}
 
-
+	
 protected:
 	//このComponentのインデックス
 	static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
@@ -45,11 +51,8 @@ protected:
 	void RegisterIndex();
 };
 
-
 template<typename Type>
 std::map<EntityID, std::weak_ptr<Type>> Component<Type>::ComponentIndex;
-
-
 
 
 //*********************************************************************************************************************

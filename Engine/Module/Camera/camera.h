@@ -30,6 +30,7 @@ private:
 
 public:
 	//コンストラクタ
+	Camera() :Camera(0){};
 	Camera(EntityID OwnerID);
 	//デストラクタ
 	virtual ~Camera();
@@ -60,9 +61,22 @@ public:
 	//視錐台カリング
 	bool GetVisibility(Vector3 position);
 
-
+	template<class Archive>
+	void serealize(Archive& archive)
+	{
+		archive(cereal::base_class<Behaviour<Camera>>(this));
+		archive(
+			cereal::make_nvp("Priority",this->_Priority);
+		);
+	}
 
 
 	//エディタ表示
 	static void EditorWindow();
 };
+
+CEREAL_REGISTER_TYPE(Component<Camera>)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(IComponent,Component<Camera>)
+CEREAL_REGISTER_TYPE(Behaviour<Camera>)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Component<Camera>,Behaviour<Camera>)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Behaviour<Camera>, Camera)

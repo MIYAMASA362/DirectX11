@@ -1,4 +1,5 @@
 #include"Common.h"
+#include<fstream>
 #include"Module\DirectX\DirectX.h"
 
 //--- Module ------------------------------------
@@ -171,8 +172,9 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 	MeshManager::RegisterIndex("Cube",new Geometry::Cube());
 	MeshManager::RegisterIndex("Sphere",new Geometry::Sphere());
 
-	//Scene
 	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
+
+	//Scene
 	SceneManager::CreateScene<TestScene>();
 	SceneManager::CreateScene<TestScene2>();
 	SceneManager::CreateScene<TestScene3>();

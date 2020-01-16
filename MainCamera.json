@@ -1,0 +1,7 @@
+{
+    "MainCamera": {
+        "name": "MainCamera",
+        "IsDestroy": false,
+        "IsActive": true
+    }
+}

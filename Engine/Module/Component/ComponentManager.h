@@ -57,8 +57,6 @@ public:
 
 	//‘SComponent‚ÌDebug•\Ž¦
 	static void ImGui_ComponentView(EntityID id);
-
-
 };
 
 

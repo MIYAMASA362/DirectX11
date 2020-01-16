@@ -17,6 +17,7 @@ protected:
 	Quaternion	m_Rotation;		//‰ñ“]
 	Vector3		m_Scale;		//ƒTƒCƒY
 public:
+	Transform() :Transform(0) {};
 	Transform(EntityID OwnerID);
 	~Transform() = default;
 
@@ -67,4 +68,19 @@ public:
 
 	void LookAt(std::weak_ptr<Transform> target);	//‚»‚Ì•ûŒü‚ðŒ©‚é
 	void OnDestroy() override;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(cereal::base_class<Component<Transform>>(this));
+		archive(
+			CEREAL_NVP(m_Position),
+			CEREAL_NVP(m_Rotation),
+			CEREAL_NVP(m_Scale)
+		);
+	}
 };
+
+CEREAL_REGISTER_TYPE(Component<Transform>)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(IComponent,Component<Transform>)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Component<Transform>, Transform)

@@ -14,6 +14,7 @@ protected:
 
 
 public:
+	Behaviour() :Behaviour(0) {};
 	//コンストラクタ
 	Behaviour(EntityID OwnerID) :Component(OwnerID) {};
 	//デストラクタ
@@ -27,5 +28,9 @@ public:
 	//削除時実行関数
 	virtual void OnDestroy()	override {};
 
-
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(cereal::base_class<Component<Type>>(this));
+	}
 };
