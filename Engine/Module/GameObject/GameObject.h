@@ -26,6 +26,7 @@ private:
 public:
 	//コンストラクタ
 	GameObject(std::string name,Scene* scene, TagName tagName);
+	GameObject() :GameObject("Hoge",,) {}
 	//デストラクタ
 	virtual ~GameObject();
 
@@ -58,6 +59,8 @@ public:
 			CEREAL_NVP(components)
 		);
 	}
-
-
 };
+
+CEREAL_REGISTER_TYPE(GameObject)
+
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Entity<GameObject>,GameObject)

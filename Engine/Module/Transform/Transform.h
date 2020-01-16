@@ -81,6 +81,4 @@ public:
 	}
 };
 
-CEREAL_REGISTER_TYPE(Component<Transform>)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(IComponent,Component<Transform>)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Component<Transform>, Transform)
+CEREAL_REGISTER_TYPE(Transform)

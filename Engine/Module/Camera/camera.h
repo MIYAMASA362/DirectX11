@@ -75,8 +75,4 @@ public:
 	static void EditorWindow();
 };
 
-CEREAL_REGISTER_TYPE(Component<Camera>)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(IComponent,Component<Camera>)
-CEREAL_REGISTER_TYPE(Behaviour<Camera>)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Component<Camera>,Behaviour<Camera>)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Behaviour<Camera>, Camera)
+CEREAL_REGISTER_TYPE(Camera)
