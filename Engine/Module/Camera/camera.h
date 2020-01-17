@@ -62,17 +62,19 @@ public:
 	bool GetVisibility(Vector3 position);
 
 	template<class Archive>
-	void serealize(Archive& archive)
+	void serialize(Archive& archive)
 	{
 		archive(cereal::base_class<Behaviour<Camera>>(this));
 		archive(
-			cereal::make_nvp("Priority",this->_Priority);
+			CEREAL_NVP(_Viewport.Height),
+			CEREAL_NVP(_Viewport.Width)
 		);
 	}
-
 
 	//エディタ表示
 	static void EditorWindow();
 };
 
+CEREAL_REGISTER_TYPE(Component<Camera>)
+CEREAL_REGISTER_TYPE(Behaviour<Camera>)
 CEREAL_REGISTER_TYPE(Camera)

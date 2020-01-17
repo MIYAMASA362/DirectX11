@@ -53,7 +53,9 @@ public:
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(_ownerId);
+		archive(
+			CEREAL_NVP(_ownerId)
+		);
 	}
 
 protected:
@@ -62,5 +64,3 @@ protected:
 
 
 };
-
-CEREAL_REGISTER_TYPE(IComponent)

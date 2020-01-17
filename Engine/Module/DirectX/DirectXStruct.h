@@ -264,6 +264,16 @@ typedef struct tagVector3
 		return tagVector3::Normalize(*this);
 	}
 
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(x),
+			CEREAL_NVP(y),
+			CEREAL_NVP(z)
+		);
+	}
+
 	operator const float*() { return &x; }
 	operator const XMVECTOR() { return XMVectorSet(x, y, z, 0.0f); };
 	operator const XMFLOAT3() { return{ x,y,z }; }
@@ -755,6 +765,17 @@ typedef struct tagQuaternion
 	tagQuaternion operator - (tagQuaternion q) {
 		return tagQuaternion::Conjugate(q);
 	};
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(x),
+			CEREAL_NVP(y),
+			CEREAL_NVP(z),
+			CEREAL_NVP(w)
+		);
+	}
 
 	bool operator== (const tagQuaternion& q) {
 		return x == q.x && y == q.y && z == q.z && w == q.w;

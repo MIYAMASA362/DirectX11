@@ -1,0 +1,63 @@
+{
+    "MainCamera": {
+        "name": "MainCamera",
+        "IsDestroy": false,
+        "IsActive": true,
+        "Components": {
+            "value0": [
+                {
+                    "locked_ptr": {
+                        "polymorphic_id": 2147483649,
+                        "polymorphic_name": "Transform",
+                        "ptr_wrapper": {
+                            "id": 2147483649,
+                            "data": {
+                                "value0": {
+                                    "value0": {
+                                        "_ownerId": 3623225871
+                                    }
+                                },
+                                "m_Position": {
+                                    "x": 0.0,
+                                    "y": 2.0,
+                                    "z": 0.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                },
+                                "m_Scale": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "locked_ptr": {
+                        "polymorphic_id": 2147483650,
+                        "polymorphic_name": "Camera",
+                        "ptr_wrapper": {
+                            "id": 2147483650,
+                            "data": {
+                                "value0": {
+                                    "value0": {
+                                        "value0": {
+                                            "_ownerId": 3623225871
+                                        }
+                                    }
+                                },
+                                "_Viewport.Height": 615.0,
+                                "_Viewport.Width": 1040.0
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

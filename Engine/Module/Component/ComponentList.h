@@ -40,6 +40,8 @@ public:
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(cereal::make_nvp("Components", _components));
+		archive(
+			_components
+		);
 	}
 };

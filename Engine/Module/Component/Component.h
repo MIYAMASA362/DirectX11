@@ -37,11 +37,10 @@ public:
 	virtual void OnDestroy() override {};
 
 	template<class Archive>
-	void serealize(Archive& archive)
+	void serialize(Archive& archive)
 	{
 		archive(cereal::base_class<IComponent>(this));
 	}
-
 	
 protected:
 	//このComponentのインデックス

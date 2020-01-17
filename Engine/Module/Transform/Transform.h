@@ -81,4 +81,5 @@ public:
 	}
 };
 
+CEREAL_REGISTER_TYPE(Component<Transform>)
 CEREAL_REGISTER_TYPE(Transform)

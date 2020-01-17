@@ -11,6 +11,7 @@ class Scene;
 class GameObject final:public Entity<GameObject>
 {
 	friend Scene;
+	friend cereal::access;
 private:
 	Scene* const scene;			//対応シーン
 
@@ -23,10 +24,12 @@ private:
 	std::weak_ptr<GameObject> _gameObject;
 	std::weak_ptr<Transform> _transform;
 
+	
 public:
+	GameObject():GameObject("None",nullptr,TagName::Default){}
 	//コンストラクタ
 	GameObject(std::string name,Scene* scene, TagName tagName);
-	GameObject() :GameObject("Hoge",,) {}
+	//GameObject() :GameObject("Hoge",,) {}
 	//デストラクタ
 	virtual ~GameObject();
 
@@ -56,11 +59,11 @@ public:
 
 		auto components = ComponentManager::GetComponents(this).lock();
 		archive(
-			CEREAL_NVP(components)
+			cereal::make_nvp("Components", *components)
 		);
 	}
+
+
 };
 
-CEREAL_REGISTER_TYPE(GameObject)
-
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Entity<GameObject>,GameObject)
+CEREAL_CLASS_VERSION(GameObject,1);
