@@ -9,7 +9,7 @@ class GameObject;
 class BallTest final :public Scene
 {
 public:
-	BallTest() :Scene("BallTest") {};
+	BallTest() :Scene("BallTest","") {};
 public:
 	void Load()
 	{
@@ -44,12 +44,5 @@ public:
 
 		//	plane->AddComponent<BallScript>();
 		//}
-
-
-		std::ofstream file("BallTest.scene");
-		cereal::JSONOutputArchive output(file);
-		output(
-			cereal::make_nvp(camera->GetName(), *camera)
-		);
 	}
 };

@@ -3,7 +3,7 @@
 class GameMain final :public Scene
 {
 public:
-	GameMain() :Scene("GameMain") {};
+	GameMain() :Scene("GameMain","") {};
 	~GameMain() {};
 public:
 	void Load() override

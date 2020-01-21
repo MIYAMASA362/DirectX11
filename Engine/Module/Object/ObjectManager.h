@@ -1,41 +1,47 @@
 #pragma once
 
-//全オブジェクト
-using ObjectIndex = std::unordered_map<InstanceID, std::shared_ptr<Object>>;
-
-//ObjectManager
-//	ゲーム内のObjectを管理する
+//*********************************************************************************************************************
 //
-class ObjectManager
+//	ObjectManager
+//		Objectの管理
+//
+//*********************************************************************************************************************
+class ObjectManager final
 {
 private:
-	//Object Instanceインデックス
-	static ObjectIndex g_ObjectIndex;
+	//インスタンス
+	static ObjectManager* pInstance;
 
-	//Objectの削除用インデックス
-	using DestroyIndex = std::vector<InstanceID>;
+	//Object Instanceインデックス
+	std::unordered_map<InstanceID, std::shared_ptr<Object>> _ObjectIndex;
+
 	//Object Instance　削除インデックス
-	static DestroyIndex g_DestroyIndex;
+	std::vector<InstanceID> _DestroyIndex;
+
+	//コンストラクタ
+	ObjectManager();
+	//デストラクタ
+	~ObjectManager();
 
 
 public:
-	//Object に固有IDを付加する
-	static InstanceID AttachID();
+	//インスタンスの取得
+	static ObjectManager* GetInstance() { return pInstance; }
 
-	//g_ObjectIndexに追加する
-	static std::weak_ptr<Object> AddIndex(Object* instance);
+	//インスタンス生成
+	static void Create();
+	//インスタンス破棄
+	static void Destroy();
 
-	//g_DestroyIndexに追加する
-	static void AddDestroy(Object* instance);
-	//g_DestroyIndex内のオブジェクトを削除する
-	static void ClearnUp();
-
-	//g_ObjectIndexからIndexの取得
-	static std::weak_ptr<Object> GetInstance(InstanceID instanceID);
-	
-	//g_ObjectIndexを削除
-	static void Release();
+	//Object登録
+	void RegisterObject(Object* object);
+	//Object削除登録
+	void DestroyObject(Object* object);
+	//Object削除
+	void ClearnUpObject();
 
 	//Editorデバッグ表示
-	static void EditorWindow();
+	void EditorWindow();
+
+
 };

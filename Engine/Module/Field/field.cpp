@@ -296,7 +296,7 @@ MeshField::MeshField()
 		{
 			_SurfaceNum = this->m_IndexNum - 2;
 			_Surface = new Surface[_SurfaceNum];
-			for(int i = 0 ; i < _SurfaceNum; i++)
+			for(unsigned int i = 0 ; i < _SurfaceNum; i++)
 			{
 				_Surface[i]._p1 = _VertexArray[pIndex[i+0]].Position;
 				_Surface[i]._p2 = _VertexArray[pIndex[i+1]].Position;

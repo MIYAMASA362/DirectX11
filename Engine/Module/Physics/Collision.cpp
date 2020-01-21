@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 
 #include"Module\DirectX\DirectX.h"
@@ -19,6 +20,12 @@
 #include"Module\Shader\Shader.h"
 
 using namespace DirectX;
+
+//*********************************************************************************************************************
+//
+//	Collision
+//
+//*********************************************************************************************************************
 
 Bounds::Bounds(Vector3 center, Vector3 size)
 {
@@ -83,10 +90,7 @@ Collider::Collider(EntityID OwnerID)
 	Component(OwnerID),
 	bound(Vector3::zero(),Vector3::one())
 {
-	this->SendComponentMessage = [this](std::string message){
-		if (message == "Start")	 { Start(); return; }
-		if (message == "Render") { Render(); return; }
-	};
+
 }
 
 Collider::~Collider()
@@ -100,12 +104,12 @@ void Collider::Start()
 	auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
 	if (rigidbody.expired())
 	{
-		auto component = this->transform()->GetComponentInParent(Rigidbody::GetTypeID());
+		auto component = this->transform()->GetComponentInParent(typeid(Rigidbody).hash_code());
 		if (component.expired()) return;
 		rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
 	}
 	_rigidbody = rigidbody.lock();
-	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(this->_self.lock()));
+	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(GetSelf().lock()));
 }
 
 void Collider::IsHitReset()
@@ -640,6 +644,12 @@ bool Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 	return false;
 }
 
+void Collider::SendComponentMessage(std::string message)
+{
+	if (message == "Start") return Start();
+	if (message == "Render") return Render();
+}
+
 //--- SphereCollider ----------------------------------------------------------
 
 ID3D11Buffer* SphereCollider::m_VertexBuffer = nullptr;
@@ -653,16 +663,9 @@ SphereCollider::SphereCollider(EntityID OwnerID)
 	Collider(OwnerID)
 {
 	this->SetRadius(0.25f);
-
-	this->OnDebugImGui = [this]()
-	{
-		if(ImGui::TreeNode("SphereCollider")){
-			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
-			ImGui::Checkbox("IsHit",&this->_IsHit);
-			ImGui::TreePop();
-		}
-	};
 }
+
+
 
 SphereCollider::~SphereCollider()
 {
@@ -805,6 +808,12 @@ bool SphereCollider::Judgment(Collider * other)
 	return _IsHit;
 }
 
+void SphereCollider::OnDebugImGui()
+{
+	ImGui::Checkbox("IsTrigger", &this->IsTrigger);
+	ImGui::Checkbox("IsHit", &this->_IsHit);
+}
+
 //--- BoxCollider -------------------------------------------------------------
 
 ID3D11Buffer* BoxCollider::m_IndexBuffer = nullptr;
@@ -907,16 +916,6 @@ BoxCollider::BoxCollider(EntityID OwnerID)
 :
 	Collider(OwnerID)
 {
-	this->OnDebugImGui = [this]() {
-		if (ImGui::TreeNode("BoxCollider")) {
-			ImGui::Checkbox("IsTrigger",&this->IsTrigger);
-			ImGui::Checkbox("IsHit",&this->_IsHit);
-			if(!_rigidbody.expired())
-				ImGui::Text(("RigidbodyName:"+_rigidbody.lock()->gameObject()->GetName()).c_str());
-			this->bound.DebugImGui();
-			ImGui::TreePop();
-		}
-	};
 }
 
 void BoxCollider::SetSize(Vector3 size)
@@ -958,6 +957,15 @@ bool BoxCollider::Judgment(Collider * other)
 		break;
 	}
 	return _IsHit;
+}
+
+void BoxCollider::OnDebugImGui()
+{
+	ImGui::Checkbox("IsTrigger", &this->IsTrigger);
+	ImGui::Checkbox("IsHit", &this->_IsHit);
+	if (!_rigidbody.expired())
+		ImGui::Text(("RigidbodyName:" + _rigidbody.lock()->gameObject()->GetName()).c_str());
+	this->bound.DebugImGui();
 }
 
 FieldCollider::FieldCollider(EntityID OwnerID)

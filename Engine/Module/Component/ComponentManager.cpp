@@ -15,12 +15,16 @@
 #include"Module\Entity\IEntity.h"
 
 
-
+//*********************************************************************************************************************
+//
+//	ComponentManager
+//
+//*********************************************************************************************************************
 
 //pInstance
 //	Singleton
 //
-ComponentManager * ComponentManager::g_pInstance = nullptr;
+ComponentManager * ComponentManager::pInstance = nullptr;
 
 
 
@@ -48,8 +52,8 @@ ComponentManager::~ComponentManager()
 //
 void ComponentManager::Create()
 {
-	if (g_pInstance) return;
-	g_pInstance = new ComponentManager();
+	if (pInstance != nullptr) return;
+	pInstance = new ComponentManager();
 	
 }
 
@@ -58,9 +62,9 @@ void ComponentManager::Create()
 //
 void ComponentManager::Release()
 {
-	if (g_pInstance == nullptr) return;
-	delete g_pInstance;
-	g_pInstance = nullptr;
+	if (pInstance == nullptr) return;
+	delete pInstance;
+	pInstance = nullptr;
 }
 
 
@@ -72,7 +76,7 @@ void ComponentManager::Release()
 //
 void ComponentManager::SendComponentMessage(std::string message)
 {
-	for (auto components : g_pInstance->_EntityComponentIndex)
+	for (auto components : _EntityComponentIndex)
 		for (auto component : components.second->_components)
 			component.lock()->SendComponentMessage(message);
 }
@@ -82,7 +86,7 @@ void ComponentManager::SendComponentMessage(std::string message)
 //
 void ComponentManager::SendComponentMessage(std::string message, EntityID entityID)
 {
-	for(auto component : g_pInstance->_EntityComponentIndex.at(entityID)->_components)
+	for(auto component : _EntityComponentIndex.at(entityID)->_components)
 		component.lock()->SendComponentMessage(message);
 }
 
@@ -94,7 +98,7 @@ void ComponentManager::SendComponentMessage(std::string message, EntityID entity
 //
 std::weak_ptr<ComponentList> ComponentManager::CreateComponents(IEntity* entity)
 {
-	return g_pInstance->_EntityComponentIndex.emplace(entity->GetEntityID(), std::shared_ptr<ComponentList>(new ComponentList())).first->second;
+	return _EntityComponentIndex.emplace(entity->GetEntityID(), std::shared_ptr<ComponentList>(new ComponentList())).first->second;
 }
 
 //GetComponents
@@ -102,7 +106,7 @@ std::weak_ptr<ComponentList> ComponentManager::CreateComponents(IEntity* entity)
 //
 std::weak_ptr<ComponentList> ComponentManager::GetComponents(IEntity* entity)
 {
-	return g_pInstance->_EntityComponentIndex.at(entity->GetEntityID());
+	return _EntityComponentIndex.at(entity->GetEntityID());
 }
 
 //DestroyComponents
@@ -110,7 +114,7 @@ std::weak_ptr<ComponentList> ComponentManager::GetComponents(IEntity* entity)
 //
 void ComponentManager::DestroyComponents(IEntity* entity)
 {
-	for(auto component : g_pInstance->_EntityComponentIndex.at(entity->GetEntityID())->_components)
+	for(auto component : _EntityComponentIndex.at(entity->GetEntityID())->_components)
 		component.lock()->Destroy();
 }
 
@@ -119,7 +123,7 @@ void ComponentManager::DestroyComponents(IEntity* entity)
 //
 void ComponentManager::ReleaseComponents(IEntity* entity)
 {
-	g_pInstance->_EntityComponentIndex.erase(entity->GetEntityID());
+	_EntityComponentIndex.erase(entity->GetEntityID());
 }
 
 
@@ -131,6 +135,8 @@ void ComponentManager::ReleaseComponents(IEntity* entity)
 //
 void ComponentManager::ImGui_ComponentView(EntityID id)
 {
-	for (auto component : g_pInstance->_EntityComponentIndex.at(id)->_components)
+	for (auto component : _EntityComponentIndex.at(id)->_components)
+	{
 		component.lock()->OnDebugImGui();
+	}
 }

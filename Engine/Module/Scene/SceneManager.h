@@ -6,12 +6,9 @@
 	ActiveSceneは必ず存在する(存在しない場合はnullptrとして例外を起こすべき)
 */
 
-
 class Scene;
 class GameObject;
 class HierarchyUtility;
-
-using SceneID = unsigned int;
 
 //*********************************************************************************************************************
 //
@@ -19,96 +16,70 @@ using SceneID = unsigned int;
 //		Scnee管理
 //
 //*********************************************************************************************************************
-class SceneManager
+class SceneManager final
 {
 	friend Scene;
 private:
-	static SceneID m_SceneID;
-	static std::map<SceneID, std::shared_ptr<Scene>> pSceneDictionary;
+	//シングルインスタンス
+	static SceneManager* pInstance;
 
-	static std::weak_ptr<Scene> pActiveScene;
-	static std::weak_ptr<Scene> pNextScene;
-	static bool IsChangeScene;
+	//シーン保管
+	std::vector<std::shared_ptr<Scene>> _SceneArray;
 
-	static void SetIsChangeScene(std::weak_ptr<Scene> scene);
-	static void AttachActiveScene(std::weak_ptr<Scene> scene);
-	static void DetachActiveScene();
-	static SceneID AttachID();
+	//現在のシーン
+	std::weak_ptr<Scene> _ActiveScene;
+	//遷移先シーン
+	std::weak_ptr<Scene> _NextScene;
+	//遷移フラグ
+	bool _IsChangeScene;
+
+
+	//コンストラクタ
+	SceneManager();
+	//デストラクタ
+	~SceneManager();
+
 
 public:
-	SceneManager() = delete;
-	~SceneManager() = delete;
 
-	template<typename Type> static std::weak_ptr<Scene> CreateScene();
+	//インスタンス取得
+	static SceneManager* GetInstance() { return pInstance; };
+
+	//インスタンス生成
+	static void Create();
+	//インスタンス破棄
 	static void Destroy();
 
-	static void LoadScene(std::weak_ptr<Scene> scene);
-	static std::weak_ptr<Scene>GetActiveScene();
-	static std::weak_ptr<Scene>GetScene(SceneID id);
-	static std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
+	//シーン生成
+	std::weak_ptr<Scene> CreateScene(std::string name);
 
-	static void ChangeScene();
-	static void DebugGUI_ActiveScene();
-};
+	//シーン読み込み
+	void LoadScene(std::weak_ptr<Scene> scene);
+	void LoadScene(std::string name);
 
-//----------------------------------------------------------------------------
-template<typename Type> static std::weak_ptr<Scene> SceneManager::CreateScene()
-{
-	auto AddScene = std::shared_ptr<Scene>(new Type());
-	pSceneDictionary.emplace(AddScene->GetSceneID(), AddScene);
-	return AddScene;
-}
+	//現在のシーン取得
+	std::weak_ptr<Scene>GetActiveScene() { return _ActiveScene; }
+	//遷移先シーンの取得
+	std::weak_ptr<Scene>GetNextScene() { return _NextScene; }
 
-//*********************************************************************************************************************
-//
-//	Scene
-//
-//*********************************************************************************************************************
-class Scene
-{
-private:
-	const SceneID m_id;			//シーンID
-	const std::string m_name;	//シーン名
-	bool IsLoaded = false;		//読み込みされてる
+	void ChangeScene();
 
-	HierarchyUtility* const _hierarchyUtility;	//オブジェクト階層
-protected:
-	Scene(std::string name);	//コンストラクタ
-	virtual ~Scene();			//デストラクタ
+	//シーン名で取得
+	std::weak_ptr<Scene>GetSceneByName(std::string SceneName);
+
+	bool IsChangeScene() { return _IsChangeScene; };
+
+	//現在のシーンを設定
+	void AttachActiveScene(std::weak_ptr<Scene> scene);
+	//遷移先を設定
+	void SetIsChangeScene(std::weak_ptr<Scene> scene);
+	//現在のシーンを破棄
+	void DetachActiveScene();
+
 
 public:
-	std::string GetSceneName();
+	//デバッグ表示
+	void DebugGUI_ActiveScene();
 
-	GameObject* AddSceneObject(std::string name, TagName tag);
-	void RemoveSceneObject(EntityID id);
 
-	std::weak_ptr<Scene> GetSelfScene();
-	void AttachActiveScene();
-	void DetachActiveScene();
-	void DebugGUI();
-	bool CompareName(std::string name);
-	SceneID GetSceneID();
-
-	virtual void Load() = 0;
-	void UnLoad();
-
-	HierarchyUtility* GetHierarchyUtility() { return _hierarchyUtility; };
-};
-
-//----------------------------------------------------------------------------
-inline bool Scene::CompareName(std::string name)
-{
-	return this->m_name == name;
-};
-inline SceneID Scene::GetSceneID()
-{
-	return this->m_id;
-}
-inline std::string Scene::GetSceneName()
-{
-	return this->m_name;
-};
-inline std::weak_ptr<Scene> Scene::GetSelfScene() 
-{
-	return SceneManager::GetScene(this->m_id);
 };

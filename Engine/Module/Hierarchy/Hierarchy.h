@@ -11,6 +11,7 @@ class HierarchyUtility;
 class Hierarchy
 {
 	friend HierarchyUtility;
+	friend cereal::access;
 private:
 	//自身
 	std::weak_ptr<IEntity> _self;
@@ -19,8 +20,31 @@ private:
 	//子
 	std::list<std::weak_ptr<IEntity>> _children;
 
+	//コンストラクタ
+	Hierarchy();
+
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		archive(
+			CEREAL_NVP(_self),
+			CEREAL_NVP(_parent),
+			CEREAL_NVP(_children)
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(_self),
+			CEREAL_NVP(_parent),
+			CEREAL_NVP(_children)
+		);
+	}
 
 public:
+	//コンストラクタ
 	Hierarchy(std::weak_ptr<IEntity> self);
 	~Hierarchy();
 
@@ -45,14 +69,34 @@ private:
 //	HierarchyUtility
 //
 //*********************************************************************************************************************
-class HierarchyUtility
+class HierarchyUtility final
 {
+	friend cereal::access;
 private:
 	//オブジェクト毎の階層
 	std::map<EntityID, Hierarchy> _hierarchyMap;
 
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		archive(
+			CEREAL_NVP(_hierarchyMap)
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(_hierarchyMap);
+	}
+
 
 public:
+	//コンストラクタ
+	HierarchyUtility();
+	//デストラクタ
+	~HierarchyUtility();
+
 	//親の取得
 	std::weak_ptr<IEntity> GetParent(EntityID id);
 	//

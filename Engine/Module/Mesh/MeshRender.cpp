@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 
 #include"Module\DirectX\DirectX.h"
@@ -42,17 +43,6 @@ MeshRender::MeshRender(EntityID OwnerID)
 	:
 	Renderer(OwnerID)
 {
-	this->OnDebugImGui = [this]() {
-		if (ImGui::TreeNode("MeshRender")) 
-		{
-			bool enable = this->GetEnable();
-
-			ImGui::Checkbox("IsEnable",&enable);
-			ImGui::TreePop();
-
-			this->SetEnable(enable);
-		}
-	};
 }
 
 //~MeshRender
@@ -92,4 +82,14 @@ std::shared_ptr<MeshFilter> MeshRender::GetMeshFilter()
 	if (!_meshfilter.expired())
 		_meshfilter = gameObject()->GetComponent<MeshFilter>();
 	return _meshfilter.lock();
+}
+
+void MeshRender::OnDebugImGui()
+{
+	bool enable = this->GetEnable();
+
+	ImGui::Checkbox("IsEnable", &enable);
+	ImGui::TreePop();
+
+	this->SetEnable(enable);
 }

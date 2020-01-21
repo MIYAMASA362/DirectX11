@@ -1,66 +1,80 @@
 #pragma once
 
+
 class Transform;
 class GameObject;
 
-
-
-//IComponent
-//	ComponentManagerで管理されるComponent Intarface
+//*********************************************************************************************************************
 //
+//	IComponent
+//
+//*********************************************************************************************************************
 class IComponent:public Object
 {
 	//Componentの管理
 	friend class ComponentManager;
+	friend cereal::access;
 private:
 	//OwnerID 所有EntityのID
 	EntityID _ownerId;
-	//Entity GameObject
-	std::weak_ptr<GameObject> _gameObject;
 
-protected:
 	//ComponentManagerで管理されているComponent
 	std::weak_ptr<IComponent> _self;
 
-	//Componentにメッセージを送信された時の動作
-	std::function<void(std::string)> SendComponentMessage = {};
-	//ImGuiの設定
-	std::function<void(void)> OnDebugImGui = {};
+	std::weak_ptr<Transform> _transform;
+	std::weak_ptr<GameObject> _gameObject;
 
+	//シリアライズ
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		archive(
+			cereal::base_class<IComponent>(this),
+			CEREAL_NVP(_ownerId)
+		);
+	}
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(
+			cereal::base_class<IComponent>(this),
+			_ownerId
+		);
+	}
 
 public:
-	IComponent() :IComponent(0) {};
 	//コンストラクタ
+	IComponent();
 	IComponent(EntityID OwnerID);
 	//デストラクタ
 	virtual ~IComponent();
 
+	//コンポーネントの取得
+	std::weak_ptr<IComponent> GetComponent() { return _self; };
 	//OwnerIDの取得
-	const EntityID GetOwnerID() const { return _ownerId; };
+	EntityID GetOwnerID() const { return _ownerId; };
 	//ComponentTypeIDの取得
-	virtual const ComponentTypeID GetComponentTypeID () const =0;
+	ComponentTypeID GetComponentTypeID() { return typeid(*this).hash_code(); }
 	//ComponentIDの取得
 	ComponentID GetComponentID() { return GetInstanceID(); };
 
 	//EntityのTranformへのアクセス
 	std::shared_ptr<Transform> transform();
 	//EntityのGameObjectへのアクセス
-	std::shared_ptr<GameObject> gameObject() 
-	{ 
-		return _gameObject.lock(); 
-	};
+	std::shared_ptr<GameObject> gameObject();
 
-	template<class Archive>
-	void serialize(Archive& archive)
-	{
-		archive(
-			CEREAL_NVP(_ownerId)
-		);
-	}
 
 protected:
 	//削除時実行関数
-	virtual void OnDestroy() override = 0;
+	virtual void OnDestroy() {};
+
+	//Componentにメッセージを送信された時の動作
+	virtual void SendComponentMessage(std::string message) {};
+
+	//ImGuiの設定
+	virtual void OnDebugImGui();
 
 
 };
+
+CEREAL_REGISTER_TYPE(IComponent)

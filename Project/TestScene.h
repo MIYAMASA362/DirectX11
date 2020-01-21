@@ -7,7 +7,7 @@ class TestScene final :public Scene
 private:
 	Font* font;
 public:
-	TestScene():Scene("TestScene")
+	TestScene():Scene("TestScene","")
 	{
 		/*this->font = new Font();
 		this->font->Load("Asset/cinecaption226.ttf", "cinecaption");*/

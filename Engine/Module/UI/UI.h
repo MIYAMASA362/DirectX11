@@ -24,6 +24,7 @@ public:
 	virtual ~UI() = default;
 public:
 	virtual void Render(XMMATRIX world) = 0;
+	virtual void SendComponentMessage(std::string message) override;
 };
 
 //UI Image

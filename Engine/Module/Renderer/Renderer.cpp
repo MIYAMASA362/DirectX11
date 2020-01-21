@@ -1,4 +1,5 @@
 #include<algorithm>
+#define INCLUDE_CEREAL
 #include"Common.h"
 
 #include"Module\DirectX\DirectX.h"

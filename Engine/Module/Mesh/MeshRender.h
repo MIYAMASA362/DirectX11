@@ -28,5 +28,5 @@ public:
 	//メッシュフィルタの取得
 	std::shared_ptr<MeshFilter> GetMeshFilter();
 
-
+	virtual void OnDebugImGui() override;
 };

@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define INCLUDE_CEREAL
 #include"Common.h"
 #include"Module\DirectX\DirectX.h"
 
@@ -24,6 +25,8 @@
 #include"Module\Texture\TextureManager.h"
 
 #include"Module\Mesh\Mesh.h"
+#include"Module\Hierarchy\Hierarchy.h"
+#include"Module\Scene\Scene.h"
 #include"Module\Scene\SceneManager.h"
 
 #include"Module\Renderer\Renderer.h"

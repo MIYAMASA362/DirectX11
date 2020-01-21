@@ -1,19 +1,18 @@
 #pragma once
 
-//EntityIndex
-using EntityIndex = std::unordered_map<EntityID, std::weak_ptr<IEntity>>;
-
-//EntityManager
-//	IEntityの管理
+//*********************************************************************************************************************
 //
+//	EntityManager
+//
+//*********************************************************************************************************************
 class EntityManager final
 {
 private:
 	//インスタンス
-	static EntityManager* g_pInstacne;
+	static EntityManager* pInstacne;
 
 	//全Entityのインデックス
-	EntityIndex* _EntityIndex;
+	std::unordered_map<EntityID, std::weak_ptr<IEntity>> _EntityIndex;
 
 	//コンストラクタ
 	EntityManager();
@@ -26,14 +25,17 @@ public:
 	static void Create();
 	//EntityManagerのインスタンス生成
 	static void Release();
+	//インスタンスの取得
+	static EntityManager* GetInstance() { return pInstacne; };
 
 	//EntityIndexへ追加
-	static std::weak_ptr<IEntity> CreateEntity(IEntity* instance);
+	std::weak_ptr<IEntity> RegisterEntity(IEntity* instance);
+	void DestroyEntity(IEntity* instance);
 	//EntityIndexからEntityの削除
-	static void ReleaseEntity(IEntity * instance);
+	void ReleaseEntity(IEntity * instance);
 
 	//EntityIndexからEntityの取得
-	static std::weak_ptr<IEntity> GetEntity(EntityID id);
+	std::weak_ptr<IEntity> GetEntity(EntityID id);
 
 
 };

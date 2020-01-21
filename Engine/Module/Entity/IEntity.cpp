@@ -1,25 +1,38 @@
 #include"Common.h"
 
+#include"Module\Object\Object.h"
+
 #define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
-
-#include"Module\Object\Object.h"
-#include"Module\Object\ObjectManager.h"
 
 #include"Module\Component\IComponent.h"
 #include"Module\Component\ComponentList.h"
 #include"Module\Component\ComponentManager.h"
 
-#include"Module\Entity\IEntity.h"
-#include"Module\Entity\EntityManager.h"
+#include"IEntity.h"
+#include"EntityManager.h"
+
+//*********************************************************************************************************************
+//
+//	IEntity
+//
+//*********************************************************************************************************************
 
 //IEntity
 //	コンストラクタ
 //
 IEntity::IEntity()
-:
-	_self(EntityManager::CreateEntity(this)),
-	_components(ComponentManager::CreateComponents(this))
+	:
+	Object()
+{
+
+}
+
+IEntity::IEntity(std::shared_ptr<IEntity> sptr, std::shared_ptr<ComponentList> components)
+	:
+	Object(),
+	_self(sptr),
+	_components(components)
 {
 
 }
@@ -31,9 +44,6 @@ IEntity::~IEntity()
 {
 	_self.reset();
 	_components.reset();
-
-	ComponentManager::ReleaseComponents(this);
-	EntityManager::ReleaseEntity(this);
 }
 
 //Destroy

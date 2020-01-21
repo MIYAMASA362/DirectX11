@@ -19,9 +19,13 @@ public:
 	//ˆê’èXVˆ—
 	virtual void FixedUpdate(){};
 
+protected:
 	//íœÀsŠÖ”
 	virtual void OnDestroy()	override {};
 
+	virtual void OnDebugImGui() override {};
+
+	virtual void SendComponentMessage(std::string message);
 };
 
 template<typename Type>
@@ -29,10 +33,13 @@ inline MonoBehaviour<Type>::MonoBehaviour(EntityID OwnerID)
 :
 	Behaviour<Type>(OwnerID)
 {
-	IComponent::SendComponentMessage = [this](std::string message)
-	{
-		if (message == "Start") { this->Start(); return; }
-		if (message == "Update") { this->Update(); return; }
-		if (message == "FixedUpdate") { this->FixedUpdate(); return; }
-	};
+
+}
+
+template<typename Type>
+inline void MonoBehaviour<Type>::SendComponentMessage(std::string message)
+{
+	if (message == "Start") return Start();
+	if (message == "Update") return Update();
+	if (message == "FixedUpdate") return FixedUpdate();
 }

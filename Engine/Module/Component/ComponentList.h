@@ -17,7 +17,6 @@ private:
 public:
 	//コンストラクタ
 	ComponentList();
-
 	//デストラクタ
 	~ComponentList();
 
@@ -37,6 +36,7 @@ public:
 	//Componentsのサイズ
 	size_t Size() { return _components.size(); };
 
+	//シリアル化
 	template<class Archive>
 	void serialize(Archive& archive)
 	{

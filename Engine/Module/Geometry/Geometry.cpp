@@ -74,7 +74,7 @@ Geometry::Cube::Cube()
 
 	this->_SurfaceNum = 12;
 	this->_Surface = new Surface[this->_SurfaceNum];
-	for (int n = 0; n < this->_SurfaceNum; n++)
+	for (unsigned int n = 0; n < this->_SurfaceNum; n++)
 	{
 		this->_Surface[n]._p1 = this->_VertexArray[this->_IndexArray[n + 0]].Position;
 		this->_Surface[n]._p2 = this->_VertexArray[this->_IndexArray[n + 1]].Position;
@@ -117,12 +117,12 @@ Geometry::Sphere::Sphere()
 	float x, y, z, radius;
 
 	//頂点
-	for (int h = 0; h < Grid; h++)
+	for (unsigned int h = 0; h < Grid; h++)
 	{
 		y = Radius * sinf(HeightAngle * h);
 		radius = Radius * cosf(HeightAngle * h);
 
-		for (int w = 0; w < Grid; w++)
+		for (unsigned int w = 0; w < Grid; w++)
 		{
 			x = radius * sinf(WidthAngle * w);
 			z = radius * cosf(WidthAngle * w);
@@ -141,9 +141,9 @@ Geometry::Sphere::Sphere()
 	this->_IndexNum = (Grid * 2) * (Grid - 1) + (Grid - 2) * 2;
 	this->_IndexArray = new unsigned short[this->_IndexNum];
 	int nCount = 0;
-	for (int h = 0; h < Grid - 1; h++)
+	for (unsigned int h = 0; h < Grid - 1; h++)
 	{
-		int w = 0;
+		unsigned int w = 0;
 		if (h != 0)
 		{
 			this->_IndexArray[nCount] = this->_IndexArray[nCount - 1];
@@ -161,7 +161,7 @@ Geometry::Sphere::Sphere()
 
 	this->_SurfaceNum = (Grid - 1) * (Grid -1);
 	this->_Surface = new Surface[this->_SurfaceNum];
-	for (int n = 0; n < this->_SurfaceNum; n++)
+	for (unsigned int n = 0; n < this->_SurfaceNum; n++)
 	{
 		this->_Surface[n]._p1 = this->_VertexArray[this->_IndexArray[n + 0]].Position;
 		this->_Surface[n]._p2 = this->_VertexArray[this->_IndexArray[n + 1]].Position;
@@ -210,7 +210,7 @@ Geometry::Plane::Plane()
 	}
 
 	//サーファス
-	for (int n = 0; n < this->_SurfaceNum; n++)
+	for (unsigned int n = 0; n < this->_SurfaceNum; n++)
 	{
 		_Surface[n]._p1 = _VertexArray[_IndexArray[n + 0]].Position;
 		_Surface[n]._p2 = _VertexArray[_IndexArray[n + 1]].Position;

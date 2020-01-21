@@ -14,6 +14,11 @@ using namespace DirectX;
 //
 //*********************************************************************************************************************
 
+Hierarchy::Hierarchy()
+{
+
+}
+
 //Hierarchy
 //	コンストラクタ
 //
@@ -73,6 +78,16 @@ void Hierarchy::DetachChildren()
 //
 //*********************************************************************************************************************
 
+HierarchyUtility::HierarchyUtility()
+{
+
+}
+
+HierarchyUtility::~HierarchyUtility()
+{
+
+}
+
 std::weak_ptr<IEntity> HierarchyUtility::GetParent(EntityID id)
 {
 	return _hierarchyMap.at(id)._parent;
@@ -107,7 +122,7 @@ std::list<std::weak_ptr<IEntity>> HierarchyUtility::GetAllChildren(EntityID id)
 
 void HierarchyUtility::AttachHierarchy(EntityID id)
 {
-	_hierarchyMap.emplace(id,Hierarchy(EntityManager::GetEntity(id)));
+	_hierarchyMap.emplace(id,Hierarchy(EntityManager::GetInstance()->GetEntity(id)));
 }
 
 void HierarchyUtility::DetachHierarchy(EntityID id)

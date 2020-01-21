@@ -1,5 +1,5 @@
 #include<algorithm>
-
+#define INCLUDE_CEREAL
 #include"Common.h"
 #include"Module\DirectX\DirectX.h"
 
@@ -48,23 +48,10 @@ Camera::Camera(EntityID OwnerID)
 	_ProjectionMatrix(XMMatrixIdentity())
 {
 	SetViewPort(0, 0, 1, 1);	//ViewPortÝ’è
-
-	this->RegisterIndex();		//ComponentIndex‚Ö’Ç‰Á
 	this->RegisterSortIndex(this);
 
 	if (pActiveCamera == nullptr)
 		pActiveCamera = this;
-
-	//ImGui•\Ž¦
-	this->OnDebugImGui = [this]() {
-		if (ImGui::TreeNode("Camera"))
-		{
-			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-			ImGui::Text(("Priority:" + std::to_string(this->_Priority)).c_str());
-
-			ImGui::TreePop();
-		}
-	};
 }
 
 //~Camera
@@ -167,18 +154,18 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 
 	RECT rect;
 	GetWindowRect(D3DRenderer::GetRenderStatus()->GetSwapChainDesc().OutputWindow, &rect);
-	float width = rect.right - rect.left;
-	float height = rect.bottom - rect.top;
+	float width =(float)(rect.right - rect.left);
+	float height =(float)(rect.bottom - rect.top);
 
-	rect.left = (long)(x == 0.0f ? 0 : width *x);
-	rect.right = (long)(w == 0.0f ? 0 : width *w);
-	rect.top = (long)(y == 0.0f ? 0 : height*y);
-	rect.bottom = (long)(h == 0.0f ? 0 : height*h);
+	rect.left	= (LONG)(x == 0.0f ? 0 : width *x);
+	rect.right	= (LONG)(w == 0.0f ? 0 : width *w);
+	rect.top	= (LONG)(y == 0.0f ? 0 : height*y);
+	rect.bottom = (LONG)(h == 0.0f ? 0 : height*h);
 
-	_Viewport.TopLeftX = rect.left;
-	_Viewport.TopLeftY = rect.top;
-	_Viewport.Width = rect.right - rect.left;
-	_Viewport.Height = rect.bottom - rect.top;
+	_Viewport.TopLeftX = (FLOAT)rect.left;
+	_Viewport.TopLeftY = (FLOAT)rect.top;
+	_Viewport.Width = (FLOAT)rect.right - rect.left;
+	_Viewport.Height = (FLOAT)rect.bottom - rect.top;
 	_Viewport.MaxDepth = 1.0f;
 	_Viewport.MinDepth = 0.0f;
 
@@ -269,4 +256,10 @@ void Camera::EditorWindow()
 		ImGui::Text((std::to_string(camera->_Priority) + " : " + camera->gameObject()->GetName()).c_str());
 	}
 	ImGui::End();
+}
+
+void Camera::OnDebugImGui()
+{
+	ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
+	ImGui::Text(("Priority:" + std::to_string(this->_Priority)).c_str());
 }

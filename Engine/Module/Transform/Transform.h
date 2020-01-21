@@ -3,43 +3,64 @@
 class GameObject;
 class Hierarchy;
 
+namespace cereal
+{
+	class access;
+}
+
 //*********************************************************************************************************************
 //
 //	Transform
 //
 //*********************************************************************************************************************
-class Transform :public Component<Transform>
+class Transform final : public Component<Transform>
 {
+	friend cereal::access;
 private:
-	Hierarchy*  _hierarchy;		//親子
-protected:
-	Vector3		m_Position;		//位置
-	Quaternion	m_Rotation;		//回転
-	Vector3		m_Scale;		//サイズ
+	//親子
+	Hierarchy*  _hierarchy;
+
+	//位置
+	Vector3	_Position;
+	//回転
+	Quaternion _Rotation;
+	//スケール
+	Vector3 _Scale;
+
+
+	//コンストラクタ
+	Transform();
+
 public:
-	Transform() :Transform(0) {};
+	//コンストラクタ
 	Transform(EntityID OwnerID);
-	~Transform() = default;
+	//デストラクタ
+	~Transform();
 
-	Vector3		position();								//ワールド位置
-	Quaternion	rotation();								//ワールド回転
-	Vector3		scale();								//ワールド大きさ
+	//位置 取得
+	Vector3	position();			//ワールド
+	Vector3	localPosition();	//ローカル
 
-	Vector3		localPosition();						//ローカル位置
-	Quaternion	localRotation();						//ローカル回転
-	Vector3		localScale();							//ローカル大きさ
+	//回転 取得
+	Quaternion rotation();		//ワールド
+	Quaternion localRotation(); //ローカル
 
+	//スケール 取得
+	Vector3	scale();			//ワールド
+	Vector3	localScale();		//ローカル
+
+	//位置 設定
 	void position(Vector3 position);					//ワールド位置
-	void rotation(Quaternion rotation);					//ワールド回転
-
 	void localPosition(Vector3 position);				//ローカル位置
+
+	//回転 設定
+	void rotation(Quaternion rotation);					//ワールド回転
 	void localRotation(Quaternion rotation);			//ローカル回転
+
+	//スケール設定
 	void localScale(Vector3 scale);						//ローカル大きさ
-protected:
-	void detachParent();								//親を離す
-	void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する
-	void childTransformUpdate();						//子の行列に変更を加える
-public:
+
+	//親子関係
 	void SetParent(std::weak_ptr<Transform> pParent);	//親子を設定
 	void SetParent(std::weak_ptr<GameObject> parent);
 	void DetachParent();								//親を離す
@@ -51,9 +72,7 @@ public:
 	std::weak_ptr<IComponent> GetComponentInParent(ComponentTypeID componentTypeID);
 	std::weak_ptr<IComponent> GetComponentInChildren(ComponentTypeID componentTypeID);
 	ComponentList GetComponentsInChildren(ComponentTypeID componentTypeID);
-protected:
-	Vector3 TransformDirection(Vector3 direction);	//回転行列を使ってDirectionを変換
-public:
+
 	Vector3 right();
 	Vector3 left();
 	Vector3 up();
@@ -70,15 +89,35 @@ public:
 	void OnDestroy() override;
 
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
 	{
 		archive(cereal::base_class<Component<Transform>>(this));
 		archive(
-			CEREAL_NVP(m_Position),
-			CEREAL_NVP(m_Rotation),
-			CEREAL_NVP(m_Scale)
+			CEREAL_NVP(_Position),
+			CEREAL_NVP(_Rotation),
+			CEREAL_NVP(_Scale)
 		);
 	}
+
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(cereal::base_class<Component<Transform>>(this));
+		archive(
+			_Position,
+			_Rotation,
+			_Scale
+		);
+	}
+
+protected:
+	void detachParent();								//親を離す
+	void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する
+	void childTransformUpdate();						//子の行列に変更を加える
+
+	Vector3 TransformDirection(Vector3 direction);	//回転行列を使ってDirectionを変換
+
+	void OnDebugImGui() override;
 };
 
 CEREAL_REGISTER_TYPE(Component<Transform>)

@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 #include"Module\DirectX\DirectX.h"
 
@@ -26,22 +27,6 @@ Rigidbody::Rigidbody(EntityID OwnerID)
 	_Mass(1.0f)
 {
 
-	this->SendComponentMessage = [this](std::string message)
-	{
-		if (message == "FixedUpdate") FixedUpdate();
-	};
-	
-	this->OnDebugImGui = [this]() 
-	{
-		if (ImGui::TreeNode("Rigidbody")) 
-		{
-			ImGui::Checkbox("UseGravity:",&this->_UseGravity);
-			ImGui::InputFloat("Mass:",&this->_Mass);
-			ImGui::InputFloat3("Velocity:",&this->_Velocity.x);
-			ImGui::InputFloat3("OldPosition",&this->_OldPosition.x);
-			ImGui::TreePop();
-		}
-	};
 }
 
 //~Rigidbody
@@ -107,5 +92,21 @@ void Rigidbody::OnDestroy()
 	/*Collider* collider = this->gameObject()->GetComponent<Collider>();
 	if(collider)
 		collider->IsAttachRigdbody = false;*/
+}
+
+void Rigidbody::OnDebugImGui()
+{
+	ImGui::Text("Rigidbody");
+	ImGui::Checkbox("UseGravity:", &this->_UseGravity);
+	ImGui::InputFloat("Mass:", &this->_Mass);
+	ImGui::InputFloat3("Velocity:", &this->_Velocity.x);
+	ImGui::InputFloat3("OldPosition", &this->_OldPosition.x);
+	ImGui::TreePop();
+}
+
+void Rigidbody::SendComponentMessage(std::string message)
+{
+	if (message == "FixedUpdate")
+		FixedUpdate();
 }
 

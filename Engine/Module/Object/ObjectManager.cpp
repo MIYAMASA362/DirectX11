@@ -1,104 +1,116 @@
 #include"Common.h"
 #include<random>
 #include<sstream>
+#include<algorithm>
 
 #include"Module\IMGUI\GUI_ImGui.h"
-
-#define NOT_INCLUDE_ECS_FILES
-#include"Module\ECSEngine.h"
 
 #include"Object.h"
 #include"ObjectManager.h"
 
-//ObjectIndex
-//	Objectのインスタンス保持
+
+//*********************************************************************************************************************
 //
-ObjectIndex ObjectManager::g_ObjectIndex;
-
-//DestroyIndex
-//	ObjectIndexから削除するターゲットのIndex
+//	ObjectManager
 //
-ObjectManager::DestroyIndex ObjectManager::g_DestroyIndex;
+//*********************************************************************************************************************
+
+//インスタンス
+ObjectManager* ObjectManager::pInstance = nullptr;
 
 
 
-//AttachID
-//	Object に固有IDを付加する
+//ObjectManager
+//	コンストラクタ
 //
-InstanceID ObjectManager::AttachID()
+ObjectManager::ObjectManager()
 {
+
+}
+
+//~ObjectManager
+//	デストラクタ
+//
+ObjectManager::~ObjectManager()
+{
+	_DestroyIndex.clear();
+
+	for (auto object : _ObjectIndex)
+	{
+		object.second->OnDestroy();
+		object.second.reset();
+	}
+	_ObjectIndex.clear();
+}
+
+
+
+//Create
+//	インスタンス生成
+//
+void ObjectManager::Create()
+{
+	if (pInstance != nullptr) return;
+	pInstance = new ObjectManager();
+}
+
+//Destroy
+//	インスタンス破棄
+//
+void ObjectManager::Destroy()
+{
+	if (pInstance == nullptr) return;
+	delete pInstance;
+	pInstance = nullptr;
+}
+
+
+//RegisterObject
+//	ObjectIndexに追加。Objectにステータス設定
+//
+//	WARNING : memcpyでデータ置き換えしている この実装どうなの？
+//
+void ObjectManager::RegisterObject(Object * object)
+{
+	auto sptr = std::shared_ptr<Object>(object);
+
 	std::random_device rand;
 	InstanceID id;
 	do
 	{
 		id = rand();
-	} 
-	while (g_ObjectIndex.find(id) != g_ObjectIndex.end());
-	
-	return id;
+	}
+	while (_ObjectIndex.find(id) != _ObjectIndex.end());
+
+	object->_InstanceID = id;
+	object->_self = sptr;
+
+	_ObjectIndex.emplace(sptr->_InstanceID,sptr);
 }
 
-
-
-
-//AddIndex
-//	ObjectIndexへObjectを追加
-//
-std::weak_ptr<Object> ObjectManager::AddIndex(Object * instance)
-{
-	return g_ObjectIndex.emplace(instance->GetInstanceID(),std::shared_ptr<Object>(instance)).first->second;
-}
-
-
-
-//AddDestroy
+//DestroyObject
 //	DestroyIndexへ追加
 //
-void ObjectManager::AddDestroy(Object * instance)
+void ObjectManager::DestroyObject(Object * object)
 {
-	g_DestroyIndex.push_back(instance->GetInstanceID());
+	_DestroyIndex.push_back(object->GetInstanceID());
 }
 
-//ClearnUp
-//	DestroyIndex,ObjectIndexから削除
+//ClearnUpObject
+//	オブジェクト削除
 //
-void ObjectManager::ClearnUp()
+void ObjectManager::ClearnUpObject()
 {
-	if (g_DestroyIndex.size() == 0) return;
-
-	for (auto id : g_DestroyIndex)
+	for(auto id : _DestroyIndex)
 	{
-		auto itr = g_ObjectIndex.find(id);
-		itr->second->OnDestroy();
-		g_ObjectIndex.erase(itr);
+		auto find  = _ObjectIndex.find(id);
+		if (find == _ObjectIndex.end()) assert(0);
+		find->second->OnDestroy();
+		_ObjectIndex.erase(find);
 	}
-	g_DestroyIndex.clear();
+	_DestroyIndex.clear();
 }
 
-
-
-//GetInstance
-//	ObjectIndexからObjectを取得
-//
-std::weak_ptr<Object> ObjectManager::GetInstance(InstanceID instanceID)
-{
-	return g_ObjectIndex.at(instanceID);
-}
-
-//Release
-//	ObjectIndexを空にする
-//	OnDestroy関数の実行
-//
-void ObjectManager::Release()
-{
-	for (auto obj : g_ObjectIndex)
-	{
-		obj.second->OnDestroy();
-	}
-	
-	g_DestroyIndex.clear();
-	g_ObjectIndex.clear();
-}
 
 //EditorWindow
 //
@@ -108,7 +120,7 @@ void ObjectManager::EditorWindow()
 	ImGui::Begin("ObjectManager");
 	ImGui::Text("InstanceID[Pointer]");
 	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,512),ImGuiWindowFlags_NoTitleBar);
-	for(auto obj :g_ObjectIndex)
+	for(auto obj :_ObjectIndex)
 	{
 		std::string text = std::to_string(obj.first);
 		std::stringstream ss;

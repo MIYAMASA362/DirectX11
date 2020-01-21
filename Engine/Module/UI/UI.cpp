@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 
 #include"Module\DirectX\DirectX.h"
@@ -23,7 +24,12 @@
 
 using namespace DirectX;
 
-//--- Canvas --------------------------------------------------------
+//*********************************************************************************************************************
+//
+//	Canvas
+//
+//*********************************************************************************************************************
+
 Canvas::Canvas(EntityID OwnerID)
 	:
 	Component(OwnerID)
@@ -39,14 +45,15 @@ UI::UI(EntityID OwnerID)
 {
 	if (!gameObject()->GetComponent<Canvas>().lock())
 		gameObject()->AddComponent<Canvas>();
-
-	this->SendComponentMessage = [this](std::string message) 
-	{
-		if (message == "Render") {
-			this->Render(this->transform()->WorldMatrix());
-		}
-	};
 }
+
+void UI::SendComponentMessage(std::string message)
+{
+	if (message == "Render")
+		this->Render(this->transform()->WorldMatrix());
+}
+
+
 
 
 //--- Image ---------------------------------------------------------

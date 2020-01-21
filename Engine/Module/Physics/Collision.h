@@ -76,6 +76,8 @@ protected:
 	static bool SphereVsMesh(Collider* collider,Collider* mesh);
 
 	virtual bool Judgment(Collider* other) = 0;
+
+	virtual void SendComponentMessage(std::string message) override;
 };
 
 inline void Collider::Center(Vector3 center) { this->bound.SetCenter(center); }
@@ -105,6 +107,8 @@ public:
 protected:
 	bool Judgment(Collider* other) override;
 
+	virtual void OnDebugImGui() override;
+
 };
 
 class BoxCollider final:public Collider
@@ -127,6 +131,8 @@ public:
 	void Render() override;
 protected:
 	bool Judgment(Collider* other) override;
+
+	virtual void OnDebugImGui() override;
 };
 
 class FieldCollider final:public Collider

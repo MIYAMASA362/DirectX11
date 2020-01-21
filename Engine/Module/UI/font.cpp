@@ -1,5 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-
 #include"Common.h"
 #include"Module\DirectX\DirectX.h"
 #include"Module\Object\Object.h"

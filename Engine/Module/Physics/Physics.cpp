@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 #include<memory>
 #include<algorithm>
@@ -6,7 +7,10 @@
 
 #include"../ECSEngine.h"
 
-#include"Module\Module.h"
+#include"Module\Transform\Transform.h"
+#include"Module\Renderer\Renderer.h"
+#include"Module\Mesh\Mesh.h"
+#include"Module\Mesh\MeshRender.h"
 
 #include"Physics.h"
 #include"Rigidbody.h"

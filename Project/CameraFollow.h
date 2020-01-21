@@ -25,9 +25,7 @@ public:
 public:
 	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) 
 	{
-		this->OnDebugImGui = [this]() {
-			ImGui::Checkbox("IsGround",&this->IsGround);
-		};
+
 	};
 	void Update()
 	{

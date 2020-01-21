@@ -37,6 +37,8 @@
 #include"Camera\camera.h"
 #include"Physics\Collision.h"
 #include"Physics\Rigidbody.h"
+#include"Module\Hierarchy\Hierarchy.h"
+#include"Module\Scene\Scene.h"
 
 //UI(CanvasModule)
 #include"UI\UI.h"

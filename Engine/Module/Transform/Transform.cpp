@@ -1,3 +1,4 @@
+#define INCLUDE_CEREAL
 #include"Common.h"
 #include<memory>
 
@@ -16,49 +17,54 @@
 
 #include"Module\Hierarchy\Hierarchy.h"
 
+#include"Module\Scene\Scene.h"
 #include"Module\Scene\SceneManager.h"
 
 using namespace DirectX;
 
-//--- Constrcutor -------------------------------------------------------------
+//*********************************************************************************************************************
+//
+//	Transform
+//
+//*********************************************************************************************************************
 
-//other
+//Transform
+//	コンストラクタ
+//
+Transform::Transform()
+	:
+	Component()
+{
+
+}
+
+//Transform
+//	コンストラクタ
+//
 Transform::Transform(EntityID OwnerID)
 	:
 	Component(OwnerID),
-	m_Position(Vector3::zero()),
-	m_Rotation(Quaternion::Identity()),
-	m_Scale(Vector3::one())
+	_Position(Vector3::zero()),
+	_Rotation(Quaternion::Identity()),
+	_Scale(Vector3::one())
 {
-	this->RegisterIndex();
 	//階層取得
 	_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(OwnerID);
-
-	this->OnDebugImGui =[this]()
-	{
-		if (ImGui::TreeNode("Transform")) {
-			ImGui::Text(("ID:" + std::to_string(this->GetInstanceID())).c_str());
-			Vector3 position = this->position();
-			Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
-			Vector3 scale = this->scale();
-
-			ImGui::InputFloat3("Position", &position.x);
-			ImGui::InputFloat3("Rotation", &rotation.x);
-			ImGui::InputFloat3("Scale", &scale.x);
-			if(!this->GetParent().expired())
-				ImGui::Text(("Parent:"+this->GetParent().lock()->gameObject()->GetName()).c_str());
-			this->position(position);
-			this->rotation(Quaternion::Euler(rotation));
-			this->localScale(scale);
-
-			ImGui::TreePop();
-		}
-	};
 }
 
-//--- 親子関係　---------------------------------------------------------------
+//~Transform
+//	デストラクタ
+//
+Transform::~Transform()
+{
+
+}
+
+
 
 //SetParent
+//	親設定
+//
 void Transform::SetParent(std::weak_ptr<Transform> parent)
 {
 	gameObject()->GetScene()->GetHierarchyUtility()->AttachParent(gameObject()->GetEntityID(),parent.lock()->gameObject());
@@ -67,15 +73,21 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 	XMMATRIX matrix;
 	matrix = this->WorldMatrix() * XMMatrixInverse(nullptr, parent.lock()->WorldMatrix());
 	this->localPosition({ matrix.r[3] });
-	this->localScale(this->m_Scale / parent.lock()->m_Scale);
+	this->localScale(this->_Scale / parent.lock()->_Scale);
 	this->localRotation(Quaternion::AtMatrix(matrix));
 }
 
+//SetParent
+//	親設定
+//
 void Transform::SetParent(std::weak_ptr<GameObject> parent)
 {
 	SetParent(parent.lock()->transform());
 }
 
+//detachParent
+//	親を解放
+//
 void Transform::detachParent() 
 {
 	Vector3 position = this->position();
@@ -126,7 +138,7 @@ std::list<std::weak_ptr<Transform>> Transform::GetChildren()
 void Transform::SendComponentMessageChildren(std::string message)
 {
 	//自身に送信
-	ComponentManager::SendComponentMessage(message,this->GetOwnerID());
+	ComponentManager::GetInstance()->SendComponentMessage(message,this->GetOwnerID());
 	//子に送信
 	for (auto child : _hierarchy->GetChildren())
 		std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->SendComponentMessageChildren(message);
@@ -197,6 +209,25 @@ Vector3 Transform::TransformDirection(Vector3 direction) {
 	return XMVector3Normalize(XMVector3Transform(direction, this->rotation().toMatrix()));
 }
 
+//OnDebugImGui
+//	デバッグ表示
+//
+void Transform::OnDebugImGui()
+{
+	Vector3 position = this->position();
+	Vector3 rotation = Quaternion::ToEulerAngles(this->rotation());
+	Vector3 scale = this->scale();
+
+	Component::OnDebugImGui();
+	ImGui::InputFloat3("Position", &position.x);
+	ImGui::InputFloat3("Rotation", &rotation.x);
+	ImGui::InputFloat3("Scale", &scale.x);
+
+	this->position(position);
+	this->rotation(Quaternion::Euler(rotation));
+	this->localScale(scale);
+}
+
 Vector3 Transform::right() { 
 	return TransformDirection(Vector3::right()); 
 }
@@ -227,60 +258,60 @@ Vector3 Transform::position() {
 }
 
 Quaternion Transform::rotation() {
-	Quaternion q = this->m_Rotation;
+	Quaternion q = this->_Rotation;
 	if (!_hierarchy->GetParent().expired())
 		q *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation();
 	return q;
 }
 
 Vector3 Transform::scale() {
-	Vector3 scale = this->m_Scale;
+	Vector3 scale = this->_Scale;
 	if (!_hierarchy->GetParent().expired())
 		scale *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->scale();
 	return scale;
 }
 
 Vector3 Transform::localPosition() {
-	return m_Position;
+	return _Position;
 }
 
 Quaternion Transform::localRotation() {
-	return m_Rotation;
+	return _Rotation;
 }
 
 Vector3 Transform::localScale() {
-	return m_Scale;
+	return _Scale;
 }
 
 void Transform::position(Vector3 position) {
-	this->m_Position += position - this->position();
+	this->_Position += position - this->position();
 }
 
 void Transform::rotation(Quaternion rotation) {
 	if (!_hierarchy->GetParent().expired())
 		rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * rotation;
-	this->m_Rotation = rotation;
-	Quaternion::Normalize(this->m_Rotation);
+	this->_Rotation = rotation;
+	Quaternion::Normalize(this->_Rotation);
 }
 
 void Transform::localPosition(Vector3 position) {
-	this->m_Position = position;
+	this->_Position = position;
 }
 
 void Transform::localRotation(Quaternion rotation) {
-	this->m_Rotation = rotation;
+	this->_Rotation = rotation;
 }
 
 void Transform::localScale(Vector3 scale) {
-	this->m_Scale = scale;
+	this->_Scale = scale;
 }
 
 void Transform::LookAt(std::weak_ptr<Transform> target) {
 	Vector3 mPos = this->position();
 	Vector3 pPos = target.lock()->position();
-	this->m_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos, Vector3::up());
+	this->_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos, Vector3::up());
 	if (!_hierarchy->GetParent().expired())
-		this->m_Rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * this->m_Rotation;
+		this->_Rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * this->_Rotation;
 }
 
 void Transform::OnDestroy()
@@ -288,12 +319,11 @@ void Transform::OnDestroy()
 
 }
 
-//--- 行列処理 ----------------------------------------------------------------
 
 XMMATRIX Transform::MatrixQuaternion()
 {
 	XMMATRIX matrix;
-	matrix = this->m_Rotation.toMatrix();
+	matrix = this->_Rotation.toMatrix();
 
 	if (!_hierarchy->GetParent().expired())
 		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixQuaternion();
@@ -304,7 +334,7 @@ XMMATRIX Transform::MatrixQuaternion()
 XMMATRIX Transform::MatrixTranslation()
 {
 	XMMATRIX matrix;
-	matrix = XMMatrixTranslation(m_Position.x,m_Position.y,m_Position.z);
+	matrix = XMMatrixTranslation(_Position.x,_Position.y,_Position.z);
 
 	if (!_hierarchy->GetParent().expired())
 		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixTranslation();
@@ -315,7 +345,7 @@ XMMATRIX Transform::MatrixTranslation()
 XMMATRIX Transform::MatrixScaling()
 {
 	XMMATRIX matrix;
-	matrix = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
+	matrix = XMMatrixScaling(_Scale.x,_Scale.y,_Scale.z);
 
 	if (!_hierarchy->GetParent().expired())
 		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixScaling();
@@ -325,14 +355,14 @@ XMMATRIX Transform::MatrixScaling()
 
 XMMATRIX Transform::WorldMatrix()
 {
-	XMMATRIX m_WorldMatrix = XMMatrixIdentity();
+	XMMATRIX WorldMatrix = XMMatrixIdentity();
 
-	m_WorldMatrix *= XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
-	m_WorldMatrix *= XMMatrixRotationQuaternion(m_Rotation);
-	m_WorldMatrix *= XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
+	WorldMatrix *= XMMatrixScaling(_Scale.x,_Scale.y,_Scale.z);
+	WorldMatrix *= XMMatrixRotationQuaternion(_Rotation);
+	WorldMatrix *= XMMatrixTranslation(_Position.x, _Position.y, _Position.z);
 
 	if (!_hierarchy->GetParent().expired())
-		m_WorldMatrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->WorldMatrix();
+		WorldMatrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->WorldMatrix();
 	
-	return m_WorldMatrix;
+	return WorldMatrix;
 }

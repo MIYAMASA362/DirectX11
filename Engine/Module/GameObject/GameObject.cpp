@@ -1,4 +1,5 @@
 #include<typeinfo>
+#define INCLUDE_CEREAL
 #include"Common.h"
 
 //DirectX
@@ -14,6 +15,8 @@
 #include"Module\Tag\Tag.h"
 #include"GameObject.h"
 
+#include"Module\Hierarchy\Hierarchy.h"
+#include"Module\Scene\Scene.h"
 #include"Module\Scene\SceneManager.h"
 
 using namespace DirectX;
@@ -24,18 +27,25 @@ using namespace DirectX;
 //
 //*********************************************************************************************************************
 
+GameObject::GameObject()
+	:
+	Entity()
+{
+
+}
+
 //GameObject
 //	コンストラクタ
 //
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	:
-	name(name),
-	tag(tagName),
-	scene(scene),
-	IsDestroy(false),
-	IsActive(true)
+	_Scene(scene),
+	_Name(name),
+	_Tag(tagName),
+	_IsDestroy(false),
+	_IsActive(true)
 {
-	g_EntityIndex.emplace(GetEntityID(),std::dynamic_pointer_cast<GameObject>(Object::_self.lock()));
+	
 }
 
 //~GameObject
@@ -43,7 +53,7 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 //
 GameObject::~GameObject() 
 {
-	scene->RemoveSceneObject(this->GetInstanceID());
+	
 }
 
 //Transform
@@ -52,55 +62,26 @@ GameObject::~GameObject()
 std::weak_ptr<Transform> GameObject::transform()
 {
 	if (_transform.expired())
-		_transform = Transform::GetComponent(this->GetEntityID());
+		_transform = Transform::GetComponent(this->GetEntityID()).lock();
 	return _transform;
 }
 
+//gameObject
+//
+//
 std::weak_ptr<GameObject> GameObject::gameObject()
 {
 	return _gameObject;
 }
 
+//OnDebugGUI
+//
+//
 void GameObject::OnDebugGUI()
 {
-	if(ImGui::TreeNode((name + " ID:" + std::to_string(this->GetEntityID())).c_str()))
+	if(ImGui::TreeNode((_Name + " ID:" + std::to_string(this->GetEntityID())).c_str()))
 	{
-		ComponentManager::ImGui_ComponentView(this->GetEntityID());
+		ComponentManager::GetInstance()->ImGui_ComponentView(this->GetEntityID());
 		ImGui::TreePop();
 	}
-}
-
-std::string GameObject::GetName()
-{
-	return this->name;
-}
-
-bool GameObject::CompareTag(TagName tag)
-{
-	return this->tag.name == tag;
-}
-
-bool GameObject::GetIsDestroy()
-{
-	return this->IsDestroy;
-}
-
-void GameObject::SetActive(bool IsActive)
-{
-	this->IsActive = IsActive;
-}
-
-bool GameObject::GetActive() 
-{
-	return this->IsActive;
-}
-
-bool GameObject::GetActiveSelf()
-{
-	return this->IsActive;
-}
-
-Scene * GameObject::GetScene()
-{
-	return scene;
 }

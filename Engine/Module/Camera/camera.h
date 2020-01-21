@@ -73,6 +73,9 @@ public:
 
 	//エディタ表示
 	static void EditorWindow();
+
+protected:
+	virtual void OnDebugImGui();
 };
 
 CEREAL_REGISTER_TYPE(Component<Camera>)

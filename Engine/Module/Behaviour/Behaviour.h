@@ -25,12 +25,18 @@ public:
 	//IsEnableæ“¾
 	bool GetEnable() { return _IsEnable; }
 
-	//íœÀsŠÖ”
-	virtual void OnDestroy()	override {};
 
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
 		archive(cereal::base_class<Component<Type>>(this));
 	}
+
+protected:
+	//íœÀsŠÖ”
+	virtual void OnDestroy()	override { }
+
+	virtual void OnDebugImGui() override { Component<Type>::OnDebugImGui(); }
+
+	virtual void SendComponentMessage(std::string message) {}
 };

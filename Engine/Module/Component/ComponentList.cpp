@@ -9,6 +9,12 @@
 #include"IComponent.h"
 #include"ComponentList.h"
 
+//*********************************************************************************************************************
+//
+//	ComponentList
+//
+//*********************************************************************************************************************
+
 //ComponentList
 //	コンストラクタ
 //
@@ -33,6 +39,9 @@ void ComponentList::Add(std::weak_ptr<IComponent> component)
 	_components.push_back(component);
 }
 
+//Add
+//	list同士の結合
+//
 void ComponentList::Add(ComponentList * list)
 {
 	_components.insert(_components.end(),list->_components.begin(),list->_components.end());
@@ -73,6 +82,7 @@ void ComponentList::Remove(ComponentID componentID)
 	{
 		return component.lock()->GetComponentID() == componentID;
 	});
+	
 }
 
 //Release

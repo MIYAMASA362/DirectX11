@@ -5,7 +5,7 @@ class GameObject;
 class TestScene3 final :public Scene
 {
 public:
-	TestScene3() :Scene("TestScene3") {};
+	TestScene3() :Scene("TestScene3","") {};
 public:
 	void Load()
 	{

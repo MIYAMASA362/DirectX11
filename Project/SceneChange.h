@@ -9,7 +9,7 @@ public:
 	void Update()
 	{
 		if (Input::GetKeyTrigger(VK_TAB))
-			SceneManager::LoadScene(SceneManager::GetSceneByName(nextScene));
+			SceneManager::GetInstance()->LoadScene(SceneManager::GetInstance()->GetSceneByName(nextScene));
 	}
 };
 

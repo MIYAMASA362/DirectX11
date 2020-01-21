@@ -1,22 +1,29 @@
 #include"Common.h"
-#include<functional>
+
+#include"Module\Object\Object.h"
+#include"Module\Object\ObjectManager.h"
 
 #define NOT_INCLUDE_ECS_FILES
 #include"Module\ECSEngine.h"
 
-#include"Module\Object\Object.h"
 #include"Module\Component\IComponent.h"
 #include"Module\Component\ComponentList.h"
 #include"Module\Component\ComponentManager.h"
 
-#include"Module\Entity\IEntity.h"
-
+#include"IEntity.h"
 #include"EntityManager.h"
+
+
+//*********************************************************************************************************************
+//
+//	EntityManager
+//
+//*********************************************************************************************************************
 
 //pInstance
 //	Singleton インスタンス
 //
-EntityManager* EntityManager::g_pInstacne = nullptr;
+EntityManager* EntityManager::pInstacne = nullptr;
 
 
 
@@ -26,7 +33,7 @@ EntityManager* EntityManager::g_pInstacne = nullptr;
 //
 EntityManager::EntityManager()
 {
-	_EntityIndex = new EntityIndex();
+	
 }
 
 //~EntityManager
@@ -35,8 +42,7 @@ EntityManager::EntityManager()
 //
 EntityManager::~EntityManager()
 {
-	_EntityIndex->clear();
-	delete _EntityIndex;
+	_EntityIndex.clear();
 }
 
 
@@ -46,8 +52,8 @@ EntityManager::~EntityManager()
 //
 void EntityManager::Create()
 {
-	if (g_pInstacne) return;
-	g_pInstacne = new EntityManager();
+	if (pInstacne != nullptr) return;
+	pInstacne = new EntityManager();
 }
 
 //Release
@@ -55,31 +61,42 @@ void EntityManager::Create()
 //
 void EntityManager::Release()
 {
-	if (g_pInstacne == nullptr) return;
-	delete g_pInstacne;
-	g_pInstacne = nullptr;
+	if (pInstacne == nullptr) return;
+	delete pInstacne;
+	pInstacne = nullptr;
 }
 
 
-
-//CreateEntity
-//	EntityIndexへの追加
-//
-std::weak_ptr<IEntity> EntityManager::CreateEntity(IEntity* instance)
-{
-	auto sptr = std::dynamic_pointer_cast<IEntity>(instance->Object::_self.lock());
-	return g_pInstacne->_EntityIndex->emplace(instance->GetEntityID(), sptr).first->second;
-}
 
 //GetEntity
 //	EntityIndexからEntityの取得
 //
 std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 {
-	auto find = g_pInstacne->_EntityIndex->find(id);
-	if (find == g_pInstacne->_EntityIndex->end()) 
-		return std::weak_ptr<IEntity>();
+	auto find = _EntityIndex.find(id);
+	if (find == _EntityIndex.end()) assert(0);
 	return find->second;
+}
+
+//RegisterEntity
+//	EntityIndexへの追加
+//
+std::weak_ptr<IEntity> EntityManager::RegisterEntity(IEntity * instance)
+{
+	if (instance->Object::GetSelf().expired()) assert(0);
+
+	auto result = std::dynamic_pointer_cast<IEntity>(instance->GetSelf().lock());
+	_EntityIndex.emplace(result->GetEntityID(),result);
+
+	instance->_self = result;
+	instance->_components = ComponentManager::GetInstance()->CreateComponents(result.get());
+
+	return result;
+}
+
+void EntityManager::DestroyEntity(IEntity * instance)
+{
+	_EntityIndex.erase(instance->GetEntityID());
 }
 
 //ReleaseEntity
@@ -87,5 +104,7 @@ std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 //
 void EntityManager::ReleaseEntity(IEntity * instance)
 {
-	g_pInstacne->_EntityIndex->erase(instance->GetEntityID());
+	_EntityIndex.erase(instance->GetEntityID());
 }
+
+

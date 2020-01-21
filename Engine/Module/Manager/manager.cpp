@@ -46,7 +46,7 @@
 //------------------------------------------------
 
 #include"cereal\cereal.hpp"
-#include"cereal\archives\json.hpp"
+//#include"cereal\archives\json.hpp"
 #include<fstream>
 
 using namespace DirectX;
@@ -139,7 +139,9 @@ bool CManager::_IsFixedUpdate = false;
 
 void CManager::Initialize(HWND hWnd ,unsigned int fps)
 {
-	//ECS
+	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
+
+	ObjectManager::Create();
 	EntityManager::Create();
 	ComponentManager::Create();
 
@@ -166,30 +168,32 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 		VSIL_COLOR,
 		VSIL_TEXCOORD
 	};
-	ShaderManager::RegisterShader("Shader2D", "Asset/Shader/vertexShader.cso",layout,ARRAYSIZE(layout), "Asset/Shader/pixelShader2D.cso");
 
+	ShaderManager::RegisterShader(
+		"Shader2D", 
+		"Asset/Shader/vertexShader.cso",
+		layout,
+		ARRAYSIZE(layout),
+		"Asset/Shader/pixelShader2D.cso"
+	);
+
+	//Mesh
 	MeshManager::RegisterIndex("Plane",new Geometry::Plane());
 	MeshManager::RegisterIndex("Cube",new Geometry::Cube());
 	MeshManager::RegisterIndex("Sphere",new Geometry::Sphere());
-
-	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
-
-	//Scene
-	SceneManager::CreateScene<TestScene>();
-	SceneManager::CreateScene<TestScene2>();
-	SceneManager::CreateScene<TestScene3>();
-	SceneManager::CreateScene<BallTest>();
-
-	SceneManager::CreateScene<TitleScene>();
-	SceneManager::CreateScene<GameMain>();
 
 
 	SphereCollider::SetRenderBuffer();
 	BoxCollider::SetRenderBuffer();
 
-	SceneManager::LoadScene(SceneManager::GetSceneByName("BallTest"));
+	//Scene
+	SceneManager::Create();
+	
+	SceneManager::GetInstance()->CreateScene("DefaultScene");
+	SceneManager::GetInstance()->LoadScene("DefaultScene");
 
-	ComponentManager::SendComponentMessage("Start");
+	//Component
+	ComponentManager::GetInstance()->SendComponentMessage("Start");
 }
 
 void CManager::SetFrame()
@@ -210,14 +214,14 @@ void CManager::Update()
 	if (!_IsUpdate) return;
 	Input::Update();
 
-	ComponentManager::SendComponentMessage("Update");
+	ComponentManager::GetInstance()->SendComponentMessage("Update");
 }
 
 void CManager::FixedUpdate()
 {
 	if (!_IsFixedUpdate) return;
 	//Collider::IsHitReset();
-	ComponentManager::SendComponentMessage("FixedUpdate");
+	ComponentManager::GetInstance()->SendComponentMessage("FixedUpdate");
 	Rigidbody::ApplyRigidbody();
 	Rigidbody::CollisionRigidbody();
 }
@@ -232,8 +236,13 @@ void CManager::Render(RenderStatus* renderstatus)
 
 void CManager::EndFrame()
 {
-	SceneManager::ChangeScene();
-	ObjectManager::ClearnUp();
+	if(SceneManager::GetInstance()->IsChangeScene())
+	{
+		SceneManager::GetInstance()->ChangeScene();
+		ComponentManager::GetInstance()->SendComponentMessage("Start");
+	}
+
+	ObjectManager::GetInstance()->ClearnUpObject();
 }
 
 void CManager::DebugRender()
@@ -241,7 +250,7 @@ void CManager::DebugRender()
 	GUI::guiImGui::SetFrame();
 
 	Input::DebugGUI();
-	SceneManager::DebugGUI_ActiveScene();
+	SceneManager::GetInstance()->DebugGUI_ActiveScene();
 
 	TimeManager::DebugGUI_Time();
 
@@ -253,7 +262,7 @@ void CManager::DebugRender()
 	ImGui::End();
 
 	TextureManager::EditorWindow();
-	ObjectManager::EditorWindow();
+	ObjectManager::GetInstance()->EditorWindow();
 	ModelManager::EditorWindow();
 
 	Camera::EditorWindow();
@@ -266,15 +275,18 @@ void CManager::Finalize()
 	BoxCollider::ReleaseRenderBuffer();
 	SphereCollider::ReleaseRenderBuffer();
 
+	SceneManager::Destroy();
+
 	ShaderManager::Release();
 	AudioManager::Release();
 	ModelManager::Release();
 	TextureManager::Release();
 	MeshManager::Release();
 
-	ObjectManager::Release();
-
 	ComponentManager::Release();
 	EntityManager::Release();
+
+	ObjectManager::GetInstance()->ClearnUpObject();
+	ObjectManager::Destroy();
 }
 

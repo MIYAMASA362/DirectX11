@@ -7,7 +7,7 @@ class TitleScene final :public Scene
 public:
 	//Font* font;
 public:
-	TitleScene() :Scene("TitleScene") {
+	TitleScene() :Scene("TitleScene","") {
 		//this->font = new Font();
 		//this->font->Load("Asset/cinecaption226.ttf", "cinecaption");
 	};

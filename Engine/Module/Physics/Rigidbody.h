@@ -57,5 +57,7 @@ protected:
 	//íœÀsŠÖ”
 	void OnDestroy() override;
 
+	void OnDebugImGui() override;
 
+	void SendComponentMessage(std::string message) override;
 };
