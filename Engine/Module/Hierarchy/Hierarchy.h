@@ -20,8 +20,7 @@ private:
 	//子
 	std::list<std::weak_ptr<IEntity>> _children;
 
-	//コンストラクタ
-	Hierarchy();
+	
 
 	template<class Archive>
 	void save(Archive& archive) const
@@ -44,6 +43,8 @@ private:
 	}
 
 public:
+	//コンストラクタ
+	Hierarchy();
 	//コンストラクタ
 	Hierarchy(std::weak_ptr<IEntity> self);
 	~Hierarchy();
@@ -87,7 +88,9 @@ private:
 	template<class Archive>
 	void load(Archive& archive)
 	{
-		archive(_hierarchyMap);
+		archive(
+			CEREAL_NVP(_hierarchyMap)
+		);
 	}
 
 

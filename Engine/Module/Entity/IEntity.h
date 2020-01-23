@@ -27,6 +27,7 @@ private:
 		cereal::base_class<Object>(this);
 	}
 
+
 public:
 	//コンストラクタ
 	IEntity();

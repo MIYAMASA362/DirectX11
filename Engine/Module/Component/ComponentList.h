@@ -38,7 +38,15 @@ public:
 
 	//ƒVƒŠƒAƒ‹‰»
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
+	{
+		archive(
+			_components
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
 	{
 		archive(
 			_components

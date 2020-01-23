@@ -10,7 +10,7 @@ class Scene : public Object
 	friend cereal::access;
 private:
 	//ƒV[ƒ“–¼
-	const std::string _name;
+	std::string _name;
 	//“Ç‚İ‚İ‚³‚ê‚Ä‚é
 	bool IsLoaded = false;		
 
@@ -70,11 +70,11 @@ public:
 	HierarchyUtility* GetHierarchyUtility() { return &_hierarchyUtility; };
 
 
-protected:
 	//“Ç‚İ‚İŠÖ”
 	virtual void Load();
 	//‘‚«‚İŠÖ”
 	virtual void Save();
+protected:
 
 	//
 	void UnLoad();

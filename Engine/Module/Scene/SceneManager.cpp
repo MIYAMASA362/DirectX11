@@ -81,7 +81,7 @@ std::weak_ptr<Scene> SceneManager::CreateScene(std::string name)
 {
 	char path[MAX_PATH + 1];
 	GetCurrentDirectory(ARRAYSIZE(path),path);
-	strcat_s(path,(name + ".scene").data());
+	strcat_s(path,("\\"+ name + ".scene").data());
 
 	auto result = std::shared_ptr<Scene>(new Scene(name, path));
 	
@@ -90,6 +90,7 @@ std::weak_ptr<Scene> SceneManager::CreateScene(std::string name)
 	auto transform = camera->transform();
 
 	_SceneArray.push_back(result);
+	result->Save();
 	return result;
 }
 

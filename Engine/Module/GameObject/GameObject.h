@@ -72,16 +72,26 @@ public:
 
 	//シリアライズ
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
 	{
+		auto components = ComponentManager::GetInstance()->GetComponents((IEntity*)this).lock();
 		archive(
+			cereal::base_class<Entity<GameObject>>(this),
 			CEREAL_NVP(_Name),
 			CEREAL_NVP(_IsDestroy),
-			CEREAL_NVP(_IsActive)
+			CEREAL_NVP(_IsActive),
+			cereal::make_nvp("Components", *components)
 		);
-
-		auto components = ComponentManager::GetInstance()->GetComponents(this).lock();
+	}
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		auto components = ComponentManager::GetInstance()->GetComponents((IEntity*)this).lock();
 		archive(
+			cereal::base_class<Entity<GameObject>>(this),
+			CEREAL_NVP(_Name),
+			CEREAL_NVP(_IsDestroy),
+			CEREAL_NVP(_IsActive),
 			cereal::make_nvp("Components", *components)
 		);
 	}
@@ -89,4 +99,5 @@ public:
 
 };
 
-CEREAL_CLASS_VERSION(GameObject, 1);
+CEREAL_REGISTER_TYPE(Entity<GameObject>)
+CEREAL_REGISTER_TYPE(GameObject)

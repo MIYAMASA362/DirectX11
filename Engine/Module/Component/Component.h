@@ -21,6 +21,7 @@ private:
 	{
 		archive(cereal::base_class<IComponent>(this));
 	}
+
 	template<class Archive>
 	void load(Archive& archive)
 	{

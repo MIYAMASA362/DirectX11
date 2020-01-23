@@ -1,6 +1,7 @@
 #include<fstream>
 
 #include"Common.h"
+#include"cereal\archives\json.hpp"
 
 #include"Module\DirectX\DirectX.h"
 
@@ -12,10 +13,11 @@
 
 #include"Module\Hierarchy\Hierarchy.h"
 
+
+
 #include"Scene.h"
 #include"SceneManager.h"
 
-#include"cereal\archives\json.hpp"
 
 
 //*********************************************************************************************************************
@@ -179,9 +181,9 @@ void Scene::Load()
 //
 void Scene::Save()
 {
-	/*std::ofstream file(_filePath);
+	std::ofstream file(_filePath);
 	cereal::JSONOutputArchive output(file);
-	output(*this);*/
+	output(*this);
 }
 
 //UnLoad

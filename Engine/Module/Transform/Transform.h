@@ -91,8 +91,8 @@ public:
 	template<class Archive>
 	void save(Archive& archive) const
 	{
-		archive(cereal::base_class<Component<Transform>>(this));
 		archive(
+			cereal::base_class<Component<Transform>>(this),
 			CEREAL_NVP(_Position),
 			CEREAL_NVP(_Rotation),
 			CEREAL_NVP(_Scale)
@@ -102,11 +102,11 @@ public:
 	template<class Archive>
 	void load(Archive& archive)
 	{
-		archive(cereal::base_class<Component<Transform>>(this));
 		archive(
-			_Position,
-			_Rotation,
-			_Scale
+			cereal::base_class<Component<Transform>>(this),
+			CEREAL_NVP(_Position),
+			CEREAL_NVP(_Rotation),
+			CEREAL_NVP(_Scale)
 		);
 	}
 
