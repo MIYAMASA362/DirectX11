@@ -9,12 +9,30 @@
 class ComponentList final
 {
 	friend class ComponentManager;
+	friend cereal::access;
 private:
+
+	//シリアル化
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		archive(
+			_components
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(
+			_components
+		);
+	}
+
+public:
 	//Components
 	std::list<std::weak_ptr<IComponent>> _components;
 
-
-public:
 	//コンストラクタ
 	ComponentList();
 	//デストラクタ
@@ -36,20 +54,4 @@ public:
 	//Componentsのサイズ
 	size_t Size() { return _components.size(); };
 
-	//シリアル化
-	template<class Archive>
-	void save(Archive& archive) const
-	{
-		archive(
-			_components
-		);
-	}
-
-	template<class Archive>
-	void load(Archive& archive)
-	{
-		archive(
-			_components
-		);
-	}
 };

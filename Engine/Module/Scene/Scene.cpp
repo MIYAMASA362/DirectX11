@@ -85,6 +85,21 @@ GameObject* Scene::AddSceneObject(std::string name, TagName tag)
 	return instance;
 }
 
+GameObject* Scene::AddSceneObject(GameObject* gameObject)
+{
+	auto instance = new GameObject(gameObject,this);
+
+	ObjectManager::GetInstance()->RegisterObject(instance);
+	EntityManager::GetInstance()->RegisterEntity(instance);
+	GameObject::RegisterEntityIndex(instance);
+
+	_hierarchyUtility.AttachHierarchy(instance->GetEntityID());
+
+
+
+	return instance;
+}
+
 //RemoveSceneObject
 //	Sceneからオブジェクト削除
 //
@@ -176,6 +191,18 @@ void Scene::Load()
 	std::ifstream file(_filePath);
 	cereal::JSONInputArchive inArchive(file);
 	inArchive(*this);
+
+	for(auto hierarchy : this->_hierarchyUtility.GetHierarchyMap())
+	{
+		
+	}
+
+	/*for(auto hierarchy : scene._hierarchyUtility.GetHierarchyMap())
+	{
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(hierarchy.second.GetSelf().lock()).get();
+		auto instance = this->AddSceneObject(gameObject);
+		gameObject = gameObject;
+	}*/
 }
 
 //Save

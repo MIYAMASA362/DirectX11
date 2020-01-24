@@ -68,8 +68,6 @@ void ObjectManager::Destroy()
 //RegisterObject
 //	ObjectIndexに追加。Objectにステータス設定
 //
-//	WARNING : memcpyでデータ置き換えしている この実装どうなの？
-//
 void ObjectManager::RegisterObject(Object * object)
 {
 	auto sptr = std::shared_ptr<Object>(object);

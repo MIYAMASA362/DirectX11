@@ -87,10 +87,10 @@ std::weak_ptr<Scene> SceneManager::CreateScene(std::string name)
 	
 	auto camera = result->AddSceneObject("MainCamera");
 	camera->AddComponent<Camera>();
-	auto transform = camera->transform();
 
 	_SceneArray.push_back(result);
 	result->Save();
+
 	return result;
 }
 

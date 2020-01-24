@@ -48,6 +48,17 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	
 }
 
+GameObject::GameObject(GameObject * gameObject,Scene* scene)
+	:
+	_Scene(scene),
+	_Name(gameObject->_Name),
+	_Tag(gameObject->_Tag),
+	_IsDestroy(gameObject->_IsDestroy),
+	_IsActive(gameObject->_IsActive)
+{
+	
+}
+
 //~GameObject
 //	デストラクタ
 //

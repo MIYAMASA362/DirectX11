@@ -4,7 +4,7 @@
         "_hierarchyUtility": {
             "_hierarchyMap": [
                 {
-                    "key": 2854722610,
+                    "key": 2726709869,
                     "value": {
                         "_self": {
                             "locked_ptr": {
@@ -17,7 +17,7 @@
                                             "value0": {}
                                         },
                                         "value1": {
-                                            "_InstanceID": 2854722610
+                                            "_InstanceID": 2726709869
                                         },
                                         "_Name": "MainCamera",
                                         "_IsDestroy": false,
@@ -34,9 +34,9 @@
                                                                 "value0": {
                                                                     "value0": {
                                                                         "value0": {
-                                                                            "_InstanceID": 2926677013
+                                                                            "_InstanceID": 2191423992
                                                                         },
-                                                                        "_ownerId": 2854722610
+                                                                        "_ownerId": 2726709869
                                                                     }
                                                                 },
                                                                 "_Position": {
@@ -70,9 +70,9 @@
                                                                     "value0": {
                                                                         "value0": {
                                                                             "value0": {
-                                                                                "_InstanceID": 2676542303
+                                                                                "_InstanceID": 3766979433
                                                                             },
-                                                                            "_ownerId": 2854722610
+                                                                            "_ownerId": 2726709869
                                                                         }
                                                                     }
                                                                 },
@@ -97,6 +97,16 @@
                     }
                 }
             ]
-        }
+        },
+        "EntityArray": [
+            {
+                "locked_ptr": {
+                    "polymorphic_id": 1,
+                    "ptr_wrapper": {
+                        "id": 1
+                    }
+                }
+            }
+        ]
     }
 }

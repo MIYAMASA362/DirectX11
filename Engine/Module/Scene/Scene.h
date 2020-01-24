@@ -20,6 +20,9 @@ private:
 	//オブジェクト階層
 	HierarchyUtility _hierarchyUtility;	
 
+	//Entityの保管庫
+	std::unordered_map<EntityID, std::weak_ptr<IEntity>> _EntityIndex;
+
 	//コンストラクタ
 	Scene();
 
@@ -55,6 +58,7 @@ public:
 
 	//オブジェクト追加
 	GameObject* AddSceneObject(std::string name, TagName tag = TagName::Default);
+	GameObject * AddSceneObject(GameObject * gameObject);
 	//オブジェクト削除
 	void RemoveSceneObject(GameObject* gameobject);
 

@@ -39,6 +39,7 @@ public:
 	//コンストラクタ
 	GameObject();
 	GameObject(std::string name, Scene* scene, TagName tagName);
+	GameObject(GameObject* gameObject,Scene* scene);
 	//デストラクタ
 	virtual ~GameObject();
 
@@ -96,8 +97,6 @@ public:
 			CEREAL_NVP(_IsActive),
 			cereal::make_nvp("Components", components)
 		);
-
-
 	}
 
 
