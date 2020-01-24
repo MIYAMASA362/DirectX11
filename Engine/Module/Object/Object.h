@@ -28,7 +28,7 @@ private:
 	void save(Archive& archive) const 
 	{
 		archive(
-			_InstanceID
+			CEREAL_NVP(_InstanceID)
 		);
 	}
 
@@ -36,7 +36,7 @@ private:
 	void load(Archive& archive)
 	{
 		archive(
-			_InstanceID
+			CEREAL_NVP(_InstanceID)
 		);
 	}
 

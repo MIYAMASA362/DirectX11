@@ -11,6 +11,8 @@
 #include"Module\Transform\Transform.h"
 #include"Module\GameObject\GameObject.h"
 
+#include"Module\Module.h"
+
 #include"Module\Hierarchy\Hierarchy.h"
 
 

@@ -30,7 +30,7 @@ private:
 
 public:
 	//コンストラクタ
-	Camera() :Camera(0){};
+	Camera() {};
 	Camera(EntityID OwnerID);
 	//デストラクタ
 	virtual ~Camera();
@@ -62,10 +62,19 @@ public:
 	bool GetVisibility(Vector3 position);
 
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
 	{
-		archive(cereal::base_class<Behaviour<Camera>>(this));
 		archive(
+			cereal::base_class<Behaviour<Camera>>(this),
+			CEREAL_NVP(_Viewport.Height),
+			CEREAL_NVP(_Viewport.Width)
+		);
+	}
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(
+			cereal::base_class<Behaviour<Camera>>(this),
 			CEREAL_NVP(_Viewport.Height),
 			CEREAL_NVP(_Viewport.Width)
 		);

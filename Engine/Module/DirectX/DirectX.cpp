@@ -444,8 +444,6 @@ RenderStatus * D3DRenderer::GetRenderStatus(HWND hWnd)
 //
 HRESULT D3DRenderer::CreateRenderStatus(HWND hWnd,RenderStatus** renderstatus, unsigned int fps)
 {
-	HRESULT hr;
-
 	//クライアント追加
 	*renderstatus = new RenderStatus(hWnd,this,fps);
 

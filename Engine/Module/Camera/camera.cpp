@@ -36,7 +36,6 @@ Camera* Camera::pActiveCamera = nullptr;
 std::vector<Camera*> Camera::CameraSortIndex;
 
 
-
 //Camera
 //	コンストラクタ
 //

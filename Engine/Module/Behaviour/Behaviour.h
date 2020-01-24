@@ -14,7 +14,7 @@ protected:
 
 
 public:
-	Behaviour() :Behaviour(0) {};
+	Behaviour(){};
 	//コンストラクタ
 	Behaviour(EntityID OwnerID) :Component(OwnerID) {};
 	//デストラクタ
@@ -25,9 +25,13 @@ public:
 	//IsEnable取得
 	bool GetEnable() { return _IsEnable; }
 
-
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
+	{
+		archive(cereal::base_class<Component<Type>>(this));
+	}
+	template<class Archive>
+	void load(Archive& archive)
 	{
 		archive(cereal::base_class<Component<Type>>(this));
 	}

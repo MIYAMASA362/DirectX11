@@ -77,6 +77,7 @@ public:
 		auto components = ComponentManager::GetInstance()->GetComponents((IEntity*)this).lock();
 		archive(
 			cereal::base_class<Entity<GameObject>>(this),
+			cereal::base_class<Object>(this),
 			CEREAL_NVP(_Name),
 			CEREAL_NVP(_IsDestroy),
 			CEREAL_NVP(_IsActive),
@@ -86,14 +87,17 @@ public:
 	template<class Archive>
 	void load(Archive& archive)
 	{
-		auto components = ComponentManager::GetInstance()->GetComponents((IEntity*)this).lock();
+		ComponentList components;
 		archive(
 			cereal::base_class<Entity<GameObject>>(this),
+			cereal::base_class<Object>(this),
 			CEREAL_NVP(_Name),
 			CEREAL_NVP(_IsDestroy),
 			CEREAL_NVP(_IsActive),
-			cereal::make_nvp("Components", *components)
+			cereal::make_nvp("Components", components)
 		);
+
+
 	}
 
 

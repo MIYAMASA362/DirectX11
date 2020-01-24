@@ -265,7 +265,17 @@ typedef struct tagVector3
 	}
 
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const 
+	{
+		archive(
+			CEREAL_NVP(x),
+			CEREAL_NVP(y),
+			CEREAL_NVP(z)
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
 	{
 		archive(
 			CEREAL_NVP(x),
@@ -767,7 +777,18 @@ typedef struct tagQuaternion
 	};
 
 	template<class Archive>
-	void serialize(Archive& archive)
+	void save(Archive& archive) const
+	{
+		archive(
+			CEREAL_NVP(x),
+			CEREAL_NVP(y),
+			CEREAL_NVP(z),
+			CEREAL_NVP(w)
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& archive)
 	{
 		archive(
 			CEREAL_NVP(x),

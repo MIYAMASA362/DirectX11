@@ -29,7 +29,7 @@ private:
 	void save(Archive& archive) const
 	{
 		archive(
-			cereal::base_class<IComponent>(this),
+			cereal::base_class<Object>(this),
 			CEREAL_NVP(_ownerId)
 		);
 	}
@@ -37,7 +37,7 @@ private:
 	void load(Archive& archive)
 	{
 		archive(
-			cereal::base_class<IComponent>(this),
+			cereal::base_class<Object>(this),
 			_ownerId
 		);
 	}
