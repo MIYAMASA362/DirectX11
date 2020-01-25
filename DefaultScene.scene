@@ -4,7 +4,7 @@
         "_hierarchyUtility": {
             "_hierarchyMap": [
                 {
-                    "key": 2726709869,
+                    "key": 4000787993,
                     "value": {
                         "_self": {
                             "locked_ptr": {
@@ -17,73 +17,11 @@
                                             "value0": {}
                                         },
                                         "value1": {
-                                            "_InstanceID": 2726709869
+                                            "_InstanceID": 4000787993
                                         },
                                         "_Name": "MainCamera",
                                         "_IsDestroy": false,
-                                        "_IsActive": true,
-                                        "Components": {
-                                            "value0": [
-                                                {
-                                                    "locked_ptr": {
-                                                        "polymorphic_id": 2147483650,
-                                                        "polymorphic_name": "Transform",
-                                                        "ptr_wrapper": {
-                                                            "id": 2147483650,
-                                                            "data": {
-                                                                "value0": {
-                                                                    "value0": {
-                                                                        "value0": {
-                                                                            "_InstanceID": 2191423992
-                                                                        },
-                                                                        "_ownerId": 2726709869
-                                                                    }
-                                                                },
-                                                                "_Position": {
-                                                                    "x": 0.0,
-                                                                    "y": 0.0,
-                                                                    "z": 0.0
-                                                                },
-                                                                "_Rotation": {
-                                                                    "x": 0.0,
-                                                                    "y": 0.0,
-                                                                    "z": 0.0,
-                                                                    "w": 1.0
-                                                                },
-                                                                "_Scale": {
-                                                                    "x": 1.0,
-                                                                    "y": 1.0,
-                                                                    "z": 1.0
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                {
-                                                    "locked_ptr": {
-                                                        "polymorphic_id": 2147483651,
-                                                        "polymorphic_name": "Camera",
-                                                        "ptr_wrapper": {
-                                                            "id": 2147483651,
-                                                            "data": {
-                                                                "value0": {
-                                                                    "value0": {
-                                                                        "value0": {
-                                                                            "value0": {
-                                                                                "_InstanceID": 3766979433
-                                                                            },
-                                                                            "_ownerId": 2726709869
-                                                                        }
-                                                                    }
-                                                                },
-                                                                "_Viewport.Height": 615.0,
-                                                                "_Viewport.Width": 1040.0
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
+                                        "_IsActive": true
                                     }
                                 }
                             }
@@ -98,13 +36,70 @@
                 }
             ]
         },
-        "EntityArray": [
+        "ComponentIndex": [
             {
-                "locked_ptr": {
-                    "polymorphic_id": 1,
-                    "ptr_wrapper": {
-                        "id": 1
-                    }
+                "key": 4000787993,
+                "value": {
+                    "value0": [
+                        {
+                            "locked_ptr": {
+                                "polymorphic_id": 2147483650,
+                                "polymorphic_name": "Transform",
+                                "ptr_wrapper": {
+                                    "id": 2147483650,
+                                    "data": {
+                                        "value0": {
+                                            "value0": {
+                                                "value0": {
+                                                    "_InstanceID": 150430776
+                                                },
+                                                "_ownerId": 4000787993
+                                            }
+                                        },
+                                        "_Position": {
+                                            "x": 0.0,
+                                            "y": 0.0,
+                                            "z": 0.0
+                                        },
+                                        "_Rotation": {
+                                            "x": 0.0,
+                                            "y": 0.0,
+                                            "z": 0.0,
+                                            "w": 1.0
+                                        },
+                                        "_Scale": {
+                                            "x": 1.0,
+                                            "y": 1.0,
+                                            "z": 1.0
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "locked_ptr": {
+                                "polymorphic_id": 2147483651,
+                                "polymorphic_name": "Camera",
+                                "ptr_wrapper": {
+                                    "id": 2147483651,
+                                    "data": {
+                                        "value0": {
+                                            "value0": {
+                                                "value0": {
+                                                    "value0": {
+                                                        "_InstanceID": 4237182610
+                                                    },
+                                                    "_ownerId": 4000787993
+                                                }
+                                            }
+                                        },
+                                        "_Viewport.Height": 615.0,
+                                        "_Viewport.Width": 1040.0
+                                    }
+                                }
+                            }
+                        }
+                    ]
                 }
             }
         ]
