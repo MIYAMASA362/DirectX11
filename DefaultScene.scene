@@ -4,7 +4,7 @@
         "_hierarchyUtility": {
             "_hierarchyMap": [
                 {
-                    "key": 4000787993,
+                    "key": 452990762,
                     "value": {
                         "_self": {
                             "locked_ptr": {
@@ -17,7 +17,7 @@
                                             "value0": {}
                                         },
                                         "value1": {
-                                            "_InstanceID": 4000787993
+                                            "_InstanceID": 452990762
                                         },
                                         "_Name": "MainCamera",
                                         "_IsDestroy": false,
@@ -38,7 +38,7 @@
         },
         "ComponentIndex": [
             {
-                "key": 4000787993,
+                "key": 452990762,
                 "value": {
                     "value0": [
                         {
@@ -51,9 +51,9 @@
                                         "value0": {
                                             "value0": {
                                                 "value0": {
-                                                    "_InstanceID": 150430776
+                                                    "_InstanceID": 1718167109
                                                 },
-                                                "_ownerId": 4000787993
+                                                "_ownerId": 452990762
                                             }
                                         },
                                         "_Position": {
@@ -87,9 +87,9 @@
                                             "value0": {
                                                 "value0": {
                                                     "value0": {
-                                                        "_InstanceID": 4237182610
+                                                        "_InstanceID": 1167401079
                                                     },
-                                                    "_ownerId": 4000787993
+                                                    "_ownerId": 452990762
                                                 }
                                             }
                                         },

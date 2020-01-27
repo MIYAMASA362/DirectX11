@@ -96,15 +96,19 @@ private:
 		{
 			auto gameObject = std::dynamic_pointer_cast<GameObject>(hierarchy.second.GetSelf().lock()).get();
 			auto instance = this->CreateInstance(gameObject);
+			this->_hierarchyUtility = this->_hierarchyUtility;
 
 			auto find = ComponentIndex.find(hierarchy.first);
 			if (find == ComponentIndex.end()) continue;
 			auto components = instance->GetComponents();
 			for(auto component : find->second._components)
 			{
-				auto obj = component.lock();
+				auto obj = component.lock().get();
+				std::string name = typeid(*obj).name();
 				obj = obj;
 			}
 		}
 	}
 };
+
+#define STATIC_ATTRIBUTE static

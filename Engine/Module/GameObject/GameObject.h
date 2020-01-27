@@ -34,7 +34,6 @@ private:
 	std::weak_ptr<GameObject> _gameObject;
 	std::weak_ptr<Transform> _transform;
 
-
 public:
 	//コンストラクタ
 	GameObject();

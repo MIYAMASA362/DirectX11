@@ -77,3 +77,9 @@ std::weak_ptr<Object> Object::GetSelf()
 	if (_self.expired()) assert(0);
 	return _self;
 }
+
+std::weak_ptr<Object> Object::CreateInstance()
+{
+
+	return std::weak_ptr<Object>();
+}

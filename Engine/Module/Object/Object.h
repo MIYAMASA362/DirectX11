@@ -59,6 +59,8 @@ public:
 	//_self‚Ìæ“¾
 	std::weak_ptr<Object> GetSelf();
 
+	virtual std::weak_ptr<Object> CreateInstance();
+
 protected:
 	//íœÀsŠÖ”
 	virtual void OnDestroy();
