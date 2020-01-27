@@ -39,6 +39,8 @@ Debug/
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app
+
+!/Asset
+!/future
