@@ -26,8 +26,8 @@ public:
 	{
 		auto camera = AddGameObject<CCamera>();
 		AddGameObject<CPolygon>();
-		/*auto field = AddGameObject<CField>();
-		field->SetCamera(camera);*/
+		auto field = AddGameObject<CField>();
+		field->SetCamera(camera);
 		auto model = AddGameObject<CModel>();
 		model->SetCamera(camera);
 		model->SetPosition({0.0f,0.0f,0.0f});

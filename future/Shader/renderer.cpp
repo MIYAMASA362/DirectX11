@@ -16,6 +16,8 @@ ID3D11DepthStencilView* CRenderer::m_DepthStencilView = NULL;
 ID3D11DepthStencilState* CRenderer::m_DepthStateEnable;
 ID3D11DepthStencilState* CRenderer::m_DepthStateDisable;
 
+ID3D11DepthStencilView*   CRenderer::m_ShadowDepthStencilView;
+ID3D11ShaderResourceView* CRenderer::m_ShadowDepthShaderResourceView;
 
 
 void CRenderer::Init()
@@ -24,7 +26,7 @@ void CRenderer::Init()
 
 	// デバイス、スワップチェーン、コンテキスト生成
 	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory( &sd, sizeof( sd ) );
+	ZeroMemory(&sd, sizeof(sd));
 	sd.BufferCount = 1;
 	sd.BufferDesc.Width = SCREEN_WIDTH;
 	sd.BufferDesc.Height = SCREEN_HEIGHT;
@@ -37,55 +39,87 @@ void CRenderer::Init()
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
 
-	hr = D3D11CreateDeviceAndSwapChain( NULL,
-										D3D_DRIVER_TYPE_HARDWARE,
-										NULL,
-										0,
-										NULL,
-										0,
-										D3D11_SDK_VERSION,
-										&sd,
-										&m_SwapChain,
-										&m_D3DDevice,
-										&m_FeatureLevel,
-										&m_ImmediateContext );
+	hr = D3D11CreateDeviceAndSwapChain(NULL,
+		D3D_DRIVER_TYPE_HARDWARE,
+		NULL,
+		0,
+		NULL,
+		0,
+		D3D11_SDK_VERSION,
+		&sd,
+		&m_SwapChain,
+		&m_D3DDevice,
+		&m_FeatureLevel,
+		&m_ImmediateContext);
 
 
 	// レンダーターゲットビュー生成、設定
 	ID3D11Texture2D* pBackBuffer = NULL;
-	m_SwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&pBackBuffer );
-	m_D3DDevice->CreateRenderTargetView( pBackBuffer, NULL, &m_RenderTargetView );
+	m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	m_D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_RenderTargetView);
 	pBackBuffer->Release();
 
 
+	{
+		//ステンシル用テクスチャー作成
+		ID3D11Texture2D* depthTexture = NULL;
+		D3D11_TEXTURE2D_DESC td;
+		ZeroMemory(&td, sizeof(td));
+		td.Width = sd.BufferDesc.Width;
+		td.Height = sd.BufferDesc.Height;
+		td.MipLevels = 1;
+		td.ArraySize = 1;
+		td.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		td.SampleDesc = sd.SampleDesc;
+		td.Usage = D3D11_USAGE_DEFAULT;
+		td.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		td.CPUAccessFlags = 0;
+		td.MiscFlags = 0;
+		m_D3DDevice->CreateTexture2D(&td, NULL, &depthTexture);
 
-	//ステンシル用テクスチャー作成
-	ID3D11Texture2D* depthTexture = NULL;
-	D3D11_TEXTURE2D_DESC td;
-	ZeroMemory( &td, sizeof(td) );
-	td.Width			= sd.BufferDesc.Width;
-	td.Height			= sd.BufferDesc.Height;
-	td.MipLevels		= 1;
-	td.ArraySize		= 1;
-	td.Format			= DXGI_FORMAT_D24_UNORM_S8_UINT;
-	td.SampleDesc		= sd.SampleDesc;
-	td.Usage			= D3D11_USAGE_DEFAULT;
-	td.BindFlags		= D3D11_BIND_DEPTH_STENCIL;
-    td.CPUAccessFlags	= 0;
-    td.MiscFlags		= 0;
-	m_D3DDevice->CreateTexture2D( &td, NULL, &depthTexture );
+		//ステンシルターゲット作成
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
+		ZeroMemory(&dsvd, sizeof(dsvd));
+		dsvd.Format = td.Format;
+		dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		dsvd.Flags = 0;
+		m_D3DDevice->CreateDepthStencilView(depthTexture, &dsvd, &m_DepthStencilView);
+	
+		m_ImmediateContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
+	}
 
-	//ステンシルターゲット作成
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
-	ZeroMemory( &dsvd, sizeof(dsvd) );
-	dsvd.Format			= td.Format;
-	dsvd.ViewDimension	= D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsvd.Flags			= 0;
-	m_D3DDevice->CreateDepthStencilView( depthTexture, &dsvd, &m_DepthStencilView );
+	{
+		//シャドウ用テクスチャー作成
+		ID3D11Texture2D* depthTexture = NULL;
+		D3D11_TEXTURE2D_DESC td;
+		ZeroMemory(&td, sizeof(td));
+		td.Width = sd.BufferDesc.Width;
+		td.Height = sd.BufferDesc.Height;
+		td.MipLevels = 1;
+		td.ArraySize = 1;
+		td.Format = DXGI_FORMAT_R32_TYPELESS;
+		td.SampleDesc = sd.SampleDesc;
+		td.Usage = D3D11_USAGE_DEFAULT;
+		td.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		td.CPUAccessFlags = 0;
+		td.MiscFlags = 0;
+		m_D3DDevice->CreateTexture2D(&td, NULL, &depthTexture);
 
+		//シャドウデプスターゲット作成
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
+		ZeroMemory(&dsvd, sizeof(dsvd));
+		dsvd.Format = DXGI_FORMAT_R32_FLOAT;
+		dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		dsvd.Flags = 0;
+		m_D3DDevice->CreateDepthStencilView(depthTexture, &dsvd, &m_ShadowDepthStencilView);
+	
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+		SRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		SRVDesc.Texture2D.MipLevels = 1;
 
-	m_ImmediateContext->OMSetRenderTargets( 1, &m_RenderTargetView, m_DepthStencilView );
-
+		m_D3DDevice->CreateShaderResourceView(depthTexture,&SRVDesc,&m_ShadowDepthShaderResourceView);
+	}
 
 	// ビューポート設定
 	D3D11_VIEWPORT vp;
@@ -194,10 +228,12 @@ void CRenderer::Uninit()
 
 void CRenderer::Begin()
 {
+
 	// バックバッファクリア
 	float ClearColor[4] = { 0.0f, 0.5f, 0.0f, 1.0f };
 	m_ImmediateContext->ClearRenderTargetView( m_RenderTargetView, ClearColor );
 	m_ImmediateContext->ClearDepthStencilView( m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_ImmediateContext->OMSetRenderTargets(1,&m_RenderTargetView,m_DepthStencilView);
 
 }
 
@@ -253,6 +289,22 @@ void CRenderer::DrawIndexed( unsigned int IndexCount, unsigned int StartIndexLoc
 
 	m_ImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	m_ImmediateContext->DrawIndexed( IndexCount, StartIndexLocation, BaseVertexLocation );
+
+}
+
+void CRenderer::BeginShadow()
+{
+	m_ImmediateContext->OMSetRenderTargets(0,NULL,m_ShadowDepthStencilView);
+	m_ImmediateContext->ClearDepthStencilView(m_ShadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void CRenderer::SetShadowTexture(unsigned int slot)
+{
+	ID3D11ShaderResourceView* src[1] = {
+		m_ShadowDepthShaderResourceView
+	};
+
+	m_ImmediateContext->PSSetShaderResources(slot,1,src);
 
 }
 

@@ -91,7 +91,7 @@ class CTexture;
 
 class CRenderer
 {
-private:
+public:
 
 	static D3D_FEATURE_LEVEL       m_FeatureLevel;
 
@@ -101,8 +101,9 @@ private:
 	static ID3D11RenderTargetView* m_RenderTargetView;
 	static ID3D11DepthStencilView* m_DepthStencilView;
 
-
-
+	//Shadow
+	static ID3D11DepthStencilView* m_ShadowDepthStencilView;
+	static ID3D11ShaderResourceView* m_ShadowDepthShaderResourceView;
 
 
 /*
@@ -112,7 +113,6 @@ private:
 */
 	static ID3D11DepthStencilState* m_DepthStateEnable;
 	static ID3D11DepthStencilState* m_DepthStateDisable;
-
 
 public:
 	static void Init();
@@ -129,5 +129,6 @@ public:
 	static ID3D11Device* GetDevice( void ){ return m_D3DDevice; }
 	static ID3D11DeviceContext* GetDeviceContext( void ){ return m_ImmediateContext; }
 
-
+	static void BeginShadow();
+	static void SetShadowTexture(unsigned int slot);
 };

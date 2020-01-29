@@ -30,17 +30,17 @@ void CPolygon::Init()
 
 	vertex[0].Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	vertex[0].Normal = XMFLOAT3(0.0f,1.0f,0.0f);
-	vertex[0].Diffuse = XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
 
 	vertex[1].Position = XMFLOAT3(100.0f, 0.0f, 0.0f);
 	vertex[1].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vertex[1].Diffuse = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[1].TexCoord = XMFLOAT2(1.0f, 0.0f);
 
 	vertex[2].Position = XMFLOAT3(0.0f, 200.0f, 0.0f);
 	vertex[2].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vertex[2].Diffuse = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
 
 	vertex[3].Position = XMFLOAT3(100.0f, 200.0f, 0.0f);
@@ -98,8 +98,9 @@ void CPolygon::Draw()
 	UINT stride = sizeof( VERTEX_3D );
 	UINT offset = 0;
 	CRenderer::GetDeviceContext()->IASetVertexBuffers( 0, 1, &m_VertexBuffer, &stride, &offset );
-	auto texture = m_Texture->GetShaderResourceView();
-	CRenderer::SetTexture(&texture);
+	/*auto texture = m_Texture->GetShaderResourceView();
+	CRenderer::SetTexture(&texture);*/
+	CRenderer::SetShadowTexture(0);
 
 	XMFLOAT4X4 identity;
 	DirectX::XMStoreFloat4x4(&identity, XMMatrixIdentity());
