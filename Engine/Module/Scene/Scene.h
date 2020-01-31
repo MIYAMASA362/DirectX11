@@ -98,11 +98,14 @@ private:
 			auto instance = this->CreateInstance(gameObject);
 			this->_hierarchyUtility = this->_hierarchyUtility;
 
+			// TODO : ComponentManager‚Æ‚Ì‘g‚Ý‡‚í‚¹‚ðˆÓŽ¯‚µ‚Ä
+			gameObject->AddComponent<Transform>();
+
 			auto find = ComponentIndex.find(hierarchy.first);
 			if (find == ComponentIndex.end()) continue;
-			auto components = instance->GetComponents();
-			for(auto component : find->second._components)
+			for(auto component : instance->GetComponents()._components)
 			{
+
 				auto obj = component.lock().get();
 				std::string name = typeid(*obj).name();
 				obj = obj;
