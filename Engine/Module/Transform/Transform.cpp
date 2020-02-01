@@ -85,6 +85,20 @@ void Transform::SetParent(std::weak_ptr<GameObject> parent)
 	SetParent(parent.lock()->transform());
 }
 
+IComponent * Transform::Internal_CreateInstance(IEntity * owner)
+{
+	Transform* instance = new Transform(owner->GetEntityID());
+
+	// TODO : Object‚Ö“o˜^
+	Transform::RegisterComponentIndex(instance);
+
+	instance->_Position = this->_Position;
+	instance->_Rotation = this->_Rotation;
+	instance->_Scale = this->_Scale;
+	
+	return instance;
+}
+
 //detachParent
 //	e‚ğ‰ğ•ú
 //

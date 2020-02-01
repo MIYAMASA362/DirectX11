@@ -1,8 +1,11 @@
 #include<assert.h>
+#include<random>
 #include"Common.h"
 
 #include"Object.h"
 #include"ObjectManager.h"
+
+std::random_device rand;
 
 //*********************************************************************************************************************
 //
@@ -15,20 +18,9 @@
 //
 Object::Object()
 	:
-	_InstanceID(NULL)
+	_InstanceID(rand())
 {
 	
-}
-
-//Object
-//	ObjectManager‚É‚æ‚Á‚Ä“o˜^‚³‚ê‚½Û‚É—˜—p
-//
-Object::Object(InstanceID id, std::shared_ptr<Object> sptr)
-	:
-	_InstanceID(id),
-	_self(sptr)
-{
-
 }
 
 //~Object
@@ -36,7 +28,7 @@ Object::Object(InstanceID id, std::shared_ptr<Object> sptr)
 //
 Object::~Object()
 {
-
+	if(_self) _self.reset();
 }
 
 //OnDestroy
@@ -47,39 +39,17 @@ void Object::OnDestroy()
 
 }
 
-//Destory
-//	íœŠÖ”
-//
-void Object::Destroy(Object* obj)
-{
-	obj->Destroy();
-}
-
 //GetInstanceID
 //	InstanceID‚Ìæ“¾
 //
 InstanceID Object::GetInstanceID()
 {
-	if (_self.expired()) assert(0);
 	return _InstanceID;
 }
 
-//Destory
-//	íœéŒ¾
-//
-void Object::Destroy()
+std::shared_ptr<Object> Object::GetSelf()
 {
-	ObjectManager::GetInstance()->DestroyObject(this);
-}
-
-std::weak_ptr<Object> Object::GetSelf()
-{
-	if (_self.expired()) assert(0);
+	if (!_self)
+		_self = ObjectManager::GetInstance()->GetObjectInstance(_InstanceID);
 	return _self;
-}
-
-std::weak_ptr<Object> Object::CreateInstance()
-{
-
-	return std::weak_ptr<Object>();
 }

@@ -25,7 +25,7 @@ ObjectManager* ObjectManager::pInstance = nullptr;
 //
 ObjectManager::ObjectManager()
 {
-
+	
 }
 
 //~ObjectManager
@@ -33,17 +33,19 @@ ObjectManager::ObjectManager()
 //
 ObjectManager::~ObjectManager()
 {
+	//削除配列をクリア
 	_DestroyIndex.clear();
 
+	//オブジェクト配列からオブジェクト削除
 	for (auto object : _ObjectIndex)
 	{
 		object.second->OnDestroy();
 		object.second.reset();
 	}
+
+	//オブジェクト配列をクリア
 	_ObjectIndex.clear();
 }
-
-
 
 //Create
 //	インスタンス生成
@@ -64,27 +66,21 @@ void ObjectManager::Destroy()
 	pInstance = nullptr;
 }
 
-
 //RegisterObject
 //	ObjectIndexに追加。Objectにステータス設定
 //
-void ObjectManager::RegisterObject(Object * object)
+std::shared_ptr<Object> ObjectManager::RegisterObject(Object * object)
 {
-	auto sptr = std::shared_ptr<Object>(object);
-
-	std::random_device rand;
-	InstanceID id;
-	do
-	{
-		id = rand();
-	}
-	while (_ObjectIndex.find(id) != _ObjectIndex.end());
-
-	object->_InstanceID = id;
-	object->_self = sptr;
-
-	_ObjectIndex.emplace(sptr->_InstanceID,sptr);
+	return _ObjectIndex.emplace(object->GetInstanceID(), std::shared_ptr<Object>(object)).first->second;
 }
+
+std::shared_ptr<Object> ObjectManager::GetObjectInstance(InstanceID id)
+{
+	auto find = _ObjectIndex.find(id);
+	if (find == _ObjectIndex.end()) assert(0);
+	return find->second;
+}
+
 
 //DestroyObject
 //	DestroyIndexへ追加
@@ -102,7 +98,6 @@ void ObjectManager::ClearnUpObject()
 	for(auto id : _DestroyIndex)
 	{
 		auto find  = _ObjectIndex.find(id);
-		if (find == _ObjectIndex.end()) assert(0);
 		find->second->OnDestroy();
 		_ObjectIndex.erase(find);
 	}

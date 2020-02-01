@@ -1,8 +1,5 @@
 #pragma once
 
-//Entityに付随するComponents
-using EntityComponents = std::unordered_map<EntityID, std::shared_ptr<ComponentList>>;
-
 class IEntity;
 
 //*********************************************************************************************************************
@@ -17,7 +14,7 @@ private:
 	static ComponentManager* pInstance;
 
 	//Entityに付加されたComponentsのインデックス
-	EntityComponents _EntityComponentIndex;
+	std::unordered_map<EntityID, std::shared_ptr<ComponentList>> _EntityComponentIndex;
 
 
 private:
@@ -64,21 +61,24 @@ public:
 	//全ComponentのDebug表示
 	void ImGui_ComponentView(EntityID id);
 
-
+	void AddComponentInstance(IEntity* owner, IComponent* original);
 };
 
 
-
-//EntityにComponentを追加
+//AddComponent
+//
+//	ObjectManagerにインスタンスを登録
+//	Component<Type>にインスタンスを登録
+//
+//	->管理されるデータの設計が完了
+//
 template<typename Type>
 inline std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
 {
 	//インスタンス生成
-	auto* instance = new Type(entity->GetEntityID());
-	ObjectManager::GetInstance()->RegisterObject(instance);
-	Component<Type>::RegisterComponentIndex(instance);
+	IComponent* instance = new Type(entity->GetEntityID());
 
-	std::shared_ptr<Type> component = std::dynamic_pointer_cast<Type>(instance->GetSelf().lock());
+	std::shared_ptr<Type> component = std::dynamic_pointer_cast<Type>(instance->GetSelf());
 
 	entity->GetComponents()->Add(component);
 	return component;

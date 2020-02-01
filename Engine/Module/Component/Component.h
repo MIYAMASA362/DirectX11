@@ -44,6 +44,8 @@ public:
 	static void RegisterComponentIndex(IComponent* instance);
 
 protected:
+	virtual IComponent* Internal_CreateInstance(IEntity* owner) override { return this; };
+
 	//ComponentIndex‚Ö’Ç‰Á
 	void RegisterIndex();
 
@@ -84,7 +86,7 @@ inline Component<Type>::Component(EntityID OwnerID)
 	:
 	IComponent(OwnerID)
 {
-	
+	this->RegisterIndex();
 }
 
 

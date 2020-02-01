@@ -140,3 +140,11 @@ void ComponentManager::ImGui_ComponentView(EntityID id)
 		component.lock()->OnDebugImGui();
 	}
 }
+
+void ComponentManager::AddComponentInstance(IEntity * owner, IComponent * original)
+{
+	IComponent* instance = original->Internal_CreateInstance(owner);
+	ObjectManager::GetInstance()->RegisterObject(instance);
+
+	owner->GetComponents()->Add(std::dynamic_pointer_cast<IComponent>(instance->GetSelf()));
+}

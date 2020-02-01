@@ -111,6 +111,8 @@ public:
 	}
 
 protected:
+	virtual IComponent* Internal_CreateInstance(IEntity* owner) override;
+
 	void detachParent();								//親を離す
 	void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する
 	void childTransformUpdate();						//子の行列に変更を加える

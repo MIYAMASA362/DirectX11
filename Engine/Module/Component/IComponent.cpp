@@ -32,10 +32,10 @@ IComponent::IComponent()
 IComponent::IComponent(EntityID OwnerID)
 	:
 	Object(),
-	_ownerId(OwnerID),
-	_gameObject(GameObject::GetTypeEntity(OwnerID).lock())
+	_OwnerID(OwnerID),
+	_Entity(EntityManager::GetInstance()->GetEntity(OwnerID).lock())
 {
-
+	ObjectManager::GetInstance()->RegisterObject(this);
 }
 
 //~IComponent
@@ -43,27 +43,27 @@ IComponent::IComponent(EntityID OwnerID)
 //
 IComponent::~IComponent()
 {
-	_gameObject.reset();
+	if(_Entity) _Entity.reset();
+}
+
+ComponentTypeID IComponent::GetComponentTypeID()
+{
+	return typeid(*this).hash_code();
 }
 
 //Transform
 //	Entity‚ÌTransform
 //
-std::shared_ptr<Transform> IComponent::transform()
+std::shared_ptr<Transform>& IComponent::transform()
 {
-	if (_transform.expired())
-		_transform = Transform::GetComponent(GetOwnerID());
-	return _transform.lock();
+	return gameObject()->transform().lock();
 }
 
 //GameObject
 //	Entity‚ÌGameObject
-//
-std::shared_ptr<GameObject> IComponent::gameObject()
+std::shared_ptr<GameObject>& IComponent::gameObject()
 {
-	if (_gameObject.expired())
-		_gameObject = GameObject::GetTypeEntity(this->_ownerId);
-	return _gameObject.lock();
+	return std::dynamic_pointer_cast<GameObject>(_Entity);
 }
 
 //OnDebugImGui
@@ -72,5 +72,5 @@ std::shared_ptr<GameObject> IComponent::gameObject()
 void IComponent::OnDebugImGui()
 {
 	ImGui::Text(("ID : " + std::to_string(this->GetInstanceID())).c_str());
-	ImGui::Text(("OwnerID : " + std::to_string(_ownerId)).c_str());
+	ImGui::Text(("OwnerID : " + std::to_string(_OwnerID)).c_str());
 }

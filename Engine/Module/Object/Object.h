@@ -19,10 +19,11 @@ class Object
 	friend class ObjectManager;
 	friend cereal::access;
 private:
+
 	//固有ID
 	InstanceID _InstanceID;
-	//ObjectManagerで管理されているInstacneへのアクセス
-	std::weak_ptr<Object> _self;
+
+	std::shared_ptr<Object> _self;
 
 	template<class Archive>
 	void save(Archive& archive) const 
@@ -43,23 +44,14 @@ private:
 public:
 	//コンストラクタ
 	Object();
-	Object(InstanceID id,std::shared_ptr<Object> sptr);
+
 	//デストラクタ
 	virtual ~Object();
-
-	//Objectの削除処理
-	static void Destroy(Object* obj);
 
 	//固有IDの取得
 	InstanceID GetInstanceID();
 
-	//削除宣言
-	virtual void Destroy();
-
-	//_selfの取得
-	std::weak_ptr<Object> GetSelf();
-
-	virtual std::weak_ptr<Object> CreateInstance();
+	std::shared_ptr<Object> GetSelf();
 
 protected:
 	//削除時実行関数

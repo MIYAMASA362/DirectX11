@@ -3,6 +3,7 @@
 
 class Transform;
 class GameObject;
+class IEntity;
 
 //*********************************************************************************************************************
 //
@@ -15,14 +16,9 @@ class IComponent:public Object
 	friend class ComponentManager;
 	friend cereal::access;
 private:
-	//OwnerID 所有EntityのID
-	EntityID _ownerId;
-
-	//ComponentManagerで管理されているComponent
-	std::weak_ptr<IComponent> _self;
-
-	std::weak_ptr<Transform> _transform;
-	std::weak_ptr<GameObject> _gameObject;
+	EntityID _OwnerID;
+	//所有者
+	std::shared_ptr<IEntity> _Entity;
 
 	//シリアライズ
 	template<class Archive>
@@ -30,7 +26,7 @@ private:
 	{
 		archive(
 			cereal::base_class<Object>(this),
-			CEREAL_NVP(_ownerId)
+			CEREAL_NVP(_OwnerId)
 		);
 	}
 	template<class Archive>
@@ -38,7 +34,7 @@ private:
 	{
 		archive(
 			cereal::base_class<Object>(this),
-			_ownerId
+			_OwnerId
 		);
 	}
 
@@ -46,25 +42,24 @@ public:
 	//コンストラクタ
 	IComponent();
 	IComponent(EntityID OwnerID);
+
 	//デストラクタ
 	virtual ~IComponent();
 
-	//コンポーネントの取得
-	std::weak_ptr<IComponent> GetComponent() { return _self; };
-	//OwnerIDの取得
-	EntityID GetOwnerID() const { return _ownerId; };
 	//ComponentTypeIDの取得
-	ComponentTypeID GetComponentTypeID() { return typeid(*this).hash_code(); }
+	ComponentTypeID GetComponentTypeID();
 	//ComponentIDの取得
 	ComponentID GetComponentID() { return GetInstanceID(); };
 
 	//EntityのTranformへのアクセス
-	std::shared_ptr<Transform> transform();
+	std::shared_ptr<Transform>& transform();
 	//EntityのGameObjectへのアクセス
-	std::shared_ptr<GameObject> gameObject();
-
+	std::shared_ptr<GameObject>& gameObject();
 
 protected:
+	//内部インスタンス生成処理
+	virtual IComponent* Internal_CreateInstance(IEntity* entity) = 0;
+
 	//削除時実行関数
 	virtual void OnDestroy() {};
 

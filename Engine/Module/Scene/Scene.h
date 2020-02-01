@@ -98,15 +98,17 @@ private:
 			auto instance = this->CreateInstance(gameObject);
 			this->_hierarchyUtility = this->_hierarchyUtility;
 
-			// TODO : ComponentManagerとの組み合わせを意識して
-			gameObject->AddComponent<Transform>();
-
 			auto find = ComponentIndex.find(hierarchy.first);
 			if (find == ComponentIndex.end()) continue;
-			for(auto component : instance->GetComponents()._components)
+			for(auto component : find->second._components)
 			{
+				//インスタンス生成
+				ComponentManager::GetInstance()->AddComponentInstance(instance,component.lock().get());
 
 				auto obj = component.lock().get();
+				size_t c_obj = typeid(*obj).hash_code();
+				size_t transform = typeid(Transform).hash_code();
+
 				std::string name = typeid(*obj).name();
 				obj = obj;
 			}

@@ -23,7 +23,6 @@ private:
 	//デストラクタ
 	~ObjectManager();
 
-
 public:
 	//インスタンスの取得
 	static ObjectManager* GetInstance() { return pInstance; }
@@ -34,7 +33,10 @@ public:
 	static void Destroy();
 
 	//Object登録
-	void RegisterObject(Object* object);
+	std::shared_ptr<Object> RegisterObject(Object* object);
+	//登録Objectの取得
+	std::shared_ptr<Object> GetObjectInstance(InstanceID id);
+
 	//Object削除登録
 	void DestroyObject(Object* object);
 	//Object削除
@@ -42,6 +44,4 @@ public:
 
 	//Editorデバッグ表示
 	void EditorWindow();
-
-
 };
