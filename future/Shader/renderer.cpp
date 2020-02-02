@@ -14,6 +14,7 @@ IDXGISwapChain*         CRenderer::m_SwapChain = NULL;
 ID3D11RenderTargetView* CRenderer::m_RenderTargetView = NULL;
 ID3D11DepthStencilView* CRenderer::m_DepthStencilView = NULL;
 
+ID3D11RenderTargetView* CRenderer::m_ShadowRenderTargetView = NULL;
 ID3D11DepthStencilState* CRenderer::m_DepthStateEnable;
 ID3D11DepthStencilState* CRenderer::m_DepthStateDisable;
 
@@ -70,10 +71,10 @@ void CRenderer::Init()
 	td.Height = sd.BufferDesc.Height;
 	td.MipLevels = 1;
 	td.ArraySize = 1;
-	td.Format = DXGI_FORMAT_R32_TYPELESS;	//ステンシルバッファ形式
+	td.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;	//ステンシルバッファ形式
 	td.SampleDesc = sd.SampleDesc;
 	td.Usage = D3D11_USAGE_DEFAULT;
-	td.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;	//ステンシル取得フラグ | シェーダーリソースフラグ
+	td.BindFlags = D3D11_BIND_DEPTH_STENCIL;	//ステンシル取得フラグ | シェーダーリソースフラグ
 	td.CPUAccessFlags = 0;
 	td.MiscFlags = 0;
 
@@ -82,7 +83,7 @@ void CRenderer::Init()
 
 	//ステンシルターゲット(サブリソース)の設定
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvd = {};
-	dsvd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvd.Format = td.Format;
 	dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;	//ステンシルリソースに2Dテクスチャデータ形式でアクセス
 	dsvd.Flags = 0;	//読み取り専用フラグ
 
@@ -92,7 +93,19 @@ void CRenderer::Init()
 	//出力マージステージのレンダー対象設定
 	m_ImmediateContext->OMSetRenderTargets(1,&m_RenderTargetView,m_DepthStencilView);
 
-	////シャドウ用リソース設定
+
+	// レンダーターゲットビュー生成、設定
+	m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	m_D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_ShadowRenderTargetView);
+	pBackBuffer->Release();
+
+
+	//シャドウ用リソース設定
+	td.Format = DXGI_FORMAT_R32_TYPELESS;
+	td.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	
+	m_D3DDevice->CreateTexture2D(&td, NULL, &depthTexture);
+	
 	dsvd.Format = DXGI_FORMAT_D32_FLOAT;	//Double型 R値形式
 
 	//シャドウ用サブリソースの作成

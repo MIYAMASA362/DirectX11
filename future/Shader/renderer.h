@@ -102,6 +102,7 @@ public:
 	static ID3D11DepthStencilView* m_DepthStencilView;
 
 	//Shadow
+	static ID3D11RenderTargetView* m_ShadowRenderTargetView;
 	static ID3D11DepthStencilView* m_ShadowDepthStencilView;
 	static ID3D11ShaderResourceView* m_ShadowDepthShaderResourceView;
 
