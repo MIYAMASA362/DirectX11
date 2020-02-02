@@ -26,12 +26,40 @@ public:
 	{
 		auto camera = AddGameObject<CCamera>();
 		AddGameObject<CPolygon>();
-		auto field = AddGameObject<CField>();
-		field->SetCamera(camera);
-		auto model = AddGameObject<CModel>();
-		model->SetCamera(camera);
-		model->SetPosition({0.0f,0.0f,0.0f});
-		model->SetScale({2.0f,2.0f,2.0f});
+		{
+			auto field = AddGameObject<CField>();
+			field->SetCamera(camera);
+			field->SetPosition({0.0f,-2.0f,0.0f});
+		}
+		{
+			auto model = AddGameObject<CModel>();
+			model->Load("data/MODEL/sphere_smooth.obj");
+			model->GetShader()->Init("EnvironmentMappingVS.cso", "EnvironmentMappingPS.cso");
+			{
+				auto texture = new CTexture[2];
+				texture[0].Load("data/TEXTURE/earthenvmap.tga");
+				texture[1].Load("data/TEXTURE/field004.tga");
+				model->SetTexture(texture);
+			}
+			model->SetCamera(camera);
+			model->SetPosition({ -5.0f,0.0f,0.0f });
+			model->SetScale({ 2.0f,2.0f,2.0f });
+		}
+
+		{
+			auto model = AddGameObject<CModel>();
+			model->Load("data/MODEL/sphere_smooth.obj");
+			model->GetShader()->Init("ToonShader3DVS.cso", "ToonShader3DPS.cso");
+			{
+				auto texture = new CTexture[2];
+				texture[0].Load("data/TEXTURE/toon.tga");
+				texture[1].Load("data/TEXTURE/field004.tga");
+				model->SetTexture(texture);
+			}
+			model->SetCamera(camera);
+			model->SetPosition({ 5.0f,0.0f,0.0f });
+			model->SetScale({ 2.0f,2.0f,2.0f });
+		}
 
 	}
 

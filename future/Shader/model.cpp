@@ -16,16 +16,14 @@
 
 
 
+CModel::CModel()
+{
+	m_Shader = new CShader();
+}
+
 void CModel::Init()
 {
-	Load( "data/MODEL/sphere_smooth.obj" );	
 
-	m_Shader = new CShader();
-	m_Shader->Init("ToonShader3DVS.cso", "ToonShader3DPS.cso");
-
-	m_Texture = new CTexture[2];
-	m_Texture[0].Load("data/TEXTURE/toon.tga");
-	m_Texture[1].Load("data/TEXTURE/field004.tga");
 }
 
 
@@ -183,7 +181,6 @@ void CModel::Unload()
 	delete[] m_SubsetArray;
 
 }
-
 
 
 

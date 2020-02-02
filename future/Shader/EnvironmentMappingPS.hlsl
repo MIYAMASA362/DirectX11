@@ -39,25 +39,27 @@ void main(
 	float3 eye = inWorldPosition.xyz - Camera.Position.xyz;
 	eye = normalize(eye);
 
-	float3 refv = reflect(Light.Direction.xyz - inWorldPosition.xyz,inNormal.xyz);
+	//スペキュラ計算
+	float3 refv = reflect(Light.Direction.xyz - inWorldPosition.xyz, inNormal.xyz);
 	refv = normalize(refv);
 
-	float specular = -dot(eye,refv);
+	float specular = -dot(eye, refv);
 	specular = saturate(specular);
-	specular = pow(specular,10);
+	specular = pow(specular, 10);
 
-	//ハーフランバート　ライトベクトルとの内積
-	float light = 0.5 - dot(inNormal.xyz,float3(0.0,-1.0,0.0))*0.5;
 
-	//-N・Eの計算
-	float facing = -dot(inNormal.xyz, eye);
-	float2 toonTexCoord;
-	toonTexCoord.x = light;
-	toonTexCoord.y = facing;
+	//環境マッピング
+	float3 refvec = reflect(eye.xyz,inNormal);
+	refvec = normalize(refvec);
 
-	outDiffuse.rgb = Texture[0].Sample(Sampler, toonTexCoord);
+	float2 envTexCoord;
+	envTexCoord.x = -refvec.x * 0.3 + 0.5;
+	envTexCoord.y = -refvec.y * 0.3 + 0.5;
+
+
+	outDiffuse.rgb = Texture[0].Sample(Sampler, envTexCoord);
 	outDiffuse.a = 1.0;
 
-	outDiffuse.rgb *= Texture[1].Sample(Sampler,inTexCoord);
+	outDiffuse.rgb *= Texture[1].Sample(Sampler, inTexCoord);
 	outDiffuse.rgb += specular;
 }

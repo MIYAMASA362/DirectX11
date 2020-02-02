@@ -48,6 +48,8 @@ private:
 	void LoadMaterial( const char *FileName, MODEL_MATERIAL **MaterialArray, unsigned short *MaterialNum );
 
 public:
+	CModel();
+
 	void Init();
 	void Uninit();
 	void Update();
@@ -57,4 +59,7 @@ public:
 	void Unload();
 
 	void SetCamera(CCamera* camera) { m_Camera = camera; };
+
+	CShader* GetShader() { return m_Shader; }
+	void SetTexture(CTexture* texture) { m_Texture = texture; }
 };
