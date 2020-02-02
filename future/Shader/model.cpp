@@ -79,7 +79,6 @@ void CModel::Draw()
 	world *= XMMatrixTranslation( m_Position.x, m_Position.y, m_Position.z );
 
 	XMFLOAT4X4 worldf;
-
 	XMStoreFloat4x4(&worldf, world);
 	m_Shader->SetWorldMatrix(&worldf);
 

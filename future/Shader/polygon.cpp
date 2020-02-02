@@ -109,6 +109,8 @@ void CPolygon::Draw()
 	XMStoreFloat4x4(&world,XMMatrixTranslation(100.0,10.0f,0.0f));
 	m_Shader->SetWorldMatrix(&world);
 
+	m_Shader->SetViewMatrix(&identity);
+
 	XMFLOAT4X4 projection;
 	DirectX::XMStoreFloat4x4(&projection, XMMatrixOrthographicOffCenterLH(0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 0.0f, 1.0f));
 	m_Shader->SetProjectionMatrix(&projection);

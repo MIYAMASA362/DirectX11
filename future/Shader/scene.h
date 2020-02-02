@@ -25,12 +25,15 @@ public:
 	virtual void Init()
 	{
 		auto camera = AddGameObject<CCamera>();
+		
 		AddGameObject<CPolygon>();
+
 		{
 			auto field = AddGameObject<CField>();
 			field->SetCamera(camera);
-			field->SetPosition({0.0f,-2.0f,0.0f});
+			field->SetPosition({ 0.0f,-2.0f,0.0f });
 		}
+
 		{
 			auto model = AddGameObject<CModel>();
 			model->Load("data/MODEL/sphere_smooth.obj");
@@ -60,6 +63,9 @@ public:
 			model->SetPosition({ 5.0f,0.0f,0.0f });
 			model->SetScale({ 2.0f,2.0f,2.0f });
 		}
+
+		
+		
 
 	}
 
