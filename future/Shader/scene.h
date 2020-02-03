@@ -12,6 +12,8 @@
 #include "polygon.h"
 #include"model.h"
 
+#include"CLight.h"
+
 class CScene
 {
 protected:
@@ -25,9 +27,12 @@ public:
 	virtual void Init()
 	{
 		auto camera = AddGameObject<CCamera>();
-		
-		AddGameObject<CPolygon>();
+		auto light = AddGameObject<CLight>();
 
+		{
+			auto polygon = AddGameObject<CPolygon>();
+			polygon->GetShader()->SetLight(light);
+		}
 		{
 			auto field = AddGameObject<CField>();
 			field->SetCamera(camera);
@@ -38,6 +43,7 @@ public:
 			auto model = AddGameObject<CModel>();
 			model->Load("data/MODEL/sphere_smooth.obj");
 			model->GetShader()->Init("EnvironmentMappingVS.cso", "EnvironmentMappingPS.cso");
+			model->GetShader()->SetLight(light);
 			{
 				auto texture = new CTexture[2];
 				texture[0].Load("data/TEXTURE/earthenvmap.tga");
@@ -53,6 +59,7 @@ public:
 			auto model = AddGameObject<CModel>();
 			model->Load("data/MODEL/sphere_smooth.obj");
 			model->GetShader()->Init("ToonShader3DVS.cso", "ToonShader3DPS.cso");
+			model->GetShader()->SetLight(light);
 			{
 				auto texture = new CTexture[2];
 				texture[0].Load("data/TEXTURE/toon.tga");

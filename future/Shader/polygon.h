@@ -19,5 +19,5 @@ public:
 	void Update();
 	void Draw();
 
-
+	CShader* GetShader() { return m_Shader; };
 };

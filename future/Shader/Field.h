@@ -20,5 +20,4 @@ public:
 	void UnInit();
 
 	void SetCamera(CCamera* camera) { _Camera = camera; };
-
 };

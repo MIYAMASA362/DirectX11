@@ -6,8 +6,6 @@
 
 #include "shader.h"
 
-#include "main.h"
-#include "renderer.h"
 #include "model.h"
 #include "texture.h"
 

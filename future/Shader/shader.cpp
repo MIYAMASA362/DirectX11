@@ -4,7 +4,8 @@
 #include "shader.h"
 #include <io.h>
 
-
+#include"game_object.h"
+#include"CLight.h"
 
 
 
@@ -78,14 +79,7 @@ void CShader::Init( const char* VertexShader, const char* PixelShader )
 
 		hBufferDesc.ByteWidth = sizeof(CONSTANT);
 		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc, NULL, &m_ConstantBuffer);
-
-		hBufferDesc.ByteWidth = sizeof(LIGHT);
-		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&m_LightBuffer);
 	}
-
-	m_Light.Direction	= XMFLOAT4(0.0f,-1.0f,0.0f,0.0f);
-	m_Light.Diffuse		= COLOR(1.0f,1.0f,1.0f,1.0f);
-	m_Light.Ambient		= COLOR(0.25f,0.25f,0.25f,1.0f);
 }
 
 
@@ -114,15 +108,12 @@ void CShader::Set()
 	// 入力レイアウト設定
 	CRenderer::GetDeviceContext()->IASetInputLayout(m_VertexLayout);
 
-
 	// 定数バッファ更新
 	CRenderer::GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, NULL, &m_Constant, 0, 0);
 
-	CRenderer::GetDeviceContext()->UpdateSubresource(m_LightBuffer,0,NULL,&m_Light,0,0);
-
 	// 定数バッファ設定
 	CRenderer::GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
-	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1, 1, &m_LightBuffer);
+	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1, 1, this->m_Light->GetBuffer());
 
 	CRenderer::GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 }

@@ -35,6 +35,10 @@ public:
 	{
 	}
 
+	virtual void Init()
+	{
+		
+	}
 
 	virtual void Uninit()
 	{

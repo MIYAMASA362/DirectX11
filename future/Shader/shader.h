@@ -1,5 +1,7 @@
 #pragma once
 
+class CLight;
+
 struct CONSTANT
 {
 	XMFLOAT4X4 WorldMatrix;
@@ -58,13 +60,13 @@ public:
 class CShader:public CShaderBase<CONSTANT>
 {
 private:
-	ID3D11Buffer*			m_LightBuffer;
-	LIGHT					m_Light;
+	CLight* m_Light;
 public:
 	void Init( const char* VertexShader, const char* PixelShader ) override;
 	void Uninit() override;
 	void Set() override;
-
+	
+	void SetLight(CLight* light) { m_Light = light; };
 	void SetProjectionMatrix(XMFLOAT4X4* ProjectionMatrix) override { m_Constant.ProjectionMatrix = Transpose(ProjectionMatrix); }
 	void SetWorldMatrix(XMFLOAT4X4* WorldMatrix) { m_Constant.WorldMatrix = Transpose(WorldMatrix); };
 	void SetViewMatrix(XMFLOAT4X4* ViewMatrix) { m_Constant.ViewMatrix = Transpose(ViewMatrix); };
