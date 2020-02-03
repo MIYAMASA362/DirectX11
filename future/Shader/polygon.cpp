@@ -33,17 +33,17 @@ void CPolygon::Init()
 	vertex[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[0].TexCoord = XMFLOAT2(0.0f, 0.0f);
 
-	vertex[1].Position = XMFLOAT3(100.0f, 0.0f, 0.0f);
+	vertex[1].Position = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	vertex[1].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[1].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[1].TexCoord = XMFLOAT2(1.0f, 0.0f);
 
-	vertex[2].Position = XMFLOAT3(0.0f, 200.0f, 0.0f);
+	vertex[2].Position = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[2].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[2].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
 
-	vertex[3].Position = XMFLOAT3(100.0f, 200.0f, 0.0f);
+	vertex[3].Position = XMFLOAT3(1.0f, 1.0f, 0.0f);
 	vertex[3].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[3].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertex[3].TexCoord = XMFLOAT2(1.0f, 1.0f);
@@ -105,9 +105,10 @@ void CPolygon::Draw()
 	XMFLOAT4X4 identity;
 	DirectX::XMStoreFloat4x4(&identity, XMMatrixIdentity());
 
-	XMFLOAT4X4 world;
-	XMStoreFloat4x4(&world,XMMatrixTranslation(100.0,10.0f,0.0f));
-	m_Shader->SetWorldMatrix(&world);
+	XMFLOAT4X4 worldf;
+	XMMATRIX world = XMMatrixScaling(SCREEN_WIDTH * 0.3f, SCREEN_HEIGHT * 0.3f, 0.0f);
+	XMStoreFloat4x4(&worldf,world);
+	m_Shader->SetWorldMatrix(&worldf);
 
 	m_Shader->SetViewMatrix(&identity);
 

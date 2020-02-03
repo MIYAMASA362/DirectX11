@@ -59,6 +59,7 @@ void CRenderer::Init()
 	ID3D11Texture2D* pBackBuffer = NULL;
 	m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	m_D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_RenderTargetView);
+	m_D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_ShadowRenderTargetView);
 	pBackBuffer->Release();
 
 	//ステンシル用テクスチャ(リソース)
@@ -92,13 +93,6 @@ void CRenderer::Init()
 
 	//出力マージステージのレンダー対象設定
 	m_ImmediateContext->OMSetRenderTargets(1,&m_RenderTargetView,m_DepthStencilView);
-
-
-	// レンダーターゲットビュー生成、設定
-	m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	m_D3DDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_ShadowRenderTargetView);
-	pBackBuffer->Release();
-
 
 	//シャドウ用リソース設定
 	td.Format = DXGI_FORMAT_R32_TYPELESS;
