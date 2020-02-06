@@ -14,14 +14,14 @@ using namespace DirectX;
 //
 //*********************************************************************************************************************
 
+//Hierarchy
+//	コンストラクタ
+//
 Hierarchy::Hierarchy()
 {
 
 }
 
-//Hierarchy
-//	コンストラクタ
-//
 Hierarchy::Hierarchy(std::weak_ptr<IEntity> self)
 	:
 	_self(self)
@@ -78,10 +78,13 @@ void Hierarchy::DetachChildren()
 //
 //*********************************************************************************************************************
 
+//HierarchyUtility
+//	コンストラクタ
+//
 HierarchyUtility::HierarchyUtility()
 {
-
 }
+
 
 HierarchyUtility::~HierarchyUtility()
 {

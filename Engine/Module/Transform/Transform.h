@@ -88,6 +88,8 @@ public:
 	void LookAt(std::weak_ptr<Transform> target);	//その方向を見る
 	void OnDestroy() override;
 
+	Hierarchy& GetHierarchy();
+
 	template<class Archive>
 	void save(Archive& archive) const
 	{
@@ -111,7 +113,7 @@ public:
 	}
 
 protected:
-	virtual IComponent* Internal_CreateInstance(IEntity* owner) override;
+	virtual IComponent* Internal_CreateInstance(IEntity* owner);
 
 	void detachParent();								//親を離す
 	void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する

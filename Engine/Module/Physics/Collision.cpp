@@ -109,7 +109,7 @@ void Collider::Start()
 		rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
 	}
 	_rigidbody = rigidbody.lock();
-	_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(GetSelf().lock()));
+	//_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(GetSelf().lock()));
 }
 
 void Collider::IsHitReset()

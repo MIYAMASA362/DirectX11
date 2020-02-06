@@ -10,48 +10,43 @@ class ComponentList final
 {
 	friend class ComponentManager;
 	friend cereal::access;
+public:
+	using Components = std::unordered_map<ComponentID, std::shared_ptr<IComponent>>;
 private:
+
+	//Components
+	Components _Components;
 
 	//シリアル化
 	template<class Archive>
 	void save(Archive& archive) const
 	{
-		archive(
-			_components
-		);
+		archive(_Components);
 	}
 
 	template<class Archive>
 	void load(Archive& archive)
 	{
-		archive(
-			_components
-		);
+		archive(_Components);
 	}
 
 public:
-	//Components
-	std::list<std::weak_ptr<IComponent>> _components;
 
 	//コンストラクタ
 	ComponentList();
 	//デストラクタ
 	~ComponentList();
+	
+	//GetComponents Componentsの取得
+	Components& GetComponents()
+	{
+		return _Components;
+	}
 
 	//Componentsへ追加
-	void Add(std::weak_ptr<IComponent> component);
-	//Componentsへ追加
-	void Add(ComponentList* list);
-	//Component取得
-	std::weak_ptr<IComponent> Get(ComponentTypeID componentTypeID);
-	//Componentを削除
-	void Remove(ComponentTypeID componentTypeID);
-	//Componentを削除
-	void Remove(ComponentID componentID);
-	//Componentsを削除
-	void Release();
-
-	//Componentsのサイズ
-	size_t Size() { return _components.size(); };
-
+	void AddComponent(std::shared_ptr<IComponent> add);
+	//Componentの取得 一番最初の物
+	std::shared_ptr<IComponent>& GetComponent(ComponentTypeID id);
+	//Componentの所有を破棄
+	void ReleaseComponent(ComponentID componentID);
 };

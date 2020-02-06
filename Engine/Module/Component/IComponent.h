@@ -16,7 +16,6 @@ class IComponent:public Object
 	friend class ComponentManager;
 	friend cereal::access;
 private:
-	EntityID _OwnerID;
 	//所有者
 	std::shared_ptr<IEntity> _Entity;
 
@@ -26,15 +25,16 @@ private:
 	{
 		archive(
 			cereal::base_class<Object>(this),
-			CEREAL_NVP(_OwnerId)
+			_Entity
 		);
 	}
+
 	template<class Archive>
 	void load(Archive& archive)
 	{
 		archive(
 			cereal::base_class<Object>(this),
-			_OwnerId
+			_Entity
 		);
 	}
 
@@ -51,15 +51,14 @@ public:
 	//ComponentIDの取得
 	ComponentID GetComponentID() { return GetInstanceID(); };
 
+	EntityID GetOwnerID();
+
 	//EntityのTranformへのアクセス
-	std::shared_ptr<Transform>& transform();
+	std::shared_ptr<Transform> transform();
 	//EntityのGameObjectへのアクセス
-	std::shared_ptr<GameObject>& gameObject();
+	std::shared_ptr<GameObject> gameObject();
 
 protected:
-	//内部インスタンス生成処理
-	virtual IComponent* Internal_CreateInstance(IEntity* entity) = 0;
-
 	//削除時実行関数
 	virtual void OnDestroy() {};
 
@@ -69,7 +68,8 @@ protected:
 	//ImGuiの設定
 	virtual void OnDebugImGui();
 
-
+	//削除命令
+	virtual void Destroy();
 };
 
 CEREAL_REGISTER_TYPE(IComponent)

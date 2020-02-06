@@ -12,10 +12,8 @@ class ComponentManager final
 private:
 	//インスタンス
 	static ComponentManager* pInstance;
-
-	//Entityに付加されたComponentsのインデックス
-	std::unordered_map<EntityID, std::shared_ptr<ComponentList>> _EntityComponentIndex;
-
+	//Entity ComponentList
+	static std::unordered_map<EntityID, std::shared_ptr<ComponentList>> _EntityComponentIndex;
 
 private:
 	//コンストラクタ
@@ -30,23 +28,22 @@ public:
 	//インスタンス破棄
 	static void Release();
 
+	//インスタンス
 	static ComponentManager* GetInstance() { return pInstance; };
 
-	//Componentに対してmessage送信
-	void SendComponentMessage(std::string message);
-	//特定のEntityのComponentにmessage送信
-	void SendComponentMessage(std::string message, EntityID entityID);
+	//ComponentList
 
-
-	//EntityのComponentリストを生成
+	//EntityのComponentListを生成
 	std::weak_ptr<ComponentList> CreateComponents(IEntity* entity);
-	//EntityのComponentリストを取得
-	std::weak_ptr<ComponentList> GetComponents(IEntity* entity);
-	//EntityのComponentsをObjectManagerの完全削除
+	//EntityのComponentListの削除命令
 	void DestroyComponents(IEntity* entity);
-	//EntityのComponentsを解放
+	//EntityのComponentListの破棄
 	void ReleaseComponents(IEntity* entity);
+	//EntityのComponentListを置き換え
+	std::weak_ptr<ComponentList> SwapComponents(IEntity* entity,ComponentList* ComponentList);
+	std::weak_ptr<ComponentList> SwapComponents(IEntity* entity,std::shared_ptr<ComponentList> ComponentList);
 
+	//Component
 
 	//EntityにComponentを追加
 	template<typename Type> 
@@ -54,46 +51,37 @@ public:
 	//EntityのComponentを取得
 	template<typename Type>
 	std::shared_ptr<Type> GetComponent(IEntity* entity);
-	//EntityのComponentを解放
-	template<typename Type>
-	void ReleaseComponent(IEntity* entity);
+
+	//Componentに対してmessage送信
+	void SendComponentMessage(std::string message);
+	//特定のEntityのComponentにmessage送信
+	void SendComponentMessage(std::string message, EntityID entityID);
 
 	//全ComponentのDebug表示
 	void ImGui_ComponentView(EntityID id);
-
-	void AddComponentInstance(IEntity* owner, IComponent* original);
 };
 
 
 //AddComponent
-//
-//	ObjectManagerにインスタンスを登録
-//	Component<Type>にインスタンスを登録
-//
-//	->管理されるデータの設計が完了
+//	Componentのインスタンス生成
+//	ObjectManagerへ追加
 //
 template<typename Type>
-inline std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
+std::shared_ptr<Type> ComponentManager::AddComponent(IEntity* entity)
 {
-	//インスタンス生成
-	IComponent* instance = new Type(entity->GetEntityID());
+	auto component = std::shared_ptr<Type>(new Type(entity->GetEntityID()));
+	//ObjectManagerへ追加
+	ObjectManager::GetInstance()->RegisterObject(component);
+	Component<Type>::RegisterComponentIndex(component);
+	//Componentsへ追加
+	entity->GetComponents()->AddComponent(component);
 
-	std::shared_ptr<Type> component = std::dynamic_pointer_cast<Type>(instance->GetSelf());
-
-	entity->GetComponents()->Add(component);
 	return component;
 }
 
 //EntityのComponentを取得
 template<typename Type >
-inline std::shared_ptr<Type> ComponentManager::GetComponent(IEntity* entity)
+std::shared_ptr<Type> ComponentManager::GetComponent(IEntity* entity)
 {
-	return std::dynamic_pointer_cast<Type>(entity->GetComponents()->Get(typeid(Type).hash_code()).lock());
-}
-
-//EntityのComponentを開放
-template<typename Type>
-inline void ComponentManager::ReleaseComponent(IEntity* entity)
-{
-	entity->GetComponents()->Remove(Component<Type>::GetTypeID());
+	return std::dynamic_pointer_cast<Type>(entity->GetComponents()->GetComponent((ComponentTypeID)typeid(Type).hash_code()));
 }

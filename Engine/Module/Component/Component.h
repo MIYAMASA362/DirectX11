@@ -12,7 +12,7 @@ class Component:public IComponent
 	friend cereal::access;
 protected:
 	//このComponentのインデックス
-	static std::map<EntityID, std::weak_ptr<Type>> ComponentIndex;
+	static std::map<ComponentID, std::weak_ptr<Type>> ComponentIndex;
 
 private:
 	//シリアライズ
@@ -41,14 +41,14 @@ public:
 	//削除時関数
 	virtual void OnDestroy() override {};
 
-	static void RegisterComponentIndex(IComponent* instance);
+	//ComponentIndexへ追加
+	static void RegisterComponentIndex(std::shared_ptr<Type> instance);
+
+	void ReleaseComponentIndex(std::shared_ptr<Type> instance);
+
+	virtual void Destroy() override;
 
 protected:
-	virtual IComponent* Internal_CreateInstance(IEntity* owner) override { return this; };
-
-	//ComponentIndexへ追加
-	void RegisterIndex();
-
 	virtual void OnDebugImGui() override;
 
 	virtual void SendComponentMessage(std::string message) override {};
@@ -64,7 +64,7 @@ protected:
 //*********************************************************************************************************************
 
 template<typename Type>
-std::map<EntityID, std::weak_ptr<Type>> Component<Type>::ComponentIndex;
+std::map<ComponentID, std::weak_ptr<Type>> Component<Type>::ComponentIndex;
 
 //Component
 //	コンストラクタ
@@ -86,7 +86,7 @@ inline Component<Type>::Component(EntityID OwnerID)
 	:
 	IComponent(OwnerID)
 {
-	this->RegisterIndex();
+
 }
 
 
@@ -97,7 +97,7 @@ template<typename Type>
 inline Component<Type>::~Component()
 {
 	//Indexから破棄
-	ComponentIndex.erase(GetOwnerID());
+	//ComponentIndex.erase(this->GetComponentID());
 }
 
 //GetComponent
@@ -106,24 +106,37 @@ inline Component<Type>::~Component()
 template<typename Type>
 inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
 {
-	auto find = ComponentIndex.find(entityID);
-	if (find == ComponentIndex.end()) assert(0);
-	return find->second.lock();
+	for(auto component : ComponentIndex)
+	{
+		if (component.second.lock()->GetOwnerID() == entityID)
+			return component.second;
+	}
+	assert(0);
+	return std::weak_ptr<Type>();
+}
+
+//RegisterComponentIndex
+//	ComponentIndexに登録する
+//
+template<typename Type>
+inline void Component<Type>::RegisterComponentIndex(std::shared_ptr<Type> instance)
+{
+	ComponentIndex.emplace(instance->GetComponentID(), instance);
+}
+
+//ReleaseComponentIndex
+//	ComponentIndexから削除する
+//
+template<typename Type>
+inline void Component<Type>::ReleaseComponentIndex(std::shared_ptr<Type> instance)
+{
+	ComponentIndex.erase(instance->GetComponentID());
 }
 
 template<typename Type>
-inline void Component<Type>::RegisterComponentIndex(IComponent * instance)
+inline void Component<Type>::Destroy()
 {
-	ComponentIndex.emplace(instance->GetOwnerID(), std::dynamic_pointer_cast<Type>(instance->GetSelf().lock()));
-}
-
-//RegisterIndex
-//
-//
-template<typename Type>
-inline void Component<Type>::RegisterIndex()
-{
-	ComponentIndex.emplace(GetOwnerID(), std::dynamic_pointer_cast<Type>(Object::GetSelf().lock()));
+	IComponent::Destroy();
 }
 
 //OnDebugImGui

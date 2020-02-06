@@ -67,7 +67,7 @@ public:
 		//}
 
 		//MikuCamera
-		GameObject* MikuCamera = this->AddSceneObject("MikuCamera", TagName::Default);
+		auto MikuCamera = this->AddSceneObject("MikuCamera", TagName::Default);
 		{
 			MikuCamera->AddComponent<Camera>().lock()->SetPriority(0);
 			//MikuCamera->transform().lock()->SetParent(pModel->gameObject());
@@ -77,13 +77,13 @@ public:
 		}
 
 		//SceneChange
-		GameObject* SceneChanger = this->AddSceneObject("SceneChanger", TagName::Default);
+		auto SceneChanger = this->AddSceneObject("SceneChanger", TagName::Default);
 		{
 			auto sceneChange = SceneChanger->AddComponent<SceneChange>();
 			sceneChange.lock()->nextScene = "TestScene";
 		}
 
-		GameObject* sphere = this->AddSceneObject("Sphere",TagName::Default);
+		auto sphere = this->AddSceneObject("Sphere",TagName::Default);
 		{
 			sphere->transform().lock()->position({0.0f,0.0f,10.0f});
 			sphere->transform().lock()->localScale(Vector3::one()*2.0f);
@@ -96,7 +96,7 @@ public:
 			collider->IsTrigger = true;
 		}
 
-		GameObject* box = this->AddSceneObject("Box",TagName::Default);
+		auto box = this->AddSceneObject("Box",TagName::Default);
 		{
 			box->transform().lock()->position({10.0f,0.0f,10.0f});
 			box->transform().lock()->localScale(Vector3::one() *2.0f);
@@ -109,7 +109,7 @@ public:
 		}
 
 		//Canvas
-		GameObject* canvas = this->AddSceneObject("Canvas",TagName::Default);
+		auto canvas = this->AddSceneObject("Canvas",TagName::Default);
 		{
 			canvas->transform().lock()->localPosition(Vector3(0.0f,0.0f,0.0f));
 			canvas->transform().lock()->localScale(Vector3::one()*10.0f);

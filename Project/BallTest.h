@@ -14,7 +14,7 @@ public:
 	void Load()
 	{
 		//Camera
-		GameObject* camera = this->AddSceneObject("MainCamera", TagName::Default);
+		auto camera = this->AddSceneObject("MainCamera", TagName::Default);
 		{
 			camera->transform().lock()->position(Vector3::up()*2.0f);
 			camera->AddComponent<Camera>().lock()->SetPriority(1);

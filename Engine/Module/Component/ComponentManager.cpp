@@ -21,6 +21,8 @@
 //
 //*********************************************************************************************************************
 
+std::unordered_map<EntityID, std::shared_ptr<ComponentList>> ComponentManager::_EntityComponentIndex;
+
 //pInstance
 //	Singleton
 //
@@ -77,8 +79,8 @@ void ComponentManager::Release()
 void ComponentManager::SendComponentMessage(std::string message)
 {
 	for (auto components : _EntityComponentIndex)
-		for (auto component : components.second->_components)
-			component.lock()->SendComponentMessage(message);
+		for (auto component : components.second->_Components)
+			component.second->SendComponentMessage(message);
 }
 
 //SendComponentMessage
@@ -86,8 +88,8 @@ void ComponentManager::SendComponentMessage(std::string message)
 //
 void ComponentManager::SendComponentMessage(std::string message, EntityID entityID)
 {
-	for(auto component : _EntityComponentIndex.at(entityID)->_components)
-		component.lock()->SendComponentMessage(message);
+	for(auto component : _EntityComponentIndex.at(entityID)->_Components)
+		component.second->SendComponentMessage(message);
 }
 
 
@@ -101,50 +103,49 @@ std::weak_ptr<ComponentList> ComponentManager::CreateComponents(IEntity* entity)
 	return _EntityComponentIndex.emplace(entity->GetEntityID(), std::shared_ptr<ComponentList>(new ComponentList())).first->second;
 }
 
-//GetComponents
-//	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ğæ“¾
-//
-std::weak_ptr<ComponentList> ComponentManager::GetComponents(IEntity* entity)
-{
-	return _EntityComponentIndex.at(entity->GetEntityID());
-}
-
 //DestroyComponents
 //	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ğ DestroyŠÖ”‚ğ—˜—p‚µ‚Äíœ
 //
 void ComponentManager::DestroyComponents(IEntity* entity)
 {
-	for(auto component : _EntityComponentIndex.at(entity->GetEntityID())->_components)
-		component.lock()->Destroy();
+	auto find = _EntityComponentIndex.at(entity->GetEntityID());
+
+	for(auto component : find->_Components)
+	{
+		component.second->Destroy();
+	}
 }
 
 //ReleaseComponents
-//	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ğŠJ•ú
+//	ComponentList‚Ì‰ğ•ú
 //
-void ComponentManager::ReleaseComponents(IEntity* entity)
+void ComponentManager::ReleaseComponents(IEntity * entity)
 {
 	_EntityComponentIndex.erase(entity->GetEntityID());
 }
 
+//RegisterComponents
+//	ComponentList‚ğEntity‚É“o˜^
+//
+std::weak_ptr<ComponentList> ComponentManager::SwapComponents(IEntity* entity,ComponentList * Components)
+{
+	_EntityComponentIndex.erase(entity->GetEntityID());
+	return _EntityComponentIndex.emplace(entity->GetEntityID(),std::shared_ptr<ComponentList>(Components)).first->second;
+}
 
-
-
+std::weak_ptr<ComponentList> ComponentManager::SwapComponents(IEntity * entity, std::shared_ptr<ComponentList> Components)
+{
+	_EntityComponentIndex.erase(entity->GetEntityID());
+	return _EntityComponentIndex.emplace(entity->GetEntityID(), Components).first->second;
+}
 
 //ImGui_ComponentView
 //	Entity‚Ì‚Á‚Ä‚¢‚éComponents‚ÌDebug•\¦
 //
 void ComponentManager::ImGui_ComponentView(EntityID id)
 {
-	for (auto component : _EntityComponentIndex.at(id)->_components)
+	for (auto component : _EntityComponentIndex.at(id)->_Components)
 	{
-		component.lock()->OnDebugImGui();
+		component.second->OnDebugImGui();
 	}
-}
-
-void ComponentManager::AddComponentInstance(IEntity * owner, IComponent * original)
-{
-	IComponent* instance = original->Internal_CreateInstance(owner);
-	ObjectManager::GetInstance()->RegisterObject(instance);
-
-	owner->GetComponents()->Add(std::dynamic_pointer_cast<IComponent>(instance->GetSelf()));
 }

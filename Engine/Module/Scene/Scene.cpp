@@ -66,36 +66,22 @@ bool Scene::CompareName(std::string name)
 //AddSceneObject
 //	Sceneにオブジェクトを追加する
 //
-GameObject* Scene::AddSceneObject(std::string name, TagName tag)
+std::shared_ptr<GameObject> Scene::AddSceneObject(std::string name, TagName tag)
 {
-	auto instance = new GameObject(name, this, tag);
-
-	ObjectManager::GetInstance()->RegisterObject(instance);
-	EntityManager::GetInstance()->RegisterEntity(instance);
-	GameObject::RegisterEntityIndex(instance);
+	auto gameObject = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
+	ObjectManager::GetInstance()->RegisterObject(gameObject);
+	EntityManager::GetInstance()->RegisterEntity(gameObject);
+	GameObject::RegisterEntityIndex(gameObject);
 
 	//階層追加
-	_hierarchyUtility.AttachHierarchy(instance->GetEntityID());
+	_hierarchyUtility.AttachHierarchy(gameObject->GetEntityID());
+
+	auto scene = gameObject->GetScene();
 
 	//Transform
-	instance->AddComponent<Transform>();
-	auto transform = instance->transform();
-	transform = transform;
+	gameObject->AddComponent<Transform>();
 
-	return instance;
-}
-
-GameObject* Scene::CreateInstance(GameObject* gameObject)
-{
-	auto instance = new GameObject(gameObject,this);
-
-	ObjectManager::GetInstance()->RegisterObject(instance);
-	EntityManager::GetInstance()->RegisterEntity(instance);
-	GameObject::RegisterEntityIndex(instance);
-
-	_hierarchyUtility.AttachHierarchy(instance->GetEntityID());
-
-	return instance;
+	return gameObject;
 }
 
 //RemoveSceneObject
@@ -183,10 +169,10 @@ void Scene::DebugGUI()
 
 //Load
 //	デシリアライズ
+//	WARNING : Componentが削除されてまう
 //
 void Scene::Load()
 {
-	ComponentList list;
 	std::ifstream file(_filePath);
 	cereal::JSONInputArchive inArchive(file);
 	inArchive(*this);
@@ -213,4 +199,14 @@ void Scene::UnLoad()
 		//std::dynamic_pointer_cast<GameObject>(EntityManager::GetInstance()->GetEntity(obj.first).lock())->Destroy();
 	}
 	_hierarchyUtility.ClearnHierarchy();
+}
+
+void Scene::OrderlySceneObject(HierarchyUtility * utility)
+{
+	for(auto map : utility->GetHierarchyMap())
+	{
+		Hierarchy& hierarchy = map.second;
+		auto gameObject = std::static_pointer_cast<GameObject>(hierarchy.GetSelf().lock());
+		gameObject->_Scene = this;
+	}
 }

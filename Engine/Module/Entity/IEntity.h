@@ -7,63 +7,61 @@
 //*********************************************************************************************************************
 class IEntity :public Object
 {
-	friend class EntityManager;
 	friend cereal::access;
+	friend class ComponentManager;
 private:
-	//EntityManagerで管理されているInstanceへのアクセス
-	std::weak_ptr<IEntity> _self;
-	//ComponentManagerで管理されているComponentsへのアクセス
-	std::weak_ptr<ComponentList> _components;
+	//Components 所持しているComponent群への参照
+	std::weak_ptr<ComponentList> _ComponentList;
 
+	//シリアル化
 	template<class Archive>
-	void save(Archive& archive)const
+	void save(Archive& archive) const
 	{
 		cereal::base_class<Object>(this);
+		archive(_ComponentList.lock());
 	}
 
 	template<class Archive>
 	void load(Archive& archive)
 	{
+		std::shared_ptr<ComponentList> list;
 		cereal::base_class<Object>(this);
+		archive(list);
+		_ComponentList = ComponentManager::GetInstance()->SwapComponents(this,list);
 	}
-
 
 public:
 	//コンストラクタ
 	IEntity();
-	IEntity(std::shared_ptr<IEntity> sptr,std::shared_ptr<ComponentList> components);
-
 	//デストラクタ
 	virtual ~IEntity();
 
 	//Entityの識別ID
-	EntityID GetEntityID() { return GetInstanceID();};
-
-	//Entityのポインタ取得
-	std::weak_ptr<IEntity> GetEntity() { return _self;};
-
-	//Componentsへの追加
-	template<typename Type> 
-	std::weak_ptr<Type> AddComponent() { return ComponentManager::GetInstance()->AddComponent<Type>(this);}
-
-	//ComponentsからComponentの取得
-	template<typename Type>
-	std::weak_ptr<Type> GetComponent() { return ComponentManager::GetInstance()->GetComponent<Type>(this); }
-
+	EntityID GetEntityID() 
+	{ 
+		return GetInstanceID(); 
+	}
 	//Componentsの取得
-	std::shared_ptr<ComponentList> GetComponents() { return _components.lock();}
+	std::shared_ptr<ComponentList> GetComponents() 
+	{
+		return _ComponentList.lock();
+	}
 
-	//ComponentsからComponentの削除
+	//Componentの追加
 	template<typename Type> 
-	void DestroyComponent() { ComponentManager::GetInstance()->DestroyComponent<Type>(this); }
+	std::weak_ptr<Type> AddComponent() 
+	{
+		return ComponentManager::GetInstance()->AddComponent<Type>(this);
+	}
+	//Componentの取得 最初に見つけた一つ
+	template<typename Type>
+	std::weak_ptr<Type> GetComponent() 
+	{
+		return ComponentManager::GetInstance()->GetComponent<Type>(this);
+	}
 
-	//Componentsの削除
-	void DestroyComponents() { ComponentManager::GetInstance()->DestroyComponents(this); }
-
-	//ObjectManagerを通した破棄
+	//削除関数
 	void Destroy() override;
-
-
 };
 
 CEREAL_REGISTER_TYPE(IEntity)

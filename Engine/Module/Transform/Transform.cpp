@@ -33,7 +33,10 @@ using namespace DirectX;
 //
 Transform::Transform()
 	:
-	Component()
+	Component(),
+	_Position(Vector3::zero()),
+	_Rotation(Quaternion::Identity()),
+	_Scale(Vector3::one())
 {
 
 }
@@ -49,7 +52,7 @@ Transform::Transform(EntityID OwnerID)
 	_Scale(Vector3::one())
 {
 	//階層取得
-	_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(OwnerID);
+	//_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(OwnerID);
 }
 
 //~Transform
@@ -89,9 +92,6 @@ IComponent * Transform::Internal_CreateInstance(IEntity * owner)
 {
 	Transform* instance = new Transform(owner->GetEntityID());
 
-	// TODO : Objectへ登録
-	Transform::RegisterComponentIndex(instance);
-
 	instance->_Position = this->_Position;
 	instance->_Rotation = this->_Rotation;
 	instance->_Scale = this->_Scale;
@@ -122,7 +122,7 @@ void Transform::detachChild(std::weak_ptr<Transform> target)
 
 void Transform::childTransformUpdate()
 {
-	auto children = _hierarchy->GetChildren();
+	auto children = GetHierarchy().GetChildren();
 	if (children.size() != 0)
 		for (auto child : children)
 			std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->WorldMatrix();
@@ -130,21 +130,21 @@ void Transform::childTransformUpdate()
 
 void Transform::DetachParent()
 {
-	if (_hierarchy->GetParent().expired()) return;
+	if (GetHierarchy().GetParent().expired()) return;
 	gameObject()->GetScene()->GetHierarchyUtility()->DetachParent(gameObject()->GetEntityID());
 	detachParent();
 }
 
 std::weak_ptr<Transform> Transform::GetParent() 
 {
-	if (_hierarchy->GetParent().expired()) return std::weak_ptr<Transform>();
-	return std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform();
+	if (GetHierarchy().GetParent().expired()) return std::weak_ptr<Transform>();
+	return std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform();
 }
 
 std::list<std::weak_ptr<Transform>> Transform::GetChildren()
 {
 	std::list<std::weak_ptr<Transform>> list;
-	for (auto child : _hierarchy->GetChildren())
+	for (auto child : GetHierarchy().GetChildren())
 		list.push_back(std::dynamic_pointer_cast<GameObject>(child.lock())->transform());
 	return list;
 }
@@ -154,31 +154,31 @@ void Transform::SendComponentMessageChildren(std::string message)
 	//自身に送信
 	ComponentManager::GetInstance()->SendComponentMessage(message,this->GetOwnerID());
 	//子に送信
-	for (auto child : _hierarchy->GetChildren())
+	for (auto child : GetHierarchy().GetChildren())
 		std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->SendComponentMessageChildren(message);
 }
 
 std::weak_ptr<IComponent> Transform::GetComponentInParent(ComponentTypeID componentTypeID)
 {
-	if (_hierarchy->GetParent().expired()) return  std::weak_ptr<IComponent>();
+	if (GetHierarchy().GetParent().expired()) return  std::weak_ptr<IComponent>();
 
 	//TypeID参照
 	if (ComponentIndex.size()) return  std::weak_ptr<IComponent>();
 
 	//親IDの物を検索
 	for (auto component : ComponentIndex)
-		if (component.second.lock()->GetOwnerID() == _hierarchy->GetParent().lock()->GetEntityID())
+		if (component.second.lock()->GetOwnerID() == GetHierarchy().GetParent().lock()->GetEntityID())
 			return component.second;
 
 	//親のGetComponentInParentを実行
-	return std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->GetComponentInParent(componentTypeID);
+	return std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->GetComponentInParent(componentTypeID);
 }
 
 std::weak_ptr<IComponent> Transform::GetComponentInChildren(ComponentTypeID componentTypeID)
 {
-	if (_hierarchy->GetChildren().size() == 0) return std::weak_ptr<IComponent>();
+	if (GetHierarchy().GetChildren().size() == 0) return std::weak_ptr<IComponent>();
 	//子IDの物を検索
-	for (auto child : _hierarchy->GetChildren()) 
+	for (auto child : GetHierarchy().GetChildren()) 
 	{
 		auto id = child.lock()->GetEntityID();
 		for (auto component : ComponentIndex)
@@ -192,21 +192,21 @@ ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID
 {
 	ComponentList list;
 
-	if (_hierarchy->GetChildren().size() == 0) return list;
+	if (GetHierarchy().GetChildren().size() == 0) return list;
 
 	//子Component検索
-	for (auto child : _hierarchy->GetChildren())
+	for (auto child : GetHierarchy().GetChildren())
 	{
 		auto id = child.lock()->GetEntityID();
 		for(auto component:ComponentIndex)
 		{
 			if (component.second.lock()->GetOwnerID() == id)
-				list.Add(component.second);
+				list.AddComponent(component.second.lock());
 		}
 
-		auto childlist = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
+		/*auto childlist = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
 		if(childlist.Size() != 0) 
-			list.Add(&childlist);
+			list.Add(&childlist);*/
 	}
 
 	return list;
@@ -273,15 +273,15 @@ Vector3 Transform::position() {
 
 Quaternion Transform::rotation() {
 	Quaternion q = this->_Rotation;
-	if (!_hierarchy->GetParent().expired())
-		q *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation();
+	if (!GetHierarchy().GetParent().expired())
+		q *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->rotation();
 	return q;
 }
 
 Vector3 Transform::scale() {
 	Vector3 scale = this->_Scale;
-	if (!_hierarchy->GetParent().expired())
-		scale *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->scale();
+	if (!GetHierarchy().GetParent().expired())
+		scale *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->scale();
 	return scale;
 }
 
@@ -302,8 +302,8 @@ void Transform::position(Vector3 position) {
 }
 
 void Transform::rotation(Quaternion rotation) {
-	if (!_hierarchy->GetParent().expired())
-		rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * rotation;
+	if (!GetHierarchy().GetParent().expired())
+		rotation = std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->rotation().conjugate() * rotation;
 	this->_Rotation = rotation;
 	Quaternion::Normalize(this->_Rotation);
 }
@@ -324,13 +324,20 @@ void Transform::LookAt(std::weak_ptr<Transform> target) {
 	Vector3 mPos = this->position();
 	Vector3 pPos = target.lock()->position();
 	this->_Rotation = Quaternion::QuaternionLookRotation(pPos - mPos, Vector3::up());
-	if (!_hierarchy->GetParent().expired())
-		this->_Rotation = std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->rotation().conjugate() * this->_Rotation;
+	if (!GetHierarchy().GetParent().expired())
+		this->_Rotation = std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->rotation().conjugate() * this->_Rotation;
 }
 
 void Transform::OnDestroy()
 {
 
+}
+
+Hierarchy & Transform::GetHierarchy()
+{
+	if(_hierarchy == nullptr)
+		_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(this->GetOwnerID());
+	return *_hierarchy;
 }
 
 
@@ -339,8 +346,8 @@ XMMATRIX Transform::MatrixQuaternion()
 	XMMATRIX matrix;
 	matrix = this->_Rotation.toMatrix();
 
-	if (!_hierarchy->GetParent().expired())
-		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixQuaternion();
+	if (!GetHierarchy().GetParent().expired())
+		matrix *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->MatrixQuaternion();
 
 	return matrix;
 }
@@ -350,8 +357,8 @@ XMMATRIX Transform::MatrixTranslation()
 	XMMATRIX matrix;
 	matrix = XMMatrixTranslation(_Position.x,_Position.y,_Position.z);
 
-	if (!_hierarchy->GetParent().expired())
-		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixTranslation();
+	if (!GetHierarchy().GetParent().expired())
+		matrix *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->MatrixTranslation();
 
 	return matrix;
 }
@@ -361,8 +368,8 @@ XMMATRIX Transform::MatrixScaling()
 	XMMATRIX matrix;
 	matrix = XMMatrixScaling(_Scale.x,_Scale.y,_Scale.z);
 
-	if (!_hierarchy->GetParent().expired())
-		matrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->MatrixScaling();
+	if (!GetHierarchy().GetParent().expired())
+		matrix *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->MatrixScaling();
 
 	return matrix;
 }
@@ -375,8 +382,8 @@ XMMATRIX Transform::WorldMatrix()
 	WorldMatrix *= XMMatrixRotationQuaternion(_Rotation);
 	WorldMatrix *= XMMatrixTranslation(_Position.x, _Position.y, _Position.z);
 
-	if (!_hierarchy->GetParent().expired())
-		WorldMatrix *= std::dynamic_pointer_cast<GameObject>(_hierarchy->GetParent().lock())->transform().lock()->WorldMatrix();
+	if (!GetHierarchy().GetParent().expired())
+		WorldMatrix *= std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->WorldMatrix();
 	
 	return WorldMatrix;
 }

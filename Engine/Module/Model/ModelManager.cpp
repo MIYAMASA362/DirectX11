@@ -281,7 +281,7 @@ void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 	{
 		auto subset = nodeMesh->_SubsetArray[i];
 
-		GameObject* child = scene->AddSceneObject(nodeMesh->_NodeName + std::to_string(i),TagName::Default);
+		auto child = scene->AddSceneObject(nodeMesh->_NodeName + std::to_string(i),TagName::Default);
 		child->transform().lock()->SetParent(parent->transform());
 		auto renderer = child->AddComponent<MeshRender>().lock();
 		auto meshfilter = child->AddComponent<MeshFilter>().lock();
@@ -300,15 +300,14 @@ GameObject * ModelManager::AddSceneModel(std::string name, Scene * scene)
 {
 	auto model = modelIndex.at(name);
 
-	GameObject* result = scene->AddSceneObject(name, TagName::Default);
+	auto result = scene->AddSceneObject(name, TagName::Default);
 
-	GameObject* parent = result;
 	for(auto nodeMesh : model->_NodeMeshArray)
 	{
-		AddSceneNodeModel(nodeMesh,parent,scene);
+		AddSceneNodeModel(nodeMesh,result.get(),scene);
 	}
 
-	return result;
+	return result.get();
 }
 
 void ModelManager::EditorWindow()

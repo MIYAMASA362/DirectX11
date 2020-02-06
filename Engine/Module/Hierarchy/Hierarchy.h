@@ -2,6 +2,7 @@
 
 
 class HierarchyUtility;
+class Scene;
 
 //*********************************************************************************************************************
 //
@@ -20,11 +21,10 @@ private:
 	//子
 	std::list<std::weak_ptr<IEntity>> _children;
 
-	
-
 	template<class Archive>
 	void save(Archive& archive) const
 	{
+		// TODO : ここのエラーを解決する
 		archive(
 			CEREAL_NVP(_self),
 			CEREAL_NVP(_parent),
@@ -40,12 +40,13 @@ private:
 			CEREAL_NVP(_parent),
 			CEREAL_NVP(_children)
 		);
+		_self = _self;
 	}
+
 
 public:
 	//コンストラクタ
 	Hierarchy();
-	//コンストラクタ
 	Hierarchy(std::weak_ptr<IEntity> self);
 	~Hierarchy();
 
@@ -89,10 +90,9 @@ private:
 	void load(Archive& archive)
 	{
 		archive(
-			CEREAL_NVP(_hierarchyMap)
+			_hierarchyMap
 		);
 	}
-
 
 public:
 	//コンストラクタ
@@ -123,5 +123,4 @@ public:
 
 	Hierarchy* GetHierarchy(EntityID id);
 	std::map<EntityID, Hierarchy> GetHierarchyMap();
-
 };

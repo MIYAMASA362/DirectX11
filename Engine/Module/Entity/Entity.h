@@ -3,6 +3,7 @@
 //*********************************************************************************************************************
 //
 //	Entity
+//		Type毎のEntity管理
 //
 //*********************************************************************************************************************
 template<typename Type>
@@ -28,15 +29,15 @@ protected:
 public:
 	//コンストラクタ
 	Entity();
-
 	//デストラクタ
 	virtual ~Entity();
 
 	//Entityの取得
 	static std::weak_ptr<Type> GetTypeEntity(EntityID id);
 
-	static void RegisterEntityIndex(Type* instance);
-
+	//EntityIndexへ登録
+	static void RegisterEntityIndex(std::shared_ptr<Type> instance);
+	//EntityIndexから削除
 	static void DestroyEntityIndex(Type* instance);
 };
 
@@ -75,9 +76,9 @@ inline std::weak_ptr<Type> Entity<Type>::GetTypeEntity(EntityID id)
 }
 
 template<typename Type>
-inline void Entity<Type>::RegisterEntityIndex(Type * instance)
+inline void Entity<Type>::RegisterEntityIndex(std::shared_ptr<Type> instance)
 {
-	EntityIndex.emplace(instance->GetEntityID(), std::dynamic_pointer_cast<Type>(instance->GetSelf().lock()));
+	EntityIndex.emplace(instance->GetEntityID(),instance);
 }
 
 template<typename Type>

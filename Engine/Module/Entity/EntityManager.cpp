@@ -81,17 +81,9 @@ std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
 //RegisterEntity
 //	EntityIndex‚Ö‚Ì’Ç‰Á
 //
-std::weak_ptr<IEntity> EntityManager::RegisterEntity(IEntity * instance)
+std::weak_ptr<IEntity> EntityManager::RegisterEntity(std::shared_ptr<IEntity> instance)
 {
-	if (instance->Object::GetSelf().expired()) assert(0);
-
-	auto result = std::dynamic_pointer_cast<IEntity>(instance->GetSelf().lock());
-	_EntityIndex.emplace(result->GetEntityID(),result);
-
-	instance->_self = result;
-	instance->_components = ComponentManager::GetInstance()->CreateComponents(result.get());
-
-	return result;
+	return _EntityIndex.emplace(instance->GetEntityID(), instance).first->second;
 }
 
 void EntityManager::DestroyEntity(IEntity * instance)

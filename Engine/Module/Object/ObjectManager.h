@@ -33,13 +33,15 @@ public:
 	static void Destroy();
 
 	//Object“o˜^
-	std::shared_ptr<Object> RegisterObject(Object* object);
+	std::shared_ptr<Object> RegisterObject(std::shared_ptr<Object> object);
+	//Obejct‚Ì”jŠü
+	void ReleaseObject(Object* object);
 	//“o˜^Object‚Ìæ“¾
 	std::shared_ptr<Object> GetObjectInstance(InstanceID id);
 
 	//Objectíœ“o˜^
 	void DestroyObject(Object* object);
-	//Objectíœ
+	//Objectíœ Object::OnDestory()‚ÌÀs
 	void ClearnUpObject();
 
 	//EditorƒfƒoƒbƒO•\¦

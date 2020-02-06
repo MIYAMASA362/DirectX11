@@ -28,67 +28,33 @@ ComponentList::ComponentList()
 //
 ComponentList::~ComponentList()
 {
-
+	//Components‚Ì”jŠü
+	_Components.clear();
 }
 
-//Add
-//	list‚Ö’Ç‰Á
+//AddComponent
+//	Components‚ÖComponent‚ğ’Ç‰Á‚·‚é
 //
-void ComponentList::Add(std::weak_ptr<IComponent> component)
+void ComponentList::AddComponent(std::shared_ptr<IComponent> add)
 {
-	_components.push_back(component);
+	_Components.emplace(add->GetComponentID(),add);
 }
 
-//Add
-//	list“¯m‚ÌŒ‹‡
-//
-void ComponentList::Add(ComponentList * list)
+std::shared_ptr<IComponent>& ComponentList::GetComponent(ComponentTypeID id)
 {
-	_components.insert(_components.end(),list->_components.begin(),list->_components.end());
-}
-
-//Get
-//	list‚©‚çComponent‚ğæ“¾
-//
-std::weak_ptr<IComponent> ComponentList::Get(ComponentTypeID componentTypeID)
-{
-	for (auto obj : _components)
+	for(auto component : _Components)
 	{
-		if (obj.lock()->GetComponentTypeID() == componentTypeID)
-			return obj.lock();
+		if (component.second->GetComponentTypeID() == id)
+			return component.second;
 	}
-	return std::weak_ptr<IComponent>();
+	assert(0);
+	return std::shared_ptr<IComponent>();
 }
 
-//Remove
-//	list‚©‚çComponentTypeID‚ªˆê’v‚·‚é‚à‚Ì‚ğíœ
+//ReleaseComponent
+//	Component‚ÌŠ—LŒ ”jŠü
 //
-void ComponentList::Remove(ComponentTypeID componentTypeID)
+void ComponentList::ReleaseComponent(ComponentID componentID)
 {
-	_components.remove_if(
-		[componentTypeID](std::weak_ptr<IComponent> component)
-	{
-		return component.lock()->GetComponentTypeID() == componentTypeID;
-	});
-}
-
-//Remove
-//	list‚©‚çComponentID‚ªˆê’v‚·‚é‚à‚Ì‚ğíœ
-//
-void ComponentList::Remove(ComponentID componentID)
-{
-	_components.remove_if(
-		[componentID](std::weak_ptr<IComponent> component)
-	{
-		return component.lock()->GetComponentID() == componentID;
-	});
-	
-}
-
-//Release
-//	components‚ğíœ
-//
-void ComponentList::Release()
-{
-	_components.clear();
+	_Components.erase(componentID);
 }

@@ -18,7 +18,7 @@ public:
 public:
 	void Load(){
 
-		GameObject* MainCamera = this->AddSceneObject("MainCamera", TagName::Default);
+		auto MainCamera = this->AddSceneObject("MainCamera", TagName::Default);
 		{
 			MainCamera->transform().lock()->position(Vector3(0.0f,2.0f,-10.0f));
 			MainCamera->transform().lock()->rotation(Quaternion::Identity());

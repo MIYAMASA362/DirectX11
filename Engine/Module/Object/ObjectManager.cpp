@@ -39,7 +39,6 @@ ObjectManager::~ObjectManager()
 	//オブジェクト配列からオブジェクト削除
 	for (auto object : _ObjectIndex)
 	{
-		object.second->OnDestroy();
 		object.second.reset();
 	}
 
@@ -69,9 +68,9 @@ void ObjectManager::Destroy()
 //RegisterObject
 //	ObjectIndexに追加。Objectにステータス設定
 //
-std::shared_ptr<Object> ObjectManager::RegisterObject(Object * object)
+std::shared_ptr<Object> ObjectManager::RegisterObject(std::shared_ptr<Object> object)
 {
-	return _ObjectIndex.emplace(object->GetInstanceID(), std::shared_ptr<Object>(object)).first->second;
+	return _ObjectIndex.emplace(object->GetInstanceID(),object).first->second;
 }
 
 std::shared_ptr<Object> ObjectManager::GetObjectInstance(InstanceID id)
@@ -81,6 +80,10 @@ std::shared_ptr<Object> ObjectManager::GetObjectInstance(InstanceID id)
 	return find->second;
 }
 
+void ObjectManager::ReleaseObject(Object* object)
+{
+	_ObjectIndex.erase(object->GetInstanceID());
+}
 
 //DestroyObject
 //	DestroyIndexへ追加
@@ -98,8 +101,8 @@ void ObjectManager::ClearnUpObject()
 	for(auto id : _DestroyIndex)
 	{
 		auto find  = _ObjectIndex.find(id);
-		find->second->OnDestroy();
-		_ObjectIndex.erase(find);
+		if (find == _ObjectIndex.end()) assert(0);
+		this->ReleaseObject(find->second.get());
 	}
 	_DestroyIndex.clear();
 }

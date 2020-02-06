@@ -11,7 +11,7 @@ namespace cereal
 //*********************************************************************************************************************
 //
 //	Object
-//		ゲーム内のオブジェクトの基底
+//		固有値を持った識別オブジェクト
 //
 //*********************************************************************************************************************
 class Object
@@ -19,12 +19,10 @@ class Object
 	friend class ObjectManager;
 	friend cereal::access;
 private:
-
 	//固有ID
 	InstanceID _InstanceID;
 
-	std::shared_ptr<Object> _self;
-
+	//シリアル化
 	template<class Archive>
 	void save(Archive& archive) const 
 	{
@@ -44,20 +42,13 @@ private:
 public:
 	//コンストラクタ
 	Object();
-
 	//デストラクタ
 	virtual ~Object();
 
 	//固有IDの取得
 	InstanceID GetInstanceID();
 
-	std::shared_ptr<Object> GetSelf();
-
-protected:
-	//削除時実行関数
-	virtual void OnDestroy();
-
-
+	virtual void Destroy() = 0;
 };
 
 CEREAL_REGISTER_TYPE(Object)

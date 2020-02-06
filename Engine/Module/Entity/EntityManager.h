@@ -29,7 +29,7 @@ public:
 	static EntityManager* GetInstance() { return pInstacne; };
 
 	//EntityIndex‚Ö’Ç‰Á
-	std::weak_ptr<IEntity> RegisterEntity(IEntity* instance);
+	std::weak_ptr<IEntity> RegisterEntity(std::shared_ptr<IEntity> instance);
 	void DestroyEntity(IEntity* instance);
 	//EntityIndex‚©‚çEntity‚Ìíœ
 	void ReleaseEntity(IEntity * instance);

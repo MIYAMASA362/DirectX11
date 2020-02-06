@@ -93,8 +93,6 @@ public:
 			CEREAL_NVP(_IsActive)
 		);
 	}
-
-
 };
 
 CEREAL_REGISTER_TYPE(Entity<GameObject>)

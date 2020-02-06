@@ -23,16 +23,9 @@
 //
 IEntity::IEntity()
 	:
-	Object()
-{
-
-}
-
-IEntity::IEntity(std::shared_ptr<IEntity> sptr, std::shared_ptr<ComponentList> components)
-	:
 	Object(),
-	_self(sptr),
-	_components(components)
+	//ComponentList‚Ì¶¬
+	_ComponentList(ComponentManager::GetInstance()->CreateComponents(this))
 {
 
 }
@@ -42,15 +35,15 @@ IEntity::IEntity(std::shared_ptr<IEntity> sptr, std::shared_ptr<ComponentList> c
 //
 IEntity::~IEntity()
 {
-	_self.reset();
-	_components.reset();
+	//ComponentList‚Ì‰ð•ú
+	ComponentManager::GetInstance()->ReleaseComponents(this);
 }
 
-//Destroy
-//	Object‚Ìíœ
+//Destory
+//	Entity‚Ìíœ–½—ß
 //
 void IEntity::Destroy()
 {
-	this->DestroyComponents();
-	Object::Destroy();
+	//ComponentList‚Ìíœ“o˜^
+	ComponentManager::GetInstance()->DestroyComponents(this);
 }
