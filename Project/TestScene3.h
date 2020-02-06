@@ -16,7 +16,7 @@ public:
 		//	pCamera->transform.get()->position(Vector3(0.0f, 10.0f, -10.0f));
 		//	pCamera->transform.get()->rotation(Quaternion::AngleAxisToEuler(30.0f, Vector3::right()));
 		//	pCamera->transform.get()->localScale(Vector3::one());
-		//	Camera* camera = pCamera->AddComponent<Camera>();
+		//	Camera* camera = pCamera->AddComponent<Camera>().lock().get();
 		//	camera->SetPriority(1);
 		//}
 		////pModel

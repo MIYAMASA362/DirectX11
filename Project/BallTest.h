@@ -20,8 +20,7 @@ public:
 			camera->AddComponent<Camera>().lock()->SetPriority(1);
 		}
 		//Ball
-		//	TODO : ‚±‚±‚Ìˆ—‚ðComponent–ˆ‚É®—‚·‚é
-		/*GameObject* ball = this->AddSceneObject("Ball", TagName::Default);
+		GameObject* ball = this->AddSceneObject("Ball", TagName::Default);
 		{
 			
 			ball->transform().lock()->position(Vector3::up() + Vector3::forward()*6.0f);
@@ -31,9 +30,10 @@ public:
 
 		{
 			GameObject* miku = ModelManager::AddSceneModel("miku_01", this);
+			miku->transform().lock()->position(Vector3::left() * 2.f);
 			miku->transform().lock()->SetParent(ball->transform());
 		}
-*/
+
 		GameObject* plane = this->AddSceneObject("Plane",TagName::Default);
 		{
 			plane->transform().lock()->position(Vector3::up() + Vector3::forward() * 6.0f);
