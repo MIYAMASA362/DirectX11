@@ -1,6 +1,22 @@
 #pragma once
 
+#ifndef EDITOR_HEADER
+#define EDITOR_HEADER
+
+#define WINDOW_XBORDERFRAME ((GetSystemMetrics(SM_CXBORDER) + GetSystemMetrics(SM_CXFIXEDFRAME) + GetSystemMetrics(SM_CXFRAME)) * 2)
+#define WINDOW_YBORDERFRAME ((GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYFRAME)) * 2 + GetSystemMetrics(SM_CYCAPTION))
+
+//ユーザー定義メッセージ
+#define WM_INSPECTOR_DELETE (WM_APP + 1)
+
+#define EDITOR_WINDOW		("EditorWindow")
+#define EDITOR_BASICWINDOW	("EditorBasicWindow")
+#define EDITOR_INSPECTOR	("EditorInspector")
+#define EDITOR_INSPECTOR_VIEW ("EditorInspectorView")
+#define EDITOR_GUIOVERRAP ("EditorGuiOverRap")
+
 class RenderStatus;
+class GameObject;
 
 namespace System
 {
@@ -13,40 +29,8 @@ namespace Editor
 	class MDIWindow;
 	class CommonControlWindow;
 	class FileTreeView;
-
-	//*********************************************************************************************************************
-	//
-	//	InspectorView
-	//
-	//*********************************************************************************************************************
-	class InspectorView final : public System::Window
-	{
-	private:
-		EditorWindow* _EditorWindow = nullptr;
-
-		RenderStatus* _RenderStatus = nullptr;
-
-		HWND _ModelView;
-
-		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
+	class InspectorView;
 	
-		bool _IsDelete = false;
-	
-
-	public:
-		~InspectorView();
-
-		//ウィンドウプロシージャ
-		LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
-		//ウィンドウ生成
-		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style,EditorWindow* editor);
-
-		RenderStatus** GetLPRenderStatus() { return &_RenderStatus; };
-
-		bool GetIsDelete() { return _IsDelete; }
-
-
-	};
 
 	//*********************************************************************************************************************
 	//
@@ -68,7 +52,6 @@ namespace Editor
 
 
 	};
-
 
 	//*********************************************************************************************************************
 	//
@@ -114,6 +97,10 @@ namespace Editor
 		//メッセージループ
 		WPARAM MessageLoop() override;
 
+		void CreateInspector(std::shared_ptr<GameObject> gameObject);
+
 		void Update();
 	};
 }
+
+#endif // !EDITOR_HEADER

@@ -43,7 +43,7 @@ ComponentManager::ComponentManager()
 //
 ComponentManager::~ComponentManager()
 {
-	_EntityComponentIndex.clear();
+	if(_EntityComponentIndex.size() != 0)_EntityComponentIndex.clear();
 }
 
 

@@ -137,6 +137,8 @@ void LoadAssetData(std::string AssetDirectory)
 bool CManager::_IsUpdate = false;
 bool CManager::_IsFixedUpdate = false;
 
+Editor::EditorWindow* CManager::_Editor = nullptr;
+
 void CManager::Initialize(HWND hWnd ,unsigned int fps)
 {
 	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
@@ -283,8 +285,8 @@ void CManager::Finalize()
 	TextureManager::Release();
 	MeshManager::Release();
 
-	ComponentManager::Release();
 	EntityManager::Release();
+	ComponentManager::Release();
 
 	ObjectManager::GetInstance()->ClearnUpObject();
 	ObjectManager::Destroy();

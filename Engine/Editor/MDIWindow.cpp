@@ -1,5 +1,6 @@
 #include<Windows.h>
 #include<vector>
+#include<memory>
 
 #include"Window\Window.h"
 #include"Editor\Editor.h"

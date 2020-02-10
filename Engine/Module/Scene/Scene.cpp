@@ -5,6 +5,10 @@
 
 #include"Module\DirectX\DirectX.h"
 
+#include"Window\Window.h"
+#include"Editor\Editor.h"
+#include"Module\Manager\manager.h"
+
 #include"Module\ECSEngine.h"
 
 #include"Module\Tag\Tag.h"
@@ -147,14 +151,17 @@ void Scene::DebugGUI()
 		if (!obj.second.GetParent().expired()) continue;
 		auto instance = EntityManager::GetInstance()->GetEntity(obj.first).lock();
 		auto gameObject = std::dynamic_pointer_cast<GameObject>(instance);
-		if (ImGui::TreeNode(gameObject->_Name.c_str()))
+		if (ImGui::TreeNode("@"))
 		{
-			if (ImGui::Button("Inspector"))
-			{
-				Debug_InspectorObject = gameObject.get();
-			}
 			DebugGUI_SceneHierarchy(obj.second.GetChildren(), &_hierarchyUtility);
 			ImGui::TreePop();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(gameObject->GetName().data()))
+		{
+			CManager::Editor().CreateInspector(gameObject);
+
+			Debug_InspectorObject = gameObject.get();
 		}
 	}
 
@@ -164,6 +171,7 @@ void Scene::DebugGUI()
 		Debug_InspectorObject->OnDebugGUI();
 		ImGui::End();
 	}
+	
 
 }
 

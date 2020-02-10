@@ -18,18 +18,11 @@
 #include"TreeView.h"
 
 #include "Editor.h"
+#include"InspectorView.h"
 
-#define WINDOW_XBORDERFRAME ((GetSystemMetrics(SM_CXBORDER) + GetSystemMetrics(SM_CXFIXEDFRAME) + GetSystemMetrics(SM_CXFRAME)) * 2)
-#define WINDOW_YBORDERFRAME ((GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYFRAME)) * 2 + GetSystemMetrics(SM_CYCAPTION))
-
-//ユーザー定義メッセージ
-#define WM_INSPECTOR_DELETE (WM_APP + 1)
-
-#define EDITOR_WINDOW		("EditorWindow")
-#define EDITOR_BASICWINDOW	("EditorBasicWindow")
-#define EDITOR_INSPECTOR	("EditorInspector")
-#define EDITOR_INSPECTOR_VIEW ("EditorInspectorView")
-#define EDITOR_GUIOVERRAP ("EditorGuiOverRap")
+#include"Common.h"
+#include"Module\ECSEngine.h"
+#include"Module\Module.h"
 
 using namespace DirectX;
 using namespace System;
@@ -407,6 +400,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 	case WM_SETFOCUS:
 		//最前面に表示する
 		//SetWindowPos(hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+		DefWindowProc(hWnd,uMsg,wParam,lParam);
 		break;
 		//サイズ
 	case WM_SIZE:
@@ -432,6 +426,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			/*SendMessage(this->_GameWindow->Get_Window(), uMsg, wParam, lParam);*/
 			break;
 		default:
+			DefWindowProc(hWnd, uMsg, wParam, lParam);
 			break;
 		}
 		break;
@@ -442,29 +437,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		{
 			//Window -> 新規作成
 		case ID_WINDOW_40003:
-			RECT rect;
-			GetClientRect(this->_hColumnSpace, &rect);
-
-			//インスペクタ
-			//
-			//
-			InspectorView* inspector;
-			inspector = new InspectorView();
-
-			inspector->Create(
-				_hColumnSpace,
-				(HINSTANCE)GetWindowLong(hWnd, GWLP_HINSTANCE),
-				EDITOR_INSPECTOR,
-				"Inspector",
-				0,
-				0,
-				300 - WINDOW_XBORDERFRAME,
-				(rect.bottom - rect.top) - WINDOW_YBORDERFRAME,
-				WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_CHILD | WS_OVERLAPPEDWINDOW,
-				this
-			);
-
-			_Inspectors.push_back(inspector);
+			CreateInspector(std::shared_ptr<GameObject>());
 
 			break;
 			//エディタ終了
@@ -480,6 +453,7 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			_EnableGUI = !_EnableGUI;
 			break;
 		default:
+			DefWindowProc(hWnd,uMsg,wParam,lParam);
 			break;
 		}
 		break;
@@ -519,6 +493,7 @@ WPARAM EditorWindow::MessageLoop()
 	auto& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+	CManager::Editor(this);
 	//Manager
 	CManager::Initialize(this->_SceneWindow->Get_Window(), 60);
 
@@ -587,146 +562,35 @@ WPARAM EditorWindow::MessageLoop()
 	return msg.wParam;
 }
 
+void Editor::EditorWindow::CreateInspector(std::shared_ptr<GameObject> gameObject)
+{
+	RECT rect;
+	GetClientRect(this->_hColumnSpace, &rect);
+
+	//インスペクタ
+	//
+	//
+	InspectorView* inspector;
+	inspector = new InspectorView();
+
+	inspector->Create(
+		_hColumnSpace,
+		(HINSTANCE)GetWindowLong(this->_hColumnSpace, GWLP_HINSTANCE),
+		EDITOR_INSPECTOR,
+		"Inspector",
+		0,
+		0,
+		300 - WINDOW_XBORDERFRAME,
+		(rect.bottom - rect.top) - WINDOW_YBORDERFRAME,
+		WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW,
+		this,
+		gameObject
+	);
+
+	_Inspectors.push_back(inspector);
+}
+
 void Editor::EditorWindow::Update()
 {
 
-}
-
-
-
-//*********************************************************************************************************************
-//
-//	InspectorView
-//
-//*********************************************************************************************************************
-
-Editor::InspectorView::~InspectorView()
-{
-
-}
-
-LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	RECT rect;
-	float width,height;
-
-	switch (uMsg)
-	{
-		//生成
-	case WM_CREATE:
-
-		GetClientRect(hWnd,&rect);
-
-		width = rect.right - rect.left;
-		this->_ModelView = CreateWindow(
-			EDITOR_INSPECTOR_VIEW,
-			"ModelView",
-			WS_CHILD | WS_VISIBLE,
-			0,
-			rect.bottom -(width),
-			width,
-			width,
-			hWnd,
-			NULL,
-			(HINSTANCE)GetWindowLongPtr(hWnd,GWLP_HINSTANCE),
-			NULL
-		);
-
-		if (FAILED(D3DRenderer::GetInstance()->CreateRenderStatus(this->_ModelView, &_RenderStatus, 60))) {
-			MessageBox(NULL, "RenderStatusの生成に失敗しました。","失敗", MB_OK);
-			return 0;
-		}
-
-		SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE);
-		break;
-
-		//サイズ
-	case WM_SIZE:
-
-		GetClientRect(this->_ModelView,&rect);
-		height = rect.bottom - rect.top;
-		width = rect.right - rect.left;
-		MoveWindow(this->_ModelView,0,HIWORD(lParam) - height,LOWORD(lParam),height,TRUE);
-
-		if (_RenderStatus)
-		{
-			_RenderStatus->CleanupRenderTargetView();
-			_RenderStatus->CleanupDepthStencilView();
-
-			GetClientRect(this->_ModelView, &rect);
-			_RenderStatus->GetSwapChain()->ResizeBuffers(0, (UINT)rect.right - rect.left, (UINT)rect.bottom - rect.top, DXGI_FORMAT_UNKNOWN, 0);
-			_RenderStatus->SetClientViewport(this->_ModelView);
-
-			_RenderStatus->CreateRenderTargetView();
-			_RenderStatus->CreateDepthStencilView();
-		}
-		break;
-
-		//最小・最大サイズの設定
-	case WM_GETMINMAXINFO:
-		MINMAXINFO* info;
-		info = (MINMAXINFO*)lParam;
-		info->ptMinTrackSize.x = 300;
-		info->ptMinTrackSize.y = 300;
-		break;
-
-	case WM_CLOSE:
-		DestroyWindow(hWnd);
-		break;
-	case WM_DESTROY:
-		this->_IsDelete = true;
-		break;
-	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-		break;
-	}
-	return 0;
-}
-
-HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style, EditorWindow * editor)
-{
-	this->_EditorWindow = editor;
-	return Create(hParent,hInstance,lpClassName,lpCaption,x,y,width,height,style);
-}
-
-
-
-HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
-{
-	WNDCLASS WndClass = {
-		CS_CLASSDC,
-		DefWindowProc,
-		0,
-		0,
-		hInstance,
-		NULL,
-		LoadCursor(NULL,IDC_ARROW),
-		(HBRUSH)(COLOR_WINDOW + 1),
-		NULL,
-		EDITOR_INSPECTOR_VIEW
-	};
-	RegisterClass(&WndClass);
-
-	//ウィンドウ生成
-	this->_hWnd = CreateWindowEx(
-		WS_EX_TOOLWINDOW,
-		lpClassName,
-		lpCaption,
-		style,
-		x,
-		y,
-		width + (GetSystemMetrics(SM_CXBORDER) + GetSystemMetrics(SM_CXFIXEDFRAME) + GetSystemMetrics(SM_CXFRAME)) * 2,
-		height + (GetSystemMetrics(SM_CYBORDER) + GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYFRAME)) * 2 + GetSystemMetrics(SM_CYCAPTION),
-		hParent,
-		NULL,
-		hInstance,
-		this	//自身のポインタ設定 プロシージャに渡す
-	);
-
-	if (!this->_hWnd) {
-		MessageBox(NULL, "hWndの設定に失敗しました。", lpCaption, MB_OK);
-		return E_FAIL;
-	}
-
-	return S_OK;
 }

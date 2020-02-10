@@ -96,8 +96,7 @@ inline Component<Type>::Component(EntityID OwnerID)
 template<typename Type>
 inline Component<Type>::~Component()
 {
-	//Index‚©‚ç”jŠü
-	//ComponentIndex.erase(this->GetComponentID());
+
 }
 
 //GetComponent
