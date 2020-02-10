@@ -1,18 +1,6 @@
+#include"Constant.hlsli"
 Texture2D	 Texture[2]:register(t0);
 SamplerState Sampler:register(s0);
-
-struct LIGHT
-{
-	float4 Direction;
-	float4 Diffuse;
-	float4 Ambient;
-	float4 Position;
-};
-
-struct CAMERA
-{
-	float4 Position;
-};
 
 
 

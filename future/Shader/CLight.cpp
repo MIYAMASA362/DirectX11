@@ -1,5 +1,6 @@
 #include "game_object.h"
 #include "CLight.h"
+#include"shader.h"
 
 #include "input.h"
 
@@ -46,8 +47,6 @@ void CLight::DrawShadow()
 	XMVECTOR dir = XMVectorSet(0.f,-1.f,0.f,0.f);
 	dir = XMVector3TransformCoord(dir,rotMtx);
 	m_Light.Direction = XMFLOAT4(dir.m128_f32[0],dir.m128_f32[1],dir.m128_f32[2],dir.m128_f32[3]);
-
-	this->UpdateSubResource();
 }
 
 void CLight::Draw()
@@ -63,4 +62,14 @@ void CLight::UnInit()
 void CLight::UpdateSubResource()
 {
 	CRenderer::GetDeviceContext()->UpdateSubresource(m_LightBuffer,0,NULL,&m_Light,0,0);
+}
+
+void CLight::SetViewMatrix(XMFLOAT4X4 * ViewMatrix)
+{
+	m_Light.ViewMatrix = Transpose(ViewMatrix);
+}
+
+void CLight::SetProjectionMatrix(XMFLOAT4X4 * ProjectionMatrix)
+{
+	m_Light.ProjMatrix = Transpose(ProjectionMatrix);
 }

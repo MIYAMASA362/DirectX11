@@ -12,7 +12,7 @@ CField::CField()
 	VERTEX_3D_NORMAL vertex[4];
 	vertex[0].Position	= XMFLOAT3(-5.0f, 0.0f, 5.0f);
 
-	vertex[0].Normal		= XMFLOAT3(0.0f,1.0f,0.0f);
+	vertex[0].Normal	= XMFLOAT3(0.0f,1.0f,0.0f);
 	vertex[0].Binormal	= XMFLOAT3(0.0f,0.0f,1.0f);
 	vertex[0].Tangent	= XMFLOAT3(1.0f,0.0f,0.0f);
 
@@ -21,7 +21,7 @@ CField::CField()
 
 	vertex[1].Position	= XMFLOAT3(-5.0f, 0.0f, -5.0f);
 
-	vertex[1].Normal		= XMFLOAT3(0.0f, 1.0f, 0.0f);
+	vertex[1].Normal	= XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[1].Binormal	= XMFLOAT3(0.0f, 0.0f, 1.0f);
 	vertex[1].Tangent	= XMFLOAT3(1.0f, 0.0f, 0.0f);
 
@@ -30,7 +30,7 @@ CField::CField()
 
 	vertex[2].Position	= XMFLOAT3(5.0f, 0.0f, 5.0f);
 
-	vertex[2].Normal		= XMFLOAT3(0.0f, 1.0f, 0.0f);
+	vertex[2].Normal	= XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[2].Binormal	= XMFLOAT3(0.0f, 0.0f, 1.0f);
 	vertex[2].Tangent	= XMFLOAT3(1.0f, 0.0f, 0.0f);
 
@@ -39,7 +39,7 @@ CField::CField()
 
 	vertex[3].Position	= XMFLOAT3(5.0f, 0.0f, -5.0f);
 
-	vertex[3].Normal		= XMFLOAT3(0.0f, 1.0f, 0.0f);
+	vertex[3].Normal	= XMFLOAT3(0.0f, 1.0f, 0.0f);
 	vertex[3].Binormal	= XMFLOAT3(0.0f, 0.0f, 1.0f);
 	vertex[3].Tangent	= XMFLOAT3(1.0f, 0.0f, 0.0f);
 
@@ -60,7 +60,7 @@ CField::CField()
 	CRenderer::GetDevice()->CreateBuffer(&bd, &sd, &_VertexBuffer);
 
 	_Shader = new CShaderNormal();
-	_Shader->Init("shader3DNormalMappingVS.cso","shader3DNormalMappingPS.cso");
+	_Shader->Init("ShaderShadowVS.cso","ShaderShadowPS.cso");
 
 	_Texture = new CTexture[3];
 	_Texture[0].Load("data/TEXTURE/Rock_Normal.tga");
@@ -80,7 +80,6 @@ void CField::Update()
 	if (CInput::GetKeyPress('S')) this->m_Position.z -= 0.1f;
 	if (CInput::GetKeyPress('A')) this->m_Position.x -= 0.1f;
 	if (CInput::GetKeyPress('D')) this->m_Position.x += 0.1f;
-
 	if (CInput::GetKeyPress('Q')) this->m_Rotation.x += 0.1f;
 	if (CInput::GetKeyPress('E')) this->m_Rotation.x -= 0.1f;
 }
@@ -135,7 +134,6 @@ void CField::Draw()
 	CRenderer::SetTexture(Textures, 0, 3);
 
 	XMMATRIX world;
-	world = XMMatrixIdentity();
 	world = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);
 	world *= XMMatrixRotationRollPitchYaw(m_Rotation.x,m_Rotation.y,m_Rotation.z);
 	world *= XMMatrixTranslation(m_Position.x,m_Position.y,m_Position.z);

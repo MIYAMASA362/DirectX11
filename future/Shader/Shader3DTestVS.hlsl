@@ -1,9 +1,4 @@
-struct LIGHT
-{
-	float4 Direction;
-	float4 Diffuse;
-	float4 Ambient;
-};
+#include"Constant.hlsli"
 
 cbuffer ConstantBuffer:register(b0)
 {

@@ -12,7 +12,7 @@ cbuffer LightBuffer:register(b1)
 	LIGHT Light;
 }
 
-cbuffer CameraBuffer:register(b2)
+cbuffer CameraBuffer : register(b2)
 {
 	CAMERA Camera;
 }
@@ -21,19 +21,19 @@ cbuffer CameraBuffer:register(b2)
 
 void main(
 	in float4 inPosition		: POSITION0,
-	in float4 inNormal		: NORMAL0,
-	in float4 inBinormal		: BINORMAL0,
-	in float4 inTangent		: TANGENT0,
-	in float4 inDiffuse		: COLOR0,
-	in float2 inTexCoord		: TEXCOORD0,
+	in float4 inNormal : NORMAL0,
+	in float4 inBinormal : BINORMAL0,
+	in float4 inTangent : TANGENT0,
+	in float4 inDiffuse : COLOR0,
+	in float2 inTexCoord : TEXCOORD0,
 
-	out float4 outPosition	: SV_POSITION,
-	out float4 outWorldPosition:POSITION0,
-	out float4 outNormal		: NORMAL0,
-	out float4 outBinormal	: BINORMAL0,
-	out float4 outTangent	: TANGENT0,
-	out float4 outDiffuse	: COLOR0,
-	out float2 outTexCoord	: TEXCOORD0
+	out float4 outPosition : SV_POSITION,
+	out float4 outWorldPosition : POSITION0,
+	out float4 outNormal : NORMAL0,
+	out float4 outBinormal : BINORMAL0,
+	out float4 outTangent : TANGENT0,
+	out float4 outDiffuse : COLOR0,
+	out float2 outTexCoord : TEXCOORD0
 )
 {
 	matrix wvp;
@@ -41,7 +41,7 @@ void main(
 	wvp = mul(wvp, Projection);
 
 	outPosition = mul(inPosition, wvp);
-	outWorldPosition = mul(inPosition,World);
+	outWorldPosition = mul(inPosition, World);
 
 	inNormal.w = 0.0;
 	outNormal = mul(inNormal, World);
@@ -50,7 +50,7 @@ void main(
 	outBinormal = mul(inBinormal, World);
 
 	inTangent.w = 0.0;
-	outTangent = mul(inTangent,World);
+	outTangent = mul(inTangent, World);
 
 	outDiffuse = inDiffuse;
 	outTexCoord = inTexCoord;

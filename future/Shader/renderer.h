@@ -78,9 +78,11 @@ struct DX11_SUBSET
 struct LIGHT
 {
 	XMFLOAT4		Direction;
-	COLOR		Diffuse;
-	COLOR		Ambient;
+	COLOR			Diffuse;
+	COLOR			Ambient;
 	XMFLOAT4		Position;
+	XMFLOAT4X4		ViewMatrix;
+	XMFLOAT4X4		ProjMatrix;
 };
 
 
