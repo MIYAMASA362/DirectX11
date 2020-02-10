@@ -16,6 +16,7 @@ public:
 	CField();
 	void Init();
 	void Update();
+	void DrawShadow();
 	void Draw();
 	void UnInit();
 

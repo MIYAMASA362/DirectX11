@@ -4,7 +4,7 @@
 #include "main.h"
 #include "renderer.h"
 
-
+class CScene;
 
 class CGameObject
 {
@@ -14,6 +14,8 @@ protected:
 	XMFLOAT3					m_Position;
 	XMFLOAT3					m_Rotation;
 	XMFLOAT3					m_Scale;
+
+	CScene* m_Scene;
 
 public:
 
@@ -25,7 +27,7 @@ public:
 	void SetRotation( XMFLOAT3 Rotation ){ m_Rotation = Rotation; }
 	void SetScale( XMFLOAT3 Scale ){ m_Scale = Scale; }
 
-
+	void SetScene(CScene* scene) { m_Scene = scene; }
 
 public:
 
@@ -45,6 +47,10 @@ public:
 	{
 	}
 
+	virtual void DrawShadow()
+	{
+		
+	}
 
 	virtual void Draw()
 	{

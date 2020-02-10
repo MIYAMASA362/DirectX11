@@ -1,15 +1,11 @@
 
 #include"main.h"
 #include"renderer.h"
-#include"game_object.h"
-#include "Camera.h"
+
+#include"scene.h"
 
 #include "shader.h"
-
-#include "main.h"
 #include "renderer.h"
-#include "model.h"
-#include "texture.h"
 
 #include"input.h"
 
@@ -57,6 +53,46 @@ void CModel::Update()
 
 }
 
+void CModel::DrawShadow()
+{
+	CLight* light = m_Scene->GetGameObject<CLight>();
+
+	UINT stride = sizeof(VERTEX_3D);
+	UINT offset = 0;
+	CRenderer::GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
+
+	CRenderer::GetDeviceContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+	// マトリクス設定
+	XMMATRIX world;
+	world = XMMatrixScaling(m_Scale.x, m_Scale.y, m_Scale.z);
+	world *= XMMatrixRotationRollPitchYaw(m_Rotation.x, m_Rotation.y, m_Rotation.z);
+	world *= XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
+
+	XMFLOAT4X4 worldf;
+	XMStoreFloat4x4(&worldf, world);
+	m_Shader->SetWorldMatrix(&worldf);
+
+	XMFLOAT4X4 viewf;
+	DirectX::XMStoreFloat4x4(&viewf, light->GetViewMatrix());
+	m_Shader->SetViewMatrix(&viewf);
+
+	XMFLOAT4X4 projection;
+	DirectX::XMStoreFloat4x4(&projection, m_Camera->GetProjectionMatrix());
+	m_Shader->SetProjectionMatrix(&projection);
+
+	m_Shader->Set();
+	m_Shader->SetLight(light);
+
+	CRenderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	for (unsigned short i = 0; i < m_SubsetNum; i++)
+	{
+		// ポリゴン描画
+		CRenderer::DrawIndexed(m_SubsetArray[i].IndexNum, m_SubsetArray[i].StartIndex, 0);
+	}
+}
+
 void CModel::Draw()
 {
 	UINT stride = sizeof(VERTEX_3D);
@@ -91,6 +127,8 @@ void CModel::Draw()
 	m_Shader->SetProjectionMatrix(&projection);
 
 	m_Shader->Set();
+	CLight* light = m_Scene->GetGameObject<CLight>();
+	m_Shader->SetLight(light);
 
 	CRenderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 

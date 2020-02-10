@@ -6,6 +6,9 @@
 
 #include<io.h>
 
+#include"game_object.h"
+#include"CLight.h"
+
 void CShaderNormal::Init(const char * VertexShader, const char * PixelShader)
 {
 	// 頂点シェーダ生成
@@ -77,15 +80,7 @@ void CShaderNormal::Init(const char * VertexShader, const char * PixelShader)
 
 		hBufferDesc.ByteWidth = sizeof(CONSTANT);
 		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc, NULL, &m_ConstantBuffer);
-
-		hBufferDesc.ByteWidth = sizeof(LIGHT);
-		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc, NULL, &_LightBuffer);
 	}
-
-	_Light.Direction = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
-	_Light.Diffuse = COLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	_Light.Ambient = COLOR(0.25f, 0.25f, 0.25f, 1.0f);
-	_Light.Position = XMFLOAT4(0.0f,0.0f,0.0f,0.0f);
 }
 
 void CShaderNormal::Uninit()
@@ -111,13 +106,14 @@ void CShaderNormal::Set()
 	// 定数バッファ更新
 	CRenderer::GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, NULL, &m_Constant, 0, 0);
 
-	CRenderer::GetDeviceContext()->UpdateSubresource(_LightBuffer, 0, NULL, &_Light, 0, 0);
-
 	// 定数バッファ設定
 	CRenderer::GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
-	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1, 1, &_LightBuffer);
-
 	CRenderer::GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
-	CRenderer::GetDeviceContext()->PSSetConstantBuffers(1,1,&_LightBuffer);
+}
+
+void CShaderNormal::SetLight(CLight * light)
+{
+	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1,1,light->GetBuffer());
+	CRenderer::GetDeviceContext()->PSSetConstantBuffers(1,1,light->GetBuffer());
 }
 

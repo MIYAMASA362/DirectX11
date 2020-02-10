@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include<typeinfo>
 #include "main.h"
 
 #include "game_object.h"
@@ -11,6 +12,7 @@
 #include"Field.h"
 #include "polygon.h"
 #include"model.h"
+#include"CLight.h"
 
 class CScene
 {
@@ -26,6 +28,7 @@ public:
 	{
 		auto camera = AddGameObject<CCamera>();
 		
+		AddGameObject<CLight>();
 		AddGameObject<CPolygon>();
 
 		{
@@ -87,6 +90,11 @@ public:
 			object->Update();
 	}
 
+	virtual void DrawShadow()
+	{
+		for (CGameObject* object : m_GameObject)
+			object->DrawShadow();
+	}
 
 	virtual void Draw()
 	{
@@ -99,9 +107,21 @@ public:
 	T* AddGameObject()
 	{
 		T* gameObject = new T();
+		gameObject->SetScene(this);
 		gameObject->Init();
 		m_GameObject.push_back( gameObject );
 
 		return gameObject;
+	}
+
+	template<typename T>
+	T* GetGameObject()
+	{
+		for(auto object : m_GameObject)
+		{
+			if (typeid(T) == typeid(*object))
+				return (T*)object;
+		}
+		return nullptr;
 	}
 };

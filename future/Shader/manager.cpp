@@ -47,7 +47,7 @@ void CManager::Draw()
 {
 
 	CRenderer::BeginShadow();
-	m_Scene->Draw();
+	m_Scene->DrawShadow();
 
 	CRenderer::Begin();
 

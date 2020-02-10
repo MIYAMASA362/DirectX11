@@ -53,6 +53,7 @@ public:
 	void Init();
 	void Uninit();
 	void Update();
+	void DrawShadow();
 	void Draw();
 
 	void Load( const char *FileName );

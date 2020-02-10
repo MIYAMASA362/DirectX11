@@ -1,8 +1,7 @@
 #include"game_object.h"
 #include"renderer.h"
 
-#include"texture.h"
-#include"Camera.h"
+#include"scene.h"
 
 #include "Field.h"
 
@@ -77,19 +76,47 @@ void CField::Init()
 void CField::Update()
 {
 	//m_Rotation.x += 0.01f;
-	if (CInput::GetKeyPress('W'))
-		this->m_Position.z += 0.1f;
-	if (CInput::GetKeyPress('S'))
-		this->m_Position.z -= 0.1f;
-	if (CInput::GetKeyPress('A'))
-		this->m_Position.x -= 0.1f;
-	if (CInput::GetKeyPress('D'))
-		this->m_Position.x += 0.1f;
+	if (CInput::GetKeyPress('W')) this->m_Position.z += 0.1f;
+	if (CInput::GetKeyPress('S')) this->m_Position.z -= 0.1f;
+	if (CInput::GetKeyPress('A')) this->m_Position.x -= 0.1f;
+	if (CInput::GetKeyPress('D')) this->m_Position.x += 0.1f;
 
-	if (CInput::GetKeyPress('Q'))
-		this->m_Rotation.x += 0.1f;
-	if (CInput::GetKeyPress('E'))
-		this->m_Rotation.x -= 0.1f;
+	if (CInput::GetKeyPress('Q')) this->m_Rotation.x += 0.1f;
+	if (CInput::GetKeyPress('E')) this->m_Rotation.x -= 0.1f;
+}
+
+void CField::DrawShadow()
+{
+	CLight* light = m_Scene->GetGameObject<CLight>();
+
+	UINT stride = sizeof(VERTEX_3D_NORMAL);
+	UINT offset = 0;
+
+	CRenderer::GetDeviceContext()->IASetVertexBuffers(0, 1, &_VertexBuffer, &stride, &offset);
+
+	XMMATRIX world;
+	world = XMMatrixIdentity();
+	world = XMMatrixScaling(m_Scale.x, m_Scale.y, m_Scale.z);
+	world *= XMMatrixRotationRollPitchYaw(m_Rotation.x, m_Rotation.y, m_Rotation.z);
+	world *= XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
+
+	XMFLOAT4X4 worldf;
+	DirectX::XMStoreFloat4x4(&worldf, world);
+	_Shader->SetWorldMatrix(&worldf);
+
+	XMFLOAT4X4 viewf;
+	DirectX::XMStoreFloat4x4(&viewf, light->GetViewMatrix());
+	_Shader->SetViewMatrix(&viewf);
+
+	XMFLOAT4X4 projf;
+	DirectX::XMStoreFloat4x4(&projf, _Camera->GetProjectionMatrix());
+	_Shader->SetProjectionMatrix(&projf);
+
+	_Shader->Set();
+	_Shader->SetLight(light);
+
+	CRenderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	CRenderer::GetDeviceContext()->Draw(4, 0);
 }
 
 void CField::Draw()
@@ -126,6 +153,8 @@ void CField::Draw()
 	_Shader->SetProjectionMatrix(&projf);
 
 	_Shader->Set();
+	CLight* light = m_Scene->GetGameObject<CLight>();
+	_Shader->SetLight(light);
 
 	CRenderer::GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	CRenderer::GetDeviceContext()->Draw(4,0);
