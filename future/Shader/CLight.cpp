@@ -11,25 +11,31 @@ CLight::CLight()
 
 void CLight::Init()
 {
-	D3D11_BUFFER_DESC bd;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.StructureByteStride = sizeof(float);
-	bd.ByteWidth = sizeof(LIGHT);
-	
-	CRenderer::GetDevice()->CreateBuffer(&bd,NULL,&m_LightBuffer);
+	m_Viewport.Width = SCREEN_WIDTH;
+	m_Viewport.Height = SCREEN_HEIGHT;
+	m_Viewport.MinDepth = 0.f;
+	m_Viewport.MaxDepth = 1.f;
+	m_Viewport.TopLeftX = 0.f;
+	m_Viewport.TopLeftY = 0.f;
 }
 
 void CLight::Update()
 {
+#if 0
 	if (CInput::GetKeyPress('U')) this->m_Rotation.x += 0.1f;
 	if (CInput::GetKeyPress('J')) this->m_Rotation.x -= 0.1f;
 	if (CInput::GetKeyPress('H')) this->m_Rotation.y -= 0.1f;
 	if (CInput::GetKeyPress('K')) this->m_Rotation.y += 0.1f;
 	if (CInput::GetKeyPress('Y')) this->m_Rotation.z -= 0.1f;
 	if (CInput::GetKeyPress('I')) this->m_Rotation.z += 0.1f;
+#else
+	if (CInput::GetKeyPress('U')) this->m_Position.z += 0.1f;
+	if (CInput::GetKeyPress('J')) this->m_Position.z -= 0.1f;
+	if (CInput::GetKeyPress('H')) this->m_Position.x -= 0.1f;
+	if (CInput::GetKeyPress('K')) this->m_Position.x += 0.1f;
+	if (CInput::GetKeyPress('Y')) this->m_Position.y += 0.1f;
+	if (CInput::GetKeyPress('I')) this->m_Position.y -= 0.1f;
+#endif
 }
 
 void CLight::DrawShadow()
@@ -44,9 +50,7 @@ void CLight::DrawShadow()
 	XMVECTOR det;
 	m_ViewMatrix = XMMatrixInverse(&det,invViewMatrix);
 
-	XMVECTOR dir = XMVectorSet(0.f,-1.f,0.f,0.f);
-	dir = XMVector3TransformCoord(dir,rotMtx);
-	m_Light.Direction = XMFLOAT4(dir.m128_f32[0],dir.m128_f32[1],dir.m128_f32[2],dir.m128_f32[3]);
+	m_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.f,m_Viewport.Width / m_Viewport.Height,1.f,1000.f);
 }
 
 void CLight::Draw()
@@ -56,20 +60,20 @@ void CLight::Draw()
 
 void CLight::UnInit()
 {
-	if (m_LightBuffer) m_LightBuffer->Release();
+
 }
 
-void CLight::UpdateSubResource()
+XMFLOAT4X4 CLight::GetViewMatrix()
 {
-	CRenderer::GetDeviceContext()->UpdateSubresource(m_LightBuffer,0,NULL,&m_Light,0,0);
+	XMFLOAT4X4 viewMatrixf;
+	XMStoreFloat4x4(&viewMatrixf,m_ViewMatrix);
+	return viewMatrixf;
 }
 
-void CLight::SetViewMatrix(XMFLOAT4X4 * ViewMatrix)
+XMFLOAT4X4 CLight::GetProjectionMatrix()
 {
-	m_Light.ViewMatrix = Transpose(ViewMatrix);
+	XMFLOAT4X4 projectionMatrixf;
+	XMStoreFloat4x4(&projectionMatrixf,m_ProjectionMatrix);
+	return projectionMatrixf;
 }
 
-void CLight::SetProjectionMatrix(XMFLOAT4X4 * ProjectionMatrix)
-{
-	m_Light.ProjMatrix = Transpose(ProjectionMatrix);
-}

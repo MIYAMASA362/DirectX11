@@ -60,6 +60,9 @@ public:
 
 class CShader:public CShaderBase<CONSTANT>
 {
+private:
+	ID3D11Buffer* m_LightBuffer;
+	LIGHT m_Light;
 public:
 	void Init( const char* VertexShader, const char* PixelShader ) override;
 	void Uninit() override;

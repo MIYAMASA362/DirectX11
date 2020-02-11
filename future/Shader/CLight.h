@@ -3,10 +3,10 @@
 class CLight : public CGameObject
 {
 private:
-	ID3D11Buffer* m_LightBuffer;
-	LIGHT m_Light;
+	D3D11_VIEWPORT m_Viewport;
 
 	XMMATRIX m_ViewMatrix;
+	XMMATRIX m_ProjectionMatrix;
 public:
 	CLight();
 
@@ -16,11 +16,6 @@ public:
 	void Draw();
 	void UnInit();
 
-	void UpdateSubResource();
-
-	XMMATRIX GetViewMatrix() { return m_ViewMatrix; }
-	ID3D11Buffer** GetBuffer() { return &m_LightBuffer; };
-
-	void SetViewMatrix(XMFLOAT4X4* ViewMatrix);
-	void SetProjectionMatrix(XMFLOAT4X4* ProjectionMatrix);
+	XMFLOAT4X4 GetViewMatrix();
+	XMFLOAT4X4 GetProjectionMatrix();
 };

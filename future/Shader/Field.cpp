@@ -75,13 +75,6 @@ void CField::Init()
 
 void CField::Update()
 {
-	//m_Rotation.x += 0.01f;
-	if (CInput::GetKeyPress('W')) this->m_Position.z += 0.1f;
-	if (CInput::GetKeyPress('S')) this->m_Position.z -= 0.1f;
-	if (CInput::GetKeyPress('A')) this->m_Position.x -= 0.1f;
-	if (CInput::GetKeyPress('D')) this->m_Position.x += 0.1f;
-	if (CInput::GetKeyPress('Q')) this->m_Rotation.x += 0.1f;
-	if (CInput::GetKeyPress('E')) this->m_Rotation.x -= 0.1f;
 }
 
 void CField::DrawShadow()
@@ -103,13 +96,8 @@ void CField::DrawShadow()
 	DirectX::XMStoreFloat4x4(&worldf, world);
 	_Shader->SetWorldMatrix(&worldf);
 
-	XMFLOAT4X4 viewf;
-	DirectX::XMStoreFloat4x4(&viewf, light->GetViewMatrix());
-	_Shader->SetViewMatrix(&viewf);
-
-	XMFLOAT4X4 projf;
-	DirectX::XMStoreFloat4x4(&projf, _Camera->GetProjectionMatrix());
-	_Shader->SetProjectionMatrix(&projf);
+	_Shader->SetViewMatrix(&light->GetViewMatrix());
+	_Shader->SetProjectionMatrix(&light->GetProjectionMatrix());
 
 	_Shader->Set();
 	_Shader->SetLight(light);
@@ -129,9 +117,10 @@ void CField::Draw()
 	{
 		_Texture[0].GetShaderResourceView(),
 		_Texture[1].GetShaderResourceView(),
-		_Texture[2].GetShaderResourceView()
+		_Texture[2].GetShaderResourceView(),
+		CRenderer::m_ShadowDepthShaderResourceView
 	};
-	CRenderer::SetTexture(Textures, 0, 3);
+	CRenderer::SetTexture(Textures, 0, 4);
 
 	XMMATRIX world;
 	world = XMMatrixScaling(m_Scale.x,m_Scale.y,m_Scale.z);

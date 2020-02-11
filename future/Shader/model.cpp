@@ -37,20 +37,6 @@ void CModel::Uninit()
 
 void CModel::Update()
 {
-	if (CInput::GetKeyPress('W'))
-		this->m_Position.z += 0.1f;
-	if (CInput::GetKeyPress('S'))
-		this->m_Position.z -= 0.1f;
-	if (CInput::GetKeyPress('A'))
-		this->m_Position.x -= 0.1f;
-	if (CInput::GetKeyPress('D'))
-		this->m_Position.x += 0.1f;
-
-	if (CInput::GetKeyPress('Q'))
-		this->m_Rotation.x += 0.1f;
-	if (CInput::GetKeyPress('E'))
-		this->m_Rotation.x -= 0.1f;
-
 }
 
 void CModel::DrawShadow()
@@ -73,9 +59,7 @@ void CModel::DrawShadow()
 	XMStoreFloat4x4(&worldf, world);
 	m_Shader->SetWorldMatrix(&worldf);
 
-	XMFLOAT4X4 viewf;
-	DirectX::XMStoreFloat4x4(&viewf, light->GetViewMatrix());
-	m_Shader->SetViewMatrix(&viewf);
+	m_Shader->SetViewMatrix(&light->GetViewMatrix());
 
 	XMFLOAT4X4 projection;
 	DirectX::XMStoreFloat4x4(&projection, m_Camera->GetProjectionMatrix());

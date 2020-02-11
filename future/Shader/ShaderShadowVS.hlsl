@@ -33,7 +33,8 @@ void main(
 	out float4 outBinormal : BINORMAL0,
 	out float4 outTangent : TANGENT0,
 	out float4 outDiffuse : COLOR0,
-	out float2 outTexCoord : TEXCOORD0
+	out float2 outTexCoord : TEXCOORD0,
+	out float4 outShadowCoord : TEXCOORD1
 )
 {
 	matrix wvp;
@@ -54,4 +55,9 @@ void main(
 
 	outDiffuse = inDiffuse;
 	outTexCoord = inTexCoord;
+
+	matrix lightwvp;
+	lightwvp = mul(World,Light.View);
+	lightwvp = mul(lightwvp,Light.Projection);
+	outShadowCoord = mul(inPosition,lightwvp);
 }

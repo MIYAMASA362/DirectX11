@@ -1,5 +1,5 @@
 #include"Constant.hlsli"
-Texture2D	 Texture[3]:register(t0);
+Texture2D	 Texture[4]:register(t0);
 SamplerState Sampler:register(s0);
 
 
@@ -21,6 +21,7 @@ void main(
 	in float4 inTangent : TANGENT0,
 	in float4 inDiffuse : COLOR0,
 	in float2 inTexCoord : TEXCOORD0,
+	in float4 inShadowCoord : TEXCOORD1,
 	out float4 outDiffuse : SV_Target
 )
 {
@@ -54,10 +55,17 @@ void main(
 	specular = saturate(specular);
 	specular = pow(specular, 10);
 
+	//シャドウ
+	inShadowCoord /= inShadowCoord.w;
+	inShadowCoord.x = inShadowCoord.x * 0.5 + 0.5;
+	inShadowCoord.y = inShadowCoord.y * 0.5 + 0.5;
+	float depth = Texture[3].Sample(Sampler,inShadowCoord.xy);
+
 	//ライティング
 	float light = -dot(normalMap.xyz, normalize(Light.Direction.xyz));
 	light = saturate(light);
-	outDiffuse = Texture[2].Sample(Sampler, inTexCoord) * light;
-	outDiffuse += specular;
+	outDiffuse.rgb = depth;
+	outDiffuse *= Texture[2].Sample(Sampler, inTexCoord) * light;
+	//outDiffuse += specular;
 	outDiffuse.a = 1.0;
 }

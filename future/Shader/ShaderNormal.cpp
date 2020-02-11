@@ -80,6 +80,9 @@ void CShaderNormal::Init(const char * VertexShader, const char * PixelShader)
 
 		hBufferDesc.ByteWidth = sizeof(CONSTANT);
 		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc, NULL, &m_ConstantBuffer);
+
+		hBufferDesc.ByteWidth = sizeof(LIGHT);
+		CRenderer::GetDevice()->CreateBuffer(&hBufferDesc,NULL,&m_LightBuffer);
 	}
 }
 
@@ -113,7 +116,20 @@ void CShaderNormal::Set()
 
 void CShaderNormal::SetLight(CLight * light)
 {
-	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1,1,light->GetBuffer());
-	CRenderer::GetDeviceContext()->PSSetConstantBuffers(1,1,light->GetBuffer());
+	XMFLOAT3 position = light->GetPosition();
+	m_Light.Position = XMFLOAT4(position.x, position.y, position.z, 0.f);
+
+	XMFLOAT3 rotation = light->GetRotation();
+	XMVECTOR dir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+	dir = XMVector3TransformCoord(dir, XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z));
+	m_Light.Direction = XMFLOAT4(dir.m128_f32[0], dir.m128_f32[1], dir.m128_f32[2], dir.m128_f32[3]);
+
+	m_Light.ViewMatrix = Transpose(&light->GetViewMatrix());
+	m_Light.ProjMatrix = Transpose(&light->GetProjectionMatrix());
+
+	CRenderer::GetDeviceContext()->UpdateSubresource(m_LightBuffer, 0, NULL, &m_Light, 0, 0);
+
+	CRenderer::GetDeviceContext()->VSSetConstantBuffers(1, 1, &m_LightBuffer);
+	CRenderer::GetDeviceContext()->PSSetConstantBuffers(1, 1, &m_LightBuffer);
 }
 
