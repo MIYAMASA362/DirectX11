@@ -19,8 +19,6 @@ using namespace Editor;
 
 //CreateSolidBrush(RGB(0xff, 0xff, 0xff))
 
-LPTSTR strItem[] = { TEXT("RENA") , TEXT("YUKI") , TEXT("MIMI") };
-
 //*********************************************************************************************************************
 //
 //	TreeView

@@ -49,6 +49,7 @@ namespace Editor
 
 		void Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+		//”’l“ü—ÍƒJƒeƒSƒŠ
 		struct CategoriesEdit
 		{
 			HWND hEditX, hEditY, hEditZ;

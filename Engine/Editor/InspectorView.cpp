@@ -117,7 +117,7 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		break;
 
 	case WM_SETFOCUS:
-		SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 		break;
 	case WM_CLOSE:
@@ -287,6 +287,9 @@ void Editor::InspectorView::TransformView::CreateView(HWND hParent, LPSTR lpClas
 
 WNDPROC defaultEditWndProc;
 
+//EditWindowProc
+//	WindowsAPI Editのプロシージャ
+//
 LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	switch (uMsg)
@@ -294,6 +297,9 @@ LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+			//フォーカス切り
+			//
+			//
 		case VK_RETURN:
 			SetFocus(GetParent(hWnd));
 			break;
@@ -307,6 +313,9 @@ LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(defaultEditWndProc, hWnd, uMsg, wParam, lParam);
 }
 
+//CreateEidtWindow
+//	WindowsAPI Editの作成 
+//
 HWND CreateEditWindow(HWND Parent, LPSTR text, int x, int y, int width, int height, LPARAM lParam,unsigned int num)
 {
 	HWND result = CreateWindow(
@@ -329,29 +338,41 @@ HWND CreateEditWindow(HWND Parent, LPSTR text, int x, int y, int width, int heig
 	return result;
 }
 
+//GetValueEdit
+//	Editから値を取得
+//
 bool GetValueEdit(HWND hEdit, float& value)
 {
 	TCHAR text[256];
 	GetWindowText(hEdit, text, strlen(text));
-
+	float keep = value;
 	try
 	{
 		value = std::stof(text);
 	}
 	catch (std::invalid_argument invalid)
 	{
-		SetWindowText(hEdit, "");
+		TCHAR text[256];
+		sprintf_s(text, "%f", keep);
+		SetWindowText(hEdit, text);
+		value = keep;
 		return true;
 	}
 
 	return false;
 }
 
+//DrawViewText
+//	TextOutをラップした関数
+//
 void DrawViewText(HDC hdc, int x, int y, LPSTR text)
 {
 	TextOut(hdc, x, y, text, strlen(text));
 }
 
+//localWndProc
+//	TransformViewのウィンドウプロシージャ
+//
 LRESULT Editor::InspectorView::TransformView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
@@ -389,12 +410,15 @@ LRESULT Editor::InspectorView::TransformView::localWndProc(HWND hWnd, UINT uMsg,
 		switch (HIWORD(wParam))
 		{
 		case EN_KILLFOCUS:
+			position = _transform->position();
 			PositionEdit.GetValue(position);
 			_transform->position(position);
 
+			rotation = _transform->rotation();
 			RotationEdit.GetValue(rotation);
 			_transform->rotation(Quaternion::Euler(rotation));
 
+			scale = _transform->localScale();
 			ScaleEdit.GetValue(scale);
 			_transform->localScale(scale);
 			return 0;
@@ -414,6 +438,9 @@ LRESULT Editor::InspectorView::TransformView::localWndProc(HWND hWnd, UINT uMsg,
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+//CreateEdit
+//	数値入力エディットの生成
+//
 void Editor::InspectorView::CategoriesEdit::CreateEdit(HWND Parent, LPARAM lParam, int x, int y, int width, int height, Vector3 & value)
 {
 	TCHAR text[256];
@@ -429,18 +456,20 @@ void Editor::InspectorView::CategoriesEdit::CreateEdit(HWND Parent, LPARAM lPara
 	this->height = height;
 }
 
+//GetValue
+//	エディットから入力数値の取得
+//
 void Editor::InspectorView::CategoriesEdit::GetValue(Vector3& value)
 {
-	Vector3 result;
-
-	if (GetValueEdit(hEditX, result.x)) return;
-	if (GetValueEdit(hEditY, result.y)) return;
-	if (GetValueEdit(hEditZ, result.z)) return;
-
-	value = result;
+	if (GetValueEdit(hEditX, value.x)) return;
+	if (GetValueEdit(hEditY, value.y)) return;
+	if (GetValueEdit(hEditZ, value.z)) return;
 	return;
 }
 
+//ResetValue
+//	Valueデータの数値をエディタに表示する
+//
 void Editor::InspectorView::CategoriesEdit::ResetValue(Vector3& value)
 {
 	TCHAR text[256];
@@ -452,6 +481,9 @@ void Editor::InspectorView::CategoriesEdit::ResetValue(Vector3& value)
 	SetWindowText(hEditZ, text);
 }
 
+//DrawValue
+//	パラメータ名の表示
+//
 void Editor::InspectorView::CategoriesEdit::DrawValue(HDC hdc, LPSTR Categories)
 {
 	DrawViewText(hdc, x, y, Categories);
