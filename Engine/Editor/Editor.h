@@ -30,7 +30,7 @@ namespace Editor
 	class CommonControlWindow;
 	class FileTreeView;
 	class InspectorView;
-	
+	class NodeView;
 
 	//*********************************************************************************************************************
 	//
@@ -74,6 +74,8 @@ namespace Editor
 
 		std::vector<InspectorView*> _Inspectors;
 
+		std::vector<NodeView*> _NodeViews;
+
 		HWND _hToolBer;		//ツールバー
 		HWND _hColumnSpace; //エディタ領域
 
@@ -98,6 +100,8 @@ namespace Editor
 		WPARAM MessageLoop() override;
 
 		void CreateInspector(std::shared_ptr<GameObject> gameObject);
+
+		void CreateNodeView();
 
 		void Update();
 	};

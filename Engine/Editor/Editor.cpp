@@ -20,6 +20,8 @@
 #include "Editor.h"
 #include"InspectorView.h"
 
+#include"NodeView.h"
+
 #include"Common.h"
 #include"Module\ECSEngine.h"
 #include"Module\Module.h"
@@ -170,6 +172,10 @@ EditorWindow::~EditorWindow()
 {
 	int i = 0;
 	for(auto obj : _Inspectors)
+	{
+		delete obj;
+	}
+	for(auto obj : _NodeViews)
 	{
 		delete obj;
 	}
@@ -440,6 +446,10 @@ LRESULT Editor::EditorWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			CreateInspector(std::shared_ptr<GameObject>());
 
 			break;
+			//Window -> ノードウィンドウ
+		case ID_WINDOW_40007:
+			CreateNodeView();
+			break;
 			//エディタ終了
 		case ID_40004:
 			SendMessage(hWnd, WM_DESTROY, 0, 0);
@@ -588,6 +598,25 @@ void Editor::EditorWindow::CreateInspector(std::shared_ptr<GameObject> gameObjec
 	);
 
 	_Inspectors.push_back(inspector);
+}
+
+void Editor::EditorWindow::CreateNodeView()
+{
+	NodeView* nodeView = new NodeView();
+
+	nodeView->Create(
+		this->_hWnd,
+		(HINSTANCE)GetWindowLong(this->_hColumnSpace, GWLP_HINSTANCE),
+		"NodeView",
+		"NodeView",
+		0,
+		0,
+		600,
+		600,
+		WS_VISIBLE | WS_OVERLAPPEDWINDOW
+	);
+
+	this->_NodeViews.push_back(nodeView);
 }
 
 void Editor::EditorWindow::Update()
