@@ -72,20 +72,30 @@ bool Scene::CompareName(std::string name)
 //
 std::shared_ptr<GameObject> Scene::AddSceneObject(std::string name, TagName tag)
 {
-	auto gameObject = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
-	ObjectManager::GetInstance()->RegisterObject(gameObject);
-	EntityManager::GetInstance()->RegisterEntity(gameObject);
-	GameObject::RegisterEntityIndex(gameObject);
+	//GameObject
+	auto gameObject = CreateSceneObject(name,tag);
 
 	//階層追加
-	_hierarchyUtility.AttachHierarchy(gameObject->GetEntityID());
-
-	auto scene = gameObject->GetScene();
+	_hierarchyUtility.AttachHierarchy(gameObject);
 
 	//Transform
 	gameObject->AddComponent<Transform>();
 
 	return gameObject;
+}
+
+//CreateSceneObject
+//	GameObjectを生成する
+//
+std::shared_ptr<GameObject> Scene::CreateSceneObject(std::string name, TagName tag)
+{
+	auto result = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
+
+	ObjectManager::GetInstance()->RegisterObject(result);
+	EntityManager::GetInstance()->RegisterEntity(result);
+	GameObject::RegisterEntityIndex(result);
+
+	return result;
 }
 
 //RemoveSceneObject
@@ -94,10 +104,7 @@ std::shared_ptr<GameObject> Scene::AddSceneObject(std::string name, TagName tag)
 void Scene::RemoveSceneObject(GameObject * gameobject)
 {
 	_hierarchyUtility.DetachHierarchy(gameobject->GetEntityID());
-
-	GameObject::DestroyEntityIndex(gameobject);
-	EntityManager::GetInstance()->DestroyEntity(gameobject);
-	ObjectManager::GetInstance()->DestroyObject(gameobject);
+	gameobject->Destroy();
 }
 
 //AttachActiveScene
@@ -105,8 +112,9 @@ void Scene::RemoveSceneObject(GameObject * gameobject)
 //
 void Scene::AttachActiveScene()
 {
-	this->IsLoaded = true;
-	this->Load();	//読み込み
+	this->IsActive = true;
+	//Scene読み込み
+	this->Load();
 }
 
 //DetachActiveScene
@@ -114,7 +122,8 @@ void Scene::AttachActiveScene()
 //
 void Scene::DetachActiveScene()
 {
-	this->IsLoaded = false;
+	this->IsActive = false;
+	//Scene破棄
 	this->UnLoad();
 }
 
@@ -177,13 +186,26 @@ void Scene::DebugGUI()
 
 //Load
 //	デシリアライズ
-//	WARNING : Componentが削除されてまう
 //
 void Scene::Load()
 {
+	//デシリアライズ
 	std::ifstream file(_filePath);
 	cereal::JSONInputArchive inArchive(file);
 	inArchive(*this);
+
+	//取得したデータから再構成
+	for (auto map : this->_hierarchyUtility.GetHierarchyMap())
+	{
+		Hierarchy& hierarchy = map.second;
+		auto gameObject = std::static_pointer_cast<GameObject>(hierarchy.GetSelf().lock());
+		gameObject->_Scene = this;
+		auto index = ObjectManager::GetInstance()->_ObjectIndex;
+
+		ObjectManager::GetInstance()->RegisterObject(gameObject);
+		EntityManager::GetInstance()->RegisterEntity(gameObject);
+		GameObject::RegisterEntityIndex(gameObject);
+	}
 }
 
 //Save
@@ -194,6 +216,11 @@ void Scene::Save()
 	std::ofstream file(_filePath);
 	cereal::JSONOutputArchive output(file);
 	output(*this);
+}
+
+void Scene::ReleaseObjects()
+{
+	this->UnLoad();
 }
 
 //UnLoad
@@ -207,14 +234,4 @@ void Scene::UnLoad()
 		//std::dynamic_pointer_cast<GameObject>(EntityManager::GetInstance()->GetEntity(obj.first).lock())->Destroy();
 	}
 	_hierarchyUtility.ClearnHierarchy();
-}
-
-void Scene::OrderlySceneObject(HierarchyUtility * utility)
-{
-	for(auto map : utility->GetHierarchyMap())
-	{
-		Hierarchy& hierarchy = map.second;
-		auto gameObject = std::static_pointer_cast<GameObject>(hierarchy.GetSelf().lock());
-		gameObject->_Scene = this;
-	}
 }

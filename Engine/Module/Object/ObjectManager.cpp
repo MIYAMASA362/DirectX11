@@ -82,6 +82,7 @@ std::shared_ptr<Object> ObjectManager::GetObjectInstance(InstanceID id)
 
 void ObjectManager::ReleaseObject(Object* object)
 {
+	object->Release();
 	_ObjectIndex.erase(object->GetInstanceID());
 }
 

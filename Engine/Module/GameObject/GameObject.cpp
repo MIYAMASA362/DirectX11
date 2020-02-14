@@ -45,18 +45,7 @@ GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	_IsDestroy(false),
 	_IsActive(true)
 {
-	
-}
 
-GameObject::GameObject(GameObject * gameObject,Scene* scene)
-	:
-	_Scene(scene),
-	_Name(gameObject->_Name),
-	_Tag(gameObject->_Tag),
-	_IsDestroy(gameObject->_IsDestroy),
-	_IsActive(gameObject->_IsActive)
-{
-	
 }
 
 //~GameObject
@@ -95,4 +84,10 @@ void GameObject::OnDebugGUI()
 		ComponentManager::GetInstance()->ImGui_ComponentView(this->GetEntityID());
 		ImGui::TreePop();
 	}
+}
+
+void GameObject::RegisterEntityIndex(std::shared_ptr<GameObject> instance)
+{
+	auto result = Entity<GameObject>::RegisterEntityIndex(instance);
+	instance->_gameObject = result.lock();
 }

@@ -70,6 +70,9 @@ protected:
 
 	//íœ–½—ß
 	virtual void Destroy();
+
+	//íœÀsŠÖ”
+	virtual void Release();
 };
 
 CEREAL_REGISTER_TYPE(IComponent)

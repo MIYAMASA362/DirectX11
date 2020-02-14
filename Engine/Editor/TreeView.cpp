@@ -1,12 +1,16 @@
 #include<Windows.h>
 #include<string>
 #include<memory>
+#include<vector>
 #include<map>
 
 #include"Window\Window.h"
 
 #include"Module\DirectX\DirectX.h"
 #include"Module\IMGUI\GUI_ImGui.h"
+
+
+#include"Module\Scene\SceneManager.h"
 
 #include"Module\Texture\texture.h"
 #include"Module\Texture\TextureManager.h"
@@ -609,6 +613,12 @@ void Editor::FileTreeView::ListView_FileOpen(LPNMITEMACTIVATE lpnmitem)
 		std::string name = path.substr(fpos + 1,pos - (fpos +1));
 		auto texture = TextureManager::GetTexture(name);
 		TextureManager::SetEditorView(texture.lock()->GetShaderResourceView());
+	}
+	else if(extension == "scene")
+	{
+		size_t fpos = path.find_last_of("\\");
+		std::string name = path.substr(fpos + 1, pos - (fpos + 1));
+		SceneManager::GetInstance()->LoadScene(name);
 	}
 	else
 	{

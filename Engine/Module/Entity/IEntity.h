@@ -62,6 +62,10 @@ public:
 
 	//íœŠÖ”
 	void Destroy() override;
+
+protected:
+	//”jŠüÀsŠÖ”
+	virtual void Release();
 };
 
 CEREAL_REGISTER_TYPE(IEntity)

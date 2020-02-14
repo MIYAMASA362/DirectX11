@@ -7,6 +7,7 @@ class Scene;
 //*********************************************************************************************************************
 //
 //	Hierarchy
+//		オブジェクトの階層関係を保持している
 //
 //*********************************************************************************************************************
 class Hierarchy
@@ -24,7 +25,6 @@ private:
 	template<class Archive>
 	void save(Archive& archive) const
 	{
-		// TODO : ここのエラーを解決する
 		archive(
 			CEREAL_NVP(_self),
 			CEREAL_NVP(_parent),
@@ -40,7 +40,6 @@ private:
 			CEREAL_NVP(_parent),
 			CEREAL_NVP(_children)
 		);
-		_self = _self;
 	}
 
 
@@ -69,6 +68,7 @@ private:
 //*********************************************************************************************************************
 //
 //	HierarchyUtility
+//		Hierarchyの管理
 //
 //*********************************************************************************************************************
 class HierarchyUtility final
@@ -90,7 +90,7 @@ private:
 	void load(Archive& archive)
 	{
 		archive(
-			_hierarchyMap
+			CEREAL_NVP(_hierarchyMap)
 		);
 	}
 
@@ -110,6 +110,7 @@ public:
 	std::list<std::weak_ptr<IEntity>> GetAllChildren(EntityID id);
 
 	void AttachHierarchy(EntityID id);
+	void AttachHierarchy(std::shared_ptr<IEntity> entity);
 	void DetachHierarchy(EntityID id);
 	void ClearnHierarchy();
 
@@ -123,4 +124,6 @@ public:
 
 	Hierarchy* GetHierarchy(EntityID id);
 	std::map<EntityID, Hierarchy> GetHierarchyMap();
+
+
 };

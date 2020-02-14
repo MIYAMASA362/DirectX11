@@ -17,6 +17,7 @@ class GameObject final :public Entity<GameObject>
 {
 	friend Scene;
 	friend cereal::access;
+	friend Entity<GameObject>;
 private:
 	//所属シーン
 	Scene* _Scene;			
@@ -38,7 +39,6 @@ public:
 	//コンストラクタ
 	GameObject();
 	GameObject(std::string name, Scene* scene, TagName tagName);
-	GameObject(GameObject* gameObject,Scene* scene);
 	//デストラクタ
 	virtual ~GameObject();
 
@@ -70,6 +70,7 @@ public:
 	//デバッグ表示
 	void OnDebugGUI();
 
+public:
 	//シリアライズ
 	template<class Archive>
 	void save(Archive& archive) const
@@ -93,6 +94,8 @@ public:
 			CEREAL_NVP(_IsActive)
 		);
 	}
+
+	static void RegisterEntityIndex(std::shared_ptr<GameObject> instance);
 };
 
 CEREAL_REGISTER_TYPE(Entity<GameObject>)

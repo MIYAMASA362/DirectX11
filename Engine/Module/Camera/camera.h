@@ -78,6 +78,9 @@ public:
 			CEREAL_NVP(_Viewport.Height),
 			CEREAL_NVP(_Viewport.Width)
 		);
+		auto instance = std::shared_ptr<Camera>(this);
+		ObjectManager::GetInstance()->RegisterObject(instance);
+		Component<Camera>::RegisterComponentIndex(instance);
 	}
 
 	//エディタ表示

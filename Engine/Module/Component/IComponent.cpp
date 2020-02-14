@@ -84,10 +84,13 @@ void IComponent::OnDebugImGui()
 //
 void IComponent::Destroy()
 {
-	//Entity‚©‚çŠ—L”jŠü
-	_Entity->GetComponents()->ReleaseComponent(this->GetComponentID());
 	//íœ“o˜^
 	ObjectManager::GetInstance()->DestroyObject(this);
 	//EntityŠ—L”jŠü
 	_Entity.reset();
+}
+
+void IComponent::Release()
+{
+
 }

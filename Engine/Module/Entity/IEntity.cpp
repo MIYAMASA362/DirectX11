@@ -46,4 +46,10 @@ void IEntity::Destroy()
 {
 	//ComponentList‚Ìíœ“o˜^
 	ComponentManager::GetInstance()->DestroyComponents(this);
+	ObjectManager::GetInstance()->DestroyObject(this);
+}
+
+void IEntity::Release()
+{
+	EntityManager::GetInstance()->ReleaseEntity(this);
 }

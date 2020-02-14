@@ -12,11 +12,6 @@ private:
 	//インスタンス
 	static ObjectManager* pInstance;
 
-	//Object Instanceインデックス
-	std::unordered_map<InstanceID, std::shared_ptr<Object>> _ObjectIndex;
-
-	//Object Instance　削除インデックス
-	std::vector<InstanceID> _DestroyIndex;
 
 	//コンストラクタ
 	ObjectManager();
@@ -24,6 +19,11 @@ private:
 	~ObjectManager();
 
 public:
+	//Object Instanceインデックス
+	std::unordered_map<InstanceID, std::shared_ptr<Object>> _ObjectIndex;
+
+	//Object Instance　削除インデックス
+	std::vector<InstanceID> _DestroyIndex;
 	//インスタンスの取得
 	static ObjectManager* GetInstance() { return pInstance; }
 

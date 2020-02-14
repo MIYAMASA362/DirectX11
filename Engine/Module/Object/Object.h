@@ -49,6 +49,10 @@ public:
 	InstanceID GetInstanceID();
 
 	virtual void Destroy() = 0;
+
+protected:
+	//”jŠüÀsŠÖ”
+	virtual void Release() = 0;
 };
 
 CEREAL_REGISTER_TYPE(Object)

@@ -88,8 +88,14 @@ std::weak_ptr<Scene> SceneManager::CreateScene(std::string name)
 	auto camera = result->AddSceneObject("MainCamera");
 	camera->AddComponent<Camera>();
 
+	//インスタンス登録
 	_SceneArray.push_back(result);
+
+	//セーブ
 	result->Save();
+
+	//破棄
+	result->ReleaseObjects();
 
 	return result;
 }
@@ -124,6 +130,8 @@ void SceneManager::ChangeScene()
 	if (!_IsChangeScene) return;
 
 	DetachActiveScene();
+
+	ObjectManager::GetInstance()->ClearnUpObject();
 
 	AttachActiveScene(_NextScene.lock());
 

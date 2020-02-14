@@ -12,7 +12,7 @@ private:
 	//シーン名
 	std::string _name;
 	//読み込みされてる
-	bool IsLoaded = false;		
+	bool IsActive = false;		
 
 	//ファイルパス
 	std::string _filePath;
@@ -38,6 +38,8 @@ public:
 
 	//オブジェクト追加
 	std::shared_ptr<GameObject> AddSceneObject(std::string name, TagName tag = TagName::Default);
+
+
 	//オブジェクト削除
 	void RemoveSceneObject(GameObject* gameobject);
 
@@ -59,12 +61,18 @@ public:
 	virtual void Save();
 
 	virtual void Destroy() override {};
+
+	//オブジェクト破棄
+	void ReleaseObjects();
+
 protected:
+	//オブジェクト生成
+	std::shared_ptr<GameObject> CreateSceneObject(std::string name,TagName tag = TagName::Default);
 
 	//
 	void UnLoad();
 
-	void OrderlySceneObject(HierarchyUtility* utility);
+	void Release() {}
 
 private:
 	template<class Archive>
@@ -74,57 +82,15 @@ private:
 			CEREAL_NVP(_name),
 			CEREAL_NVP(_hierarchyUtility)
 		);
-
-		/*std::map<EntityID, ComponentList> ComponentIndex;
-		auto utility = _hierarchyUtility;
-		for(auto hierarchy : utility.GetHierarchyMap())
-		{
-			auto components = ComponentManager::GetInstance()->GetComponents(hierarchy.second.GetSelf().lock().get());
-			ComponentIndex.emplace(hierarchy.first,*components.lock());
-		}
-		archive(CEREAL_NVP(ComponentIndex));
-		*/
 	}
 
 	template<class Archive>
 	void load(Archive& archive)
 	{
-		HierarchyUtility utility;
-
 		archive(
 			CEREAL_NVP(_name),
-			utility
+			CEREAL_NVP(_hierarchyUtility)
 		);
-
-		
-		this->_hierarchyUtility = utility;
-		OrderlySceneObject(&this->_hierarchyUtility);
-		this->_hierarchyUtility = this->_hierarchyUtility;
-
-		//std::map<EntityID, ComponentList> ComponentIndex;
-		//archive(CEREAL_NVP(ComponentIndex));
-
-		//for(auto hierarchy : _hierarchyUtility.GetHierarchyMap())
-		//{
-		//	auto gameObject = std::dynamic_pointer_cast<GameObject>(hierarchy.second.GetSelf().lock()).get();
-		//	auto instance = this->CreateInstance(gameObject);
-		//	this->_hierarchyUtility = this->_hierarchyUtility;
-
-		//	auto find = ComponentIndex.find(hierarchy.first);
-		//	if (find == ComponentIndex.end()) continue;
-		//	for(auto component : find->second._components)
-		//	{
-		//		//インスタンス生成
-		//		ComponentManager::GetInstance()->AddComponentInstance(instance,component.lock().get());
-
-		//		auto obj = component.lock().get();
-		//		size_t c_obj = typeid(*obj).hash_code();
-		//		size_t transform = typeid(Transform).hash_code();
-
-		//		std::string name = typeid(*obj).name();
-		//		obj = obj;
-		//	}
-		//}
 	}
 };
 

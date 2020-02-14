@@ -36,9 +36,13 @@ public:
 	static std::weak_ptr<Type> GetTypeEntity(EntityID id);
 
 	//EntityIndex‚Ö“o˜^
-	static void RegisterEntityIndex(std::shared_ptr<Type> instance);
+	static std::weak_ptr<Type> RegisterEntityIndex(std::shared_ptr<Type> instance);
 	//EntityIndex‚©‚çíœ
 	static void DestroyEntityIndex(Type* instance);
+
+protected:
+
+	virtual void Release();
 };
 
 
@@ -76,13 +80,20 @@ inline std::weak_ptr<Type> Entity<Type>::GetTypeEntity(EntityID id)
 }
 
 template<typename Type>
-inline void Entity<Type>::RegisterEntityIndex(std::shared_ptr<Type> instance)
+inline std::weak_ptr<Type> Entity<Type>::RegisterEntityIndex(std::shared_ptr<Type> instance)
 {
-	EntityIndex.emplace(instance->GetEntityID(),instance);
+	return EntityIndex.emplace(instance->GetEntityID(),instance).first->second;
 }
 
 template<typename Type>
 inline void Entity<Type>::DestroyEntityIndex(Type * instance)
 {
 	EntityIndex.erase(instance->GetEntityID());
+}
+
+template<typename Type>
+inline void Entity<Type>::Release()
+{
+	IEntity::Release();
+	EntityIndex.erase(this->GetEntityID());
 }
