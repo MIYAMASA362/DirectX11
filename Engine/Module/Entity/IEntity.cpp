@@ -49,6 +49,9 @@ void IEntity::Destroy()
 	ObjectManager::GetInstance()->DestroyObject(this);
 }
 
+//Release
+//	‘¦Žž”jŠüŠÖ”
+//
 void IEntity::Release()
 {
 	EntityManager::GetInstance()->ReleaseEntity(this);

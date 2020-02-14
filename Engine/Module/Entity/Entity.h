@@ -14,17 +14,6 @@ protected:
 	//このEntityのインスタンス配列
 	static std::unordered_map<EntityID,std::weak_ptr<Type>> EntityIndex;
 
-	template<class Archive>
-	void save(Archive& archive) const
-	{
-		archive(cereal::base_class<IEntity>(this));
-	}
-
-	template<class Archive>
-	void load(Archive& archive)
-	{
-		archive(cereal::base_class<IEntity>(this));
-	}
 
 public:
 	//コンストラクタ
@@ -35,16 +24,34 @@ public:
 	//Entityの取得
 	static std::weak_ptr<Type> GetTypeEntity(EntityID id);
 
-	//EntityIndexへ登録
-	static std::weak_ptr<Type> RegisterEntityIndex(std::shared_ptr<Type> instance);
-	//EntityIndexから削除
-	static void DestroyEntityIndex(Type* instance);
 
 protected:
-
+	//即時破棄関数
 	virtual void Release();
-};
 
+	//EntityIndexから削除
+	static void ReleaseEntityIndex(Type* instance);
+	//EntityIndexへ登録
+	static std::weak_ptr<Type> RegisterEntityIndex(std::shared_ptr<Type> instance);
+
+
+private:
+	//シリアライズ
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		archive(cereal::base_class<IEntity>(this));
+	}
+
+	//デシリアライズ
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		archive(cereal::base_class<IEntity>(this));
+	}
+
+
+};
 
 
 
@@ -86,7 +93,7 @@ inline std::weak_ptr<Type> Entity<Type>::RegisterEntityIndex(std::shared_ptr<Typ
 }
 
 template<typename Type>
-inline void Entity<Type>::DestroyEntityIndex(Type * instance)
+inline void Entity<Type>::ReleaseEntityIndex(Type * instance)
 {
 	EntityIndex.erase(instance->GetEntityID());
 }
@@ -95,5 +102,5 @@ template<typename Type>
 inline void Entity<Type>::Release()
 {
 	IEntity::Release();
-	EntityIndex.erase(this->GetEntityID());
+	ReleaseEntityIndex(this);
 }

@@ -51,7 +51,9 @@ public:
 	static void Destroy();
 
 	//シーン生成
-	std::weak_ptr<Scene> CreateScene(std::string name);
+	void CreateScene(std::string name);
+	//シーン登録
+	std::shared_ptr<Scene> RegisterScene(Scene* scene);
 
 	//シーン読み込み
 	void LoadScene(std::weak_ptr<Scene> scene);

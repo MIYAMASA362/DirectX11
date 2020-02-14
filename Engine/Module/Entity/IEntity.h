@@ -13,23 +13,6 @@ private:
 	//Components 所持しているComponent群への参照
 	std::weak_ptr<ComponentList> _ComponentList;
 
-	//シリアル化
-	template<class Archive>
-	void save(Archive& archive) const
-	{
-		cereal::base_class<Object>(this);
-		archive(_ComponentList.lock());
-	}
-
-	template<class Archive>
-	void load(Archive& archive)
-	{
-		std::shared_ptr<ComponentList> list;
-		cereal::base_class<Object>(this);
-		archive(list);
-		_ComponentList = ComponentManager::GetInstance()->SwapComponents(this,list);
-	}
-
 public:
 	//コンストラクタ
 	IEntity();
@@ -53,7 +36,7 @@ public:
 	{
 		return ComponentManager::GetInstance()->AddComponent<Type>(this);
 	}
-	//Componentの取得 最初に見つけた一つ
+	//Componentの取得
 	template<typename Type>
 	std::weak_ptr<Type> GetComponent() 
 	{
@@ -64,8 +47,28 @@ public:
 	void Destroy() override;
 
 protected:
-	//破棄時実行関数
-	virtual void Release();
+	//即時破棄関数
+	virtual void Release() override;
+
+private:
+	//シリアライズ
+	template<class Archive>
+	void save(Archive& archive) const
+	{
+		cereal::base_class<Object>(this);
+		archive(_ComponentList.lock());
+	}
+
+	//デシリアライズ
+	template<class Archive>
+	void load(Archive& archive)
+	{
+		std::shared_ptr<ComponentList> list;
+		cereal::base_class<Object>(this);
+		archive(list);
+		_ComponentList = ComponentManager::GetInstance()->SwapComponents(this, list);
+	}
+
 };
 
 CEREAL_REGISTER_TYPE(IEntity)

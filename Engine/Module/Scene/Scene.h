@@ -7,6 +7,7 @@
 //*********************************************************************************************************************
 class Scene : public Object
 {
+	friend class SceneManager;
 	friend cereal::access;
 private:
 	//シーン名
@@ -61,9 +62,6 @@ public:
 	virtual void Save();
 
 	virtual void Destroy() override {};
-
-	//オブジェクト破棄
-	void ReleaseObjects();
 
 protected:
 	//オブジェクト生成

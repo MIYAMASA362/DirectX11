@@ -39,7 +39,8 @@ SceneManager::SceneManager()
 	:
 	_IsChangeScene(false)
 {
-
+	//Array確保
+	_SceneArray.reserve(10);
 }
 
 //~SceneManager
@@ -77,26 +78,35 @@ void SceneManager::Destroy()
 //CreateScene
 //	シーン生成
 //
-std::weak_ptr<Scene> SceneManager::CreateScene(std::string name)
+void SceneManager::CreateScene(std::string name)
 {
+	//ファイル
 	char path[MAX_PATH + 1];
 	GetCurrentDirectory(ARRAYSIZE(path),path);
 	strcat_s(path,("\\"+ name + ".scene").data());
 
-	auto result = std::shared_ptr<Scene>(new Scene(name, path));
+	//Scene生成
+	auto scene = RegisterScene(new Scene(name, path));
 	
-	auto camera = result->AddSceneObject("MainCamera");
+	//オブジェクト生成
+	auto camera = scene->AddSceneObject("MainCamera");
 	camera->AddComponent<Camera>();
 
-	//インスタンス登録
-	_SceneArray.push_back(result);
-
 	//セーブ
-	result->Save();
+	scene->Save();
 
 	//破棄
-	result->ReleaseObjects();
+	camera->Destroy();
 
+}
+
+//RegisterScene
+//	SceneArrayへインスタンス登録
+//
+std::shared_ptr<Scene> SceneManager::RegisterScene(Scene * scene)
+{
+	auto result = std::shared_ptr<Scene>(scene);
+	_SceneArray.push_back(result);
 	return result;
 }
 
@@ -111,6 +121,7 @@ void SceneManager::LoadScene(std::weak_ptr<Scene> scene)
 		AttachActiveScene(scene);
 		return;
 	}
+
 	//次のSceneへ登録
 	SetIsChangeScene(scene);
 }

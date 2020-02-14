@@ -39,6 +39,7 @@ GameObject::GameObject()
 //
 GameObject::GameObject(std::string name, Scene* scene, TagName tagName)
 	:
+	Entity(),
 	_Scene(scene),
 	_Name(name),
 	_Tag(tagName),
@@ -62,7 +63,7 @@ GameObject::~GameObject()
 std::weak_ptr<Transform> GameObject::transform()
 {
 	if (_transform.expired())
-		_transform = Transform::GetComponent(this->GetEntityID()).lock();
+	_transform = Transform::GetComponent(this->GetEntityID()).lock();
 	return _transform;
 }
 
@@ -86,6 +87,9 @@ void GameObject::OnDebugGUI()
 	}
 }
 
+//RegisterEntityIndex
+//	EntityIndex‚ÖEntity‚ð’Ç‰Á‚·‚é
+//
 void GameObject::RegisterEntityIndex(std::shared_ptr<GameObject> instance)
 {
 	auto result = Entity<GameObject>::RegisterEntityIndex(instance);

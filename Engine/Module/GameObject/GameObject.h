@@ -83,6 +83,8 @@ public:
 			CEREAL_NVP(_IsActive)
 		);
 	}
+
+	//デシリアライズ
 	template<class Archive>
 	void load(Archive& archive)
 	{
@@ -95,6 +97,7 @@ public:
 		);
 	}
 
+	//
 	static void RegisterEntityIndex(std::shared_ptr<GameObject> instance);
 };
 

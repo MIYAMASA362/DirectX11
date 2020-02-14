@@ -218,11 +218,6 @@ void Scene::Save()
 	output(*this);
 }
 
-void Scene::ReleaseObjects()
-{
-	this->UnLoad();
-}
-
 //UnLoad
 //	
 //

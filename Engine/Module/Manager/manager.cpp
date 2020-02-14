@@ -143,6 +143,7 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 {
 	D3DRenderer::SetRenderStatus(D3DRenderer::GetRenderStatus(hWnd));
 
+	//ECS
 	ObjectManager::Create();
 	EntityManager::Create();
 	ComponentManager::Create();
