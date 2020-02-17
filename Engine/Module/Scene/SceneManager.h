@@ -50,6 +50,11 @@ public:
 	//インスタンス破棄
 	static void Destroy();
 
+	//現在のシーン取得
+	std::weak_ptr<Scene>GetActiveScene() { return _ActiveScene; }
+	//遷移先シーンの取得
+	std::weak_ptr<Scene>GetNextScene() { return _NextScene; }
+
 	//シーン生成
 	void CreateScene(std::string name);
 	//シーン登録
@@ -59,10 +64,9 @@ public:
 	void LoadScene(std::weak_ptr<Scene> scene);
 	void LoadScene(std::string name);
 
-	//現在のシーン取得
-	std::weak_ptr<Scene>GetActiveScene() { return _ActiveScene; }
-	//遷移先シーンの取得
-	std::weak_ptr<Scene>GetNextScene() { return _NextScene; }
+	//シーンセーブ
+	void SaveScene(std::weak_ptr<Scene> load = GetInstance()->GetActiveScene());
+
 
 	void ChangeScene();
 

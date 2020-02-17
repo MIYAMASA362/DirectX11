@@ -9,7 +9,6 @@
 #include"Module\DirectX\DirectX.h"
 #include"Module\IMGUI\GUI_ImGui.h"
 
-
 #include"Module\Scene\SceneManager.h"
 
 #include"Module\Texture\texture.h"
@@ -616,6 +615,12 @@ void Editor::FileTreeView::ListView_FileOpen(LPNMITEMACTIVATE lpnmitem)
 	}
 	else if(extension == "scene")
 	{
+		if(MessageBox(NULL,"Œ»Ý‚ÌƒV[ƒ“‚ð•Û‘¶‚µ‚Ü‚·‚©H","Editor", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			SceneManager::GetInstance()->SaveScene();
+		}
+
+
 		size_t fpos = path.find_last_of("\\");
 		std::string name = path.substr(fpos + 1, pos - (fpos + 1));
 		SceneManager::GetInstance()->LoadScene(name);

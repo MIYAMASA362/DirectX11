@@ -50,6 +50,8 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	RECT rect;
 	float width, height;
 
+	if (_GameObject.expired()) DestroyWindow(hWnd);
+
 	switch (uMsg)
 	{
 		//ê∂ê¨

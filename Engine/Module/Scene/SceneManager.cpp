@@ -131,6 +131,11 @@ void SceneManager::LoadScene(std::string name)
 	LoadScene(GetSceneByName(name));
 }
 
+void SceneManager::SaveScene(std::weak_ptr<Scene> load)
+{
+	load.lock()->Save();
+}
+
 
 
 //ChangeScene

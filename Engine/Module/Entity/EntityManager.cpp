@@ -86,6 +86,7 @@ void EntityManager::ReleaseEntity(IEntity * instance)
 	auto find = std::remove_if(
 		_EntityIndex.begin(), end, [=](std::weak_ptr<IEntity>& entity) 
 	{
+		if (entity.expired()) return false;
 		return entity.lock()->GetEntityID() == instance->GetEntityID();
 	});
 	_EntityIndex.erase(find,end);

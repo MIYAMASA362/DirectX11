@@ -42,6 +42,7 @@ IEntity::~IEntity()
 //
 void IEntity::Destroy()
 {
+	Object::Destroy();
 	for(auto component : _Components)
 	{
 		component->Destroy();
