@@ -1,20 +1,6 @@
+#include"Constant.hlsli"
 Texture2D	 Texture[2]:register(t0);
 SamplerState Sampler:register(s0);
-
-struct LIGHT
-{
-	float4 Direction;
-	float4 Diffuse;
-	float4 Ambient;
-	float4 Position;
-};
-
-struct CAMERA
-{
-	float4 Position;
-};
-
-
 
 cbuffer LightBuffer:register(b1)
 {
@@ -27,7 +13,7 @@ cbuffer CameraBuffer : register(b2)
 }
 
 void main(
-	in float4 inPosition			: SV_POSITION,
+	in float4 inPosition : SV_POSITION,
 	in float4 inWorldPosition : POSITION0,
 	in float4 inNormal : NORMAL0,
 	in float4 inDiffuse : COLOR0,

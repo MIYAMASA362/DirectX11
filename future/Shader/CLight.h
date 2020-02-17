@@ -1,16 +1,21 @@
 #pragma once
 
-class CLight :public CGameObject
+class CLight : public CGameObject
 {
 private:
-	ID3D11Buffer* m_Buffer;
-	LIGHT m_Context;
+	D3D11_VIEWPORT m_Viewport;
+
+	XMMATRIX m_ViewMatrix;
+	XMMATRIX m_ProjectionMatrix;
 public:
 	CLight();
-	virtual ~CLight();
 
-	LIGHT& GetLight() { return m_Context; };
-	ID3D11Buffer** GetBuffer() { return &m_Buffer; }
+	void Init();
+	void Update();
+	void DrawShadow();
+	void Draw();
+	void UnInit();
 
-	void Draw() override;
+	XMFLOAT4X4 GetViewMatrix();
+	XMFLOAT4X4 GetProjectionMatrix();
 };

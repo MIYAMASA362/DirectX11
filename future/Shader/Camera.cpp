@@ -2,6 +2,7 @@
 #include"renderer.h"
 
 #include "Camera.h"
+#include"input.h"
 
 CCamera::CCamera()
 {
@@ -39,7 +40,12 @@ void CCamera::UnInit()
 
 void CCamera::Update()
 {
-	//m_Rotation.y += 0.01f;
+	if (CInput::GetKeyPress('W')) this->m_Position.z += 0.1f;
+	if (CInput::GetKeyPress('S')) this->m_Position.z -= 0.1f;
+	if (CInput::GetKeyPress('A')) this->m_Position.x -= 0.1f;
+	if (CInput::GetKeyPress('D')) this->m_Position.x += 0.1f;
+	if (CInput::GetKeyPress('Q')) this->m_Position.y += 0.1f;
+	if (CInput::GetKeyPress('E')) this->m_Position.y -= 0.1f;
 }
 
 
