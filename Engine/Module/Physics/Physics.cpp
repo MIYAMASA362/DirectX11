@@ -8,6 +8,9 @@
 #include"../ECSEngine.h"
 
 #include"Module\Transform\Transform.h"
+#include"Module\Tag\Tag.h"
+#include"Module\GameObject\GameObject.h"
+
 #include"Module\Renderer\Renderer.h"
 #include"Module\Mesh\Mesh.h"
 #include"Module\Mesh\MeshRender.h"
@@ -58,7 +61,7 @@ bool Physics::RayCast(Vector3 origin, Vector3 direction,RayCastHit& info, float 
 		//Mesh‚©‚ç’¸“_Žæ“¾
 		{
 			auto mesh = meshrender.lock()->GetMeshFilter()->GetMesh().lock();
-			auto world = meshrender.lock()->transform()->WorldMatrix();
+			auto world = meshrender.lock()->gameObject()->transform().lock()->WorldMatrix();
 
 			bool hit = false;
 			for (unsigned int i = 0; i < mesh->_SurfaceNum; i++)

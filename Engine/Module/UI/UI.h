@@ -13,14 +13,14 @@ class Canvas:public Component<Canvas>
 private:
 	std::list<std::weak_ptr<UI>> UIIndex;
 public:
-	Canvas(EntityID OwnerID);
+	Canvas();
 };
 
 //UI
 class UI:public Component<UI>
 {
 public:
-	UI(EntityID OwnerID);
+	UI();
 	virtual ~UI() = default;
 public:
 	virtual void Render(XMMATRIX world) = 0;
@@ -34,7 +34,7 @@ public:
 	std::weak_ptr<Texture> texture;
 	ID3D11Buffer* vertexBuffer = nullptr;
 public:
-	Image(EntityID OwnerID);
+	Image();
 	virtual ~Image();
 	virtual void Render(XMMATRIX& world) override;
 };
@@ -49,7 +49,7 @@ private:
 public:
 	Texture* texture;
 public:
-	Button(EntityID OwnerID);
+	Button();
 	virtual ~Button();
 	void Update();
 	void Render(XMMATRIX world) override;
@@ -66,7 +66,7 @@ private:
 	ID3D11ShaderResourceView* m_srv;
 	Font* m_font;
 public:
-	Text(EntityID OwnerID);
+	Text();
 	void Render(XMMATRIX world)override {};
 	void SetText(std::string text);
 	void SetFont(Font* font);

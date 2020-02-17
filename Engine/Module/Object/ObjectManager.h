@@ -18,12 +18,14 @@ private:
 	//デストラクタ
 	~ObjectManager();
 
+
 public:
 	//Object Instanceインデックス
-	std::unordered_map<InstanceID, std::shared_ptr<Object>> _ObjectIndex;
-
+	std::vector<std::shared_ptr<Object>> _ObjectIndex;
 	//Object Instance　削除インデックス
-	std::vector<InstanceID> _DestroyIndex;
+	std::stack<InstanceID> _DestroyIndex;
+
+
 	//インスタンスの取得
 	static ObjectManager* GetInstance() { return pInstance; }
 
@@ -33,11 +35,7 @@ public:
 	static void Destroy();
 
 	//Object登録
-	std::shared_ptr<Object> RegisterObject(std::shared_ptr<Object> object);
-	//Obejctの破棄
-	void ReleaseObject(Object* object);
-	//登録Objectの取得
-	std::shared_ptr<Object> GetObjectInstance(InstanceID id);
+	void RegisterObject(std::shared_ptr<Object> instance);
 
 	//Object削除登録
 	void DestroyObject(Object* object);
@@ -46,4 +44,6 @@ public:
 
 	//Editorデバッグ表示
 	void EditorWindow();
+
+
 };

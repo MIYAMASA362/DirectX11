@@ -39,9 +39,7 @@ using namespace DirectX;
 //MeshRender
 //	コンストラクタ
 //
-MeshRender::MeshRender(EntityID OwnerID)
-	:
-	Renderer(OwnerID)
+MeshRender::MeshRender()
 {
 }
 

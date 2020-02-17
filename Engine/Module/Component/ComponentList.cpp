@@ -28,33 +28,5 @@ ComponentList::ComponentList()
 //
 ComponentList::~ComponentList()
 {
-	//Components‚Ì”jŠü
-	_Components.clear();
-}
-
-//AddComponent
-//	Components‚ÖComponent‚ð’Ç‰Á‚·‚é
-//
-void ComponentList::AddComponent(std::shared_ptr<IComponent> add)
-{
-	_Components.emplace(add->GetComponentID(),add);
-}
-
-std::shared_ptr<IComponent>& ComponentList::GetComponent(ComponentTypeID id)
-{
-	for(auto component : _Components)
-	{
-		if (component.second->GetComponentTypeID() == id)
-			return component.second;
-	}
-	assert(0);
-	return std::shared_ptr<IComponent>();
-}
-
-//ReleaseComponent
-//	Component‚ÌŠ—LŒ ”jŠü
-//
-void ComponentList::ReleaseComponent(ComponentID componentID)
-{
-	_Components.erase(componentID);
+	this->_Components.clear();
 }

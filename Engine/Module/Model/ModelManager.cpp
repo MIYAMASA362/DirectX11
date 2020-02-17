@@ -283,8 +283,8 @@ void AddSceneNodeModel(NodeMesh* nodeMesh, GameObject* parent,Scene* scene)
 
 		auto child = scene->AddSceneObject(nodeMesh->_NodeName + std::to_string(i),TagName::Default);
 		child->transform().lock()->SetParent(parent->transform());
-		auto renderer = child->AddComponent<MeshRender>().lock();
-		auto meshfilter = child->AddComponent<MeshFilter>().lock();
+		auto renderer = child->AddComponent<MeshRender>();
+		auto meshfilter = child->AddComponent<MeshFilter>();
 		meshfilter->SetMesh(nodeMesh->_Mesh);
 		meshfilter->SetIndexNum(subset._IndexNum, subset._StartIndex);
 

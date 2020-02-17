@@ -12,7 +12,7 @@ private:
 	static EntityManager* pInstacne;
 
 	//全Entityのインデックス
-	std::unordered_map<EntityID, std::weak_ptr<IEntity>> _EntityIndex;
+	std::vector<std::weak_ptr<IEntity>> _EntityIndex;
 
 	//コンストラクタ
 	EntityManager();
@@ -29,13 +29,9 @@ public:
 	static EntityManager* GetInstance() { return pInstacne; };
 
 	//EntityIndexへ追加
-	std::weak_ptr<IEntity> RegisterEntity(std::shared_ptr<IEntity> instance);
-	void DestroyEntity(IEntity* instance);
+	void RegisterEntity(std::shared_ptr<IEntity> instance);
 	//EntityIndexからEntityの削除
 	void ReleaseEntity(IEntity * instance);
-
-	//EntityIndexからEntityの取得
-	std::weak_ptr<IEntity> GetEntity(EntityID id);
 
 
 };

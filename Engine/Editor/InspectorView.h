@@ -27,6 +27,9 @@ namespace Editor
 		RenderStatus* _RenderStatus = nullptr;
 
 		HWND _ModelView;
+		
+		//GameObjectの名前変更
+		HWND _NameEdit;
 
 		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
 
@@ -48,6 +51,7 @@ namespace Editor
 	private:
 
 		void Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 
 		//数値入力カテゴリ
 		struct CategoriesEdit

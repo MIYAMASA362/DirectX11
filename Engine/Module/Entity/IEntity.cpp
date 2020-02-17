@@ -1,3 +1,4 @@
+#include<algorithm>
 #include"Common.h"
 
 #include"Module\Object\Object.h"
@@ -6,7 +7,7 @@
 #include"Module\ECSEngine.h"
 
 #include"Module\Component\IComponent.h"
-#include"Module\Component\ComponentList.h"
+#include"Module\Component\Component.h"
 #include"Module\Component\ComponentManager.h"
 
 #include"IEntity.h"
@@ -23,11 +24,9 @@
 //
 IEntity::IEntity()
 	:
-	Object(),
-	//ComponentList‚Ì¶¬
-	_ComponentList(ComponentManager::GetInstance()->CreateComponents(this))
+	Object()
 {
-
+	_Components.reserve(COMPONENTS_CAPACITY);
 }
 
 //~IEntity
@@ -35,18 +34,26 @@ IEntity::IEntity()
 //
 IEntity::~IEntity()
 {
-	//ComponentList‚Ì‰ð•ú
-	ComponentManager::GetInstance()->ReleaseComponents(this);
+	_Components.clear();
 }
 
-//Destory
-//	Entity‚Ìíœ–½—ß
+//Destroy
+//	íœéŒ¾
 //
 void IEntity::Destroy()
 {
-	//ComponentList‚Ìíœ“o˜^
-	ComponentManager::GetInstance()->DestroyComponents(this);
-	ObjectManager::GetInstance()->DestroyObject(this);
+	for(auto component : _Components)
+	{
+		component->Destroy();
+	}
+}
+
+void IEntity::SendComponentMessage(std::string message)
+{
+	for (auto component : _Components)
+	{
+		component->SendComponentMessage(message);
+	}
 }
 
 //Release
@@ -55,4 +62,26 @@ void IEntity::Destroy()
 void IEntity::Release()
 {
 	EntityManager::GetInstance()->ReleaseEntity(this);
+}
+
+//ReleaseComponent
+//	ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì”jŠü
+//
+void IEntity::ReleaseComponent(IComponent * component)
+{
+	ComponentID id = component->GetComponentID();
+
+	auto end = _Components.end();
+	auto find = std::remove_if(
+		_Components.begin(), end, [id](std::shared_ptr<IComponent> component)
+	{
+		return component->GetComponentID() == id;
+	});
+	_Components.erase(find,end);
+}
+
+void IEntity::Register(std::shared_ptr<Object> instance)
+{
+	Object::Register(instance);
+	EntityManager::GetInstance()->RegisterEntity(std::dynamic_pointer_cast<IEntity>(instance));
 }

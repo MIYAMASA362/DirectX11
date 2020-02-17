@@ -1,12 +1,16 @@
 #pragma once
 
-class Player:public MonoBehaviour<Player>
+class Player:public Component<Player>
 {
 public:
 	const float speed = 0.5f;
 	FieldCollider* _fieldCollider;
-public:
-	Player(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
+
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+		if (message == "FixedUpdate") FixedUpdate();
+	}
 
 	void Update()
 	{
@@ -16,38 +20,38 @@ public:
 	void FixedUpdate()
 	{
 		float horizontal = Input::Mouse::GetAccelerationX();
-		this->transform()->localRotation(
-			this->transform()->localRotation() * Quaternion::AngleAxisToEuler(horizontal,this->transform()->up())
+		this->gameObject()->transform().lock()->localRotation(
+			this->gameObject()->transform().lock()->localRotation() * Quaternion::AngleAxisToEuler(horizontal,this->gameObject()->transform().lock()->up())
 		);
 
 		if (Input::GetKeyPress('W'))
-			this->transform()->position(this->transform()->position() + this->transform()->forward() * speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->forward() * speed);
 		if (Input::GetKeyPress('S'))
-			this->transform()->position(this->transform()->position() + this->transform()->back() *speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->back() *speed);
 		if (Input::GetKeyPress('A'))
-			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->left() *speed);
 		if (Input::GetKeyPress('D'))
-			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->right()*speed);
 		
-		/*if (_fieldCollider->IsOnGround(this->transform()->position()))
+		/*if (_fieldCollider->IsOnGround(this->gameObject()->transform().lock()->position()))
 		{
-			Vector3 pos = this->transform()->position();
+			Vector3 pos = this->gameObject()->transform().lock()->position();
 			pos.y = _fieldCollider->GetHeight(pos) + 4.0f;
-			this->transform()->position(pos);
+			this->gameObject()->transform().lock()->position(pos);
 			this->gameObject()->GetComponent<Rigidbody>().lock()->SetVelocity(Vector3::zero());
 		}
 */
 		RayCastHit info;
-		if (Physics::RayCast(this->transform()->position() + Vector3::up()*2.0f, Vector3::down(), info, 10.0f))
+		if (Physics::RayCast(this->gameObject()->transform().lock()->position() + Vector3::up()*2.0f, Vector3::down(), info, 10.0f))
 		{
-			Vector3 pos = this->transform()->position();
-			pos.y = info.hitPosition.y + this->transform()->scale().y;
-			this->transform()->position(pos);
+			Vector3 pos = this->gameObject()->transform().lock()->position();
+			pos.y = info.hitPosition.y + this->gameObject()->transform().lock()->scale().y;
+			this->gameObject()->transform().lock()->position(pos);
 		}
 	}
 };
 
-class PlayerCamera:public MonoBehaviour<PlayerCamera>
+class PlayerCamera:public Component<PlayerCamera>
 {
 public:
 	GameObject* target;
@@ -55,10 +59,14 @@ public:
 	GameObject* VerticalPivot;
 	GameObject* player;
 	const float speed = 0.001f;
-public:
-	PlayerCamera(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
 
-	void Update() override
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+	}
+
+
+	void Update()
 	{
 		//float horizontal = Input::Mouse::GetAccelerationX() * speed;
 		//float vertical = Input::Mouse::GetAccelerationY() * speed;
@@ -81,7 +89,7 @@ public:
 	}
 };
 
-class PlayerMove:public MonoBehaviour<PlayerMove>
+class PlayerMove:public Component<PlayerMove>
 {
 private:
 	const float walk = 0.8f;	//•à‚­
@@ -91,9 +99,13 @@ private:
 	bool IsRun = false;	//‘–‚Á‚Ä‚¢‚é‚©
 public:
 	Camera* camera;
-public:
-	PlayerMove(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
-	void Update() override
+
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+	}
+
+	void Update()
 	{
 		//Vector3 vec = Vector3::zero();
 		//float horizontal = 0.0f;
@@ -128,16 +140,5 @@ public:
 		//auto rigidbody = this->gameObject.lock()->rigidbody;
 		//if(rigidbody)
 		//	rigidbody->AddForce(vec);
-	}
-};
-
-class PivotBehaviour:public MonoBehaviour<PivotBehaviour>
-{
-public:
-	GameObject* target;
-	PivotBehaviour(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
-public:
-	void Update(){
-		/*this->transform.lock()->position(target->transform->position());*/
 	}
 };

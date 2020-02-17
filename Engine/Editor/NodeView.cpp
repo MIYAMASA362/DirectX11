@@ -6,7 +6,6 @@
 #include"Window\Window.h"
 #include "NodeView.h"
 
-
 Editor::NodeColumn::NodeColumn()
 	:
 	_IsSelect(false),
@@ -17,6 +16,7 @@ Editor::NodeColumn::NodeColumn()
 
 Editor::NodeColumn::~NodeColumn()
 {
+
 }
 
 void Editor::NodeColumn::AddConectPos(float x, float y)

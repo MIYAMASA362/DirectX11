@@ -5,15 +5,17 @@ struct ID3D11Buffer;
 
 namespace DirectX
 {
-	class CPolygon :public MonoBehaviour<CPolygon>
+	class CPolygon :public Component<CPolygon>
 	{
 	private:
 		ID3D11Buffer* m_VertexBuffer = nullptr;
 		Texture** m_Texture = nullptr;
 	public:
-		void Start() override;
-		void Update() override;
+		void SendComponentMessage(std::string message) override;
+
+		void Start();
+		void Update();
 		void Render();
-		void OnDestroy() override;
+		void Release() override;
 	};
 }

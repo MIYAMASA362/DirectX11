@@ -28,7 +28,7 @@ public:
 	static void CollisionRigidbody();
 
 	//コンスタント
-	Rigidbody(EntityID OwnerID);
+	Rigidbody();
 	//デストラクタ
 	virtual ~Rigidbody();
 
@@ -54,9 +54,6 @@ public:
 
 
 protected:
-	//削除時実行関数
-	void OnDestroy() override;
-
 	void OnDebugImGui() override;
 
 	void SendComponentMessage(std::string message) override;

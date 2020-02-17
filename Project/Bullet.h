@@ -1,51 +1,38 @@
 #pragma once
 
-class Bullet:public MonoBehaviour<Bullet>
+class Bullet:public Component<Bullet>
 {
 public:
 	const float speed = 0.5f;
-public:
-	Bullet(EntityID OwnerID):MonoBehaviour(OwnerID)
+
+	virtual void SendComponentMessage(std::string message) override
 	{
-		
-	};
-public:
+		if (message == "Update") Update();
+	}
 	void Update()
 	{
 		//this->transform.lock()->position(this->transform.lock()->position()+this->transform.lock()->forward() * speed);
 	}
 };
 
-class Shot:public MonoBehaviour<Shot>
+class Shot:public Component<Shot>
 {
 public:
-	Shot(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
-public:
-	void Start()override
-	{
-		
-	}
 
-	void Update()override
-	{
-
-	}
 };
 
-class RotationBox:public MonoBehaviour<RotationBox>
+class RotationBox:public Component<RotationBox>
 {
 public :
-	RotationBox(EntityID OwnerID) :MonoBehaviour(OwnerID) { };
-public:
-	void Start() override
+	virtual void SendComponentMessage(std::string message) override
 	{
-	
+		if (message == "Update") Update();
 	}
 
-	void Update() override
+	void Update()
 	{
-		Quaternion q = this->transform()->rotation();
+		Quaternion q = this->gameObject()->transform().lock()->rotation();
 		q *= Quaternion::AngleAxisToEuler(0.1f,Vector3::up());
-		this->transform()->rotation(q);
+		this->gameObject()->transform().lock()->rotation(q);
 	}
 };

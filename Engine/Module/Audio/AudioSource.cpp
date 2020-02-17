@@ -5,9 +5,9 @@
 #include"AudioManager.h"
 #include"AudioSource.h"
 
-AudioSource::AudioSource(EntityID OwnerID)
+AudioSource::AudioSource()
 :
-	Component(OwnerID)
+	Component()
 {
 
 }
@@ -38,7 +38,7 @@ void AudioSource::Stop()
 	audio.lock()->Stop();
 }
 
-void AudioSource::OnDestroy()
+void AudioSource::Release()
 {
 	audio.lock()->Stop();
 }

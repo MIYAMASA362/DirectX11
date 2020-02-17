@@ -22,22 +22,6 @@ private:
 	//固有ID
 	InstanceID _InstanceID;
 
-	//シリアル化
-	template<class Archive>
-	void save(Archive& archive) const 
-	{
-		archive(
-			CEREAL_NVP(_InstanceID)
-		);
-	}
-
-	template<class Archive>
-	void load(Archive& archive)
-	{
-		archive(
-			CEREAL_NVP(_InstanceID)
-		);
-	}
 
 public:
 	//コンストラクタ
@@ -48,11 +32,34 @@ public:
 	//固有IDの取得
 	InstanceID GetInstanceID();
 
-	virtual void Destroy() = 0;
+	//削除宣言 DestroyIndexへ追加
+	virtual void Destroy();
+
 
 protected:
-	//破棄実行時関数
+	//即時破棄関数
 	virtual void Release() = 0;
+
+	//ObjectManager登録時実行関数
+	virtual void Register(std::shared_ptr<Object> instance) {};
+
+
+private:
+	//シリアライズ
+	template<class Archive>
+	void save(Archive& archive) const 
+	{
+
+	}
+
+	//デシリアライズ
+	template<class Archive>
+	void load(Archive& archive)
+	{
+
+	}
+
+
 };
 
 CEREAL_REGISTER_TYPE(Object)

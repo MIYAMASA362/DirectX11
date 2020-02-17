@@ -6,7 +6,7 @@
 //
 //*********************************************************************************************************************
 
-class Camera final :public Behaviour<Camera>
+class Camera final :public Component<Camera>
 {
 private:
 	//アクティブなカメラ 描画のターゲット
@@ -17,6 +17,7 @@ private:
 
 	D3D11_VIEWPORT _Viewport;		//描画領域
 	int _Priority;					//描画優先度
+	bool _IsEnable;
 
 	XMMATRIX _ViewMatrix;
 	XMMATRIX _ProjectionMatrix;
@@ -30,8 +31,7 @@ private:
 
 public:
 	//コンストラクタ
-	Camera() {};
-	Camera(EntityID OwnerID);
+	Camera();
 	//デストラクタ
 	virtual ~Camera();
 
@@ -46,6 +46,10 @@ public:
 
 	//ビューポート設定
 	void SetViewPort(float x, float y, float w, float h);
+
+	void Register(std::shared_ptr<Object> instance) override;
+
+	void Release() override;
 
 	//描画優先度設定
 	void SetPriority(int priority);
@@ -65,7 +69,7 @@ public:
 	void save(Archive& archive) const
 	{
 		archive(
-			cereal::base_class<Behaviour<Camera>>(this),
+			cereal::base_class<Component<Camera>>(this),
 			CEREAL_NVP(_Viewport.Height),
 			CEREAL_NVP(_Viewport.Width)
 		);
@@ -74,13 +78,10 @@ public:
 	void load(Archive& archive)
 	{
 		archive(
-			cereal::base_class<Behaviour<Camera>>(this),
+			cereal::base_class<Component<Camera>>(this),
 			CEREAL_NVP(_Viewport.Height),
 			CEREAL_NVP(_Viewport.Width)
 		);
-		auto instance = std::shared_ptr<Camera>(this);
-		ObjectManager::GetInstance()->RegisterObject(instance);
-		Component<Camera>::RegisterComponentIndex(instance);
 	}
 
 	//エディタ表示
@@ -91,5 +92,4 @@ protected:
 };
 
 CEREAL_REGISTER_TYPE(Component<Camera>)
-CEREAL_REGISTER_TYPE(Behaviour<Camera>)
 CEREAL_REGISTER_TYPE(Camera)

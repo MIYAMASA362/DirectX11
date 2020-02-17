@@ -19,9 +19,8 @@ using namespace DirectX;
 //Rigidbody
 //	コンストラクタ
 //
-Rigidbody::Rigidbody(EntityID OwnerID)
+Rigidbody::Rigidbody()
 :
-	Component(OwnerID),
 	_UseGravity(true),
 	_Velocity(Vector3::zero()),
 	_Mass(1.0f)
@@ -43,17 +42,11 @@ Rigidbody::~Rigidbody()
 //
 void Rigidbody::FixedUpdate()
 {
-	Transform* m_transform = this->transform().get();
-
 	//重力
 	if (_UseGravity)
 		_Velocity += _Mass * Physics::Get_Gravity();
 	else
 		_Velocity = Vector3::zero();
-
-	//y:0を地面とした判定
-	/*if (m_transform->position().y - (m_transform->scale().y*0.5f) + m_velocity.y < 0.0f)
-		m_velocity.y -= m_transform->position().y- (m_transform->scale().y* 0.5f) + m_velocity.y;*/
 }
 
 //ApplyRigidbody
@@ -62,9 +55,9 @@ void Rigidbody::FixedUpdate()
 void Rigidbody::ApplyRigidbody()
 {
 	for (auto rigidbody : ComponentIndex) {
-		auto transform = rigidbody.second.lock()->transform();
-		rigidbody.second.lock()->_OldPosition = transform->position();
-		transform->position(transform->position() + rigidbody.second.lock()->_Velocity);
+		auto transform = rigidbody.lock()->gameObject()->transform().lock();
+		rigidbody.lock()->_OldPosition = transform->position();
+		transform->position(transform->position() + rigidbody.lock()->_Velocity);
 	}
 }
 
@@ -75,23 +68,8 @@ void Rigidbody::CollisionRigidbody()
 {
 	for(auto rigidbody : ComponentIndex)
 	{
-		Collider::Hitjudgment(rigidbody.second.lock()->_Colliders);
+		Collider::Hitjudgment(rigidbody.lock()->_Colliders);
 	}
-}
-
-//OnDestroy
-//
-//
-void Rigidbody::OnDestroy()
-{
-	//auto rigidbody = this->transform()->GetComponentInParent(Rigidbody::TypeID);
-
-	//if(rigidbody.expired())
-		
-
-	/*Collider* collider = this->gameObject()->GetComponent<Collider>();
-	if(collider)
-		collider->IsAttachRigdbody = false;*/
 }
 
 void Rigidbody::OnDebugImGui()

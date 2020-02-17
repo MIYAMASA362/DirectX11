@@ -26,48 +26,23 @@ IComponent::IComponent()
 
 }
 
-//IComponent
-//	コンストラクタ
-//
-IComponent::IComponent(EntityID OwnerID)
-	:
-	Object(),
-	_Entity(EntityManager::GetInstance()->GetEntity(OwnerID).lock())
-{
-
-}
 
 //~IComponent
 //	デストラクタ
 //
 IComponent::~IComponent()
 {
-	if(_Entity) _Entity.reset();
+	
 }
 
-ComponentTypeID IComponent::GetComponentTypeID()
+GameObject* IComponent::gameObject()
 {
-	return typeid(*this).hash_code();
+	return static_cast<GameObject*>(_Entity);
 }
 
 EntityID IComponent::GetOwnerID()
 {
-	return _Entity->GetEntityID();
-}
-
-//Transform
-//	EntityのTransform
-//
-std::shared_ptr<Transform> IComponent::transform()
-{
-	return gameObject()->transform().lock();
-}
-
-//GameObject
-//	EntityのGameObject
-std::shared_ptr<GameObject> IComponent::gameObject()
-{
-	return std::static_pointer_cast<GameObject>(_Entity);
+	return gameObject()->GetEntityID();
 }
 
 //OnDebugImGui
@@ -76,21 +51,20 @@ std::shared_ptr<GameObject> IComponent::gameObject()
 void IComponent::OnDebugImGui()
 {
 	ImGui::Text(("ID : " + std::to_string(this->GetInstanceID())).c_str());
-	ImGui::Text(("OwnerID : " + std::to_string(_Entity->GetEntityID())).c_str());
 }
 
-//Destory
-//	Componentの削除命令
+//Release
 //
-void IComponent::Destroy()
-{
-	//削除登録
-	ObjectManager::GetInstance()->DestroyObject(this);
-	//Entity所有破棄
-	_Entity.reset();
-}
-
+//
 void IComponent::Release()
 {
+	ComponentManager::GetInstance()->ReleaseComponent(this);
+	//Entity._Componentsから削除
+	_Entity->ReleaseComponent(this);
+}
 
+void IComponent::Register(std::shared_ptr<Object> instance)
+{
+	Object::Register(instance);
+	ComponentManager::GetInstance()->RegisterComponent(std::dynamic_pointer_cast<IComponent>(instance));
 }

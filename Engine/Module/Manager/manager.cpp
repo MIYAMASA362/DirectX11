@@ -14,35 +14,6 @@
 
 #include"Module\Geometry\Geometry.h"
 
-//--- Project Component -------------------------
-#include"../Project/CameraMouse.h"
-#include"../Project/CameraFollow.h"
-#include"../Project/RemoveObject.h"
-#include"../Project/Bullet.h"
-
-#include"../Project/Enemy.h"
-#include"../Project/Player.h"
-
-#include"../Project/ItemSlotScript.h"
-#include"../Project/MapUIScript.h"
-
-#include"../Project/BallScript.h"
-
-
-//--- Scene -------------------------------------
-
-//Test
-#include"../Project/SceneChange.h"
-#include"../Project/TestScene.h"
-#include"../Project/TestScene2.h"
-#include"../Project/TestScene3.h"
-#include"../Project/BallTest.h"
-
-//Main
-#include"../Project/Title.h"
-#include"../Project/GameMain.h"
-
-
 //------------------------------------------------
 
 #include"cereal\cereal.hpp"
@@ -194,6 +165,8 @@ void CManager::Initialize(HWND hWnd ,unsigned int fps)
 	
 	SceneManager::GetInstance()->CreateScene("DefaultScene");
 	SceneManager::GetInstance()->LoadScene("DefaultScene");
+
+	ObjectManager::GetInstance()->ClearnUpObject();
 
 	//Component
 	ComponentManager::GetInstance()->SendComponentMessage("Start");

@@ -4,7 +4,7 @@
         "_hierarchyUtility": {
             "_hierarchyMap": [
                 {
-                    "key": 3936742633,
+                    "key": 2087455131,
                     "value": {
                         "_self": {
                             "locked_ptr": {
@@ -15,90 +15,57 @@
                                     "data": {
                                         "value0": {
                                             "value0": {
-                                                "value0": {
-                                                    "ptr_wrapper": {
-                                                        "id": 2147483650,
-                                                        "data": {
-                                                            "value0": [
-                                                                {
-                                                                    "key": 2585539460,
-                                                                    "value": {
-                                                                        "polymorphic_id": 2147483650,
-                                                                        "polymorphic_name": "Transform",
-                                                                        "ptr_wrapper": {
-                                                                            "id": 2147483651,
-                                                                            "data": {
-                                                                                "value0": {
-                                                                                    "value0": {
-                                                                                        "value0": {
-                                                                                            "_InstanceID": 2585539460
-                                                                                        },
-                                                                                        "value1": {
-                                                                                            "polymorphic_id": 1,
-                                                                                            "ptr_wrapper": {
-                                                                                                "id": 1
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                },
-                                                                                "_Position": {
-                                                                                    "x": 0.0,
-                                                                                    "y": 0.0,
-                                                                                    "z": 0.0
-                                                                                },
-                                                                                "_Rotation": {
-                                                                                    "x": 0.0,
-                                                                                    "y": 0.0,
-                                                                                    "z": 0.0,
-                                                                                    "w": 1.0
-                                                                                },
-                                                                                "_Scale": {
-                                                                                    "x": 1.0,
-                                                                                    "y": 1.0,
-                                                                                    "z": 1.0
-                                                                                }
-                                                                            }
-                                                                        }
+                                                "value0": [
+                                                    {
+                                                        "polymorphic_id": 2147483650,
+                                                        "polymorphic_name": "Transform",
+                                                        "ptr_wrapper": {
+                                                            "id": 2147483650,
+                                                            "data": {
+                                                                "value0": {
+                                                                    "value0": {
+                                                                        "value0": {}
                                                                     }
                                                                 },
-                                                                {
-                                                                    "key": 231310777,
-                                                                    "value": {
-                                                                        "polymorphic_id": 2147483651,
-                                                                        "polymorphic_name": "Camera",
-                                                                        "ptr_wrapper": {
-                                                                            "id": 2147483652,
-                                                                            "data": {
-                                                                                "value0": {
-                                                                                    "value0": {
-                                                                                        "value0": {
-                                                                                            "value0": {
-                                                                                                "_InstanceID": 231310777
-                                                                                            },
-                                                                                            "value1": {
-                                                                                                "polymorphic_id": 1,
-                                                                                                "ptr_wrapper": {
-                                                                                                    "id": 1
-                                                                                                }
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                },
-                                                                                "_Viewport.Height": 615.0,
-                                                                                "_Viewport.Width": 1040.0
-                                                                            }
-                                                                        }
-                                                                    }
+                                                                "_Position": {
+                                                                    "x": 0.0,
+                                                                    "y": 0.0,
+                                                                    "z": 0.0
+                                                                },
+                                                                "_Rotation": {
+                                                                    "x": 0.0,
+                                                                    "y": 0.0,
+                                                                    "z": 0.0,
+                                                                    "w": 1.0
+                                                                },
+                                                                "_Scale": {
+                                                                    "x": 1.0,
+                                                                    "y": 1.0,
+                                                                    "z": 1.0
                                                                 }
-                                                            ]
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "polymorphic_id": 2147483651,
+                                                        "polymorphic_name": "Camera",
+                                                        "ptr_wrapper": {
+                                                            "id": 2147483651,
+                                                            "data": {
+                                                                "value0": {
+                                                                    "value0": {
+                                                                        "value0": {}
+                                                                    }
+                                                                },
+                                                                "_Viewport.Height": 615.0,
+                                                                "_Viewport.Width": 1040.0
+                                                            }
                                                         }
                                                     }
-                                                }
+                                                ]
                                             }
                                         },
-                                        "value1": {
-                                            "_InstanceID": 3936742633
-                                        },
+                                        "value1": {},
                                         "_Name": "MainCamera",
                                         "_IsDestroy": false,
                                         "_IsActive": true

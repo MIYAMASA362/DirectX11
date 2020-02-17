@@ -1,5 +1,7 @@
 #pragma once
 
+#include<algorithm>
+
 //*********************************************************************************************************************
 //
 //	Component 
@@ -8,11 +10,33 @@
 template<typename Type>
 class Component:public IComponent
 {
-	friend class ComponentManager;
 	friend cereal::access;
 protected:
 	//このComponentのインデックス
-	static std::map<ComponentID, std::weak_ptr<Type>> ComponentIndex;
+	static std::list<std::weak_ptr<Type>> ComponentIndex;
+
+public:
+	//コンストラクタ
+	Component();
+	//デストラクタ
+	virtual ~Component();
+
+	//ComponentIndexの取得
+	static std::list<std::weak_ptr<Type>>& GetComponentIndex() { return ComponentIndex; };
+
+	//Componentへmessage送信
+	virtual void SendComponentMessage(std::string message) override {};
+	//ComponentIndexから削除
+	static void ReleaseComponentIndex(Type* instance);
+	//ComponentIndexへ追加
+	static void RegisterComponentIndex(std::shared_ptr<Type> instance);
+
+	//ImGuiの設定
+	virtual void OnDebugImGui() override;
+	//削除時実行関数
+	virtual void Release() override;
+	//ObjectManager登録時実行関数
+	virtual void Register(std::shared_ptr<Object> instance) override;
 
 private:
 	//シリアライズ
@@ -22,36 +46,13 @@ private:
 		archive(cereal::base_class<IComponent>(this));
 	}
 
+	//デシリアライズ
 	template<class Archive>
 	void load(Archive& archive)
 	{
 		archive(cereal::base_class<IComponent>(this));
 	}
 
-public:
-	//コンストラクタ
-	Component();
-	Component(EntityID OwnerID);
-	//デストラクタ
-	virtual ~Component();
-
-	//Entityに付属されているComponentを取得
-	static std::weak_ptr<Type> GetComponent(EntityID entityID);
-
-	//削除時関数
-	virtual void OnDestroy() override {};
-
-	//ComponentIndexへ追加
-	static void RegisterComponentIndex(std::shared_ptr<Type> instance);
-
-	void ReleaseComponentIndex(std::shared_ptr<Type> instance);
-
-	virtual void Destroy() override;
-
-protected:
-	virtual void OnDebugImGui() override;
-
-	virtual void SendComponentMessage(std::string message) override {};
 
 };
 
@@ -64,10 +65,10 @@ protected:
 //*********************************************************************************************************************
 
 template<typename Type>
-std::map<ComponentID, std::weak_ptr<Type>> Component<Type>::ComponentIndex;
+std::list<std::weak_ptr<Type>> Component<Type>::ComponentIndex;
 
-//Component
-//	コンストラクタ
+//コンストラクタ
+//
 //
 template<typename Type>
 inline Component<Type>::Component()
@@ -77,21 +78,8 @@ inline Component<Type>::Component()
 
 }
 
-
-//Component
-//	コンストラクタ
-//
-template<typename Type>
-inline Component<Type>::Component(EntityID OwnerID)
-	:
-	IComponent(OwnerID)
-{
-
-}
-
-
 //デストラクタ
-//	インデックスから削除
+//
 //
 template<typename Type>
 inline Component<Type>::~Component()
@@ -99,19 +87,18 @@ inline Component<Type>::~Component()
 
 }
 
-//GetComponent
-//
-//
+
 template<typename Type>
-inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
+inline void Component<Type>::ReleaseComponentIndex(Type * instance)
 {
-	for(auto component : ComponentIndex)
+	ComponentID id = instance->GetComponentID();
+	auto end = ComponentIndex.end();
+	auto find = std::remove_if(
+		ComponentIndex.begin(), end, [id](std::weak_ptr<IComponent> component)
 	{
-		if (component.second.lock()->GetOwnerID() == entityID)
-			return component.second;
-	}
-	assert(0);
-	return std::weak_ptr<Type>();
+		return component.lock()->GetComponentID() == id;
+	});
+	ComponentIndex.erase(find,end);
 }
 
 //RegisterComponentIndex
@@ -120,22 +107,7 @@ inline std::weak_ptr<Type> Component<Type>::GetComponent(EntityID entityID)
 template<typename Type>
 inline void Component<Type>::RegisterComponentIndex(std::shared_ptr<Type> instance)
 {
-	ComponentIndex.emplace(instance->GetComponentID(), instance);
-}
-
-//ReleaseComponentIndex
-//	ComponentIndexから削除する
-//
-template<typename Type>
-inline void Component<Type>::ReleaseComponentIndex(std::shared_ptr<Type> instance)
-{
-	ComponentIndex.erase(instance->GetComponentID());
-}
-
-template<typename Type>
-inline void Component<Type>::Destroy()
-{
-	IComponent::Destroy();
+	ComponentIndex.push_back(instance);
 }
 
 //OnDebugImGui
@@ -145,4 +117,24 @@ template<typename Type>
 inline void Component<Type>::OnDebugImGui()
 {
 	IComponent::OnDebugImGui();
+}
+
+//Release
+//
+//
+template<typename Type>
+inline void Component<Type>::Release()
+{
+	IComponent::Release();
+	ReleaseComponentIndex(static_cast<Type*>(this));
+}
+
+//Register
+//
+//
+template<typename Type>
+inline void Component<Type>::Register(std::shared_ptr<Object> instance)
+{
+	IComponent::Register(instance);
+	RegisterComponentIndex(std::dynamic_pointer_cast<Type>(instance));
 }

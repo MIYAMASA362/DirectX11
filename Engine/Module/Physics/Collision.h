@@ -57,7 +57,7 @@ public:
 	bool IsTrigger = false;			//ï®óùãììÆÇ∑ÇÈÇ©
 	Mesh* _mesh;
 
-	Collider(EntityID OwnerID);
+	Collider();
 	virtual ~Collider();
 
 	virtual ShapeType GetShapeType() = 0;	//Type
@@ -96,7 +96,7 @@ public:
 	static void ReleaseRenderBuffer();
 
 public:
-	SphereCollider(EntityID OwnerID);
+	SphereCollider();
 	virtual ~SphereCollider();
 
 	ShapeType GetShapeType() override { return ShapeType::ST_Sphere; };
@@ -124,7 +124,7 @@ public:
 	static void SetRenderBuffer();
 	static void ReleaseRenderBuffer();
 public:
-	BoxCollider(EntityID OwnerID);
+	BoxCollider();
 	virtual ~BoxCollider() = default;
 	virtual ShapeType GetShapeType() override { return ShapeType::ST_Box; };
 	void SetSize(Vector3 size);
@@ -140,7 +140,7 @@ class FieldCollider final:public Collider
 private:
 	MeshField* _field;
 public:
-	FieldCollider(EntityID OwnerID);
+	FieldCollider();
 	ShapeType GetShapeType() override { return ShapeType::ST_Field; };
 	void SetMesh(MeshField* field);
 	bool IsOnGround(Vector3 Position);
@@ -154,7 +154,7 @@ class MeshCollider final : public Collider
 {
 	friend class Collider;
 public:
-	MeshCollider(EntityID OwnerID);
+	MeshCollider();
 	ShapeType GetShapeType() override { return ShapeType::ST_Mesh; };
 	void SetMesh(Mesh* mesh);
 	void Render() override {};

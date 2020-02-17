@@ -39,15 +39,14 @@ std::vector<Camera*> Camera::CameraSortIndex;
 //Camera
 //	コンストラクタ
 //
-Camera::Camera(EntityID OwnerID)
+Camera::Camera()
 	:
-	Behaviour(OwnerID),
 	_Priority(1),
+	_IsEnable(true),
 	_ViewMatrix(XMMatrixIdentity()),
 	_ProjectionMatrix(XMMatrixIdentity())
 {
 	SetViewPort(0, 0, 1, 1);	//ViewPort設定
-	this->RegisterSortIndex(this);
 
 	if (pActiveCamera == nullptr)
 		pActiveCamera = this;
@@ -58,7 +57,7 @@ Camera::Camera(EntityID OwnerID)
 //
 Camera::~Camera()
 {
-	RemoveSortIndex(this);
+	
 }
 
 
@@ -72,7 +71,7 @@ void Camera::Render(void(*Draw)(void),RenderStatus* renderStatus)
 	{
 		//有効
 		if (!camera->gameObject()->GetActive()) continue;
-		if (!camera->GetEnable()) continue;
+		if (!camera->_IsEnable) continue;
 
 		//アクティブなカメラに設定
 		pActiveCamera = camera;
@@ -89,6 +88,7 @@ void Camera::Render(void(*Draw)(void),RenderStatus* renderStatus)
 //
 Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 {
+	if (CameraSortIndex.size() == 0) return position;
 	XMFLOAT2 MousePos;
 	MousePos.x = Input::Mouse::GetMouseX();
 	MousePos.y = Input::Mouse::GetMouseY();
@@ -98,7 +98,7 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 
 	const XMMATRIX projection = pActiveCamera->GetProjectionMatrix();
 	const XMMATRIX ViewMatrix = pActiveCamera->GetViewMatrix();
-	const XMMATRIX WorldMatrix = pActiveCamera->transform()->WorldMatrix();
+	const XMMATRIX WorldMatrix = pActiveCamera->gameObject()->transform().lock()->WorldMatrix();
 
 	Vector3 screenRay;
 	//2.0fは画面中心に移動させるため
@@ -115,9 +115,9 @@ Vector3 Camera::ScreenToWorldPosition(Vector3 position)
 	rayDirection.z = screenRay.x * InvWorldView.r[0].m128_f32[2] + screenRay.y * InvWorldView.r[1].m128_f32[2] + screenRay.z * InvWorldView.r[2].m128_f32[2];
 	rayDirection = rayDirection.normalize();
 
-	screenRay = XMVector3TransformCoord(screenRay, pActiveCamera->transform()->MatrixQuaternion());
+	screenRay = XMVector3TransformCoord(screenRay, pActiveCamera->gameObject()->transform().lock()->MatrixQuaternion());
 
-	return pActiveCamera->transform()->position() + screenRay*10.0f;
+	return pActiveCamera->gameObject()->transform().lock()->position() + screenRay*10.0f;
 }
 
 
@@ -170,6 +170,18 @@ void Camera::SetViewPort(float x, float y, float w, float h)
 
 }
 
+void Camera::Register(std::shared_ptr<Object> instance)
+{
+	Component::Register(instance);
+	this->RegisterSortIndex(this);
+}
+
+void Camera::Release()
+{
+	Component::Release();
+	RemoveSortIndex(this);
+}
+
 //SetPriority
 //	Camera描画優先度設定
 //
@@ -194,12 +206,12 @@ void Camera::Run()
 
 	// ビューマトリクス設定
 	{
-		InvViewMatrix = this->transform()->WorldMatrix();
+		InvViewMatrix = this->gameObject()->transform().lock()->WorldMatrix();
 
 		XMVECTOR det;
 		ViewMatrix = XMMatrixInverse(&det, InvViewMatrix);
 
-		this->_ViewMatrix = this->transform()->MatrixScaling() * this->transform()->MatrixQuaternion();
+		this->_ViewMatrix = this->gameObject()->transform().lock()->MatrixScaling() * this->gameObject()->transform().lock()->MatrixQuaternion();
 
 		D3DRenderer::GetInstance()->SetViewMatrix(&ViewMatrix);
 	}

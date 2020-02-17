@@ -12,7 +12,7 @@ class Entity:public IEntity
 	friend cereal::access;
 protected:
 	//このEntityのインスタンス配列
-	static std::unordered_map<EntityID,std::weak_ptr<Type>> EntityIndex;
+	static std::list<std::weak_ptr<Type>> EntityIndex;
 
 
 public:
@@ -21,18 +21,21 @@ public:
 	//デストラクタ
 	virtual ~Entity();
 
-	//Entityの取得
-	static std::weak_ptr<Type> GetTypeEntity(EntityID id);
+	//EntityIndexの取得
+	static std::list<std::weak_ptr<Type>>& GetEntityIndex() { return EntityIndex; };
 
+	
 
 protected:
 	//即時破棄関数
-	virtual void Release();
+	virtual void Release() override;
+	//ObjectManager登録時実行関数
+	virtual void Register(std::shared_ptr<Object> instance) override;
 
 	//EntityIndexから削除
 	static void ReleaseEntityIndex(Type* instance);
 	//EntityIndexへ登録
-	static std::weak_ptr<Type> RegisterEntityIndex(std::shared_ptr<Type> instance);
+	static void RegisterEntityIndex(std::shared_ptr<Type> instance);
 
 
 private:
@@ -56,7 +59,7 @@ private:
 
 
 template<typename Type>
-std::unordered_map<EntityID, std::weak_ptr<Type>> Entity<Type>::EntityIndex;
+std::list<std::weak_ptr<Type>> Entity<Type>::EntityIndex;
 
 //Entity
 //	コンストラクタ
@@ -78,29 +81,45 @@ Entity<Type>::~Entity()
 	
 }
 
+//RegisterEntityIndex
+//	
+//
 template<typename Type>
-inline std::weak_ptr<Type> Entity<Type>::GetTypeEntity(EntityID id)
+inline void Entity<Type>::RegisterEntityIndex(std::shared_ptr<Type> instance)
 {
-	auto find = EntityIndex.find(id);
-	if (find == EntityIndex.end()) assert(0);
-	return find->second;
+	return EntityIndex.push_back(instance);
 }
 
+//ReleaseEntityIndex
+//
+//
 template<typename Type>
-inline std::weak_ptr<Type> Entity<Type>::RegisterEntityIndex(std::shared_ptr<Type> instance)
+inline void Entity<Type>::ReleaseEntityIndex(Type* instance)
 {
-	return EntityIndex.emplace(instance->GetEntityID(),instance).first->second;
+	EntityID id = instance->GetEntityID();
+
+	auto end = EntityIndex.end();
+	auto find = std::remove_if(
+		EntityIndex.begin(), end, [id](std::weak_ptr<Type> entity) 
+	{
+		return entity.lock()->GetEntityID() == id;
+	});
+	EntityIndex.erase(find,end);
 }
 
-template<typename Type>
-inline void Entity<Type>::ReleaseEntityIndex(Type * instance)
-{
-	EntityIndex.erase(instance->GetEntityID());
-}
-
+//Release
+//
+//
 template<typename Type>
 inline void Entity<Type>::Release()
 {
 	IEntity::Release();
-	ReleaseEntityIndex(this);
+	ReleaseEntityIndex(static_cast<Type*>(this));
+}
+
+template<typename Type>
+inline void Entity<Type>::Register(std::shared_ptr<Object> instance)
+{
+	IEntity::Register(instance);
+	this->RegisterEntityIndex(std::dynamic_pointer_cast<Type>(instance));
 }

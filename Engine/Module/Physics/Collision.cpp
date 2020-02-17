@@ -85,9 +85,8 @@ void Bounds::DebugImGui()
 //--- Collider --------------------------------------------
 
 //Constrcutor
-Collider::Collider(EntityID OwnerID)
+Collider::Collider()
 :
-	Component(OwnerID),
 	bound(Vector3::zero(),Vector3::one())
 {
 
@@ -102,19 +101,19 @@ void Collider::Start()
 {
 	//Rigidbodyを探す
 	auto rigidbody = this->gameObject()->GetComponent<Rigidbody>();
-	if (rigidbody.expired())
+	if (rigidbody)
 	{
-		auto component = this->transform()->GetComponentInParent(typeid(Rigidbody).hash_code());
+		auto component = this->gameObject()->transform().lock()->GetComponentInParent(typeid(Rigidbody).hash_code());
 		if (component.expired()) return;
 		rigidbody = std::dynamic_pointer_cast<Rigidbody>(component.lock());
 	}
-	_rigidbody = rigidbody.lock();
+	_rigidbody = rigidbody;
 	//_rigidbody.lock()->RegisterCollider(std::dynamic_pointer_cast<Collider>(GetSelf().lock()));
 }
 
 void Collider::IsHitReset()
 {
-	for (auto col : ComponentIndex) col.second.lock()->_IsHit = false;
+	for (auto col : ComponentIndex) col.lock()->_IsHit = false;
 }
 
 void Collider::Hitjudgment()
@@ -122,8 +121,8 @@ void Collider::Hitjudgment()
 	for(auto collider : ComponentIndex)
 		for(auto other : ComponentIndex)
 		{
-			if (collider.second.lock() == other.second.lock()) continue;
-			collider.second.lock()->Judgment(other.second.lock().get());
+			if (collider.lock() == other.lock()) continue;
+			collider.lock()->Judgment(other.lock().get());
 		}
 }
 
@@ -132,8 +131,8 @@ void Collider::Hitjudgment(std::list<std::weak_ptr<Collider>>& colliderlist)
 	for(auto collider : colliderlist)
 		for(auto other : ComponentIndex)
 		{
-			if (collider.lock() == other.second.lock()) continue;
-			collider.lock()->Judgment(other.second.lock().get());
+			if (collider.lock() == other.lock()) continue;
+			collider.lock()->Judgment(other.lock().get());
 		}
 }
 
@@ -154,11 +153,11 @@ bool Collider::BoxVsBox(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	Vector3 pos1 = collider->transform()->position() + bound1.GetCenter();
-	Vector3 pos2 = other->transform()->position() + bound2.GetCenter();
+	Vector3 pos1 = collider->gameObject()->transform().lock()->position() + bound1.GetCenter();
+	Vector3 pos2 = other->gameObject()->transform().lock()->position() + bound2.GetCenter();
 
-	Vector3 scale1 = collider->transform()->scale() * 2.0f;
-	Vector3 scale2 = other->transform()->scale() * 2.0f;
+	Vector3 scale1 = collider->gameObject()->transform().lock()->scale() * 2.0f;
+	Vector3 scale2 = other->gameObject()->transform().lock()->scale() * 2.0f;
 
 	Vector3 pos1_max = pos1 + Vector3(bound1.GetMax() * scale1);
 	Vector3 pos1_min = pos1 + Vector3(bound1.GetMin() * scale1);
@@ -183,16 +182,16 @@ bool Collider::OBBVsOBB(Collider * colA, Collider * colB)
 	Bounds& boundB = colB->bound;
 
 	//空間行列
-	XMMATRIX worldA = colA->transform()->WorldMatrix();
-	XMMATRIX worldB = colB->transform()->WorldMatrix();
+	XMMATRIX worldA = colA->gameObject()->transform().lock()->WorldMatrix();
+	XMMATRIX worldB = colB->gameObject()->transform().lock()->WorldMatrix();
 
 	//中心
 	Vector3 centerA = XMVector3TransformCoord(boundA.GetCenter(),worldA);
 	Vector3 centerB = XMVector3TransformCoord(boundB.GetCenter(),worldB);
 
 	//Boxのサイズ
-	Vector3 sizeA = boundA.GetSize() * colA->transform()->scale();
-	Vector3 sizeB = boundB.GetSize() * colB->transform()->scale();
+	Vector3 sizeA = boundA.GetSize() * colA->gameObject()->transform().lock()->scale();
+	Vector3 sizeB = boundB.GetSize() * colB->gameObject()->transform().lock()->scale();
 
 	Vector3 distance = centerA - centerB;
 
@@ -213,13 +212,13 @@ bool Collider::OBBVsOBB(Collider * colA, Collider * colB)
 	float L;	//ColAとColB間の長さ
 
 	//Axis
-	Vector3 colA_Right	 = colA->transform()->right();
-	Vector3 colA_Forward = colA->transform()->forward();
-	Vector3 colA_Up		 = colA->transform()->up();
+	Vector3 colA_Right	 = colA->gameObject()->transform().lock()->right();
+	Vector3 colA_Forward = colA->gameObject()->transform().lock()->forward();
+	Vector3 colA_Up		 = colA->gameObject()->transform().lock()->up();
 
-	Vector3 colB_Right	 = colB->transform()->right();
-	Vector3 colB_Forward = colB->transform()->forward();
-	Vector3 colB_Up		 = colB->transform()->up();
+	Vector3 colB_Right	 = colB->gameObject()->transform().lock()->right();
+	Vector3 colB_Forward = colB->gameObject()->transform().lock()->forward();
+	Vector3 colB_Up		 = colB->gameObject()->transform().lock()->up();
 
 	//AxisLength
 	Vector3 colA_RightLen	= colA_Right * sizeA.x;
@@ -282,7 +281,7 @@ bool Collider::OBBVsOBB(Collider * colA, Collider * colB)
 
 		//ColB forward
 		{
-			SepAxis = colB->transform()->forward();
+			SepAxis = colB->gameObject()->transform().lock()->forward();
 
 			rA = Vector3::Length(SepAxis * sizeB.z);
 			rB = DotSepAxis(&SepAxis, &colA_RightLen, &colA_ForwardLen, &colA_UpLen);
@@ -412,7 +411,7 @@ bool Collider::OBBVsOBB(Collider * colA, Collider * colB)
 			Vector3 Rep = SepAxis * ((rA + rB) - distance.length());
 
 			auto rigidbody = colA->_rigidbody.lock();
-			rigidbody->transform()->position(rigidbody->transform()->position() + Rep);
+			rigidbody->gameObject()->transform().lock()->position(rigidbody->gameObject()->transform().lock()->position() + Rep);
 		}
 	}
 
@@ -425,22 +424,22 @@ bool Collider::OBBVsShpere(Collider * box, Collider * sphere)
 	Bounds& SphB = sphere->bound;
 
 	//空間行列
-	XMMATRIX BoxWorld = box->transform()->WorldMatrix();
-	XMMATRIX SphWorld = sphere->transform()->WorldMatrix();
+	XMMATRIX BoxWorld = box->gameObject()->transform().lock()->WorldMatrix();
+	XMMATRIX SphWorld = sphere->gameObject()->transform().lock()->WorldMatrix();
 
 	//中心
 	Vector3 BoxC = XMVector3TransformCoord(BoxB.GetCenter(), BoxWorld);
 	Vector3 SphC = XMVector3TransformCoord(SphB.GetCenter(), SphWorld);
 
 	//Boxのサイズ
-	Vector3 boxSize = BoxB.GetSize() * box->transform()->scale();
+	Vector3 boxSize = BoxB.GetSize() * box->gameObject()->transform().lock()->scale();
 	float radius = SphB.GetRadius();
 
 	Vector3 distance = BoxC - SphC;
 
-	Vector3 Box_Right = box->transform()->right();
-	Vector3 Box_Forward = box->transform()->forward();
-	Vector3 Box_Up = box->transform()->up();
+	Vector3 Box_Right = box->gameObject()->transform().lock()->right();
+	Vector3 Box_Forward = box->gameObject()->transform().lock()->forward();
+	Vector3 Box_Up = box->gameObject()->transform().lock()->up();
 	
 	Vector3 Box_RightLen = Box_Right * boxSize.x;
 	Vector3 Box_ForwardLen = Box_Forward * boxSize.z;
@@ -486,11 +485,11 @@ bool Collider::BoxVsShpere(Collider * collider, Collider * other)
 	Bounds& BoxBound = collider->bound;
 	Bounds& SphereBound = other->bound;
 
-	Vector3 BoxPos = collider->transform()->position() + BoxBound.GetCenter();
-	Vector3 SphPos = other->transform()->position() + SphereBound.GetCenter();
+	Vector3 BoxPos = collider->gameObject()->transform().lock()->position() + BoxBound.GetCenter();
+	Vector3 SphPos = other->gameObject()->transform().lock()->position() + SphereBound.GetCenter();
 
-	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->transform()->scale());
-	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->transform()->scale());
+	Vector3 pos1_max = BoxPos + Vector3(BoxBound.GetMax() * other->gameObject()->transform().lock()->scale());
+	Vector3 pos1_min = BoxPos + Vector3(BoxBound.GetMin() * other->gameObject()->transform().lock()->scale());
 
 	float radius = SphereBound.GetSize().x;
 
@@ -536,11 +535,11 @@ bool Collider::SphereVsSphere(Collider * collider, Collider * other)
 	Bounds& bound1 = collider->bound;
 	Bounds& bound2 = other->bound;
 
-	float radius1 = bound1.GetSize().x * collider->transform()->scale().MaxElement();
-	float radius2 = bound2.GetSize().x * other->transform()->scale().MaxElement();
+	float radius1 = bound1.GetSize().x * collider->gameObject()->transform().lock()->scale().MaxElement();
+	float radius2 = bound2.GetSize().x * other->gameObject()->transform().lock()->scale().MaxElement();
 
-	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->transform()->WorldMatrix());
-	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->transform()->WorldMatrix());
+	Vector3 pos1 = XMVector3TransformCoord(bound1.GetCenter(),collider->gameObject()->transform().lock()->WorldMatrix());
+	Vector3 pos2 = XMVector3TransformCoord(bound2.GetCenter(),other->gameObject()->transform().lock()->WorldMatrix());
 
 	Vector3 distance = pos1 - pos2;
 	//衝突
@@ -557,7 +556,7 @@ bool Collider::SphereVsSphere(Collider * collider, Collider * other)
 			auto rigidbody = collider->_rigidbody.lock();
 			float length = (radius1 + radius2) - distance.length();
 			Vector3 vec = distance.normalize() * length;
-			rigidbody->transform()->position(rigidbody->transform()->position() + vec);
+			rigidbody->gameObject()->transform().lock()->position(rigidbody->gameObject()->transform().lock()->position() + vec);
 		}
 		return true;
 	}
@@ -570,9 +569,9 @@ bool Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 	
 	float radius = sphB.GetRadius();
 
-	Vector3 sphC = XMVector3TransformCoord(sphB.GetCenter(),sphCol->transform()->WorldMatrix());
+	Vector3 sphC = XMVector3TransformCoord(sphB.GetCenter(),sphCol->gameObject()->transform().lock()->WorldMatrix());
 
-	auto Meshworld = meshCol->transform()->WorldMatrix();
+	auto Meshworld = meshCol->gameObject()->transform().lock()->WorldMatrix();
 
 	//物理処理
 	auto Extrusion = [sphCol](Vector3 sub)->bool
@@ -580,7 +579,7 @@ bool Collider::SphereVsMesh(Collider * sphCol, Collider* meshCol)
 		if (!sphCol->_rigidbody.expired())
 		{
 			auto rigidbody = sphCol->_rigidbody.lock();
-			rigidbody->transform()->position(rigidbody->transform()->position() + sub);
+			rigidbody->gameObject()->transform().lock()->position(rigidbody->gameObject()->transform().lock()->position() + sub);
 		}
 		return true;
 	};
@@ -658,9 +657,7 @@ VERTEX_3D* SphereCollider::m_pVertex = nullptr;
 int SphereCollider::m_IndexNum = 0;
 Texture* SphereCollider::m_Texture = nullptr;
 
-SphereCollider::SphereCollider(EntityID OwnerID)
-:
-	Collider(OwnerID)
+SphereCollider::SphereCollider()
 {
 	this->SetRadius(0.25f);
 }
@@ -762,7 +759,7 @@ void SphereCollider::Render()
 	D3DRenderer::GetInstance()->SetIndexBuffer(m_IndexBuffer);
 
 	m_Texture->SetResource();
-	float rad = this->transform()->scale().MaxElement();
+	float rad = this->gameObject()->transform().lock()->scale().MaxElement();
 	float radius = bound.GetRadius();
 	Vector3 scale = bound.GetSize() * rad;
 	Vector3 pos = bound.GetCenter();
@@ -771,7 +768,7 @@ void SphereCollider::Render()
 	XMMATRIX local;
 	world = XMMatrixScaling(radius,radius,radius);
 	world *= XMMatrixTranslation(pos.x,pos.y,pos.z);
-	world *= this->transform()->MatrixQuaternion()* this->transform()->MatrixTranslation();
+	world *= this->gameObject()->transform().lock()->MatrixQuaternion()* this->gameObject()->transform().lock()->MatrixTranslation();
 
 	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
 	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
@@ -912,9 +909,7 @@ void BoxCollider::ReleaseRenderBuffer()
 	delete[] m_pVertex;
 }
 
-BoxCollider::BoxCollider(EntityID OwnerID)
-:
-	Collider(OwnerID)
+BoxCollider::BoxCollider()
 {
 }
 
@@ -936,7 +931,7 @@ void BoxCollider::Render()
 	XMMATRIX world = XMMatrixIdentity();
 	world *= XMMatrixScaling(scale.x, scale.y, scale.z);
 	world *= XMMatrixTranslation(pos.x, pos.y, pos.z);
-	world *= this->transform()->WorldMatrix();
+	world *= this->gameObject()->transform().lock()->WorldMatrix();
 	
 
 	D3DRenderer::GetInstance()->SetWorldMatrix(&world);
@@ -968,9 +963,7 @@ void BoxCollider::OnDebugImGui()
 	this->bound.DebugImGui();
 }
 
-FieldCollider::FieldCollider(EntityID OwnerID)
-	:
-	Collider(OwnerID)
+FieldCollider::FieldCollider()
 {
 
 }
@@ -982,8 +975,8 @@ void FieldCollider::SetMesh(MeshField * field)
 
 bool FieldCollider::IsOnGround(Vector3 Position)
 {
-	float width = this->_field->m_Width * this->transform()->scale().x;
-	float depth = this->_field->m_Depth * this->transform()->scale().z;
+	float width = this->_field->m_Width * this->gameObject()->transform().lock()->scale().x;
+	float depth = this->_field->m_Depth * this->gameObject()->transform().lock()->scale().z;
 	float x = ( Position.x + (width * this->_field->m_WidthNum * 0.5f)) / width;
 	float z = (-Position.z + (depth * this->_field->m_DepthNum * 0.5f)) / depth;
 	return 0.0 < x && x < (float)this->_field->m_WidthNum && 0.0f < z && z < (float)this->_field->m_DepthNum;
@@ -991,7 +984,7 @@ bool FieldCollider::IsOnGround(Vector3 Position)
 
 float FieldCollider::GetHeight(Vector3 Position)
 {
-	Transform* trans = this->transform().get();
+	Transform* trans = this->gameObject()->transform().lock().get();
 	Vector3 scale = trans->scale();
 	auto VertexIndex = this->_field->_VertexArray;
 
@@ -1053,7 +1046,7 @@ float FieldCollider::GetHeight(Vector3 Position)
 
 Vector3 FieldCollider::GetNormal(Vector3 Position)
 {
-	Transform* trans = this->transform().get();
+	Transform* trans = this->gameObject()->transform().lock().get();
 	Vector3 scale = trans->scale();
 	auto VertexIndex = this->_field->_VertexArray;
 
@@ -1095,9 +1088,7 @@ Vector3 FieldCollider::GetNormal(Vector3 Position)
 	return normal.normalize();
 }
 
-MeshCollider::MeshCollider(EntityID OwnerID)
-:
-	Collider(OwnerID)
+MeshCollider::MeshCollider()
 {
 
 }

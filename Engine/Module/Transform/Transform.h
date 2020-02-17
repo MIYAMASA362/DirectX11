@@ -28,12 +28,9 @@ private:
 	Vector3 _Scale;
 
 
-	//コンストラクタ
-	Transform();
-
 public:
 	//コンストラクタ
-	Transform(EntityID OwnerID);
+	Transform();
 	//デストラクタ
 	~Transform();
 
@@ -71,7 +68,6 @@ public:
 	void SendComponentMessageChildren(std::string message);	//自身と子のComponentsにmessageを送る
 	std::weak_ptr<IComponent> GetComponentInParent(ComponentTypeID componentTypeID);
 	std::weak_ptr<IComponent> GetComponentInChildren(ComponentTypeID componentTypeID);
-	ComponentList GetComponentsInChildren(ComponentTypeID componentTypeID);
 
 	Vector3 right();
 	Vector3 left();
@@ -86,7 +82,6 @@ public:
 	XMMATRIX WorldMatrix();				//ワールド行列
 
 	void LookAt(std::weak_ptr<Transform> target);	//その方向を見る
-	void OnDestroy() override;
 
 	Hierarchy& GetHierarchy();
 
@@ -113,8 +108,6 @@ public:
 	}
 
 protected:
-	virtual IComponent* Internal_CreateInstance(IEntity* owner);
-
 	void detachParent();								//親を離す
 	void detachChild(std::weak_ptr<Transform> child);	//親がターゲットの子を見つけると削除する
 	void childTransformUpdate();						//子の行列に変更を加える

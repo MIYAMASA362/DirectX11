@@ -1,5 +1,4 @@
 #include<typeinfo>
-#define INCLUDE_CEREAL
 #include"Common.h"
 
 //DirectX
@@ -8,12 +7,10 @@
 //ECS
 #include"../ECSEngine.h"
 
-//Component Module
 #include"Module\Transform\Transform.h"
-
-//GameObject
 #include"Module\Tag\Tag.h"
 #include"GameObject.h"
+
 
 #include"Module\Hierarchy\Hierarchy.h"
 #include"Module\Scene\Scene.h"
@@ -63,7 +60,7 @@ GameObject::~GameObject()
 std::weak_ptr<Transform> GameObject::transform()
 {
 	if (_transform.expired())
-	_transform = Transform::GetComponent(this->GetEntityID()).lock();
+		_transform = this->GetComponent<Transform>();
 	return _transform;
 }
 
@@ -80,18 +77,10 @@ std::weak_ptr<GameObject> GameObject::gameObject()
 //
 void GameObject::OnDebugGUI()
 {
-	if(ImGui::TreeNode((_Name + " ID:" + std::to_string(this->GetEntityID())).c_str()))
-	{
-		ComponentManager::GetInstance()->ImGui_ComponentView(this->GetEntityID());
-		ImGui::TreePop();
-	}
 }
 
-//RegisterEntityIndex
-//	EntityIndex‚ÖEntity‚ð’Ç‰Á‚·‚é
-//
-void GameObject::RegisterEntityIndex(std::shared_ptr<GameObject> instance)
+void GameObject::Register(std::shared_ptr<Object> instance)
 {
-	auto result = Entity<GameObject>::RegisterEntityIndex(instance);
-	instance->_gameObject = result.lock();
+	Entity::Register(instance);
+	_gameObject = std::dynamic_pointer_cast<GameObject>(instance);
 }

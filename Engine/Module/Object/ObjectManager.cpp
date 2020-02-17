@@ -3,6 +3,9 @@
 #include<sstream>
 #include<algorithm>
 
+#define NOT_INCLUDE_ECS_FILES
+#include"Module\ECSEngine.h"
+
 #include"Module\IMGUI\GUI_ImGui.h"
 
 #include"Object.h"
@@ -25,7 +28,7 @@ ObjectManager* ObjectManager::pInstance = nullptr;
 //
 ObjectManager::ObjectManager()
 {
-	
+	_ObjectIndex.reserve(OBJECT_CAPACITY);
 }
 
 //~ObjectManager
@@ -33,15 +36,6 @@ ObjectManager::ObjectManager()
 //
 ObjectManager::~ObjectManager()
 {
-	//削除配列をクリア
-	_DestroyIndex.clear();
-
-	//オブジェクト配列からオブジェクト削除
-	for (auto object : _ObjectIndex)
-	{
-		object.second.reset();
-	}
-
 	//オブジェクト配列をクリア
 	_ObjectIndex.clear();
 }
@@ -66,24 +60,12 @@ void ObjectManager::Destroy()
 }
 
 //RegisterObject
-//	ObjectIndexに追加。Objectにステータス設定
+//	ObjectIndexに追加
 //
-std::shared_ptr<Object> ObjectManager::RegisterObject(std::shared_ptr<Object> object)
+void ObjectManager::RegisterObject(std::shared_ptr<Object> instance)
 {
-	return _ObjectIndex.emplace(object->GetInstanceID(),object).first->second;
-}
-
-std::shared_ptr<Object> ObjectManager::GetObjectInstance(InstanceID id)
-{
-	auto find = _ObjectIndex.find(id);
-	if (find == _ObjectIndex.end()) assert(0);
-	return find->second;
-}
-
-void ObjectManager::ReleaseObject(Object* object)
-{
-	object->Release();
-	_ObjectIndex.erase(object->GetInstanceID());
+	_ObjectIndex.push_back(instance);
+	instance->Register(instance);
 }
 
 //DestroyObject
@@ -91,7 +73,7 @@ void ObjectManager::ReleaseObject(Object* object)
 //
 void ObjectManager::DestroyObject(Object * object)
 {
-	_DestroyIndex.push_back(object->GetInstanceID());
+	_DestroyIndex.push(object->GetInstanceID());
 }
 
 //ClearnUpObject
@@ -99,13 +81,31 @@ void ObjectManager::DestroyObject(Object * object)
 //
 void ObjectManager::ClearnUpObject()
 {
-	for(auto id : _DestroyIndex)
+	if (_DestroyIndex.size() == 0) return;
+
+	InstanceID id;
+	std::vector<std::shared_ptr<Object>>::iterator itr;
+
+	//削除対象を移動
+	unsigned int i = 0;
+	for(size_t size = _DestroyIndex.size(); i < size; i++)
 	{
-		auto find  = _ObjectIndex.find(id);
-		if (find == _ObjectIndex.end()) assert(0);
-		this->ReleaseObject(find->second.get());
+		id = _DestroyIndex.top();
+
+		itr = std::find_if(
+			_ObjectIndex.begin(), _ObjectIndex.end(), [id](std::shared_ptr<Object> object) 
+		{
+			return object->GetInstanceID() == id;
+		});
+
+		//削除時実行関数
+		(*itr)->Release();
+
+		//完全削除
+		_ObjectIndex.erase(itr);
+
+		_DestroyIndex.pop();
 	}
-	_DestroyIndex.clear();
 }
 
 
@@ -119,9 +119,9 @@ void ObjectManager::EditorWindow()
 	ImGui::BeginChild(ImGui::GetID((void*)0),ImVec2(256,512),ImGuiWindowFlags_NoTitleBar);
 	for(auto obj :_ObjectIndex)
 	{
-		std::string text = std::to_string(obj.first);
+		std::string text = std::to_string(obj->GetInstanceID());
 		std::stringstream ss;
-		ss << std::hex << (uintptr_t)obj.second.get();
+		ss << std::hex << (uintptr_t)obj.get();
 		text += "[" + ss.str()+"]";
 		ImGui::Text(text.c_str());
 	}

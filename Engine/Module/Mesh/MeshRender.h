@@ -18,7 +18,7 @@ private:
 
 public:
 	//コンストラクタ
-	MeshRender(EntityID OwnerID);
+	MeshRender();
 	//デストラクタ
 	virtual ~MeshRender();
 

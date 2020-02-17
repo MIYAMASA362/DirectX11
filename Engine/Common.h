@@ -10,6 +10,7 @@
 #include"../include/cereal/cereal.hpp"
 
 #include"../include/cereal/types/polymorphic.hpp"
+#include"../include/cereal/types/vector.hpp"
 #include"../include/cereal/types/string.hpp"
 #include"../include/cereal/types/list.hpp"
 #include"../include/cereal/types/map.hpp"

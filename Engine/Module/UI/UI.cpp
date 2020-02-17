@@ -30,27 +30,23 @@ using namespace DirectX;
 //
 //*********************************************************************************************************************
 
-Canvas::Canvas(EntityID OwnerID)
-	:
-	Component(OwnerID)
+Canvas::Canvas()
 {
 	
 }
 
 //--- UI ------------------------------------------------------------
 
-UI::UI(EntityID OwnerID)
-	:
-	Component(OwnerID)
+UI::UI()
 {
-	if (!gameObject()->GetComponent<Canvas>().lock())
+	if (!gameObject()->GetComponent<Canvas>())
 		gameObject()->AddComponent<Canvas>();
 }
 
 void UI::SendComponentMessage(std::string message)
 {
 	if (message == "Render")
-		this->Render(this->transform()->WorldMatrix());
+		this->Render(this->gameObject()->transform().lock()->WorldMatrix());
 }
 
 
@@ -58,9 +54,7 @@ void UI::SendComponentMessage(std::string message)
 
 //--- Image ---------------------------------------------------------
 
-Image::Image(EntityID OwnerID)
-:
-	Renderer(OwnerID)
+Image::Image()
 {
 	VERTEX_3D vertex[4] = {
 		{ XMFLOAT3(-5.0f, -5.0f, 0.0f),		XMFLOAT3(0.0f, 1.0f, 0.0f),		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),	XMFLOAT2(0.0f, 0.0f) },
@@ -112,9 +106,8 @@ void Image::Render(XMMATRIX& world)
 
 //--- Button --------------------------------------------------------
 
-Button::Button(EntityID OwnerID)
+Button::Button()
 :
-	UI(OwnerID),
 	m_scale(5.0f),
 	m_isHover(false)
 {
@@ -171,8 +164,8 @@ void Button::Update()
 	mouseX = Input::Mouse::GetMouseX();
 	mouseY = Input::Mouse::GetMouseY();
 
-	center = this->transform()->position();
-	scale = this->transform()->scale() * this->m_scale;
+	center = this->gameObject()->transform().lock()->position();
+	scale = this->gameObject()->transform().lock()->scale() * this->m_scale;
 
 	left	= center.x - scale.x;
 	right	= center.x + scale.x;
@@ -209,10 +202,9 @@ bool Button::IsClick()
 	return this->m_isHover && Input::Mouse::IsLeftDown();
 }
 
-Text::Text(EntityID OwnerID)
-:
-	UI(OwnerID)
+Text::Text()
 {
+
 }
 
 void Text::SetText(std::string text)

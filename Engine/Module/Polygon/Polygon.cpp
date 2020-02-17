@@ -16,6 +16,13 @@
 
 using namespace DirectX;
 
+void DirectX::CPolygon::SendComponentMessage(std::string message)
+{
+	if (message == "Start") Start();
+	if (message == "Update") Update();
+	if (message == "Render") Render();
+}
+
 void CPolygon::Start()
 {
 	//’¸“_î•ñ
@@ -41,14 +48,6 @@ void CPolygon::Start()
 	D3DRenderer::GetInstance()->GetDevice()->CreateBuffer(&bufferDesc, &subResourceData, &this->m_VertexBuffer);
 }
 
-void CPolygon::OnDestroy()
-{
-	if (m_Texture)
-		delete m_Texture;
-	if (m_VertexBuffer)
-		m_VertexBuffer->Release();
-}
-
 void CPolygon::Update()
 {
 
@@ -68,4 +67,12 @@ void CPolygon::Render()
 	D3DRenderer::GetInstance()->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//Draw(n,i)@n:‘” i:‚Ç‚±‚©‚çŽn‚ß‚é‚©
 	D3DRenderer::GetInstance()->GetDeviceContext()->Draw(4,0);
+}
+
+void DirectX::CPolygon::Release()
+{
+	if (m_Texture)
+		delete m_Texture;
+	if (m_VertexBuffer)
+		m_VertexBuffer->Release();
 }

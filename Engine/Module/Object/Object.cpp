@@ -38,3 +38,11 @@ InstanceID Object::GetInstanceID()
 {
 	return _InstanceID;
 }
+
+//Destroy
+//	íœéŒ¾
+//
+void Object::Destroy()
+{
+	ObjectManager::GetInstance()->DestroyObject(this);
+}

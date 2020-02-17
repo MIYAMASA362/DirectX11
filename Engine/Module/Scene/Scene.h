@@ -13,13 +13,13 @@ private:
 	//シーン名
 	std::string _name;
 	//読み込みされてる
-	bool IsActive = false;		
+	bool IsActive = false;
 
 	//ファイルパス
 	std::string _filePath;
 
 	//オブジェクト階層
-	HierarchyUtility _hierarchyUtility;	
+	HierarchyUtility _hierarchyUtility;
 
 	//コンストラクタ
 	Scene();
@@ -89,6 +89,7 @@ private:
 			CEREAL_NVP(_name),
 			CEREAL_NVP(_hierarchyUtility)
 		);
+
 	}
 };
 

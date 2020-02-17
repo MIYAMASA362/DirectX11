@@ -123,11 +123,6 @@ std::list<std::weak_ptr<IEntity>> HierarchyUtility::GetAllChildren(EntityID id)
 	return list;
 }
 
-void HierarchyUtility::AttachHierarchy(EntityID id)
-{
-	_hierarchyMap.emplace(id,Hierarchy(EntityManager::GetInstance()->GetEntity(id)));
-}
-
 void HierarchyUtility::AttachHierarchy(std::shared_ptr<IEntity> entity)
 {
 	_hierarchyMap.emplace(entity->GetEntityID(),entity);

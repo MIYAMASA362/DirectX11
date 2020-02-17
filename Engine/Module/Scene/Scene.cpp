@@ -89,11 +89,18 @@ std::shared_ptr<GameObject> Scene::AddSceneObject(std::string name, TagName tag)
 //
 std::shared_ptr<GameObject> Scene::CreateSceneObject(std::string name, TagName tag)
 {
+	int n = 0;
+	for(auto hierarchy : _hierarchyUtility.GetHierarchyMap())
+	{
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(hierarchy.second.GetSelf().lock());
+		if (gameObject->_Name.find_first_of(name) != std::string::npos) n++;
+	}
+	if (n > 0) name = name + std::to_string(n);
+
 	auto result = std::shared_ptr<GameObject>(new GameObject(name, this, tag));
 
+	//ObjectManagerへ追加する
 	ObjectManager::GetInstance()->RegisterObject(result);
-	EntityManager::GetInstance()->RegisterEntity(result);
-	GameObject::RegisterEntityIndex(result);
 
 	return result;
 }
@@ -136,8 +143,7 @@ void DebugGUI_SceneHierarchy(std::list<std::weak_ptr<IEntity>> children, Hierarc
 {
 	for (auto child : children)
 	{
-		auto instance = EntityManager::GetInstance()->GetEntity(child.lock()->GetEntityID()).lock();
-		auto gameObject = std::dynamic_pointer_cast<GameObject>(instance);
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(child.lock());
 		if (ImGui::TreeNode(gameObject->GetName().c_str()))
 		{
 			if (ImGui::Button("Inspector"))
@@ -158,8 +164,7 @@ void Scene::DebugGUI()
 	for (auto obj : _hierarchyUtility.GetHierarchyMap())
 	{
 		if (!obj.second.GetParent().expired()) continue;
-		auto instance = EntityManager::GetInstance()->GetEntity(obj.first).lock();
-		auto gameObject = std::dynamic_pointer_cast<GameObject>(instance);
+		auto gameObject = std::dynamic_pointer_cast<GameObject>(obj.second.GetSelf().lock());
 		if (ImGui::TreeNode("　"))
 		{
 			DebugGUI_SceneHierarchy(obj.second.GetChildren(), &_hierarchyUtility);
@@ -172,6 +177,13 @@ void Scene::DebugGUI()
 
 			Debug_InspectorObject = gameObject.get();
 		}
+	}
+
+	ImGui::NewLine();
+
+	if(ImGui::Button("New GameObject"))
+	{
+		this->AddSceneObject("GameObject");
 	}
 
 	if (Debug_InspectorObject != nullptr)
@@ -194,18 +206,26 @@ void Scene::Load()
 	cereal::JSONInputArchive inArchive(file);
 	inArchive(*this);
 
+	HierarchyUtility utility;
 	//取得したデータから再構成
 	for (auto map : this->_hierarchyUtility.GetHierarchyMap())
 	{
 		Hierarchy& hierarchy = map.second;
 		auto gameObject = std::static_pointer_cast<GameObject>(hierarchy.GetSelf().lock());
 		gameObject->_Scene = this;
-		auto index = ObjectManager::GetInstance()->_ObjectIndex;
 
 		ObjectManager::GetInstance()->RegisterObject(gameObject);
-		EntityManager::GetInstance()->RegisterEntity(gameObject);
-		GameObject::RegisterEntityIndex(gameObject);
+		
+		utility.AttachHierarchy(gameObject);
+
+		//ComponentをObjectManagerへ登録
+		for(auto component : gameObject->GetComponents())
+		{
+			component->SetEntity(gameObject.get());
+			ObjectManager::GetInstance()->RegisterObject(component);
+		}
 	}
+	_hierarchyUtility = utility;
 }
 
 //Save

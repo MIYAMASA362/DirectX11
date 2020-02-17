@@ -47,6 +47,8 @@ public:
 
 	//オブジェクト名取得
 	std::string GetName() { return _Name; };
+	//オブジェクト名設定
+	void SetName(std::string name) { _Name = name; }
 
 	//タグ確認
 	bool CompareTag(TagName tag) { return _Tag.Compare(tag); }
@@ -70,7 +72,9 @@ public:
 	//デバッグ表示
 	void OnDebugGUI();
 
-public:
+	void Register(std::shared_ptr<Object> instance) override;
+
+private:
 	//シリアライズ
 	template<class Archive>
 	void save(Archive& archive) const
@@ -97,8 +101,7 @@ public:
 		);
 	}
 
-	//
-	static void RegisterEntityIndex(std::shared_ptr<GameObject> instance);
+
 };
 
 CEREAL_REGISTER_TYPE(Entity<GameObject>)

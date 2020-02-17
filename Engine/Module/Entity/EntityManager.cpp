@@ -1,3 +1,4 @@
+#include<algorithm>
 #include"Common.h"
 
 #include"Module\Object\Object.h"
@@ -7,7 +8,6 @@
 #include"Module\ECSEngine.h"
 
 #include"Module\Component\IComponent.h"
-#include"Module\Component\ComponentList.h"
 #include"Module\Component\ComponentManager.h"
 
 #include"IEntity.h"
@@ -32,8 +32,10 @@ EntityManager* EntityManager::pInstacne = nullptr;
 //	EntityIndex‚Ì¶¬
 //
 EntityManager::EntityManager()
+	:
+	_EntityIndex(ENTITY_CAPACITY)
 {
-	
+
 }
 
 //~EntityManager
@@ -67,28 +69,12 @@ void EntityManager::Release()
 }
 
 
-
-//GetEntity
-//	EntityIndex‚©‚çEntity‚Ìæ“¾
-//
-std::weak_ptr<IEntity> EntityManager::GetEntity(EntityID id)
-{
-	auto find = _EntityIndex.find(id);
-	if (find == _EntityIndex.end()) assert(0);
-	return find->second;
-}
-
 //RegisterEntity
 //	EntityIndex‚Ö‚Ì’Ç‰Á
 //
-std::weak_ptr<IEntity> EntityManager::RegisterEntity(std::shared_ptr<IEntity> instance)
+void EntityManager::RegisterEntity(std::shared_ptr<IEntity> instance)
 {
-	return _EntityIndex.emplace(instance->GetEntityID(), instance).first->second;
-}
-
-void EntityManager::DestroyEntity(IEntity * instance)
-{
-	_EntityIndex.erase(instance->GetEntityID());
+	_EntityIndex.push_back(instance);
 }
 
 //ReleaseEntity
@@ -96,7 +82,13 @@ void EntityManager::DestroyEntity(IEntity * instance)
 //
 void EntityManager::ReleaseEntity(IEntity * instance)
 {
-	_EntityIndex.erase(instance->GetEntityID());
+	auto end = _EntityIndex.end();
+	auto find = std::remove_if(
+		_EntityIndex.begin(), end, [=](std::weak_ptr<IEntity>& entity) 
+	{
+		return entity.lock()->GetEntityID() == instance->GetEntityID();
+	});
+	_EntityIndex.erase(find,end);
 }
 
 

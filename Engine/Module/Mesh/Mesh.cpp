@@ -94,9 +94,7 @@ std::weak_ptr<Mesh> MeshManager::GetMesh(std::string name)
 	return g_MeshIndex.at(name);
 }
 
-MeshFilter::MeshFilter(EntityID OwnerID)
-	:
-	Component(OwnerID)
+MeshFilter::MeshFilter()
 {
 }
 

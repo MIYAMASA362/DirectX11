@@ -95,7 +95,7 @@ private:
 	unsigned int _IndexStartNum;
 
 public:
-	MeshFilter(EntityID OwnerID);
+	MeshFilter();
 
 	void SetMesh(std::weak_ptr<Mesh> mesh);
 	void SetIndexNum(unsigned int IndexNum,unsigned int StartNum);

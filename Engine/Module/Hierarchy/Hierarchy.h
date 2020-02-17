@@ -109,7 +109,6 @@ public:
 	//‘S‚Ä‚ÌŽq‚ðŽæ“¾
 	std::list<std::weak_ptr<IEntity>> GetAllChildren(EntityID id);
 
-	void AttachHierarchy(EntityID id);
 	void AttachHierarchy(std::shared_ptr<IEntity> entity);
 	void DetachHierarchy(EntityID id);
 	void ClearnHierarchy();

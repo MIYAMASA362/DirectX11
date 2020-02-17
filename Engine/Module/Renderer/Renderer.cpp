@@ -36,9 +36,7 @@ std::vector<Renderer*> Renderer::RendererIndex;
 //Renderer
 //	コンストラクタ
 //
-Renderer::Renderer(EntityID OwnerID)
-:
-	Component(OwnerID)
+Renderer::Renderer()
 {
 	RendererIndex.push_back(this);
 }

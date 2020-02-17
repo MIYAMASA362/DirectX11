@@ -41,20 +41,6 @@ Transform::Transform()
 
 }
 
-//Transform
-//	コンストラクタ
-//
-Transform::Transform(EntityID OwnerID)
-	:
-	Component(OwnerID),
-	_Position(Vector3::zero()),
-	_Rotation(Quaternion::Identity()),
-	_Scale(Vector3::one())
-{
-	//階層取得
-	//_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(OwnerID);
-}
-
 //~Transform
 //	デストラクタ
 //
@@ -70,7 +56,7 @@ Transform::~Transform()
 //
 void Transform::SetParent(std::weak_ptr<Transform> parent)
 {
-	gameObject()->GetScene()->GetHierarchyUtility()->AttachParent(gameObject()->GetEntityID(),parent.lock()->gameObject());
+	gameObject()->GetScene()->GetHierarchyUtility()->AttachParent(gameObject()->GetEntityID(),parent.lock()->gameObject()->gameObject());
 
 	//向きなどを保持したまま子になる
 	XMMATRIX matrix;
@@ -86,17 +72,6 @@ void Transform::SetParent(std::weak_ptr<Transform> parent)
 void Transform::SetParent(std::weak_ptr<GameObject> parent)
 {
 	SetParent(parent.lock()->transform());
-}
-
-IComponent * Transform::Internal_CreateInstance(IEntity * owner)
-{
-	Transform* instance = new Transform(owner->GetEntityID());
-
-	instance->_Position = this->_Position;
-	instance->_Rotation = this->_Rotation;
-	instance->_Scale = this->_Scale;
-	
-	return instance;
 }
 
 //detachParent
@@ -117,7 +92,7 @@ void Transform::detachParent()
 
 void Transform::detachChild(std::weak_ptr<Transform> target)
 {
-	gameObject()->GetScene()->GetHierarchyUtility()->DetachChild(gameObject()->GetEntityID(),target.lock()->gameObject());
+	gameObject()->GetScene()->GetHierarchyUtility()->DetachChild(gameObject()->GetEntityID(),target.lock()->gameObject()->gameObject());
 }
 
 void Transform::childTransformUpdate()
@@ -152,7 +127,7 @@ std::list<std::weak_ptr<Transform>> Transform::GetChildren()
 void Transform::SendComponentMessageChildren(std::string message)
 {
 	//自身に送信
-	ComponentManager::GetInstance()->SendComponentMessage(message,this->GetOwnerID());
+	this->gameObject()->SendComponentMessage(message);
 	//子に送信
 	for (auto child : GetHierarchy().GetChildren())
 		std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->SendComponentMessageChildren(message);
@@ -167,8 +142,8 @@ std::weak_ptr<IComponent> Transform::GetComponentInParent(ComponentTypeID compon
 
 	//親IDの物を検索
 	for (auto component : ComponentIndex)
-		if (component.second.lock()->GetOwnerID() == GetHierarchy().GetParent().lock()->GetEntityID())
-			return component.second;
+		if (component.lock()->gameObject()->GetEntityID() == GetHierarchy().GetParent().lock()->GetEntityID())
+			return component;
 
 	//親のGetComponentInParentを実行
 	return std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->GetComponentInParent(componentTypeID);
@@ -182,35 +157,35 @@ std::weak_ptr<IComponent> Transform::GetComponentInChildren(ComponentTypeID comp
 	{
 		auto id = child.lock()->GetEntityID();
 		for (auto component : ComponentIndex)
-			if (component.second.lock()->GetOwnerID() == id)
-				return component.second;
+			if (component.lock()->gameObject()->GetEntityID() == id)
+				return component;
 	}
 	return std::weak_ptr<IComponent>();
 }
-
-ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID)
-{
-	ComponentList list;
-
-	if (GetHierarchy().GetChildren().size() == 0) return list;
-
-	//子Component検索
-	for (auto child : GetHierarchy().GetChildren())
-	{
-		auto id = child.lock()->GetEntityID();
-		for(auto component:ComponentIndex)
-		{
-			if (component.second.lock()->GetOwnerID() == id)
-				list.AddComponent(component.second.lock());
-		}
-
-		/*auto childlist = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
-		if(childlist.Size() != 0) 
-			list.Add(&childlist);*/
-	}
-
-	return list;
-}
+//
+//ComponentList Transform::GetComponentsInChildren(ComponentTypeID componentTypeID)
+//{
+//	ComponentList list;
+//
+//	if (GetHierarchy().GetChildren().size() == 0) return list;
+//
+//	//子Component検索
+//	for (auto child : GetHierarchy().GetChildren())
+//	{
+//		auto id = child.lock()->GetEntityID();
+//		for(auto component:ComponentIndex)
+//		{
+//			if (component.second.lock()->GetOwnerID() == id)
+//				list.AddComponent(component.second.lock());
+//		}
+//
+//		/*auto childlist = std::dynamic_pointer_cast<GameObject>(child.lock())->transform().lock()->GetComponentsInChildren(componentTypeID);
+//		if(childlist.Size() != 0) 
+//			list.Add(&childlist);*/
+//	}
+//
+//	return list;
+//}
 
 void Transform::DetachChildren()
 {
@@ -328,15 +303,10 @@ void Transform::LookAt(std::weak_ptr<Transform> target) {
 		this->_Rotation = std::dynamic_pointer_cast<GameObject>(GetHierarchy().GetParent().lock())->transform().lock()->rotation().conjugate() * this->_Rotation;
 }
 
-void Transform::OnDestroy()
-{
-
-}
-
 Hierarchy & Transform::GetHierarchy()
 {
 	if(_hierarchy == nullptr)
-		_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(this->GetOwnerID());
+		_hierarchy = gameObject()->GetScene()->GetHierarchyUtility()->GetHierarchy(this->gameObject()->GetEntityID());
 	return *_hierarchy;
 }
 

@@ -39,7 +39,7 @@ public:
 
 public:	
 	//コンストラクタ
-	Renderer(EntityID OwnerID);
+	Renderer();
 	//デストラクタ
 	virtual ~Renderer();
 

@@ -1,11 +1,15 @@
 #pragma once
 
-class LookAt:public MonoBehaviour<LookAt>
+class LookAt:public Component<LookAt>
 {
 public:
 	GameObject* parent;
 public:
-	LookAt(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+	}
+
 	void Update()
 	{
 		//this->transform.lock()->LookAt(parent->transform);
@@ -16,31 +20,33 @@ public:
 	}*/
 };
 
-class WASDMove:public MonoBehaviour<WASDMove>
+class WASDMove:public Component<WASDMove>
 {
 public:
 	const float speed = 0.5f;
 	FieldCollider* _fieldCollider;
 	bool IsGround = false;
 public:
-	WASDMove(EntityID OwnerID) :MonoBehaviour(OwnerID) 
+	virtual void SendComponentMessage(std::string message) override
 	{
+		if (message == "Update") Update();
+		if (message == "FixedUpdate") FixedUpdate();
+	}
 
-	};
 	void Update()
 	{
 		if (Input::GetKeyPress('W'))
-			this->transform()->position(this->transform()->position() + this->transform()->forward() * speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->forward() * speed);
 		if (Input::GetKeyPress('S'))
-			this->transform()->position(this->transform()->position() + this->transform()->back() *speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->back() *speed);
 		if (Input::GetKeyPress('A'))
-			this->transform()->position(this->transform()->position() + this->transform()->left() *speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->left() *speed);
 		if (Input::GetKeyPress('D'))
-			this->transform()->position(this->transform()->position() + this->transform()->right()*speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->right()*speed);
 		if (Input::GetKeyPress('Q'))
-			this->transform()->position(this->transform()->position() + this->transform()->down()*speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->down()*speed);
 		if (Input::GetKeyPress('E'))
-			this->transform()->position(this->transform()->position() + this->transform()->up()*speed);
+			this->gameObject()->transform().lock()->position(this->gameObject()->transform().lock()->position() + this->gameObject()->transform().lock()->up()*speed);
 
 		//this->transform()->position(Camera::ScreenToWorldPosition(Vector3::zero()));
 
@@ -53,23 +59,27 @@ public:
 
 	void FixedUpdate()
 	{
-		IsGround = _fieldCollider->IsOnGround(this->transform()->position());
+		IsGround = _fieldCollider->IsOnGround(this->gameObject()->transform().lock()->position());
 		if (IsGround)
 		{
-			Vector3 pos = this->transform()->position();
+			Vector3 pos = this->gameObject()->transform().lock()->position();
 			pos.y = _fieldCollider->GetHeight(pos) + 4.0f;
-			this->transform()->position(pos);
-			this->gameObject()->GetComponent<Rigidbody>().lock()->SetVelocity(Vector3::zero());
+			this->gameObject()->transform().lock()->position(pos);
+			this->gameObject()->GetComponent<Rigidbody>()->SetVelocity(Vector3::zero());
 		}
 	}
 };
 
-class CameraHorizontal:public MonoBehaviour<CameraHorizontal>
+class CameraHorizontal:public Component<CameraHorizontal>
 {
 public:
 	const float speed = 0.001f;
 public:
-	CameraHorizontal(EntityID OwnerID) :MonoBehaviour(OwnerID) {}
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+	}
+
 	void Update()
 	{
 		/*float horizontal = Input::Mouse::GetAccelerationX() * speed;
@@ -79,10 +89,14 @@ public:
 	}
 };
 
-class Move :public MonoBehaviour<Move>
+class Move :public Component<Move>
 {
 public:
-	Move(EntityID OwnerID) :MonoBehaviour(OwnerID) {};
+	virtual void SendComponentMessage(std::string message) override
+	{
+		if (message == "Update") Update();
+	}
+
 	void Update() {
 		/*if (Input::GetKeyPress(VK_UP))
 			this->transform.lock()->position(this->transform.lock()->position() + Vector3::up()*0.5f);

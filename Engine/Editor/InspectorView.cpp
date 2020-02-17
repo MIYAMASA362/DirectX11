@@ -204,10 +204,9 @@ void Editor::InspectorView::Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		TextOut(hdc, line, 0, text.data(), text.size());
 		line += 30;
 
-		for (auto obj : gameObject->GetComponents()->GetComponents())
+		for (auto component : gameObject->GetComponents())
 		{
-			auto component = obj.second.get();
-			if (dynamic_cast<Transform*>(component))
+			if (std::shared_ptr<Transform> result = std::dynamic_pointer_cast<Transform>(component))
 			{
 				if (!_TransformView)
 				{
@@ -223,7 +222,7 @@ void Editor::InspectorView::Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 						300,
 						height,
 						WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE,
-						dynamic_cast<Transform*>(component)
+						result.get()
 					);
 					line += height;
 				}
@@ -377,7 +376,6 @@ LRESULT Editor::InspectorView::TransformView::localWndProc(HWND hWnd, UINT uMsg,
 {
 	HDC hdc;
 	PAINTSTRUCT paint;
-	size_t id;
 
 	Vector3 position;
 	Vector3 rotation;
