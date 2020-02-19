@@ -27,6 +27,8 @@ namespace Editor
 		HWND _ListView;		//リストビュー
 		LVCOLUMN _Column;	//リストビュー表示形式
 
+		HIMAGELIST _ListImage;
+
 	public:
 		//コンストラクタ
 		FileTreeView();

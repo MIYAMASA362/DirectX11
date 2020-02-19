@@ -161,7 +161,7 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 				NULL,
 				WC_LISTVIEW,
 				NULL,
-				WS_CHILD | WS_VISIBLE | LVS_REPORT,
+				WS_CHILD | WS_VISIBLE | LVS_AUTOARRANGE | LVS_ICON | WS_BORDER,
 				300,
 				0,
 				LOWORD(lParam) - 300,
@@ -205,6 +205,7 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			ShowWindow(hWnd, SW_RESTORE);
 			break;
 		default:
+			DefWindowProc(hWnd,uMsg,wParam,lParam);
 			break;
 		}
 	}
@@ -216,14 +217,6 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		switch (((LPNMHDR)lParam)->code)
 		{
 #pragma region TREEVIEW_NOTIFY
-
-			//ドラッグ開始
-		case TVN_BEGINDRAG:
-		{
-			//TreeView_OnBeginDrag(this->_TreeView,(LPNMTREEVIEW)lParam);
-		}
-		break;
-
 		//ツリービューの選択が変更された
 		case TVN_SELCHANGED:
 		{
@@ -233,30 +226,9 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 			item = lptv->itemNew.hItem;
 			_TreeDirectory = TreeView_GetFilePath(item);
 			ListView_FileView(_TreeDirectory);
-
+			UpdateWindow(this->_TreeView);
 		}
 		break;
-
-		//TreeView情報の取得
-		//
-		//
-		case TVN_GETINFOTIP:
-		{
-			////Itemのテキスト取得
-			//TVITEM tvitem;
-			//tvitem.mask = TVIF_TEXT;
-			//tvitem.hItem = item;
-			//
-			//tvitem.pszText = infoTipBuf;
-			//tvitem.cchTextMax = sizeof(temp) / sizeof(TCHAR);
-			//TreeView_GetItem(this->_TreeView, &tvitem);
-
-			//// Copy the text to the infotip.
-			////strcpy_s(pTip->pszText,pTip->cchTextMax,tvitem.pszText);
-			//tvitem.pszText = tvitem.pszText;
-		}
-		break;
-
 #pragma endregion
 
 #pragma region LISTVIEW_NOTIFY
@@ -264,7 +236,7 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		//ListViewがクリックされた
 		//	ref : https://docs.microsoft.com/en-us/windows/win32/controls/lvn-columnclick
 		//
-		case NM_CLICK:
+		case NM_DBLCLK:
 		{
 			if (((LPNMHDR)lParam)->hwndFrom == this->_ListView)
 			{
@@ -275,15 +247,7 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		}
 		break;
 
-		case LVN_COLUMNCLICK:
-		{
-
-		}
-		break;
-
 #pragma endregion
-
-
 		default:
 			DefWindowProc(this->_TreeView, uMsg, wParam, lParam);
 			break;
@@ -291,16 +255,6 @@ LRESULT Editor::FileTreeView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, 
 		}
 	}
 	break;	//WM_NOTIFY
-
-	case WM_MOUSEMOVE:
-		//TreeView_OnDragging(hWnd, this->_TreeView, LOWORD(lParam), HIWORD(lParam));
-		break;
-
-	case WM_MBUTTONUP:
-		//TreeView_OnEndDrag(this->_TreeView);
-		break;
-
-		//デフォルト
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		break;
@@ -502,16 +456,24 @@ void Editor::FileTreeView::ListView_FileView(std::string DirectoryPath)
 	if (hFind == INVALID_HANDLE_VALUE) return;
 
 	int num = 0;
+	ImageList_Destroy(this->_ListImage);
+	this->_ListImage = ImageList_Create(32, 32, ILC_COLOR4 | ILC_MASK, 1, 1);
+	ListView_SetImageList(this->_ListView,this->_ListImage,LVSIL_NORMAL);
 
 	LVITEM item;
 	ZeroMemory(&item, sizeof(item));
-	item.mask = TVIF_TEXT;
+	item.mask = TVIF_TEXT | TVIF_IMAGE;
 
 	do
 	{
-		if ((strcmp(file.cFileName, ".") == 0) || (strcmp(file.cFileName, "..") == 0))
+		if ((strcmp(file.cFileName, ".") == 0) || (strcmp(file.cFileName, "..") == 0)) 
 			continue;
+		SHFILEINFO shFileInfo;
+		SHGetFileInfo((DirectoryPath + "\\" + file.cFileName).data(),NULL,&shFileInfo,sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_LARGEICON | SHGFI_USEFILEATTRIBUTES);
+		ImageList_AddIcon(this->_ListImage,shFileInfo.hIcon);
+
 		item.iItem = num;
+		item.iImage = num;
 		item.pszText = file.cFileName;
 		ListView_InsertItem(this->_ListView, &item);
 		num++;
