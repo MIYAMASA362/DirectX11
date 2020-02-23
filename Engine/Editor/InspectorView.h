@@ -1,5 +1,7 @@
 #pragma once
 
+#include"Editor\Module\EditorModule.h"
+
 class RenderStatus;
 class GameObject;
 

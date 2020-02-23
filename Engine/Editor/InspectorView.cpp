@@ -27,28 +27,65 @@
 
 #define INSPECTOR_TRANSFORM ("TransformView")
 
+WNDPROC defaultEditWndProc;
+
+//EditWindowProc
+//	WindowsAPI Editのプロシージャ
+//
+LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+	switch (uMsg)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+			//フォーカス切り
+			//
+			//
+		case VK_RETURN:
+			SetFocus(GetParent(hWnd));
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return CallWindowProc(defaultEditWndProc, hWnd, uMsg, wParam, lParam);
+}
+
 //*********************************************************************************************************************
 //
 //	InspectorView
 //
 //*********************************************************************************************************************
 
+//InspectorView
+//	コンストラクタ
+//
 Editor::InspectorView::InspectorView()
 {
 
 }
 
+//~InspectorView
+//	デストラクタ
+//
 Editor::InspectorView::~InspectorView()
 {
 	if (!_TransformView) delete _TransformView;
 }
 
+//localWndProc
+//	ウィンドウプロシージャ
+//
 LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
-
 	RECT rect;
 	float width, height;
+
+	CHAR text[256];
 
 	if (_GameObject.expired()) DestroyWindow(hWnd);
 
@@ -77,6 +114,23 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 			MessageBox(NULL, "RenderStatusの生成に失敗しました。", "失敗", MB_OK);
 			return 0;
 		}
+
+		this->_NameEdit = CreateWindow(
+			"EDIT",
+			"Name",
+			WS_CHILD | WS_VISIBLE | ES_LEFT | WS_BORDER,
+			40,
+			0,
+			200,
+			22,
+			hWnd,
+			NULL,
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			NULL
+		);
+
+		defaultEditWndProc = (WNDPROC)SetWindowLongPtr(this->_NameEdit, GWLP_WNDPROC, (LONG_PTR)EditWindowProc);
+
 
 		SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		break;
@@ -129,6 +183,20 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		this->_IsDelete = true;
 		break;
 
+	case WM_COMMAND:
+		switch (HIWORD(wParam))
+		{
+		case EN_KILLFOCUS:
+			GetWindowText(this->_NameEdit,text,strlen(text));
+			this->_GameObject.lock()->SetName(text);
+			break;
+		case EN_SETFOCUS:
+			SetWindowText(this->_NameEdit, this->_GameObject.lock()->GetName().data());
+			break;
+		}
+
+		break;
+
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		break;
@@ -136,6 +204,9 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	return 0;
 }
 
+//Create
+//	ウィンドウ生成
+//
 HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style, EditorWindow * editor, std::shared_ptr<GameObject> target)
 {
 	this->_EditorWindow = editor;
@@ -143,6 +214,9 @@ HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR l
 	return Create(hParent, hInstance, lpClassName, lpCaption, x, y, width, height, style);
 }
 
+//Create
+//	ウィンドウ生成
+//
 HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style)
 {
 	WNDCLASS WndClass = {
@@ -183,6 +257,9 @@ HRESULT Editor::InspectorView::Create(HWND hParent, HINSTANCE hInstance, LPSTR l
 	return S_OK;
 }
 
+//Draw
+//	ウィンドウ描画
+//
 void Editor::InspectorView::Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
@@ -201,9 +278,12 @@ void Editor::InspectorView::Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		unsigned int line = 0;
 
 		std::shared_ptr<GameObject> gameObject = _GameObject.lock();
-		text = "Name:" + gameObject->GetName();
-
+		text = "Name";
 		TextOut(hdc, line, 0, text.data(), text.size());
+
+		text = gameObject->GetName();
+		SetWindowText(this->_NameEdit,text.data());
+
 		line += 30;
 
 		for (auto component : gameObject->GetComponents())
@@ -234,16 +314,31 @@ void Editor::InspectorView::Draw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	EndPaint(_hWnd, &paint);
 }
 
+//*********************************************************************************************************************
+//
+//	TransformView
+//
+//*********************************************************************************************************************
+
+//TransformView
+//	コンストラクタ
+//
 Editor::InspectorView::TransformView::TransformView()
 {
 
 }
 
+//~TransformView
+//	デストラクタ
+//
 Editor::InspectorView::TransformView::~TransformView()
 {
 
 }
 
+//CreateView
+//	View作成
+//
 void Editor::InspectorView::TransformView::CreateView(HWND hParent, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style, Transform* transform)
 {
 	this->_transform = transform;
@@ -284,34 +379,6 @@ void Editor::InspectorView::TransformView::CreateView(HWND hParent, LPSTR lpClas
 		MessageBox(NULL, "hWndの設定に失敗しました。", lpCaption, MB_OK);
 		return;
 	}
-}
-
-WNDPROC defaultEditWndProc;
-
-//EditWindowProc
-//	WindowsAPI Editのプロシージャ
-//
-LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-
-	switch (uMsg)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-			//フォーカス切り
-			//
-			//
-		case VK_RETURN:
-			SetFocus(GetParent(hWnd));
-			break;
-		default:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
-	return CallWindowProc(defaultEditWndProc, hWnd, uMsg, wParam, lParam);
 }
 
 //CreateEidtWindow
