@@ -2,6 +2,28 @@
 
 namespace System
 {
+	//IWindow
+	//	
+	//
+	class IWindow
+	{
+	protected:
+		HWND _hWnd;
+
+	public:
+		IWindow();
+		virtual ~IWindow();
+
+		//ウィンドウプロシージャ
+		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		//ローカルなウィンドウプロシージャ
+		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		//ウィンドウハンドル設定
+		void SetHWndPointer(HWND hWnd);
+	};
+
 	//ウィンドウのフラグ
 	typedef int WindowFlags;
 
@@ -18,12 +40,9 @@ namespace System
 	//Window
 	//	メインウィンドウ生成用のウィンドウクラス
 	//
-	class Window
+	class Window : public IWindow
 	{
 	protected:
-		//ウィンドウハンドル
-		HWND _hWnd;
-
 		//ウィンドウフラグ
 		WindowFlags _WindowFlag = WindowFlags_None;
 
@@ -40,19 +59,13 @@ namespace System
 		HWND Get_Window() { return _hWnd; }
 
 		//ローカルなウィンドウプロシージャ
-		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
 		//メッセージループ イベントドリブン
 		virtual WPARAM MessageLoop();
 
 		//ウィンドウフラグの取得
 		WindowFlags& GetWindowFlags() { return this->_WindowFlag; };
-
-		//ウィンドウハンドル設定
-		void SetHWndPointer(HWND hWnd);
-
-		//ウィンドウプロシージャ
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		void CaptionClipProcessID();
 

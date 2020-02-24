@@ -5,6 +5,72 @@
 
 using namespace System;
 
+
+//*********************************************************************************************************************
+//
+//	IWindow
+//
+//*********************************************************************************************************************
+
+System::IWindow::IWindow()
+{
+
+}
+
+System::IWindow::~IWindow()
+{
+	DestroyWindow(_hWnd);
+}
+
+
+#ifdef GUI_ImGui_H
+//ImGuiのウィンドウ移動
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#endif
+
+LRESULT System::IWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+#ifdef GUI_ImGui_H
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		return true;
+#endif
+
+	IWindow* window = (IWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+	if (uMsg == WM_CREATE)
+	{
+		//ユーザーが設定したParamを利用する
+		window = (IWindow*)((LPCREATESTRUCT)lParam)->lpCreateParams;
+
+		if (window != nullptr)
+		{
+			window->SetHWndPointer(hWnd);
+		}
+	}
+
+	//ウィンドウ共通事項
+	if (window != nullptr)
+	{
+		return window->localWndProc(hWnd, uMsg, wParam, lParam);
+	}
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT System::IWindow::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+
+//SetHWndPointer
+//	HWNDを設定
+//
+void System::IWindow::SetHWndPointer(HWND hWnd)
+{
+	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
+	this->_hWnd = hWnd;
+}
+
 //*********************************************************************************************************************
 //
 //	Window
@@ -37,7 +103,7 @@ HRESULT Window::Create(HWND hParent,HINSTANCE hInstance, LPSTR lpClassName, LPST
 	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
-		WndProc,
+		IWindow::WndProc,
 		0,
 		0,
 		hInstance,
@@ -185,51 +251,6 @@ WPARAM System::Window::MessageLoop()
 	} while (msg.message != WM_QUIT);
 
 	return msg.wParam;
-}
-
-//SetHWndPointer
-//	HWNDを設定
-//
-void System::Window::SetHWndPointer(HWND hWnd)
-{
-	SetWindowLongPtr(hWnd,GWLP_USERDATA,(LONG_PTR)this);
-	this->_hWnd = hWnd;
-}
-
-#ifdef GUI_ImGui_H
-//ImGuiのウィンドウ移動
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
-
-//WndProc
-//	グローバル ウィンドウプロシージャ
-//
-LRESULT CALLBACK Window::WndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
-{
-#ifdef GUI_ImGui_H
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
-		return true;
-#endif
-
-	Window* window = (Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
-	if(uMsg == WM_CREATE)
-	{
-		//ユーザーが設定したParamを利用する
-		window = (Window*)((LPCREATESTRUCT)lParam)->lpCreateParams;
-
-		if(window != nullptr)
-		{
-			window->SetHWndPointer(hWnd);
-		}
-	}
-
-	//ウィンドウ共通事項
-	if(window != nullptr)
-	{
-		return window->localWndProc(hWnd, uMsg, wParam, lParam);
-	}
-	return DefWindowProc(hWnd,uMsg,wParam,lParam);
 }
 
 void System::Window::CaptionClipProcessID()
