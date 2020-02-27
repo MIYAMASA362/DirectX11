@@ -2,9 +2,11 @@
 
 namespace System
 {
-	//IWindow
-	//	
+	//*********************************************************************************************************************
 	//
+	//	IWindow
+	//
+	//*********************************************************************************************************************
 	class IWindow
 	{
 	protected:
@@ -22,7 +24,12 @@ namespace System
 
 		//ウィンドウハンドル設定
 		void SetHWndPointer(HWND hWnd);
+
+		//HWND取得
+		HWND Get_Window() { return _hWnd; }
 	};
+
+
 
 	//ウィンドウのフラグ
 	typedef int WindowFlags;
@@ -37,9 +44,12 @@ namespace System
 		WindowFlags_PreviewProcessID = 1 << 3			//ProcessIDの表示
 	};
 
-	//Window
-	//	メインウィンドウ生成用のウィンドウクラス
+	//*********************************************************************************************************************
 	//
+	//	Window
+	//		メインウィンドウ生成用のウィンドウクラス
+	//
+	//*********************************************************************************************************************
 	class Window : public IWindow
 	{
 	protected:
@@ -54,9 +64,6 @@ namespace System
 
 		//生成
 		virtual HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption,int x,int y, long width, long height, DWORD style);
-
-		//HWND取得
-		HWND Get_Window() { return _hWnd; }
 
 		//ローカルなウィンドウプロシージャ
 		virtual LRESULT localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;

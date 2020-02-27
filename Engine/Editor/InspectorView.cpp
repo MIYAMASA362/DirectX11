@@ -57,6 +57,96 @@ LRESULT CALLBACK EditWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 //*********************************************************************************************************************
 //
+//	IComponentView
+//
+//*********************************************************************************************************************
+
+
+Editor::IComponentView::IComponentView(unsigned int width, unsigned int height, IComponentView * view)
+	:
+	_Decorator(view),
+	_width(width),
+	_height(height)
+{
+}
+
+Editor::IComponentView::~IComponentView()
+{
+
+}
+
+void Editor::IComponentView::Create(unsigned int x, unsigned int y, HWND hParent, HINSTANCE hInstance)
+{
+	if(_Decorator != nullptr)
+	{
+		_Decorator->Create(x + _width,y + _height,hParent,hInstance);
+	}
+}
+
+
+
+//*********************************************************************************************************************
+//
+//	EditView
+//
+//*********************************************************************************************************************
+
+Editor::EditView::EditView(unsigned int width,unsigned int height,IComponentView * view)
+	:
+	IComponentView(width,height,view)
+{
+
+}
+
+Editor::EditView::~EditView()
+{
+
+}
+
+void Editor::EditView::Create(unsigned int x, unsigned int y, HWND hParent, HINSTANCE hInstance)
+{
+	this->_hWnd = CreateWindow(
+		"Edit",
+		"Edit",
+		WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+		x,
+		y,
+		this->_width,
+		this->_height,
+		hParent,
+		NULL,
+		hInstance,
+		NULL
+	);
+
+	IComponentView::Create(x,y,hParent,hInstance);
+}
+
+//*********************************************************************************************************************
+//
+//	LabelEdit
+//
+//*********************************************************************************************************************
+
+Editor::LabelEditView::LabelEditView(unsigned int width,unsigned int height,LPSTR label, IComponentView * view)
+	:
+	EditView(width,height,view)
+{
+
+}
+
+Editor::LabelEditView::~LabelEditView()
+{
+
+}
+
+void Editor::LabelEditView::Create(unsigned int x, unsigned int y, HWND hParent, HINSTANCE hInstance)
+{
+
+}
+
+//*********************************************************************************************************************
+//
 //	InspectorView
 //
 //*********************************************************************************************************************
@@ -84,6 +174,7 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 {
 	RECT rect;
 	float width, height;
+	HINSTANCE hInstance;
 
 	CHAR text[256];
 
@@ -93,6 +184,8 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	{
 		//¶¬
 	case WM_CREATE:
+
+		hInstance = (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
 
 		GetClientRect(hWnd, &rect);
 		width = (float)rect.right - rect.left;
@@ -106,7 +199,7 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 			width,
 			hWnd,
 			NULL,
-			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			hInstance,
 			NULL
 		);
 
@@ -114,6 +207,20 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 			MessageBox(NULL, "RenderStatus‚Ì¶¬‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", "Ž¸”s", MB_OK);
 			return 0;
 		}
+
+		this->_AddComponentButton = CreateWindow(
+			"BUTTON",
+			"Add Component",
+			WS_CHILD | WS_VISIBLE | WS_CHILDWINDOW,
+			50,
+			400,
+			200,
+			30,
+			hWnd,
+			NULL,
+			hInstance,
+			NULL
+		);
 
 		this->_NameEdit = CreateWindow(
 			"EDIT",
@@ -125,12 +232,11 @@ LRESULT Editor::InspectorView::localWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 			22,
 			hWnd,
 			NULL,
-			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			hInstance,
 			NULL
 		);
 
 		defaultEditWndProc = (WNDPROC)SetWindowLongPtr(this->_NameEdit, GWLP_WNDPROC, (LONG_PTR)EditWindowProc);
-
 
 		SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		break;
@@ -558,3 +664,5 @@ void Editor::InspectorView::CategoriesEdit::DrawValue(HDC hdc, LPSTR Categories)
 	DrawViewText(hdc, x, y + height * 2, "Y");
 	DrawViewText(hdc, x, y + height * 3, "Z");
 }
+
+

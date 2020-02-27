@@ -7,13 +7,79 @@ class GameObject;
 
 class Transform;
 
-namespace System
-{
-	class Window;
-}
-
 namespace Editor
 {
+
+	//*********************************************************************************************************************
+	//
+	//	IComponentView
+	//
+	//*********************************************************************************************************************
+	class IComponentView : public System::IWindow
+	{
+	private:
+		IComponentView* _Decorator;
+
+	protected:
+		unsigned int _width;
+		unsigned int _height;
+
+	public:
+		IComponentView(unsigned int width,unsigned int height,IComponentView* view = nullptr);
+		virtual ~IComponentView();
+
+		virtual void Create(unsigned int x,unsigned int y, HWND hParent,HINSTANCE hInstance);
+
+		void Draw();
+	};
+
+	//*********************************************************************************************************************
+	//
+	//	EditView
+	//
+	//*********************************************************************************************************************
+	class EditView : public IComponentView
+	{
+	private:
+
+	public:
+		EditView(unsigned int width,unsigned int height,IComponentView* view = nullptr);
+		virtual ~EditView();
+
+		virtual void Create(unsigned int x,unsigned int y,HWND hParent, HINSTANCE hInstance);
+	};
+
+	//*********************************************************************************************************************
+	//
+	//	LabelEditView
+	//
+	//*********************************************************************************************************************
+	class LabelEditView : public EditView
+	{
+	private:
+		LPSTR _label;
+	public:
+		LabelEditView(unsigned int width,unsigned int height, LPSTR label,IComponentView* view =nullptr);
+		virtual ~LabelEditView();
+
+		virtual void Create(unsigned int x,unsigned int y, HWND hParent, HINSTANCE hInstance);
+	};
+
+	//*********************************************************************************************************************
+	//
+	//	TransformView
+	//
+	//*********************************************************************************************************************
+	class TransformView : public IComponentView
+	{
+	private:
+		
+
+	public:
+		TransformView(IComponentView* view = nullptr);
+		virtual ~TransformView();
+	};
+
 	//*********************************************************************************************************************
 	//
 	//	InspectorView
@@ -30,8 +96,13 @@ namespace Editor
 
 		HWND _ModelView;
 		
+		//Viewコンテンツ
+		IComponentView* _View;
+
 		//GameObjectの名前変更
 		HWND _NameEdit;
+
+		HWND _AddComponentButton;
 
 		HRESULT Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassName, LPSTR lpCaption, int x, int y, long width, long height, DWORD style) override;
 
@@ -88,5 +159,8 @@ namespace Editor
 
 		TransformView* _TransformView = nullptr;
 	};
+
+	
+
 
 }

@@ -52,7 +52,7 @@ HRESULT FileTreeView::Create(HWND hParent, HINSTANCE hInstance, LPSTR lpClassNam
 	WNDCLASSEX WndClass = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
-		WndProc,
+		IWindow::WndProc,
 		0,
 		0,
 		hInstance,
