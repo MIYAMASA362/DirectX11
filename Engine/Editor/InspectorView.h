@@ -9,10 +9,10 @@ class Transform;
 
 namespace Editor
 {
-
 	//*********************************************************************************************************************
 	//
 	//	IComponentView
+	//		Inspector上に表示されるComponent情報のインターフェイスビュー
 	//
 	//*********************************************************************************************************************
 	class IComponentView : public System::IWindow
@@ -27,7 +27,7 @@ namespace Editor
 	public:
 		IComponentView(unsigned int width,unsigned int height,IComponentView* view = nullptr);
 		virtual ~IComponentView();
-
+			
 		virtual void Create(unsigned int x,unsigned int y, HWND hParent,HINSTANCE hInstance);
 
 		void Draw();
@@ -79,6 +79,10 @@ namespace Editor
 		TransformView(IComponentView* view = nullptr);
 		virtual ~TransformView();
 	};
+
+
+
+
 
 	//*********************************************************************************************************************
 	//
